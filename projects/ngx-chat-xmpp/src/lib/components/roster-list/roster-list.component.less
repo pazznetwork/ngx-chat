@@ -1,0 +1,75 @@
+@import '../../style';
+
+@roster-width: 14em;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica", "Arial", serif
+}
+
+.roster-list {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: @roster-width;
+  overflow: visible;
+  border-left: 1px solid @general-border-color;
+  z-index: 80;
+  margin-left: 10px;
+  background-color: @roster-background-color;
+  text-align: left;
+  padding: 0.5em;
+
+  .roster-header {
+    border-bottom: 1px solid @general-border-color;
+    padding-bottom: 0.5em;
+  }
+
+  .roster-footer {
+    border-top: 1px solid @general-border-color;
+    bottom: 0.5em;
+    position: absolute;
+    width: @roster-width;
+    padding-top: 0.5em;
+  }
+
+  pz-roster-contact {
+    display: block;
+    padding: 0.5em;
+
+    &:hover {
+      background-color: darken(@roster-background-color, 5%);
+      cursor: pointer;
+    }
+  }
+
+}
+
+.roster-drawer {
+  top: 0;
+  bottom: 0;
+  right: 14em;
+  width: 1em;
+  position: fixed;
+  z-index: 80;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(30, 30, 30, 0.2);
+  }
+}
+
+.roster-drawer__button {
+  top: 50%;
+  color: transparent;
+  background-color: transparent;
+  position: fixed;
+  margin-left: 0.4rem;
+}
+
+.roster-drawer:hover .roster-drawer__button {
+  color: #fff;
+}

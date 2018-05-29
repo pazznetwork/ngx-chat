@@ -1,0 +1,5 @@
+<div class="chat-list" [@rosterVisibility]="rosterState">
+    <div *ngFor="let chatWindowState of (this.chatListService.openChats$ | async)">
+        <pz-chat-window [chatWindowState]="chatWindowState" [translations]="translations"></pz-chat-window>
+    </div>
+</div>

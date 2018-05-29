@@ -1,0 +1,39 @@
+@import '../../../style';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica", "Arial", serif
+}
+
+.roster-contact {
+  text-align: left;
+
+  &:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+.roster-contact-avatar {
+  width: 2em;
+  height: 2em;
+  float: left;
+
+  img {
+    width: 2em;
+    height: 2em;
+  }
+}
+
+.roster-contact-name {
+  float: left;
+  padding-left: 0.5em;
+  padding-top: 0.5em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 9em;
+  overflow: hidden;
+}

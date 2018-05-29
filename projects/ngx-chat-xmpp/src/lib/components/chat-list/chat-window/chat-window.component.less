@@ -1,0 +1,110 @@
+@import '../../../style';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica", "Arial", serif
+}
+
+.chat-window {
+  border: 1px solid @general-border-color;
+  border-bottom: none;
+  background: @general-background-color;
+  margin-left: 1em;
+  width: 12em;
+  bottom: 0;
+}
+
+.chat-contact-header {
+  text-align: left;
+  border-bottom: 1px solid @general-border-color;
+  cursor: pointer;
+
+  &:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+.chat-contact-avatar {
+  width: 2em;
+  height: 2em;
+  float: left;
+
+  img {
+    width: 2em;
+    height: 2em;
+  }
+}
+
+.chat-contact-name {
+  float: left;
+  padding-left: 0.5em;
+  padding-top: 0.5em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 8em;
+  overflow: hidden;
+}
+
+.chat-close {
+  float: right;
+  margin: 0.5rem;
+}
+
+.chat-content {
+  text-align: left;
+  padding: 0;
+  min-height: 5em;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages {
+  min-height: 10em;
+  max-height: 20em;
+  overflow: scroll;
+}
+
+.chat-message {
+  max-width: 76%;
+  border-radius: 5px;
+  clear: both;
+  padding: 0.5em;
+  margin: 0.5em;
+
+  &.chat-message--out {
+    background-color: #e6ffd1;
+    float: right;
+    position: relative;
+    margin-left: 10px;
+  }
+
+  &.chat-message--in {
+    background-color: #DBEDFF;
+    float: left;
+    position: relative;
+    margin-right: 10px;
+  }
+
+}
+
+.chat-message-datetime {
+  color: #999;
+  font-size: 0.75em;
+}
+
+.chat-messages-empty {
+  text-align: center;
+  font-size: 1.5em;
+  color: #999;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.chat-input {
+  align-self: flex-end;
+  width: 100%;
+}
