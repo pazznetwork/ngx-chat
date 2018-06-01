@@ -1,6 +1,7 @@
 {
   "name": "ngx-chat-xmpp-shell",
   "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "ng": "ng",
     "start": "ng build ngx-chat-xmpp && ng serve",

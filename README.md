@@ -31,8 +31,8 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Build the plugin
 
-`npm build ngx-chat-xmpp`
+`ng build ngx-chat-xmpp`
 
 ## Run the plugin tests
 
-`npm test ngx-chat-xmpp`
+`ng test ngx-chat-xmpp`
