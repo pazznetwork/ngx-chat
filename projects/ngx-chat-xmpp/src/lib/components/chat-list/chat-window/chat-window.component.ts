@@ -60,7 +60,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
     public onSendMessage() {
         if (this.message.trim().length > 0) {
-            this.chatService.sendMessage(this.chatWindowState.contact.jid, this.message);
+            this.chatService.sendMessage(this.chatWindowState.contact.jidPlain, this.message);
             this.message = '';
         }
     }

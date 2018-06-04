@@ -49,29 +49,30 @@ export class ChatConnectionService {
             });
         });
 
-        this.client.on('stanza', (stanza: Stanza) => {
-            if (stanza.attrs.type === 'error') {
-                this.logService.debug('error <=', stanza.toString());
-                this.stanzaError$.next(stanza);
-            } else if (this.isPresenceStanza(stanza)) {
-                this.logService.debug('presence stanza <=', stanza.toString());
-                if (stanza.attrs.type === 'subscribe' && stanza.attrs.to === this.myJidWithResource) {
-                    this.stanzaPresenceRequest$.next(stanza);
-                } else if (stanza.attrs.to === this.myJidWithResource) {
-                    this.stanzaPresenceInformation$.next(stanza);
-                }
-            } else if (this.isMessageStanza(stanza)) {
-                this.stanzaMessage$.next(stanza);
-            } else {
-                this.stanzaUnknown$.next(stanza);
-            }
-
-        });
+        this.client.on('stanza', (stanza: Stanza) => this.onStanzaReceived(stanza));
 
     }
 
     public send(content: any): PromiseLike<void> {
         return this.client.send(content);
+    }
+
+    public onStanzaReceived(stanza: Stanza) {
+        if (stanza.attrs.type === 'error') {
+            this.logService.debug('error <=', stanza.toString());
+            this.stanzaError$.next(stanza);
+        } else if (this.isPresenceStanza(stanza)) {
+            this.logService.debug('presence stanza <=', stanza.toString());
+            if (stanza.attrs.type === 'subscribe' && stanza.attrs.to === this.myJidWithResource) {
+                this.stanzaPresenceRequest$.next(stanza);
+            } else if (stanza.attrs.to === this.myJidWithResource) {
+                this.stanzaPresenceInformation$.next(stanza);
+            }
+        } else if (this.isMessageStanza(stanza)) {
+            this.stanzaMessage$.next(stanza);
+        } else {
+            this.stanzaUnknown$.next(stanza);
+        }
     }
 
     private isPresenceStanza(stanza: Stanza): stanza is PresenceStanza {
@@ -106,7 +107,7 @@ export class ChatConnectionService {
 
     private subscribeToContactStatus(contact: Contact) {
         this.send(
-            xml('presence', {to: contact.jid, type: 'subscribe'})
+            xml('presence', {to: contact.jidPlain, type: 'subscribe'})
         ).then(
             (res) => this.logService.debug('subscribeStatusResolved', res),
             (rej) => this.logService.warn('subscribeStatusResolved', rej)

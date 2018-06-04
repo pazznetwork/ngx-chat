@@ -52,7 +52,7 @@ export class RosterListComponent implements OnInit {
     }
 
     onClickContact(contact: Contact) {
-        this.chatListService.openChat(contact.jid);
+        this.chatListService.openChat(contact.jidPlain);
     }
 
     toggleVisibility() {

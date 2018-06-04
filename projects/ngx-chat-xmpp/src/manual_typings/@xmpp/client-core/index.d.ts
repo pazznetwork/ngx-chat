@@ -16,6 +16,8 @@ declare module '@xmpp/client-core' {
 
         public send(content: any): PromiseLike<void>;
 
+        public plugin(plugin: any): void;
+
     }
 
     export interface StartOptions {

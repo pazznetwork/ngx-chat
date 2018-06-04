@@ -1,17 +1,6 @@
 import { Element } from 'ltx';
 
-export interface Stanza extends Element {
-    attrs: {
-        [key: string]: string;
-    };
-    children: Stanza[];
-    name: string;
-
-    getChildText(child: string): string;
-
-    getChild(child: string): Stanza;
-
-}
+export type Stanza = Element;
 
 export interface PresenceStanza extends Stanza {
     attrs: {

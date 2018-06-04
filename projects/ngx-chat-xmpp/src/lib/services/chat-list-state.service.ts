@@ -17,23 +17,23 @@ export class ChatListStateService {
             });
     }
 
-    public openChatCollapsed(jid: string) {
-        if (!this.isChatWithJidOpen(jid)) {
+    public openChatCollapsed(jidPlain: string) {
+        if (!this.isChatWithJidOpen(jidPlain)) {
             const openChats = this.openChats$.getValue();
-            const chatWindow = new ChatWindowState(this.chatService.getContactByJid(jid), true);
+            const chatWindow = new ChatWindowState(this.chatService.getContactByJid(jidPlain), true);
             const copyWithNewContact = [chatWindow].concat(openChats);
             this.openChats$.next(copyWithNewContact);
         }
     }
 
-    public openChat(jid: string) {
-        this.openChatCollapsed(jid);
-        this.findChatWindowStateByJid(jid).isCollapsed = false;
+    public openChat(jidPlain: string) {
+        this.openChatCollapsed(jidPlain);
+        this.findChatWindowStateByJid(jidPlain).isCollapsed = false;
     }
 
     public closeChat(contactToClose: Contact) {
         const openChats = this.openChats$.getValue();
-        const index = this.findChatWindowStateIndexByJid(contactToClose.jid);
+        const index = this.findChatWindowStateIndexByJid(contactToClose.jidPlain);
         if (index >= 0) {
             const copyWithoutContact = openChats.slice();
             copyWithoutContact.splice(index, 1);
@@ -41,18 +41,18 @@ export class ChatListStateService {
         }
     }
 
-    private isChatWithJidOpen(jid: string) {
-        return this.findChatWindowStateIndexByJid(jid) >= 0;
+    private isChatWithJidOpen(jidPlain: string) {
+        return this.findChatWindowStateIndexByJid(jidPlain) >= 0;
     }
 
-    private findChatWindowStateIndexByJid(jid: string) {
+    private findChatWindowStateIndexByJid(jidPlain: string) {
         return this.openChats$.getValue()
-            .findIndex((chatWindowState) => chatWindowState.contact.jid === jid);
+            .findIndex((chatWindowState) => chatWindowState.contact.jidPlain === jidPlain);
     }
 
-    private findChatWindowStateByJid(jid: string) {
+    private findChatWindowStateByJid(jidPlain: string) {
         return this.openChats$.getValue()
-            .find((chatWindowState) => chatWindowState.contact.jid === jid);
+            .find((chatWindowState) => chatWindowState.contact.jidPlain === jidPlain);
     }
 }
 

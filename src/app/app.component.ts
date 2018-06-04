@@ -7,23 +7,38 @@ import { ChatService, Contact } from 'ngx-chat-xmpp';
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-    title = 'app';
+
+    public domain: string;
+    public uri: string;
+    public password: string;
+    public jid: string;
 
     constructor(private ngxChatXmppService: ChatService) {
+        const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
+        this.domain = contactData.domain;
+        this.uri = contactData.uri;
+        this.password = contactData.password;
+        this.jid = contactData.jid;
+    }
 
-        ngxChatXmppService.setContacts([
-            new Contact("user@host", "user1"),
-            new Contact("user2@host", "user2"),
+    onLogin() {
+        this.ngxChatXmppService.setContacts([
+            new Contact('user@host', 'user1'),
+            new Contact('user2@host', 'user2'),
         ]);
 
-        ngxChatXmppService.logIn({
-            // TODO
-            domain: 'jabber.host.example',
-            uri: 'wss://jabber.host.example:5280/websocket',
-            password: 'password',
-            jid: 'jid'
-        });
+        const logInRequest = {
+            domain: this.domain,
+            uri: this.uri,
+            password: this.password,
+            jid: this.jid,
+        };
+        localStorage.setItem('data', JSON.stringify(logInRequest));
+        this.ngxChatXmppService.logIn(logInRequest);
+    }
 
+    onLogout() {
+        this.ngxChatXmppService.logOut();
     }
 
 }
