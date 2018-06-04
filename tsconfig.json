@@ -17,8 +17,8 @@
       "dom"
     ],
     "paths": {
-      "ngx-chat-xmpp": [
-        "dist/ngx-chat-xmpp"
+      "@pazz/ngx-chat": [
+        "dist/pazz/ngx-chat"
       ]
     }
   }

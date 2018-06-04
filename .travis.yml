@@ -13,6 +13,6 @@ before_script:
   - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
 
 script:
-  - ng test ngx-chat-xmpp --code-coverage --watch=false --browsers Chrome_ci
+  - ng test @pazz/ngx-chat --code-coverage --watch=false --browsers Chrome_ci
 
 after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"

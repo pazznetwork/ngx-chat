@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgxChatXmppModule } from 'ngx-chat-xmpp';
+import { NgxChatModule } from '@pazz/ngx-chat';
 
 import { AppComponent } from './app.component';
 
@@ -11,7 +11,7 @@ import { AppComponent } from './app.component';
     ],
     imports: [
         BrowserModule,
-        NgxChatXmppModule.forRoot(),
+        NgxChatModule.forRoot(),
         FormsModule,
     ],
     providers: [],

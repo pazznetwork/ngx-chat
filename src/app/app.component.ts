@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ChatService, Contact } from 'ngx-chat-xmpp';
+import { ChatService, Contact } from '@pazz/ngx-chat';
 
 @Component({
     selector: 'app-root',

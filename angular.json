@@ -117,38 +117,38 @@
         }
       }
     },
-    "ngx-chat-xmpp": {
-      "root": "projects/ngx-chat-xmpp",
-      "sourceRoot": "projects/ngx-chat-xmpp/src",
+    "@pazz/ngx-chat": {
+      "root": "projects/pazz/ngx-chat",
+      "sourceRoot": "projects/pazz/ngx-chat/src",
       "projectType": "library",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
-            "tsConfig": "projects/ngx-chat-xmpp/tsconfig.lib.json",
-            "project": "projects/ngx-chat-xmpp/ng-package.json"
+            "tsConfig": "projects/pazz/ngx-chat/tsconfig.lib.json",
+            "project": "projects/pazz/ngx-chat/ng-package.json"
           },
           "configurations": {
             "production": {
-              "project": "projects/ngx-chat-xmpp/ng-package.prod.json"
+              "project": "projects/pazz/ngx-chat/ng-package.prod.json"
             }
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/ngx-chat-xmpp/src/test.ts",
-            "tsConfig": "projects/ngx-chat-xmpp/tsconfig.spec.json",
-            "karmaConfig": "projects/ngx-chat-xmpp/karma.conf.js"
+            "main": "projects/pazz/ngx-chat/src/test.ts",
+            "tsConfig": "projects/pazz/ngx-chat/tsconfig.spec.json",
+            "karmaConfig": "projects/pazz/ngx-chat/karma.conf.js"
           }
         },
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": [
-              "projects/ngx-chat-xmpp/tsconfig.lib.json",
-              "projects/ngx-chat-xmpp/tsconfig.spec.json"
+              "projects/pazz/ngx-chat/tsconfig.lib.json",
+              "projects/pazz/ngx-chat/tsconfig.spec.json"
             ],
             "exclude": [
               "**/node_modules/**"

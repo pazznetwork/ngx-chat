@@ -1,9 +1,0 @@
-<pz-chat-list *ngIf="showChatComponent"
-              [rosterState]="rosterState"
-              [translations]="translations">
-</pz-chat-list>
-<pz-roster-list [rosterState]="rosterState"
-                *ngIf="showChatComponent"
-                (rosterStateChanged)="onRosterStateChanged($event)"
-                [translations]="translations">
-</pz-roster-list>
