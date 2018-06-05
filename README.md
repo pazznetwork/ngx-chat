@@ -1,4 +1,4 @@
-# @pazz/ngx-chat ![Build status](https://api.travis-ci.com/pazz-dot-com/angular-xmpp-client.svg?branch=master) ![Coverage](https://coveralls.io/repos/github/pazz-dot-com/angular-xmpp-client/badge.svg?branch=master)
+# @pazz/ngx-chat [![Build status](https://api.travis-ci.com/pazz-dot-com/angular-xmpp-client.svg?branch=master)](https://travis-ci.com/pazz-dot-com/angular-xmpp-client) [![Coverage](https://coveralls.io/repos/github/pazz-dot-com/angular-xmpp-client/badge.svg?branch=master)](https://coveralls.io/github/pazz-dot-com/angular-xmpp-client)
 
 This library provides an out-of-the-box usable XMPP chat component.
 
@@ -22,8 +22,8 @@ The Library can be found in the `projects/pazz/ngx-chat` folder.
 
 ### Build the plugin
 
-`ng build @pazz/ngx-chat`
+`npm run build`
 
 ### Run the plugin tests
 
-`ng test @pazz/ngx-chat`
+`npm run test`

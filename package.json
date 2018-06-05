@@ -5,8 +5,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng build @pazz/ngx-chat && ng serve",
-    "build": "ng build @pazz/ngx-chat && node concat-definitions.js && ng build",
-    "test": "ng test @pazz/ngx-chat && ng test",
+    "clean": "rimraf dist && rimraf coverage",
+    "build": "npm run clean && ng build @pazz/ngx-chat && node fix-build-result.js && ng build",
+    "test": "ng test @pazz/ngx-chat --watch=false",
+    "ci": "npm run build && ng test @pazz/ngx-chat --code-coverage --watch=false --browsers Chrome_ci",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
