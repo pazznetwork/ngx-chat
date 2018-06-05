@@ -112,10 +112,27 @@ describe('chat service', () => {
         it('#setContacts() should remove non existing contacts', () => {
 
             chatService.setContacts([contact1]);
+            expect(chatService.contacts$.getValue())
+                .toEqual([contact1]);
+
             chatService.setContacts([contact2]);
 
+            expect(chatService.contacts$.getValue())
+                .toEqual([contact2]);
             expect(chatService.getContactByJid(contact1.jidPlain))
                 .toBeUndefined();
+
+        });
+
+        it('#setContacts() should not add existing contacts', () => {
+
+            chatService.setContacts([contact1]);
+            expect(chatService.contacts$.getValue())
+                .toEqual([contact1]);
+
+            chatService.setContacts([contact1]);
+            expect(chatService.contacts$.getValue())
+                .toEqual([contact1]);
 
         });
 

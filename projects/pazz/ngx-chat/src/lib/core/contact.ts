@@ -8,7 +8,8 @@ export class Contact {
     public messages$: Subject<Message>;
     public messages: Message[] = [];
     public avatar = dummyAvatar;
-    public bareJid: JID;
+    public jidBare: JID;
+    public jid: JID;
     private messageIdToMessage: { [key: string]: Message } = {};
 
 
@@ -19,7 +20,8 @@ export class Contact {
         if (avatar) {
             this.avatar = avatar;
         }
-        this.bareJid = parseJid(jidPlain).bare();
+        this.jid = parseJid(jidPlain);
+        this.jidBare = this.jid.bare();
     }
 
     appendMessage(message: Message) {
@@ -34,6 +36,6 @@ export class Contact {
     }
 
     public equalsBareJid(other: Contact) {
-        return this.bareJid.equals(other.bareJid);
+        return this.jidBare.equals(other.jidBare);
     }
 }

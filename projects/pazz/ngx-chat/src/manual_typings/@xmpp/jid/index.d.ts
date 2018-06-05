@@ -1,11 +1,15 @@
-export class JID {
+declare module '@xmpp/jid' {
 
-    constructor(local: string, domain: string, resource: string);
+    export class JID {
 
-    bare(): JID;
+        constructor(local: string, domain: string, resource: string);
 
-    equals(other: JID): boolean;
+        bare(): JID;
+
+        equals(other: JID): boolean;
+
+    }
+
+    export function jid(jid: string): JID;
 
 }
-
-export function jid(jid: string): JID;

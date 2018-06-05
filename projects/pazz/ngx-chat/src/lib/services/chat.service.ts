@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { x as xml } from '@xmpp/xml';
 import { jid as parseJid } from '@xmpp/jid';
+import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../core/index';
 import { MessageArchivePlugin, StanzaUuidPlugin } from '../plugins/index';
@@ -29,18 +29,34 @@ export class ChatService {
     }
 
     setContacts(newContacts: Contact[]) {
-        const contactsRetained = this.contacts$.getValue()
-            .filter(existingContact => newContacts.some(newContact => newContact.equalsBareJid(existingContact)));
 
-        const contactsToAdd = newContacts
-            .filter(newContact => contactsRetained.every(existingContact => existingContact.equalsBareJid(newContact)));
+        const contactsByJid = {};
+        const existingContacts = this.contacts$.getValue();
 
-        this.contacts$.next(contactsRetained.concat(contactsToAdd));
+        for (const newContact of newContacts) {
+            contactsByJid[newContact.jidBare.toString()] = newContact;
+        }
+
+        for (const existingContact of existingContacts) {
+            if (contactsByJid[existingContact.jidBare.toString()]) {
+                contactsByJid[existingContact.jidBare.toString()] = existingContact;
+            }
+        }
+
+        const contacts = [];
+        for (const jid in contactsByJid) {
+            if (contactsByJid.hasOwnProperty(jid)) {
+                contacts.push(contactsByJid[jid]);
+            }
+        }
+
+        this.contacts$.next(contacts);
+
     }
 
     getContactByJid(jidPlain: string) {
         const bareJidToFind = parseJid(jidPlain).bare();
-        return this.contacts$.getValue().find(contact => contact.bareJid.equals(bareJidToFind));
+        return this.contacts$.getValue().find(contact => contact.jidBare.equals(bareJidToFind));
     }
 
     logIn(logInRequest: LogInRequest): void {

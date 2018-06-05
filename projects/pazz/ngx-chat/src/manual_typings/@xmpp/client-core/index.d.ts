@@ -1,24 +1,28 @@
-export class Client {
+declare module '@xmpp/client-core' {
 
-    public timeout: number;
+    export class Client {
 
-    public on(eventName: string, callback: any): void;
+        public timeout: number;
 
-    public handle(eventName: string, callback: any): void;
+        public on(eventName: string, callback: any): void;
 
-    public write(message: string): void;
+        public handle(eventName: string, callback: any): void;
 
-    public start(options: StartOptions): void;
+        public write(message: string): void;
 
-    public stop(): void;
+        public start(options: StartOptions): void;
 
-    public send(content: any): PromiseLike<void>;
+        public stop(): void;
 
-    public plugin(plugin: any): void;
+        public send(content: any): PromiseLike<void>;
 
-}
+        public plugin(plugin: any): void;
 
-export interface StartOptions {
-    uri: string;
-    domain: string;
+    }
+
+    export interface StartOptions {
+        uri: string;
+        domain: string;
+    }
+
 }

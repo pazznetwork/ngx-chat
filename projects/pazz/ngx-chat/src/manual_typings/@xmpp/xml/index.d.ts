@@ -1,3 +1,7 @@
-import { Element } from 'ltx';
+declare module '@xmpp/xml' {
 
-export function x(name: string, attrs?: { [key: string]: string }, ...content: any[]): Element;
+    import { Element } from 'ltx';
+
+    export function x(name: string, attrs?: { [key: string]: string }, ...content: any[]): Element;
+
+}
