@@ -12,6 +12,7 @@ import { ChatWindowComponent } from './components/chat-list/chat-window/chat-win
 import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-list/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
+import { LinksDirective } from './directives/links.directive';
 import { ChatConnectionService, XmppClientToken } from './services/chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
 import { ChatService } from './services/chat.service';
@@ -30,6 +31,7 @@ import { LogService } from './services/log.service';
         ChatComponent,
         RosterListComponent,
         RosterContactComponent,
+        LinksDirective,
     ],
     exports: [ChatComponent],
 })

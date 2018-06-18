@@ -15,7 +15,7 @@
             <div *ngFor="let message of chatWindowState.contact.messages"
                  class="chat-message"
                  [ngClass]="{'chat-message--in': message.direction === 'in', 'chat-message--out': message.direction === 'out'}">
-                {{message.body}}
+                <span [ngxChatLinks]="message.body"></span>
                 <div class="chat-message-datetime">
                     <small>{{message.datetime | date:'short'}}</small>
                 </div>
