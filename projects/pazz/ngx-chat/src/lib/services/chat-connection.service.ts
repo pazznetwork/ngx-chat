@@ -2,7 +2,7 @@ import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Client } from '@xmpp/client-core';
 import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Contact, LogInRequest, MessageWithBodyStanza, PresenceStanza, Stanza } from '../core/index';
+import { Contact, LogInRequest, MessageWithBodyStanza, PresenceStanza, Stanza } from '../core';
 import { LogService } from './log.service';
 
 export const XmppClientToken = new InjectionToken('XmppClient');

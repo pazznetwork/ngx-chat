@@ -8,9 +8,10 @@ import plain from '@xmpp/plugins/sasl-plain';
 import sessionEstablishment from '@xmpp/plugins/session-establishment';
 import websocket from '@xmpp/plugins/websocket';
 import { ChatListComponent } from './components/chat-list/chat-list.component';
-import { ChatWindowComponent } from './components/chat-list/chat-window/chat-window.component';
+import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
+import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ChatComponent } from './components/chat.component';
-import { RosterContactComponent } from './components/roster-list/roster-contact/roster-contact.component';
+import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
 import { LinksDirective } from './directives/links.directive';
 import { ChatConnectionService, XmppClientToken } from './services/chat-connection.service';
@@ -32,8 +33,10 @@ import { LogService } from './services/log.service';
         RosterListComponent,
         RosterContactComponent,
         LinksDirective,
+        ChatMessageLinkComponent,
     ],
     exports: [ChatComponent],
+    entryComponents: [ChatMessageLinkComponent],
 })
 export class NgxChatModule {
 

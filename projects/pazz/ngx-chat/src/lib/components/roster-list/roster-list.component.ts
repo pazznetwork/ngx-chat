@@ -1,6 +1,6 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Contact, Translations } from '../../core/index';
+import { Contact, Translations } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatService } from '../../services/chat.service';
 

@@ -1,5 +1,5 @@
 import { Element } from 'ltx';
-import { ChatPlugin, Message, MessageWithBodyStanza, Stanza } from '../core/index';
+import { ChatPlugin, Message, MessageWithBodyStanza, Stanza } from '../core';
 
 export abstract class AbstractPlugin implements ChatPlugin {
 

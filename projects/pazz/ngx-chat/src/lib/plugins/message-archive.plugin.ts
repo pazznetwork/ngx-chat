@@ -1,6 +1,6 @@
 import { x as xml } from '@xmpp/xml';
 import { filter } from 'rxjs/operators';
-import { Direction, Stanza } from '../core/index';
+import { Direction, Stanza } from '../core';
 import { ChatConnectionService } from '../services/chat-connection.service';
 import { ChatService } from '../services/chat.service';
 import { AbstractPlugin } from './abstract.plugin';

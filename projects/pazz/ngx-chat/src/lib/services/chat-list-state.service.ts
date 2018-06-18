@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Contact } from '../core/index';
+import { Contact } from '../core';
 import { ChatService } from './chat.service';
 
 @Injectable()

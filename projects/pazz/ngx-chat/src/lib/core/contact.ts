@@ -1,7 +1,7 @@
 import { JID, jid as parseJid } from '@xmpp/jid';
 import { Subject } from 'rxjs';
-import { Message } from './message';
 import { dummyAvatar } from './contact-avatar';
+import { Message } from './message';
 
 export class Contact {
 

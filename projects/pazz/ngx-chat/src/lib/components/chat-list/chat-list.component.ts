@@ -1,7 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Translations } from '../../core/index';
+import { Translations } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatService } from '../../services/chat.service';
 

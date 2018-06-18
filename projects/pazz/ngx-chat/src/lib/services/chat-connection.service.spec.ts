@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
 import { ChatConnectionService, XmppClientToken } from './chat-connection.service';
 import { LogService } from './log.service';
-import { x as xml } from '@xmpp/xml';
 
 describe('chat connection service', () => {
 

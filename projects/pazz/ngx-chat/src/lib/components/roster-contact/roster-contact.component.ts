@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Contact } from '../../../core/index';
+import { Contact } from '../../core';
 
 @Component({
     selector: 'ngx-chat-roster-contact',

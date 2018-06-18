@@ -1,13 +1,17 @@
-import { AfterViewInit, Directive, ElementRef, Input, Renderer2 } from '@angular/core';
+import { ComponentFactoryResolver, Directive, ElementRef, Input, OnChanges, Renderer2, ViewContainerRef } from '@angular/core';
+import { ChatMessageLinkComponent } from '../components/chat-message-link/chat-message-link.component';
 
 @Directive({
     selector: '[ngxChatLinks]'
 })
-export class LinksDirective implements AfterViewInit {
+export class LinksDirective implements OnChanges {
 
     @Input('ngxChatLinks') ngxChatLinks: string;
 
-    constructor(private el: ElementRef, private renderer: Renderer2) {
+    constructor(private el: ElementRef,
+                private renderer: Renderer2,
+                private resolver: ComponentFactoryResolver,
+                private viewContainerRef: ViewContainerRef) {
     }
 
     private transform() {
@@ -25,11 +29,10 @@ export class LinksDirective implements AfterViewInit {
                 const textBeforeLink = message.substring(lastIndex, currentIndex);
                 this.renderer.appendChild(container, this.renderer.createText(textBeforeLink));
 
-                const a = this.renderer.createElement('a');
-                a.href = links[i];
-                a.target = '_blank';
-                a.innerText = this.shorten(links[i]);
-                this.renderer.appendChild(container, a);
+                const chatMessageLinkFactory = this.resolver.resolveComponentFactory(ChatMessageLinkComponent);
+                const linkRef = this.viewContainerRef.createComponent(chatMessageLinkFactory);
+                linkRef.instance.link = links[i];
+                linkRef.instance.text = this.shorten(links[i]);
 
                 lastIndex = currentIndex + links[i].length;
             }
@@ -63,7 +66,7 @@ export class LinksDirective implements AfterViewInit {
         return parser.protocol + '//' + parser.host + shortenedPathname;
     }
 
-    ngAfterViewInit(): void {
+    ngOnChanges(): void {
         this.transform();
     }
 

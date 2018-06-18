@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../core/index';
-import { MessageArchivePlugin, StanzaUuidPlugin } from '../plugins/index';
+import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../core';
+import { MessageArchivePlugin, StanzaUuidPlugin } from '../plugins';
 import { ChatConnectionService } from './chat-connection.service';
 import { LogService } from './log.service';
 

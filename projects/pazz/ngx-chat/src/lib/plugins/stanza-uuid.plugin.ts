@@ -1,7 +1,7 @@
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { v4 as uuid } from 'uuid';
-import { Message, MessageWithBodyStanza } from '../core/index';
+import { Message, MessageWithBodyStanza } from '../core';
 import { AbstractPlugin } from './abstract.plugin';
 
 /**

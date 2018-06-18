@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Client } from '@xmpp/client-core';
 import { x as xml } from '@xmpp/xml';
 import { first, skip, take } from 'rxjs/operators';
-import { Contact, Direction, Stanza } from '../core/index';
+import { Contact, Direction, Stanza } from '../core';
 import { ChatConnectionService, XmppClientToken } from './chat-connection.service';
 import { ChatService } from './chat.service';
 import { LogService } from './log.service';

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+// import { ChatService, Contact } from '../../projects/pazz/ngx-chat/src/public_api';
 import { ChatService, Contact } from '@pazz/ngx-chat';
 
 @Component({
