@@ -3,31 +3,16 @@ import { Client } from '@xmpp/client-core';
 import { x as xml } from '@xmpp/xml';
 import { first, skip, take } from 'rxjs/operators';
 import { Contact, Direction, Stanza } from '../core';
-import { ChatConnectionService, XmppClientToken } from './chat-connection.service';
+import { XmppChatConnectionService, XmppClientToken } from './adapters/xmpp/xmpp-chat-connection.service';
 import { ChatService } from './chat.service';
+import { ContactFactoryService } from './contact-factory.service';
 import { LogService } from './log.service';
-
-let chatService: ChatService;
-let chatConnectionService: ChatConnectionService;
 
 describe('chat service', () => {
 
-    beforeEach(() => {
-        const spy = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin']);
-
-        TestBed.configureTestingModule({
-            providers: [
-                {provide: XmppClientToken, useValue: spy},
-                ChatConnectionService,
-                ChatService,
-                LogService
-            ]
-        });
-
-        chatService = TestBed.get(ChatService);
-        chatService.initialize();
-        chatConnectionService = TestBed.get(ChatConnectionService);
-    });
+    let chatService: ChatService;
+    let chatConnectionService: XmppChatConnectionService;
+    let contactFactory;
 
     let contact1: Contact;
     let contact2: Contact;
@@ -39,8 +24,25 @@ describe('chat service', () => {
     };
 
     beforeEach(() => {
-        contact1 = new Contact('test@example.com', 'jon doe');
-        contact2 = new Contact('test2@example.com', 'jane dane');
+        const spy = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin']);
+
+        TestBed.configureTestingModule({
+            providers: [
+                {provide: XmppClientToken, useValue: spy},
+                XmppChatConnectionService,
+                ChatService,
+                LogService,
+                ContactFactoryService
+            ]
+        });
+
+        chatService = TestBed.get(ChatService);
+        chatService.initialize();
+        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        contactFactory = TestBed.get(ContactFactoryService);
+
+        contact1 = contactFactory.createContact('test@example.com', 'jon doe');
+        contact2 = contactFactory.createContact('test2@example.com', 'jane dane');
         contacts = [contact1, contact2];
     });
 
@@ -99,7 +101,7 @@ describe('chat service', () => {
 
         it('#setContacts() should not reset existing contacts', () => {
 
-            const copyOfContact1 = new Contact('test@example.com', 'jon doe');
+            const copyOfContact1 = contactFactory.createContact('test@example.com', 'jon doe');
             copyOfContact1.appendMessage(sampleMessage);
             chatService.setContacts([copyOfContact1]);
             chatService.setContacts(contacts);
@@ -133,6 +135,18 @@ describe('chat service', () => {
             chatService.setContacts([contact1]);
             expect(chatService.contacts$.getValue())
                 .toEqual([contact1]);
+
+        });
+
+        it('#setContacts() should not notify on non-updates', () => {
+
+            let updateCount = 0;
+            chatService.contacts$.subscribe(() => {
+                updateCount++;
+            });
+            chatService.setContacts([contact1]);
+            chatService.setContacts([contact1]);
+            expect(updateCount).toEqual(2);
 
         });
 

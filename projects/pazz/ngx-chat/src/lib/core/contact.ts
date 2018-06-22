@@ -1,7 +1,12 @@
 import { JID, jid as parseJid } from '@xmpp/jid';
 import { Subject } from 'rxjs';
+import { LogService } from '../services/log.service';
 import { dummyAvatar } from './contact-avatar';
 import { Message } from './message';
+
+export interface ContactMetadata {
+    [key: string]: any;
+}
 
 export class Contact {
 
@@ -10,11 +15,16 @@ export class Contact {
     public avatar = dummyAvatar;
     public jidBare: JID;
     public jid: JID;
+    public metadata: ContactMetadata = {};
     private messageIdToMessage: { [key: string]: Message } = {};
 
-
-    constructor(public jidPlain: string,
+    /**
+     * Do not call directly, use {@link ContactFactoryService#createContact} instead.
+     * @deprecated
+     */
+    constructor(public readonly jidPlain: string,
                 public name: string,
+                private logService: LogService,
                 avatar?: string) {
         this.messages$ = new Subject();
         if (avatar) {
@@ -26,7 +36,7 @@ export class Contact {
 
     appendMessage(message: Message) {
         if (message.id && this.messageIdToMessage[message.id]) {
-            console.log(`message with id ${message.id} already exists`);
+            this.logService.debug(`message with id ${message.id} already exists`);
             return false;
         }
         this.messages.push(message);

@@ -6,12 +6,14 @@
     "ng": "ng",
     "start": "ng build @pazz/ngx-chat && ng serve",
     "clean": "rimraf dist && rimraf coverage",
-    "build-lib": "npm run clean && ng build @pazz/ngx-chat && node fix-build-result.js",
-    "build": "npm run build-lib && ng build",
-    "test": "ng test @pazz/ngx-chat --watch=false",
-    "ci": "npm run build && ng test @pazz/ngx-chat --code-coverage --watch=false --browsers Chrome_ci",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "build-lib": "npm run clean && ng build @pazz/ngx-chat --prod && node fix-build-result.js",
+    "build": "npm run build-lib && ng build --prod --stats-json",
+    "test": "ng test @pazz/ngx-chat --watch",
+    "test:once": "ng test @pazz/ngx-chat --watch=false",
+    "ci": "npm run build && ng test @pazz/ngx-chat --code-coverage --watch=false --browsers Chrome_ci && ng lint @pazz/ngx-chat",
+    "lint": "ng lint @pazz/ngx-chat",
+    "e2e": "ng e2e",
+    "bundle-report": "webpack-bundle-analyzer dist/ngx-chat-xmpp-shell/stats.json"
   },
   "dependencies": {
     "@angular/animations": "^6.0.3",
@@ -55,6 +57,7 @@
     "tsickle": "^0.29.0",
     "tslib": "^1.7.1",
     "tslint": "~5.9.1",
-    "typescript": "~2.7.2"
+    "typescript": "~2.7.2",
+    "webpack-bundle-analyzer": "^2.13.1"
   }
 }

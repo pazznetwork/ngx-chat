@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
-    selector: 'lib-chat-message-link',
+    selector: 'ngx-chat-message-link',
     templateUrl: './chat-message-link.component.html',
     styleUrls: ['./chat-message-link.component.less']
 })

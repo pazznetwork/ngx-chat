@@ -4,6 +4,12 @@ import { filter } from 'rxjs/operators';
 import { Contact } from '../core';
 import { ChatService } from './chat.service';
 
+export class ChatWindowState {
+    constructor(public contact: Contact,
+                public isCollapsed: boolean) {
+    }
+}
+
 @Injectable()
 export class ChatListStateService {
 
@@ -53,11 +59,5 @@ export class ChatListStateService {
     private findChatWindowStateByJid(jidPlain: string) {
         return this.openChats$.getValue()
             .find((chatWindowState) => chatWindowState.contact.jidPlain === jidPlain);
-    }
-}
-
-export class ChatWindowState {
-    constructor(public contact: Contact,
-                public isCollapsed: boolean) {
     }
 }

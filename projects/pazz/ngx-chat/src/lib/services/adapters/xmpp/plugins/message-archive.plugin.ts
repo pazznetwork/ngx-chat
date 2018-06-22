@@ -1,8 +1,9 @@
 import { x as xml } from '@xmpp/xml';
 import { filter } from 'rxjs/operators';
-import { Direction, Stanza } from '../core';
-import { ChatConnectionService } from '../services/chat-connection.service';
-import { ChatService } from '../services/chat.service';
+
+import { Direction, Stanza } from '../../../../core';
+import { ChatService } from '../../../chat.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { AbstractPlugin } from './abstract.plugin';
 import { StanzaUuidPlugin } from './stanza-uuid.plugin';
 
@@ -12,15 +13,20 @@ import { StanzaUuidPlugin } from './stanza-uuid.plugin';
  */
 export class MessageArchivePlugin extends AbstractPlugin {
 
+    private messagesWithPendingContact: Stanza[] = [];
+
     constructor(private chatService: ChatService) {
         super();
         this.chatService.state$.pipe(filter(newState => newState === 'online'))
             .subscribe(() => {
                 this.requestAllArchivedMessages(chatService.chatConnectionService);
             });
+        this.chatService.contacts$.subscribe(() => {
+            this.messagesWithPendingContact.forEach((messageStanza) => this.handleArchivedMessageStanza(messageStanza));
+        });
     }
 
-    private requestAllArchivedMessages(chatService: ChatConnectionService) {
+    private requestAllArchivedMessages(chatService: XmppChatConnectionService) {
         this.chatService.chatConnectionService.send(
             xml('iq', {type: 'set', id: chatService.getNextIqId()},
                 xml('query', {xmlns: 'urn:xmpp:mam:2'},
@@ -43,29 +49,31 @@ export class MessageArchivePlugin extends AbstractPlugin {
     }
 
     private handleArchivedMessageStanza(stanza: Stanza) {
-        const messageStanza = stanza.getChild('result').getChild('forwarded').getChild('message');
+        const messageElement = stanza.getChild('result').getChild('forwarded').getChild('message');
         const datetime = new Date(
             stanza.getChild('result').getChild('forwarded').getChild('delay').attrs.stamp
         );
 
-        const sender = this.chatService.getContactByJid(messageStanza.attrs.from);
-        const receiver = this.chatService.getContactByJid(messageStanza.attrs.to);
+        const sender = this.chatService.getContactByJid(messageElement.attrs.from);
+        const receiver = this.chatService.getContactByJid(messageElement.attrs.to);
         if (sender) {
             sender.appendMessage({
                 direction: Direction.in,
                 datetime,
-                body: messageStanza.getChildText('body'),
-                id: StanzaUuidPlugin.extractIdFromStanza(messageStanza)
+                body: messageElement.getChildText('body'),
+                id: StanzaUuidPlugin.extractIdFromStanza(messageElement)
             });
         } else if (receiver) {
             receiver.appendMessage({
                 direction: Direction.out,
                 datetime,
-                body: messageStanza.getChildText('body'),
-                id: StanzaUuidPlugin.extractIdFromStanza(messageStanza)
+                body: messageElement.getChildText('body'),
+                id: StanzaUuidPlugin.extractIdFromStanza(messageElement)
             });
         } else {
-            console.log('no contact found for ', messageStanza.attrs.from);
+            if (this.messagesWithPendingContact.indexOf(stanza) === -1) {
+                this.messagesWithPendingContact.push(stanza);
+            }
         }
     }
 
