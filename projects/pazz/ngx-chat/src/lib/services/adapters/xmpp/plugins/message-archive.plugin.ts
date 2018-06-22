@@ -17,13 +17,21 @@ export class MessageArchivePlugin extends AbstractPlugin {
 
     constructor(private chatService: ChatService) {
         super();
+
         this.chatService.state$.pipe(filter(newState => newState === 'online'))
             .subscribe(() => {
                 this.requestAllArchivedMessages(chatService.chatConnectionService);
             });
+
+        this.chatService.state$.pipe(filter(newState => newState === 'disconnected'))
+            .subscribe(() => {
+                this.messagesWithPendingContact = [];
+            });
+
         this.chatService.contacts$.subscribe(() => {
             this.messagesWithPendingContact.forEach((messageStanza) => this.handleArchivedMessageStanza(messageStanza));
         });
+
     }
 
     private requestAllArchivedMessages(chatService: XmppChatConnectionService) {
