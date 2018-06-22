@@ -18,13 +18,11 @@ export class ChatMessageLinkComponent implements OnInit {
     }
 
     onClick($event: Event) {
-        $event.preventDefault();
         if (this.isInApp()) {
+            $event.preventDefault();
             const linkParser = document.createElement('a');
             linkParser.href = this.link;
             this.router.navigateByUrl(linkParser.pathname);
-        } else {
-            window.open(this.link, '_blank');
         }
     }
 
