@@ -2,11 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { Client } from '@xmpp/client-core';
 import { x as xml } from '@xmpp/xml';
 import { first, skip, take } from 'rxjs/operators';
-import { Contact, Direction, Stanza } from '../core';
-import { XmppChatConnectionService, XmppClientToken } from './adapters/xmpp/xmpp-chat-connection.service';
-import { ChatService } from './chat.service';
-import { ContactFactoryService } from './contact-factory.service';
-import { LogService } from './log.service';
+import { ChatService, ChatServiceToken, Contact, Direction, Stanza } from '../../../core';
+import { ContactFactoryService } from '../../contact-factory.service';
+import { LogService } from '../../log.service';
+import { XmppChatAdapter } from './xmpp-chat-adapter.service';
+import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
 
 describe('chat service', () => {
 
@@ -30,14 +30,13 @@ describe('chat service', () => {
             providers: [
                 {provide: XmppClientToken, useValue: spy},
                 XmppChatConnectionService,
-                ChatService,
+                {provide: ChatServiceToken, useClass: XmppChatAdapter},
                 LogService,
                 ContactFactoryService
             ]
         });
 
-        chatService = TestBed.get(ChatService);
-        chatService.initialize();
+        chatService = TestBed.get(ChatServiceToken);
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         contactFactory = TestBed.get(ContactFactoryService);
 

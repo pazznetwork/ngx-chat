@@ -5,9 +5,9 @@
 <div class="roster-list" [@rosterVisibility]="rosterState">
     <div class="roster-header">{{translations?.contacts}}</div>
     <div class="contact-list-wrapper">
-        <ngx-chat-roster-contact (click)="onClickContact(contact)"
-                           [contact]="contact"
-                           *ngFor="let contact of (this.chatService.contacts$ | async)">
+        <ngx-chat-roster-contact *ngFor="let contact of (this.chatService.contacts$ | async)"
+                                 [contact]="contact"
+                                 (click)="onClickContact(contact)">
         </ngx-chat-roster-contact>
     </div>
     <div class="roster-footer"></div>

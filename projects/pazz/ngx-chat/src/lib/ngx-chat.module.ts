@@ -14,10 +14,11 @@ import { ChatWindowComponent } from './components/chat-window/chat-window.compon
 import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
+import { ChatServiceToken } from './core';
 import { LinksDirective } from './directives/links.directive';
+import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
-import { ChatService } from './services/chat.service';
 import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
 
@@ -51,13 +52,13 @@ export class NgxChatModule {
                 LogService,
                 ContactFactoryService,
                 {
-                    provide: ChatService,
-                    deps: [XmppChatConnectionService, LogService],
-                    useFactory: NgxChatModule.chatService
+                    provide: ChatServiceToken,
+                    deps: [XmppChatConnectionService, LogService, ContactFactoryService],
+                    useClass: XmppChatAdapter
                 },
                 {
                     provide: XmppChatConnectionService,
-                    deps: [XmppClientToken, LogService, ContactFactoryService],
+                    deps: [XmppClientToken, LogService],
                     useFactory: NgxChatModule.chatConnectionService
                 },
                 {
@@ -69,14 +70,8 @@ export class NgxChatModule {
 
     }
 
-    private static chatService(chatConnectionService: XmppChatConnectionService, logService: LogService) {
-        const chatService = new ChatService(chatConnectionService, logService);
-        chatService.initialize();
-        return chatService;
-    }
-
-    private static chatConnectionService(client: Client, logService: LogService, contactFactory: ContactFactoryService) {
-        const connectionService = new XmppChatConnectionService(client, logService, contactFactory);
+    private static chatConnectionService(client: Client, logService: LogService) {
+        const connectionService = new XmppChatConnectionService(client, logService);
         connectionService.initialize();
         return connectionService;
     }

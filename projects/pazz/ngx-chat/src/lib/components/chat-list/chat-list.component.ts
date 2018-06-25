@@ -1,9 +1,8 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Translations } from '../../core';
+import { ChatService, ChatServiceToken, Translations } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
-import { ChatService } from '../../services/chat.service';
 
 @Component({
     selector: 'ngx-chat-list',
@@ -33,7 +32,7 @@ export class ChatListComponent implements OnInit {
     private messageSubscription: Subscription;
 
     constructor(public chatListService: ChatListStateService,
-                private chatService: ChatService) {
+                @Inject(ChatServiceToken) private chatService: ChatService) {
     }
 
     public ngOnInit() {

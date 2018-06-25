@@ -40,6 +40,21 @@
 
     <button (click)="onLogin()">Log in</button>
     <button (click)="onLogout()">Log out</button>
+
+    <hr />
+
+    <div class="form-group">
+        <div>
+            Contact Management
+        </div>
+        <div>
+            <input [(ngModel)]="otherJid" class="form-control" type="text" placeholder="JID"/>
+        </div>
+    </div>
+
+    <button (click)="onAddContact()">Add contact</button>
+    <button (click)="onRemoveContact()">Remove contact</button>
+
 </div>
 
 <ngx-chat></ngx-chat>

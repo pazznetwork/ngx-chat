@@ -1,6 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Translations } from '../core';
-import { ChatService } from '../services/chat.service';
+import { Component, Inject, Input, OnInit } from '@angular/core';
+import { ChatService, ChatServiceToken, Translations } from '../core';
 
 @Component({
     selector: 'ngx-chat',
@@ -19,22 +18,22 @@ export class ChatComponent implements OnInit {
     showChatComponent = false;
     rosterState = 'hidden';
 
-    constructor(private chatService: ChatService) {
+    constructor(@Inject(ChatServiceToken) private chatService: ChatService) {
     }
 
     ngOnInit() {
-        this.chatService.state$.subscribe($e => this.onJabberStateChanged($e));
-        const rosterState = localStorage.getItem('ngxJabberRosterState') || 'hidden';
+        this.chatService.state$.subscribe($e => this.onChatStateChange($e));
+        const rosterState = localStorage.getItem('pazzNgxChatRosterState') || 'hidden';
         this.onRosterStateChanged(rosterState);
     }
 
-    private onJabberStateChanged(state: string) {
+    private onChatStateChange(state: string) {
         this.showChatComponent = state === 'online';
         this.updateBodyClass();
     }
 
     onRosterStateChanged(state: string) {
-        localStorage.setItem('ngxJabberRosterState', state);
+        localStorage.setItem('pazzNgxChatRosterState', state);
         this.rosterState = state;
         this.updateBodyClass();
     }

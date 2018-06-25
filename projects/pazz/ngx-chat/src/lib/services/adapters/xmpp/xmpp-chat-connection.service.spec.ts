@@ -1,8 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
-
-import { Stanza } from '../../../core';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
@@ -44,29 +42,6 @@ describe('chat connection service', () => {
             chatConnectionService.onStanzaReceived(
                 xml('message', {},
                     xml('body', {}, 'message text')));
-        });
-
-    });
-
-    describe('loading roster', () => {
-
-        it('should handle loading roster', async () => {
-
-            client.send.and.callFake((content) => {
-                chatConnectionService.onStanzaReceived(
-                    xml('iq', {type: 'result', id: content.attrs.id},
-                        xml('query', {},
-                            xml('item', {subscription: 'both', jid: 'test@example.com', name: 'jon doe'}),
-                            xml('item', {subscription: 'both', jid: 'test2@example.com', name: 'jane dane'}),
-                        )
-                    ) as Stanza
-                );
-            });
-
-            const contact1 = contactFactory.createContact('test@example.com', 'jon doe');
-            const contact2 = contactFactory.createContact('test2@example.com', 'jane dane');
-            const contacts = await chatConnectionService.getRosterContacts();
-            expect(contacts).toEqual([contact1, contact2]);
         });
 
     });

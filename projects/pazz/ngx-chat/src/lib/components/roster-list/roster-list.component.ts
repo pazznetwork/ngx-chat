@@ -1,8 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Contact, Translations } from '../../core';
+import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
+import { ChatService, ChatServiceToken, Contact, Translations } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
-import { ChatService } from '../../services/chat.service';
 
 @Component({
     selector: 'ngx-chat-roster-list',
@@ -42,9 +41,7 @@ export class RosterListComponent implements OnInit {
     @Output()
     rosterStateChanged: EventEmitter<string> = new EventEmitter<string>();
 
-    protected contacts: Contact[] = [];
-
-    constructor(public chatService: ChatService,
+    constructor(@Inject(ChatServiceToken) public chatService: ChatService,
                 private chatListService: ChatListStateService) {
     }
 

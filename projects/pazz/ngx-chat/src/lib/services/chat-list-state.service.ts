@@ -1,8 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Contact } from '../core';
-import { ChatService } from './chat.service';
+import { ChatService, ChatServiceToken, Contact } from '../core';
 
 export class ChatWindowState {
     constructor(public contact: Contact,
@@ -15,7 +14,7 @@ export class ChatListStateService {
 
     public openChats$ = new BehaviorSubject<ChatWindowState[]>([]);
 
-    constructor(private chatService: ChatService) {
+    constructor(@Inject(ChatServiceToken) private chatService: ChatService) {
         this.chatService.state$
             .pipe(filter(newState => newState === 'disconnected'))
             .subscribe(() => {

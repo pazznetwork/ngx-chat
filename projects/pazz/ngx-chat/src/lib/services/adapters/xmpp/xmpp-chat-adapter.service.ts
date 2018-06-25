@@ -2,30 +2,46 @@ import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../core';
-import { XmppChatConnectionService } from './adapters/xmpp/xmpp-chat-connection.service';
-import { MessageArchivePlugin, StanzaUuidPlugin } from './adapters/xmpp/plugins';
-import { LogService } from './log.service';
+import { filter } from 'rxjs/operators';
+import { ChatPlugin, ChatService, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
+import { ContactFactoryService } from '../../contact-factory.service';
+import { LogService } from '../../log.service';
+import { MessageArchivePlugin, StanzaUuidPlugin } from './plugins';
+import { RosterPlugin } from './plugins/roster.plugin';
+import { XmppChatConnectionService } from './xmpp-chat-connection.service';
 
 @Injectable()
-export class ChatService {
+export class XmppChatAdapter implements ChatService {
 
-    public message$ = new Subject<Contact>();
-    public contacts$ = new BehaviorSubject<Contact[]>([]);
-    public state$: BehaviorSubject<'disconnected' | 'online'>;
+    message$ = new Subject<Contact>();
+    contacts$ = new BehaviorSubject<Contact[]>([]);
+    state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
     private logInRequest: LogInRequest;
     private plugins: ChatPlugin[] = [];
+    private rosterPlugin: RosterPlugin;
 
-    constructor(public chatConnectionService: XmppChatConnectionService, private logService: LogService) {
-        this.state$ = chatConnectionService.state$;
+    constructor(public chatConnectionService: XmppChatConnectionService,
+                private logService: LogService,
+                private contactFactory: ContactFactoryService) {
+        this.initializePlugins();
+        chatConnectionService.state$
+            .pipe(filter(state => state === 'online'))
+            .subscribe(() => {
+                Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
+                    .then(
+                        () => this.state$.next('online'),
+                        () => this.state$.next('online')
+                    );
+            });
         this.chatConnectionService.stanzaPresenceRequest$.subscribe((stanza) => this.onContactPresenceRequest(stanza));
         this.chatConnectionService.stanzaPresenceInformation$.subscribe((stanza) => this.onContactPresenceInformation(stanza));
         this.chatConnectionService.stanzaMessage$.subscribe((stanza) => this.onMessageReceived(stanza));
         this.chatConnectionService.stanzaUnknown$.subscribe((stanza) => this.onUnknownStanza(stanza));
     }
 
-    initialize() {
-        this.plugins = [new MessageArchivePlugin(this), new StanzaUuidPlugin()];
+    private initializePlugins() {
+        this.rosterPlugin = new RosterPlugin(this, this.contactFactory);
+        this.plugins = [new MessageArchivePlugin(this), new StanzaUuidPlugin(), this.rosterPlugin];
     }
 
     setContacts(newContacts: Contact[]) {
@@ -60,14 +76,20 @@ export class ChatService {
     }
 
     reloadContacts(): void {
-        this.chatConnectionService.getRosterContacts().then((contacts) => {
-            this.setContacts(contacts);
-        });
+        this.rosterPlugin.refreshRosterContacts();
     }
 
     getContactByJid(jidPlain: string) {
         const bareJidToFind = parseJid(jidPlain).bare();
         return this.contacts$.getValue().find(contact => contact.jidBare.equals(bareJidToFind));
+    }
+
+    addContact(identifier: string) {
+        this.rosterPlugin.addRosterContact(identifier);
+    }
+
+    removeContact(identifier: string) {
+        this.rosterPlugin.removeRosterContact(identifier);
     }
 
     logIn(logInRequest: LogInRequest): void {
@@ -163,8 +185,7 @@ export class ChatService {
         let handled = false;
 
         for (const plugin of this.plugins) {
-            if (plugin.canHandleStanza(stanza)) {
-                plugin.handleStanza(stanza);
+            if (plugin.handleStanza(stanza)) {
                 handled = true;
             }
         }

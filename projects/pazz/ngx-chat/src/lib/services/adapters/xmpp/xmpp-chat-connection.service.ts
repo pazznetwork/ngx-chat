@@ -4,10 +4,9 @@ import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Contact, IqResponseStanza, LogInRequest, MessageWithBodyStanza, PresenceStanza, Stanza } from '../../../core';
-import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 
-export const XmppClientToken = new InjectionToken('XmppClient');
+export const XmppClientToken = new InjectionToken('PazzNgxChatXmppClient');
 
 /**
  * Implementation of the XMPP specification according to RFC 6121.
@@ -32,8 +31,7 @@ export class XmppChatConnectionService {
     private iqStanzaResponseCallbacks: { [key: string]: ((any) => void) } = {};
 
     constructor(@Inject(XmppClientToken) public client: Client,
-                private logService: LogService,
-                private contactFactory: ContactFactoryService) {}
+                private logService: LogService) {}
 
     initialize(): void {
 
@@ -73,6 +71,7 @@ export class XmppChatConnectionService {
         return new Promise((resolve, reject) => {
             const id = this.getNextIqId();
             request.attrs.id = id;
+            request.attrs.from = this.myJidWithResource;
             this.iqStanzaResponseCallbacks[id] = (response: IqResponseStanza) => {
                 if (response.attrs.type === 'result') {
                     resolve(response);
@@ -103,6 +102,7 @@ export class XmppChatConnectionService {
                 delete this.iqStanzaResponseCallbacks[stanza.attrs.id];
                 callback(stanza);
             } else {
+                // run plugins
                 this.stanzaUnknown$.next(stanza);
             }
         } else {
@@ -156,27 +156,6 @@ export class XmppChatConnectionService {
 
     getNextIqId() {
         return '' + this.iqId++;
-    }
-
-    getRosterContacts(): Promise<Contact[]> {
-        return new Promise((resolve, reject) =>
-            this.sendIq(
-                xml('iq', {from: this.myJidWithResource, type: 'get'},
-                    xml('query', {xmlns: 'jabber:iq:roster'})
-                )
-            ).then(
-                (responseStanza: Stanza) => resolve(this.convertToContacts(responseStanza)),
-                () => resolve([])
-            )
-        );
-    }
-
-    private convertToContacts(responseStanza: Stanza): Contact[] {
-        return responseStanza.getChild('query').getChildElements()
-            .filter(rosterElement => rosterElement.attrs.subscription)
-            .map(rosterElement => this.contactFactory.createContact(
-                rosterElement.attrs.jid,
-                rosterElement.attrs.name || rosterElement.attrs.jid));
     }
 
 }
