@@ -1,7 +1,9 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
-import { ChatService, ChatServiceToken, Contact, Translations } from '../../core';
+
+import { Contact, Translations } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
+import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-roster-list',

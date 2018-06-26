@@ -6,14 +6,14 @@ export interface ChatPlugin {
 
     /**
      * All onBeforeOnline-Promises have to be resolved before the chat service will emit the 'connected' state.
-     * @returns {PromiseLike<any>}
+     * @returns
      */
     onBeforeOnline(): PromiseLike<any>;
 
     /**
      * True if the given stanza was handled by this plugin, false otherwise.
-     * @param {Stanza} stanza
-     * @returns {boolean}
+     * @param stanza
+     * @returns
      */
     handleStanza(stanza: Stanza): boolean;
 

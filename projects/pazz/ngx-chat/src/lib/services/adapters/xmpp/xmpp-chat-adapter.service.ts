@@ -3,7 +3,9 @@ import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { ChatPlugin, ChatService, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
+
+import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
+import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { MessageArchivePlugin, StanzaUuidPlugin } from './plugins';

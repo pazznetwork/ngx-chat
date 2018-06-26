@@ -1,5 +1,7 @@
 import { Component, Inject, Input, OnInit } from '@angular/core';
-import { ChatService, ChatServiceToken, Translations } from '../core';
+
+import { Translations } from '../core';
+import { ChatService, ChatServiceToken } from '../services/chat-service';
 
 @Component({
     selector: 'ngx-chat',

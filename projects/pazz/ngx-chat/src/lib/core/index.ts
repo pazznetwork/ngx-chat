@@ -1,4 +1,3 @@
-export * from './chat-service';
 export * from './contact';
 export * from './log-in-request';
 export * from './message';

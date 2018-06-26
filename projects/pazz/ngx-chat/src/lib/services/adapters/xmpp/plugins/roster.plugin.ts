@@ -1,5 +1,5 @@
 import { x as xml } from '@xmpp/xml';
-import { Contact, Stanza } from '../../../../core';
+import { Contact, IqResponseStanza, Stanza } from '../../../../core';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractPlugin } from './abstract.plugin';
@@ -66,14 +66,14 @@ export class RosterPlugin extends AbstractPlugin {
                 rosterElement.attrs.name || rosterElement.attrs.jid));
     }
 
-    addRosterContact(jid: string) {
+    addRosterContact(jid: string): Promise<IqResponseStanza> {
         return this.chatService.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
                 xml('query', {xmlns: 'jabber:iq:roster'},
                     xml('item', {jid}))));
     }
 
-    removeRosterContact(jid: string) {
+    removeRosterContact(jid: string): Promise<IqResponseStanza> {
         return this.chatService.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
                 xml('query', {xmlns: 'jabber:iq:roster'},
