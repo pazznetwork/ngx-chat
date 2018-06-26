@@ -17,6 +17,8 @@ export class XmppChatAdapter implements ChatService {
 
     message$ = new Subject<Contact>();
     contacts$ = new BehaviorSubject<Contact[]>([]);
+    contactRequestsReceived$ = new BehaviorSubject<Contact[]>([]);
+    contactRequestsSent$ = new BehaviorSubject<Contact[]>([]);
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
     private logInRequest: LogInRequest;
     private plugins: ChatPlugin[] = [];
@@ -26,23 +28,27 @@ export class XmppChatAdapter implements ChatService {
                 private logService: LogService,
                 private contactFactory: ContactFactoryService) {
         this.initializePlugins();
+        this.state$.subscribe((state) => this.logService.debug('state changed to:', state));
         chatConnectionService.state$
             .pipe(filter(state => state === 'online'))
             .subscribe(() => {
                 Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
                     .then(
-                        () => this.state$.next('online'),
-                        () => this.state$.next('online')
+                        () => this.announceAvailability(),
+                        () => this.announceAvailability()
                     );
             });
-        this.chatConnectionService.stanzaPresenceRequest$.subscribe((stanza) => this.onContactPresenceRequest(stanza));
-        this.chatConnectionService.stanzaPresenceInformation$.subscribe((stanza) => this.onContactPresenceInformation(stanza));
         this.chatConnectionService.stanzaMessage$.subscribe((stanza) => this.onMessageReceived(stanza));
         this.chatConnectionService.stanzaUnknown$.subscribe((stanza) => this.onUnknownStanza(stanza));
     }
 
+    private announceAvailability() {
+        this.chatConnectionService.sendPresence();
+        this.state$.next('online');
+    }
+
     private initializePlugins() {
-        this.rosterPlugin = new RosterPlugin(this, this.contactFactory);
+        this.rosterPlugin = new RosterPlugin(this, this.contactFactory, this.logService);
         this.plugins = [new MessageArchivePlugin(this), new StanzaUuidPlugin(), this.rosterPlugin];
     }
 
@@ -151,37 +157,6 @@ export class XmppChatAdapter implements ChatService {
         }
     }
 
-    private onContactPresenceRequest(stanza: Stanza) {
-        this.chatConnectionService.send(
-            xml('presence', {to: stanza.attrs.from, type: 'subscribed'})
-        );
-    }
-
-    private onContactPresenceInformation(stanza: Stanza) {
-        if (stanza.getChild('show') != null) {
-            // https://xmpp.org/rfcs/rfc3921.html#stanzas-presence-children-show
-            const show = stanza.getChildText('show');
-            if (show === 'away') {
-                // away
-                this.logService.debug('presence of', stanza.attrs.from, 'away');
-            } else if (show === 'chat') {
-                // chat
-                this.logService.debug('presence of', stanza.attrs.from, 'chat');
-            } else if (show === 'dnd') {
-                // do not distrb
-                this.logService.debug('presence of', stanza.attrs.from, 'dnd');
-            } else if (show === 'xa') {
-                // long away
-                this.logService.debug('presence of', stanza.attrs.from, 'xa');
-            } else {
-                // error, undefined
-            }
-        } else {
-            // contact available
-            this.logService.debug('presence of', stanza.attrs.from, 'available');
-        }
-    }
-
     private onUnknownStanza(stanza: Stanza) {
 
         let handled = false;
@@ -196,5 +171,12 @@ export class XmppChatAdapter implements ChatService {
             this.logService.warn('unknown stanza <=', stanza.toString());
         }
 
+    }
+
+    addContactRequestReceived(contact: Contact) {
+        const existingContactRequests = this.contactRequestsReceived$.getValue();
+        if (existingContactRequests.indexOf(contact) === -1) {
+            this.contactRequestsReceived$.next(existingContactRequests.concat(contact));
+        }
     }
 }

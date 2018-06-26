@@ -9,6 +9,8 @@ export interface ChatService {
     message$: Subject<Contact>;
     contacts$: BehaviorSubject<Contact[]>;
     state$: BehaviorSubject<'disconnected' | 'connecting' | 'online'>;
+    contactRequestsReceived$: BehaviorSubject<Contact[]>;
+    contactRequestsSent$: BehaviorSubject<Contact[]>;
 
     setContacts(newContacts: Contact[]): void;
 

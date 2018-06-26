@@ -10,5 +10,18 @@
                                  (click)="onClickContact(contact)">
         </ngx-chat-roster-contact>
     </div>
+
+    <hr />
+
+    <div class="contact-pending-request-received-wrapper">
+        <div class="contact-pending-request-received" *ngFor="let request of (this.chatService.contactRequestsReceived$ | async)">{{request.name}}</div>
+    </div>
+
+    <hr />
+
+    <div class="contact-pending-request-sent-wrapper">
+        <div class="contact-pending-request-sent" *ngFor="let request of (this.chatService.contactRequestsSent$ | async)">{{request.name}}</div>
+    </div>
+
     <div class="roster-footer"></div>
 </div>

@@ -1,8 +1,9 @@
 import { JID, jid as parseJid } from '@xmpp/jid';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { LogService } from '../services/log.service';
 import { dummyAvatar } from './contact-avatar';
 import { Message } from './message';
+import { Presence } from './presence';
 
 export interface ContactMetadata {
     [key: string]: any;
@@ -16,6 +17,7 @@ export class Contact {
     public jidBare: JID;
     public jid: JID;
     public metadata: ContactMetadata = {};
+    public presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
     private messageIdToMessage: { [key: string]: Message } = {};
 
     /**

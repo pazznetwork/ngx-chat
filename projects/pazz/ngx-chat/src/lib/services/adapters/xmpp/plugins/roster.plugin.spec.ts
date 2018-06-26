@@ -15,6 +15,7 @@ describe('chat connection service', () => {
     let chatAdapter;
     let contactFactory;
     let client;
+    let logService;
 
     beforeEach(() => {
         client = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin', 'send']);
@@ -32,6 +33,7 @@ describe('chat connection service', () => {
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
+        logService = TestBed.get(LogService);
     });
 
     describe('loading roster', () => {
@@ -51,7 +53,7 @@ describe('chat connection service', () => {
 
             const contact1 = contactFactory.createContact('test@example.com', 'jon doe');
             const contact2 = contactFactory.createContact('test2@example.com', 'jane dane');
-            const contacts = await new RosterPlugin(chatAdapter, contactFactory).getRosterContacts();
+            const contacts = await new RosterPlugin(chatAdapter, contactFactory, logService).getRosterContacts();
             expect(contacts).toEqual([contact1, contact2]);
         });
 

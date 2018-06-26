@@ -3,7 +3,7 @@ import { Client } from '@xmpp/client-core';
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Contact, IqResponseStanza, LogInRequest, MessageWithBodyStanza, PresenceStanza, Stanza } from '../../../core';
+import { IqResponseStanza, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
 import { LogService } from '../../log.service';
 
 export const XmppClientToken = new InjectionToken('PazzNgxChatXmppClient');
@@ -20,8 +20,6 @@ export class XmppChatConnectionService {
     public state$ = new BehaviorSubject<'disconnected' | 'online'>('disconnected');
 
     public stanzaError$ = new Subject<Stanza>();
-    public stanzaPresenceRequest$ = new Subject<PresenceStanza>();
-    public stanzaPresenceInformation$ = new Subject<PresenceStanza>();
     public stanzaMessage$ = new Subject<MessageWithBodyStanza>();
     public stanzaUnknown$ = new Subject<Stanza>();
 
@@ -47,20 +45,16 @@ export class XmppChatConnectionService {
             this.logService.debug('online =', 'online as', jid.toString());
             this.myJidWithResource = jid.toString();
             this.state$.next('online');
-
-            // TODO: subscribe to contact presence notifications
-
-            this.send(
-                xml('presence')
-            ).then((resolve) => {
-                this.logService.debug('presence resolved', resolve);
-            }, (e) => {
-                this.logService.debug('presence errored', e);
-            });
         });
 
         this.client.on('stanza', (stanza: Stanza) => this.onStanzaReceived(stanza));
 
+    }
+
+    public sendPresence() {
+        this.send(
+            xml('presence')
+        );
     }
 
     public send(content: any): PromiseLike<void> {
@@ -87,13 +81,6 @@ export class XmppChatConnectionService {
         if (stanza.attrs.type === 'error') {
             this.logService.debug('error <=', stanza.toString());
             this.stanzaError$.next(stanza);
-        } else if (this.isPresenceStanza(stanza)) {
-            this.logService.debug('presence stanza <=', stanza.toString());
-            if (stanza.attrs.type === 'subscribe' && stanza.attrs.to === this.myJidWithResource) {
-                this.stanzaPresenceRequest$.next(stanza);
-            } else if (stanza.attrs.to === this.myJidWithResource) {
-                this.stanzaPresenceInformation$.next(stanza);
-            }
         } else if (this.isMessageStanza(stanza)) {
             this.stanzaMessage$.next(stanza);
         } else if (this.isIqStanzaResponse(stanza)) {
@@ -108,10 +95,6 @@ export class XmppChatConnectionService {
         } else {
             this.stanzaUnknown$.next(stanza);
         }
-    }
-
-    private isPresenceStanza(stanza: Stanza): stanza is PresenceStanza {
-        return stanza.name === 'presence';
     }
 
     private isMessageStanza(stanza: Stanza): stanza is MessageWithBodyStanza {
@@ -143,15 +126,6 @@ export class XmppChatConnectionService {
             .catch(() => {
                 this.logService.warn('error while logging out');
             });
-    }
-
-    private subscribeToContactStatus(contact: Contact) {
-        this.send(
-            xml('presence', {to: contact.jidPlain, type: 'subscribe'})
-        ).then(
-            (res) => this.logService.debug('subscribeStatusResolved', res),
-            (rej) => this.logService.warn('subscribeStatusResolved', rej)
-        );
     }
 
     getNextIqId() {
