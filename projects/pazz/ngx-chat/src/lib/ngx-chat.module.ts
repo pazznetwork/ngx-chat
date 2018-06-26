@@ -9,6 +9,7 @@ import sessionEstablishment from '@xmpp/plugins/session-establishment';
 import websocket from '@xmpp/plugins/websocket';
 import { ChatListComponent } from './components/chat-list/chat-list.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
+import { ChatMessageTextComponent } from './components/chat-message-text/chat-message-text.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
@@ -34,9 +35,10 @@ import { LogService } from './services/log.service';
         RosterContactComponent,
         LinksDirective,
         ChatMessageLinkComponent,
+        ChatMessageTextComponent,
     ],
     exports: [ChatComponent],
-    entryComponents: [ChatMessageLinkComponent],
+    entryComponents: [ChatMessageLinkComponent, ChatMessageTextComponent],
 })
 export class NgxChatModule {
 

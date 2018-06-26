@@ -1,5 +1,6 @@
-import { ComponentFactoryResolver, Directive, ElementRef, Input, OnChanges, Renderer2, ViewContainerRef } from '@angular/core';
+import { ComponentFactoryResolver, Directive, ElementRef, Input, OnChanges, ViewContainerRef } from '@angular/core';
 import { ChatMessageLinkComponent } from '../components/chat-message-link/chat-message-link.component';
+import { ChatMessageTextComponent } from '../components/chat-message-text/chat-message-text.component';
 
 @Directive({
     selector: '[ngxChatLinks]'
@@ -9,7 +10,6 @@ export class LinksDirective implements OnChanges {
     @Input('ngxChatLinks') ngxChatLinks: string;
 
     constructor(private el: ElementRef,
-                private renderer: Renderer2,
                 private resolver: ComponentFactoryResolver,
                 private viewContainerRef: ViewContainerRef) {
     }
@@ -21,24 +21,25 @@ export class LinksDirective implements OnChanges {
             const urlRegex = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
             const links = this.getAllMatches(urlRegex, message);
 
-            const container = this.renderer.createElement('div');
+            const chatMessageTextFactory = this.resolver.resolveComponentFactory(ChatMessageTextComponent);
+            const chatMessageLinkFactory = this.resolver.resolveComponentFactory(ChatMessageLinkComponent);
+
             let lastIndex = 0;
             for (let i = 0; i < links.length; i++) {
                 const currentIndex = message.indexOf(links[i]);
 
-                const textBeforeLink = message.substring(lastIndex, currentIndex);
-                this.renderer.appendChild(container, this.renderer.createText(textBeforeLink));
+                const textBeforeLink = this.viewContainerRef.createComponent(chatMessageTextFactory);
+                textBeforeLink.instance.text = message.substring(lastIndex, currentIndex);
 
-                const chatMessageLinkFactory = this.resolver.resolveComponentFactory(ChatMessageLinkComponent);
                 const linkRef = this.viewContainerRef.createComponent(chatMessageLinkFactory);
                 linkRef.instance.link = links[i];
                 linkRef.instance.text = this.shorten(links[i]);
 
                 lastIndex = currentIndex + links[i].length;
             }
-            const textAfterLastLink = this.renderer.createText(message.substring(lastIndex));
-            this.renderer.appendChild(container, textAfterLastLink);
-            this.renderer.appendChild(this.el.nativeElement, container);
+
+            const textAfterLastLinkSpan = this.viewContainerRef.createComponent(chatMessageTextFactory);
+            textAfterLastLinkSpan.instance.text = message.substring(lastIndex);
         }
     }
 

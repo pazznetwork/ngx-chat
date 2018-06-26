@@ -44,7 +44,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     }
 
     private scrollToLastMessage() {
-        this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
+        if (this.chatMessageAreaElement) {
+            this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
+        }
     }
 
     ngOnDestroy() {
