@@ -1,14 +1,22 @@
 import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Client } from '@xmpp/client-core';
 import { x as xml } from '@xmpp/xml';
+import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Contact, LogInRequest, MessageWithBodyStanza, PresenceStanza, Stanza } from '../core';
-import { LogService } from './log.service';
+import { Contact, IqResponseStanza, LogInRequest, MessageWithBodyStanza, PresenceStanza, Stanza } from '../../../core';
+import { ContactFactoryService } from '../../contact-factory.service';
+import { LogService } from '../../log.service';
 
 export const XmppClientToken = new InjectionToken('XmppClient');
 
+/**
+ * Implementation of the XMPP specification according to RFC 6121.
+ * @see https://xmpp.org/rfcs/rfc6121.html
+ * @see https://xmpp.org/rfcs/rfc3920.html
+ * @see https://xmpp.org/rfcs/rfc3921.html
+ */
 @Injectable()
-export class ChatConnectionService {
+export class XmppChatConnectionService {
 
     public state$ = new BehaviorSubject<'disconnected' | 'online'>('disconnected');
 
@@ -19,9 +27,13 @@ export class ChatConnectionService {
     public stanzaUnknown$ = new Subject<Stanza>();
 
     public myJidWithResource: string;
-    private iqId = 0;
+    private iqId = new Date().getTime();
 
-    constructor(@Inject(XmppClientToken) public client: Client, private logService: LogService) {}
+    private iqStanzaResponseCallbacks: { [key: string]: ((any) => void) } = {};
+
+    constructor(@Inject(XmppClientToken) public client: Client,
+                private logService: LogService,
+                private contactFactory: ContactFactoryService) {}
 
     initialize(): void {
 
@@ -57,6 +69,21 @@ export class ChatConnectionService {
         return this.client.send(content);
     }
 
+    public sendIq(request: Element): Promise<IqResponseStanza> {
+        return new Promise((resolve, reject) => {
+            const id = this.getNextIqId();
+            request.attrs.id = id;
+            this.iqStanzaResponseCallbacks[id] = (response: IqResponseStanza) => {
+                if (response.attrs.type === 'result') {
+                    resolve(response);
+                } else {
+                    reject(response);
+                }
+            };
+            this.send(request);
+        });
+    }
+
     public onStanzaReceived(stanza: Stanza) {
         if (stanza.attrs.type === 'error') {
             this.logService.debug('error <=', stanza.toString());
@@ -70,6 +97,14 @@ export class ChatConnectionService {
             }
         } else if (this.isMessageStanza(stanza)) {
             this.stanzaMessage$.next(stanza);
+        } else if (this.isIqStanzaResponse(stanza)) {
+            const callback = this.iqStanzaResponseCallbacks[stanza.attrs.id];
+            if (callback) {
+                delete this.iqStanzaResponseCallbacks[stanza.attrs.id];
+                callback(stanza);
+            } else {
+                this.stanzaUnknown$.next(stanza);
+            }
         } else {
             this.stanzaUnknown$.next(stanza);
         }
@@ -81,6 +116,11 @@ export class ChatConnectionService {
 
     private isMessageStanza(stanza: Stanza): stanza is MessageWithBodyStanza {
         return stanza.name === 'message' && !!stanza.getChildText('body');
+    }
+
+    private isIqStanzaResponse(stanza: Stanza): stanza is IqResponseStanza {
+        const stanzaType = stanza.attrs['type'];
+        return stanza.name === 'iq' && (stanzaType === 'result' || stanzaType === 'error');
     }
 
     logIn(logInRequest: LogInRequest): void {
@@ -116,6 +156,27 @@ export class ChatConnectionService {
 
     getNextIqId() {
         return '' + this.iqId++;
+    }
+
+    getRosterContacts(): Promise<Contact[]> {
+        return new Promise((resolve, reject) =>
+            this.sendIq(
+                xml('iq', {from: this.myJidWithResource, type: 'get'},
+                    xml('query', {xmlns: 'jabber:iq:roster'})
+                )
+            ).then(
+                (responseStanza: Stanza) => resolve(this.convertToContacts(responseStanza)),
+                () => resolve([])
+            )
+        );
+    }
+
+    private convertToContacts(responseStanza: Stanza): Contact[] {
+        return responseStanza.getChild('query').getChildElements()
+            .filter(rosterElement => rosterElement.attrs.subscription)
+            .map(rosterElement => this.contactFactory.createContact(
+                rosterElement.attrs.jid,
+                rosterElement.attrs.name || rosterElement.attrs.jid));
     }
 
 }

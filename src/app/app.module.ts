@@ -2,10 +2,9 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-// import { NgxChatModule } from '../../projects/pazz/ngx-chat/src/public_api';
-import { NgxChatModule } from '@pazz/ngx-chat';
 
 import { AppComponent } from './app.component';
+import { NgxChatModule } from './ngx-chat-imports';
 
 @NgModule({
     declarations: [

@@ -3,8 +3,8 @@ import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../core';
-import { MessageArchivePlugin, StanzaUuidPlugin } from '../plugins';
-import { ChatConnectionService } from './chat-connection.service';
+import { XmppChatConnectionService } from './adapters/xmpp/xmpp-chat-connection.service';
+import { MessageArchivePlugin, StanzaUuidPlugin } from './adapters/xmpp/plugins';
 import { LogService } from './log.service';
 
 @Injectable()
@@ -12,11 +12,11 @@ export class ChatService {
 
     public message$ = new Subject<Contact>();
     public contacts$ = new BehaviorSubject<Contact[]>([]);
-    public state$;
+    public state$: BehaviorSubject<'disconnected' | 'online'>;
     private logInRequest: LogInRequest;
     private plugins: ChatPlugin[] = [];
 
-    constructor(public chatConnectionService: ChatConnectionService, private logService: LogService) {
+    constructor(public chatConnectionService: XmppChatConnectionService, private logService: LogService) {
         this.state$ = chatConnectionService.state$;
         this.chatConnectionService.stanzaPresenceRequest$.subscribe((stanza) => this.onContactPresenceRequest(stanza));
         this.chatConnectionService.stanzaPresenceInformation$.subscribe((stanza) => this.onContactPresenceInformation(stanza));
@@ -31,7 +31,8 @@ export class ChatService {
     setContacts(newContacts: Contact[]) {
 
         const contactsByJid = {};
-        const existingContacts = this.contacts$.getValue();
+        const existingContacts = [].concat(this.contacts$.getValue()) as Contact[];
+        let contactsDiffer = existingContacts.length !== newContacts.length;
 
         for (const newContact of newContacts) {
             contactsByJid[newContact.jidBare.toString()] = newContact;
@@ -40,18 +41,28 @@ export class ChatService {
         for (const existingContact of existingContacts) {
             if (contactsByJid[existingContact.jidBare.toString()]) {
                 contactsByJid[existingContact.jidBare.toString()] = existingContact;
+            } else {
+                contactsDiffer = true;
             }
         }
 
-        const contacts = [];
-        for (const jid in contactsByJid) {
-            if (contactsByJid.hasOwnProperty(jid)) {
-                contacts.push(contactsByJid[jid]);
+        if (contactsDiffer) {
+            const nextContacts = [];
+            for (const jid in contactsByJid) {
+                if (contactsByJid.hasOwnProperty(jid)) {
+                    nextContacts.push(contactsByJid[jid]);
+                }
             }
+
+            this.contacts$.next(nextContacts);
         }
 
-        this.contacts$.next(contacts);
+    }
 
+    reloadContacts(): void {
+        this.chatConnectionService.getRosterContacts().then((contacts) => {
+            this.setContacts(contacts);
+        });
     }
 
     getContactByJid(jidPlain: string) {
@@ -94,7 +105,7 @@ export class ChatService {
         });
     }
 
-    onMessageReceived(messageStanza: MessageWithBodyStanza) {
+    private onMessageReceived(messageStanza: MessageWithBodyStanza) {
         this.logService.debug('message received <=', messageStanza.getChildText('body'));
         const contact = this.getContactByJid(messageStanza.attrs.from);
 
@@ -159,7 +170,7 @@ export class ChatService {
         }
 
         if (!handled) {
-            this.logService.debug('unknown stanza <=', stanza.toString());
+            this.logService.warn('unknown stanza <=', stanza.toString());
         }
 
     }

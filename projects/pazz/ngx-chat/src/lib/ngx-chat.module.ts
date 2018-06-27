@@ -7,6 +7,7 @@ import bind from '@xmpp/plugins/bind';
 import plain from '@xmpp/plugins/sasl-plain';
 import sessionEstablishment from '@xmpp/plugins/session-establishment';
 import websocket from '@xmpp/plugins/websocket';
+
 import { ChatListComponent } from './components/chat-list/chat-list.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
 import { ChatMessageTextComponent } from './components/chat-message-text/chat-message-text.component';
@@ -15,9 +16,10 @@ import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
 import { LinksDirective } from './directives/links.directive';
-import { ChatConnectionService, XmppClientToken } from './services/chat-connection.service';
+import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
 import { ChatService } from './services/chat.service';
+import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
 
 
@@ -49,14 +51,15 @@ export class NgxChatModule {
             providers: [
                 ChatListStateService,
                 LogService,
+                ContactFactoryService,
                 {
                     provide: ChatService,
-                    deps: [ChatConnectionService, LogService],
+                    deps: [XmppChatConnectionService, LogService],
                     useFactory: NgxChatModule.chatService
                 },
                 {
-                    provide: ChatConnectionService,
-                    deps: [XmppClientToken, LogService],
+                    provide: XmppChatConnectionService,
+                    deps: [XmppClientToken, LogService, ContactFactoryService],
                     useFactory: NgxChatModule.chatConnectionService
                 },
                 {
@@ -68,14 +71,14 @@ export class NgxChatModule {
 
     }
 
-    private static chatService(chatConnectionService: ChatConnectionService, logService: LogService) {
+    private static chatService(chatConnectionService: XmppChatConnectionService, logService: LogService) {
         const chatService = new ChatService(chatConnectionService, logService);
         chatService.initialize();
         return chatService;
     }
 
-    private static chatConnectionService(client: Client, logService: LogService) {
-        const connectionService = new ChatConnectionService(client, logService);
+    private static chatConnectionService(client: Client, logService: LogService, contactFactory: ContactFactoryService) {
+        const connectionService = new XmppChatConnectionService(client, logService, contactFactory);
         connectionService.initialize();
         return connectionService;
     }

@@ -13,6 +13,13 @@ export interface Stanza extends Element {
 
 }
 
+export interface IqResponseStanza extends Stanza {
+    attrs: {
+        id: string;
+        type: 'result' | 'error'
+    };
+}
+
 export interface PresenceStanza extends Stanza {
     attrs: {
         from?: string;
