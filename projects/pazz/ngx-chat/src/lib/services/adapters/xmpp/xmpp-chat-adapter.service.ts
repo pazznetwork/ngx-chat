@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
 import { ChatService } from '../../chat-service';
@@ -17,8 +17,9 @@ export class XmppChatAdapter implements ChatService {
 
     message$ = new Subject<Contact>();
     contacts$ = new BehaviorSubject<Contact[]>([]);
-    contactRequestsReceived$ = new BehaviorSubject<Contact[]>([]);
-    contactRequestsSent$ = new BehaviorSubject<Contact[]>([]);
+    contactsSubscribed$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.isSubscribed())));
+    contactRequestsReceived$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingIn)));
+    contactRequestsSent$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingOut)));
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
     private logInRequest: LogInRequest;
     private plugins: ChatPlugin[] = [];
@@ -173,10 +174,4 @@ export class XmppChatAdapter implements ChatService {
 
     }
 
-    addContactRequestReceived(contact: Contact) {
-        const existingContactRequests = this.contactRequestsReceived$.getValue();
-        if (existingContactRequests.indexOf(contact) === -1) {
-            this.contactRequestsReceived$.next(existingContactRequests.concat(contact));
-        }
-    }
 }

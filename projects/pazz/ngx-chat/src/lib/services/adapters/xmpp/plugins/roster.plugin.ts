@@ -1,12 +1,11 @@
 import { x as xml } from '@xmpp/xml';
 import { Contact, PresenceStanza, Stanza } from '../../../../core';
 import { Presence } from '../../../../core/presence';
+import { ContactSubscription } from '../../../../core/Subscription';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractPlugin } from './abstract.plugin';
-
-type SubscriptionStatus = 'none' | 'to' | 'from' | 'both' | 'remove';
 
 /**
  * https://xmpp.org/rfcs/rfc6121.html#roster-add-success
@@ -19,8 +18,7 @@ export class RosterPlugin extends AbstractPlugin {
 
     handleStanza(stanza: Stanza) {
         if (this.isRosterPushStanza(stanza)) {
-            this.handleRosterPushStanza(stanza);
-            return true;
+            return this.handleRosterPushStanza(stanza);
         } else if (this.isPresenceStanza(stanza)) {
             return this.handlePresenceStanza(stanza);
         }
@@ -46,22 +44,40 @@ export class RosterPlugin extends AbstractPlugin {
         // (the latter behavior overrides a MUST-level requirement from [XMPP‑CORE] for the purpose of preventing a presence leak).
 
         const itemChild = stanza.getChild('query').getChild('item');
-        const subscriptionStatus = itemChild.attrs.subscription as SubscriptionStatus || 'none';
+        const subscriptionStatus = itemChild.attrs.subscription || 'none';
         const name = itemChild.attrs.name || itemChild.attrs.jid;
-        const contactFromPush = this.contactFactory.createContact(itemChild.attrs.jid, name);
         const existingContacts = [].concat(this.chatService.contacts$.getValue()) as Contact[];
+        let contact = this.chatService.getContactByJid(itemChild.attrs.jid);
+        if (!contact) {
+            const contactFromPush = this.contactFactory.createContact(itemChild.attrs.jid, name);
+            this.chatService.contacts$.next(existingContacts.concat(contactFromPush));
+            contact = contactFromPush;
+        }
+        contact.pendingIn = false;
+        contact.pendingOut = itemChild.attrs.ask === 'subscribe';
+
+        this.chatService.chatConnectionService.sendIqAckResult(stanza.attrs.id);
+
 
         if (subscriptionStatus === 'remove') {
-            this.chatService.contacts$.next(existingContacts.filter(contact => !contact.equalsBareJid(contactFromPush)));
-        } else {
-            if (existingContacts.filter(contact => contact.equalsBareJid(contactFromPush)).length === 0) {
-                this.chatService.contacts$.next(existingContacts.concat(contactFromPush));
-            }
+            contact.pendingOut = false;
+            contact.subscription$.next(ContactSubscription.none);
+            this.chatService.contacts$.next(existingContacts);
+            return true;
+        } else if (subscriptionStatus === 'none') {
+            contact.subscription$.next(ContactSubscription.none);
+            this.chatService.contacts$.next(existingContacts);
+            return true;
+        } else if (subscriptionStatus === 'to') {
+            contact.subscription$.next(ContactSubscription.to);
+            this.chatService.contacts$.next(existingContacts);
+        } else if (subscriptionStatus === 'from') {
+            contact.subscription$.next(ContactSubscription.from);
+            this.chatService.contacts$.next(existingContacts);
+        } else if (subscriptionStatus === 'both') {
+            contact.subscription$.next(ContactSubscription.both);
+            this.chatService.contacts$.next(existingContacts);
         }
-
-        this.chatService.chatConnectionService.send(
-            xml('iq', {from: this.chatService.chatConnectionService.myJidWithResource, id: stanza.attrs.id, type: 'result'})
-        ).then(() => {}, () => {});
     }
 
     private isPresenceStanza(stanza: Stanza): stanza is PresenceStanza {
@@ -102,15 +118,38 @@ export class RosterPlugin extends AbstractPlugin {
                     return true;
                 }
             } else if (stanza.attrs.type === 'subscribe') {
-                if (fromAsContact) {
+                if (fromAsContact && fromAsContact.isSubscribed()) {
                     // subscriber is already a contact of us, approve subscription
-                    this.chatService.chatConnectionService.send(
-                        xml('presence', {to: stanza.attrs.from, type: 'subscribed'})
-                    );
+                    fromAsContact.pendingIn = false;
+                    this.sendAcceptPresenceSubscriptionRequest(stanza.attrs.from);
+                    this.chatService.contacts$.next(this.chatService.contacts$.getValue());
+                    return true;
+                } else if (fromAsContact) {
+                    // subscriber is known but not subscribed or pending
+                    fromAsContact.pendingIn = true;
+                    this.chatService.contacts$.next(this.chatService.contacts$.getValue());
+                    return true;
                 } else {
                     // subscriber is not known, add a pending subscription so one can confirm
-                    this.chatService.addContactRequestReceived(this.contactFactory.createContact(stanza.attrs.from));
+                    const existingContacts = this.chatService.contacts$.getValue().slice(0);
+                    const newContact = this.contactFactory.createContact(stanza.attrs.from);
+                    existingContacts.push(newContact);
+                    newContact.pendingIn = true;
+                    this.chatService.contacts$.next(existingContacts);
+                    return true;
                 }
+
+            } else if (stanza.attrs.type === 'subscribed') {
+                const currentSubscriptionState = fromAsContact.subscription$.getValue();
+                let newSubscriptionState;
+                if (currentSubscriptionState === ContactSubscription.none) {
+                    newSubscriptionState = ContactSubscription.to;
+                } else {
+                    newSubscriptionState = ContactSubscription.both;
+                }
+                fromAsContact.pendingOut = false;
+                fromAsContact.subscription$.next(newSubscriptionState);
+                this.chatService.contacts$.next(this.chatService.contacts$.getValue());
                 return true;
             } else  if (stanza.attrs.type === 'unsubscribed') {
                 // TODO: handle unsubscriptions
@@ -121,6 +160,12 @@ export class RosterPlugin extends AbstractPlugin {
             }
         }
         return false;
+    }
+
+    private sendAcceptPresenceSubscriptionRequest(jid) {
+        this.chatService.chatConnectionService.send(
+            xml('presence', {to: jid, type: 'subscribed', id: this.chatService.chatConnectionService.getNextIqId()})
+        );
     }
 
     public onBeforeOnline(): PromiseLike<any> {
@@ -142,31 +187,70 @@ export class RosterPlugin extends AbstractPlugin {
 
     private convertToContacts(responseStanza: Stanza): Contact[] {
         return responseStanza.getChild('query').getChildElements()
-            .filter(rosterElement => rosterElement.attrs.subscription || rosterElement.attrs.jid)
-            .map(rosterElement => this.contactFactory.createContact(
-                rosterElement.attrs.jid,
-                rosterElement.attrs.name || rosterElement.attrs.jid));
-    }
-
-    addRosterContact(jid: string): void {
-        this.chatService.chatConnectionService.sendIq(
-            xml('iq', {type: 'set'},
-                xml('query', {xmlns: 'jabber:iq:roster'},
-                    xml('item', {jid}))))
-            .then(() => {
-                // TODO: rethink. shouldn't one first subscribe to another contact and after a successful subscription add the person to
-                // the roster?
-                return this.chatService.chatConnectionService.send(
-                    xml('presence', {id: this.chatService.chatConnectionService.getNextIqId(), to: jid, type: 'subscribe'})
-                );
+            .map(rosterElement => {
+                const contact = this.contactFactory.createContact(rosterElement.attrs.jid,
+                    rosterElement.attrs.name || rosterElement.attrs.jid);
+                contact.subscription$.next(this.parseSubscription(rosterElement.attrs.subscription));
+                contact.pendingOut = rosterElement.attrs.ask === 'subscribe'; // TODO! pending out ist egal
+                return contact;
             });
     }
 
+    private parseSubscription(subscription: string): ContactSubscription {
+        switch (subscription) {
+            case 'to':
+                return ContactSubscription.to;
+            case 'from':
+                return ContactSubscription.from;
+            case 'both':
+                return ContactSubscription.both;
+            case 'none':
+            default:
+                return ContactSubscription.none;
+        }
+    }
+
+    addRosterContact(jid: string): void {
+        this.sendAcceptPresenceSubscriptionRequest(jid);
+        this.sendAddToRoster(jid);
+        this.sendSubscribeToPresence(jid);
+    }
+
+    private sendAddToRoster(jid: string) {
+        return this.chatService.chatConnectionService.sendIq(
+            xml('iq', {type: 'set'},
+                xml('query', {xmlns: 'jabber:iq:roster'},
+                    xml('item', {jid}))));
+    }
+
+    private sendSubscribeToPresence(jid: string) {
+        this.chatService.chatConnectionService.send(
+            xml('presence', {id: this.chatService.chatConnectionService.getNextIqId(), to: jid, type: 'subscribe'})
+        );
+    }
+
     removeRosterContact(jid: string): void {
+        const contact = this.chatService.getContactByJid(jid);
+        if (contact) {
+            contact.subscription$.next(ContactSubscription.none);
+            contact.pendingOut = false;
+            contact.pendingIn = false;
+            this.sendRemoveFromRoster(jid);
+            this.sendWithdrawPresenceSubscription(jid);
+        }
+    }
+
+    private sendRemoveFromRoster(jid: string) {
         this.chatService.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
                 xml('query', {xmlns: 'jabber:iq:roster'},
                     xml('item', {jid, subscription: 'remove'}))));
+    }
+
+    private sendWithdrawPresenceSubscription(jid: string) {
+        this.chatService.chatConnectionService.send(
+            xml('presence', {id: this.chatService.chatConnectionService.getNextIqId(), to: jid, type: 'unsubscribe'})
+        );
     }
 
     refreshRosterContacts() {

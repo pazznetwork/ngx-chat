@@ -4,6 +4,7 @@ import { LogService } from '../services/log.service';
 import { dummyAvatar } from './contact-avatar';
 import { Message } from './message';
 import { Presence } from './presence';
+import { ContactSubscription } from './Subscription';
 
 export interface ContactMetadata {
     [key: string]: any;
@@ -18,6 +19,9 @@ export class Contact {
     public jid: JID;
     public metadata: ContactMetadata = {};
     public presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
+    public subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
+    public pendingOut = false;
+    public pendingIn = false;
     private messageIdToMessage: { [key: string]: Message } = {};
 
     /**
@@ -50,4 +54,10 @@ export class Contact {
     public equalsBareJid(other: Contact) {
         return this.jidBare.equals(other.jidBare);
     }
+
+    isSubscribed() {
+        const subscription = this.subscription$.getValue();
+        return subscription === ContactSubscription.both || subscription === ContactSubscription.to || this.pendingOut;
+    }
+
 }

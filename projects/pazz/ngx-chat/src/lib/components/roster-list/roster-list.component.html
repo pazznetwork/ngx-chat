@@ -5,7 +5,7 @@
 <div class="roster-list" [@rosterVisibility]="rosterState">
     <div class="roster-header">{{translations?.contacts}}</div>
     <div class="contact-list-wrapper">
-        <ngx-chat-roster-contact *ngFor="let contact of (this.chatService.contacts$ | async)"
+        <ngx-chat-roster-contact *ngFor="let contact of (this.chatService.contactsSubscribed$ | async)"
                                  [contact]="contact"
                                  (click)="onClickContact(contact)">
         </ngx-chat-roster-contact>
@@ -14,13 +14,19 @@
     <hr />
 
     <div class="contact-pending-request-received-wrapper">
+        debug contact requests in:
         <div class="contact-pending-request-received" *ngFor="let request of (this.chatService.contactRequestsReceived$ | async)">{{request.name}}</div>
     </div>
 
     <hr />
 
     <div class="contact-pending-request-sent-wrapper">
+        debug contact requests out:
         <div class="contact-pending-request-sent" *ngFor="let request of (this.chatService.contactRequestsSent$ | async)">{{request.name}}</div>
+    </div>
+
+    <div>
+        debug: contact count :: {{ (this.chatService.contacts$ | async).length }}
     </div>
 
     <div class="roster-footer"></div>

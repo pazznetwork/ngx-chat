@@ -58,6 +58,7 @@ export class XmppChatConnectionService {
     }
 
     public send(content: any): PromiseLike<void> {
+        this.logService.debug('>>>', content);
         return this.client.send(content);
     }
 
@@ -77,7 +78,16 @@ export class XmppChatConnectionService {
         });
     }
 
+    public sendIqAckResult(id) {
+        this.send(
+            xml('iq', {from: this.myJidWithResource, id: id, type: 'result'})
+        );
+    }
+
     public onStanzaReceived(stanza: Stanza) {
+
+        this.logService.debug('<<<', stanza);
+
         if (stanza.attrs.type === 'error') {
             this.logService.debug('error <=', stanza.toString());
             this.stanzaError$.next(stanza);
