@@ -1,7 +1,5 @@
 import { x as xml } from '@xmpp/xml';
-import { Contact, PresenceStanza, Stanza } from '../../../../core';
-import { Presence } from '../../../../core/presence';
-import { ContactSubscription } from '../../../../core/Subscription';
+import { Contact, ContactSubscription, Presence, PresenceStanza, Stanza } from '../../../../core';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -44,21 +42,13 @@ export class RosterPlugin extends AbstractPlugin {
         // (the latter behavior overrides a MUST-level requirement from [XMPP‑CORE] for the purpose of preventing a presence leak).
 
         const itemChild = stanza.getChild('query').getChild('item');
-        const subscriptionStatus = itemChild.attrs.subscription || 'none';
-        const name = itemChild.attrs.name || itemChild.attrs.jid;
-        const existingContacts = [].concat(this.chatService.contacts$.getValue()) as Contact[];
-        let contact = this.chatService.getContactByJid(itemChild.attrs.jid);
-        if (!contact) {
-            const contactFromPush = this.contactFactory.createContact(itemChild.attrs.jid, name);
-            this.chatService.contacts$.next(existingContacts.concat(contactFromPush));
-            contact = contactFromPush;
-        }
-        contact.pendingIn = false;
+        const contact = this.getOrCreateContact(itemChild.attrs.jid, itemChild.attrs.name || itemChild.attrs.jid);
         contact.pendingOut = itemChild.attrs.ask === 'subscribe';
+        const subscriptionStatus = itemChild.attrs.subscription || 'none';
 
         this.chatService.chatConnectionService.sendIqAckResult(stanza.attrs.id);
 
-
+        const existingContacts = this.chatService.contacts$.getValue();
         if (subscriptionStatus === 'remove') {
             contact.pendingOut = false;
             contact.subscription$.next(ContactSubscription.none);
@@ -71,13 +61,26 @@ export class RosterPlugin extends AbstractPlugin {
         } else if (subscriptionStatus === 'to') {
             contact.subscription$.next(ContactSubscription.to);
             this.chatService.contacts$.next(existingContacts);
+            return true;
         } else if (subscriptionStatus === 'from') {
             contact.subscription$.next(ContactSubscription.from);
             this.chatService.contacts$.next(existingContacts);
+            return true;
         } else if (subscriptionStatus === 'both') {
             contact.subscription$.next(ContactSubscription.both);
             this.chatService.contacts$.next(existingContacts);
+            return true;
         }
+    }
+
+    private getOrCreateContact(jid, name?) {
+        let contact = this.chatService.getContactByJid(jid);
+        if (!contact) {
+            contact = this.contactFactory.createContact(jid, name);
+            const existingContacts = [].concat(this.chatService.contacts$.getValue()) as Contact[];
+            this.chatService.contacts$.next(existingContacts.concat(contact));
+        }
+        return contact;
     }
 
     private isPresenceStanza(stanza: Stanza): stanza is PresenceStanza {
@@ -85,7 +88,7 @@ export class RosterPlugin extends AbstractPlugin {
     }
 
     private handlePresenceStanza(stanza: PresenceStanza) {
-        const fromAsContact = this.chatService.getContactByJid(stanza.attrs.from);
+        const fromAsContact = this.getOrCreateContact(stanza.attrs.from);
         const isAddressedToMe = stanza.attrs.to === this.chatService.chatConnectionService.myJidWithResource;
         if (isAddressedToMe) {
             if (!stanza.attrs.type) {
@@ -126,7 +129,7 @@ export class RosterPlugin extends AbstractPlugin {
                 fromAsContact.presence$.next(Presence.unavailable);
                 return true;
             } else if (stanza.attrs.type === 'subscribe') {
-                if (fromAsContact && fromAsContact.isSubscribed()) {
+                if (fromAsContact && (fromAsContact.isSubscribed() || fromAsContact.pendingOut)) {
                     // subscriber is already a contact of us, approve subscription
                     fromAsContact.pendingIn = false;
                     this.sendAcceptPresenceSubscriptionRequest(stanza.attrs.from);
@@ -154,7 +157,9 @@ export class RosterPlugin extends AbstractPlugin {
                 this.chatService.contacts$.next(this.chatService.contacts$.getValue());
                 return true;
             } else if (stanza.attrs.type === 'unsubscribed') {
-                // TODO: handle unsubscriptions
+                // TODO: handle unsubscribed
+            } else if (stanza.attrs.type === 'unsubscribe') {
+                // TODO: handle unsubscribe
             }
         }
         return false;
@@ -183,6 +188,8 @@ export class RosterPlugin extends AbstractPlugin {
     }
 
     private sendAcceptPresenceSubscriptionRequest(jid) {
+        const contact = this.getOrCreateContact(jid);
+        contact.pendingIn = false;
         this.chatService.chatConnectionService.send(
             xml('presence', {to: jid, type: 'subscribed', id: this.chatService.chatConnectionService.getNextIqId()})
         );
@@ -211,7 +218,7 @@ export class RosterPlugin extends AbstractPlugin {
                 const contact = this.contactFactory.createContact(rosterElement.attrs.jid,
                     rosterElement.attrs.name || rosterElement.attrs.jid);
                 contact.subscription$.next(this.parseSubscription(rosterElement.attrs.subscription));
-                contact.pendingOut = rosterElement.attrs.ask === 'subscribe'; // TODO! pending out ist egal
+                contact.pendingOut = rosterElement.attrs.ask === 'subscribe';
                 return contact;
             });
     }

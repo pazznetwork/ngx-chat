@@ -22,6 +22,12 @@ export class ChatListStateService {
             .subscribe(() => {
                 this.openChats$.next([]);
             });
+
+        this.chatService.contactRequestsReceived$.subscribe(contacts => {
+            for (const contact of contacts) {
+                this.openChat(contact.jidPlain);
+            }
+        });
     }
 
     public openChatCollapsed(jidPlain: string) {

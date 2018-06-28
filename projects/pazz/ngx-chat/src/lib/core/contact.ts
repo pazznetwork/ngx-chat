@@ -4,7 +4,7 @@ import { LogService } from '../services/log.service';
 import { dummyAvatar } from './contact-avatar';
 import { Message } from './message';
 import { Presence } from './presence';
-import { ContactSubscription } from './Subscription';
+import { ContactSubscription } from './subscription';
 
 export interface ContactMetadata {
     [key: string]: any;
@@ -57,7 +57,7 @@ export class Contact {
 
     isSubscribed() {
         const subscription = this.subscription$.getValue();
-        return subscription === ContactSubscription.both || subscription === ContactSubscription.to || this.pendingOut;
+        return subscription === ContactSubscription.both || subscription === ContactSubscription.to;
     }
 
 }

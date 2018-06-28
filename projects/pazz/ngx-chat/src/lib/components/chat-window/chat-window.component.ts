@@ -70,4 +70,14 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
         this.chatListService.closeChat(this.chatWindowState.contact);
     }
 
+    acceptSubscriptionRequest(event: Event) {
+        event.preventDefault();
+        this.chatService.addContact(this.chatWindowState.contact.jidBare.toString());
+    }
+
+    denySubscriptionRequest(event: Event) {
+        event.preventDefault();
+        this.chatService.removeContact((this.chatWindowState.contact.jidBare.toString()));
+        this.chatListService.closeChat(this.chatWindowState.contact);
+    }
 }

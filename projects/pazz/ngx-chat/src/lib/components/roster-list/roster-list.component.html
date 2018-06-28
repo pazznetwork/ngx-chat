@@ -11,23 +11,34 @@
         </ngx-chat-roster-contact>
     </div>
 
-    <hr />
+    <ng-container *ngIf="this.chatService.enableDebugging">
+        <hr/>
 
-    <div class="contact-pending-request-received-wrapper">
-        debug contact requests in:
-        <div class="contact-pending-request-received" *ngFor="let request of (this.chatService.contactRequestsReceived$ | async)">{{request.name}}</div>
-    </div>
+        <div class="contact-pending-request-received-wrapper">
+            debug contact requests in:
+            <div class="contact-pending-request-received" *ngFor="let request of (this.chatService.contactRequestsReceived$ | async)">
+                {{request.name}}
+            </div>
+        </div>
 
-    <hr />
+        <hr/>
 
-    <div class="contact-pending-request-sent-wrapper">
-        debug contact requests out:
-        <div class="contact-pending-request-sent" *ngFor="let request of (this.chatService.contactRequestsSent$ | async)">{{request.name}}</div>
-    </div>
+        <div class="contact-pending-request-sent-wrapper">
+            debug contact requests out:
+            <div class="contact-pending-request-sent" *ngFor="let request of (this.chatService.contactRequestsSent$ | async)">
+                {{request.name}}
+            </div>
+        </div>
 
-    <div>
-        debug: contact count :: {{ (this.chatService.contacts$ | async).length }}
-    </div>
+        <hr/>
+
+        <div>
+            debug: contact count :: {{ (this.chatService.contacts$ | async).length }}
+        </div>
+        <ul>
+            <li *ngFor="let contact of (this.chatService.contacts$ | async)">{{contact.name}}</li>
+        </ul>
+    </ng-container>
 
     <div class="roster-footer"></div>
 </div>

@@ -12,6 +12,7 @@ export interface ChatService {
     contactsSubscribed$: Observable<Contact[]>;
     contactRequestsSent$: Observable<Contact[]>;
     contactRequestsReceived$: Observable<Contact[]>;
+    enableDebugging: boolean;
 
     setContacts(newContacts: Contact[]): void;
 

@@ -1,9 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { x as xml } from '@xmpp/xml';
 
-import { Contact, Stanza } from '../../../../core';
-import { Presence } from '../../../../core/presence';
-import { ContactSubscription } from '../../../../core/Subscription';
+import { Contact, ContactSubscription, Presence, Stanza } from '../../../../core';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -11,7 +9,7 @@ import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connect
 import { RosterPlugin } from './roster.plugin';
 
 
-describe('chat connection service', () => {
+describe('roster plugin', () => {
 
     let chatConnectionService: XmppChatConnectionService;
     let chatAdapter: XmppChatAdapter;

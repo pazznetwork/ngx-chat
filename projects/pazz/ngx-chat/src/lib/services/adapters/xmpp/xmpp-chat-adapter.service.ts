@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
 import { ChatService } from '../../chat-service';
@@ -25,7 +25,7 @@ export class XmppChatAdapter implements ChatService {
     rosterPlugin: RosterPlugin;
     messageArchivePlugin: MessageArchivePlugin;
     stanzaUuidPlugin: StanzaUuidPlugin;
-    private logInRequest: LogInRequest;
+    enableDebugging = false;
 
     constructor(public chatConnectionService: XmppChatConnectionService,
                 private logService: LogService,
@@ -33,13 +33,16 @@ export class XmppChatAdapter implements ChatService {
         this.initializePlugins();
         this.state$.subscribe((state) => this.logService.debug('state changed to:', state));
         chatConnectionService.state$
-            .pipe(filter(state => state === 'online'))
-            .subscribe(() => {
-                Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
-                    .then(
-                        () => this.announceAvailability(),
-                        () => this.announceAvailability()
-                    );
+            .subscribe((nextState) => {
+                if (nextState === 'online') {
+                    Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
+                        .then(
+                            () => this.announceAvailability(),
+                            () => this.announceAvailability()
+                        );
+                } else {
+                    this.state$.next(nextState);
+                }
             });
         this.chatConnectionService.stanzaMessage$.subscribe((stanza) => this.onMessageReceived(stanza));
         this.chatConnectionService.stanzaUnknown$.subscribe((stanza) => this.onUnknownStanza(stanza));
@@ -61,28 +64,23 @@ export class XmppChatAdapter implements ChatService {
 
         const contactsByJid = {};
         const existingContacts = [].concat(this.contacts$.getValue()) as Contact[];
-        let contactsDiffer = existingContacts.length !== newContacts.length;
 
         for (const newContact of newContacts) {
             contactsByJid[newContact.jidBare.toString()] = newContact;
         }
 
         for (const existingContact of existingContacts) {
-            if (contactsByJid[existingContact.jidBare.toString()]) {
-                contactsByJid[existingContact.jidBare.toString()] = existingContact;
-            } else {
-                contactsDiffer = true;
+            contactsByJid[existingContact.jidBare.toString()] = existingContact;
+        }
+
+        const nextContacts = [];
+        for (const jid in contactsByJid) {
+            if (contactsByJid.hasOwnProperty(jid)) {
+                nextContacts.push(contactsByJid[jid]);
             }
         }
 
-        if (contactsDiffer) {
-            const nextContacts = [];
-            for (const jid in contactsByJid) {
-                if (contactsByJid.hasOwnProperty(jid)) {
-                    nextContacts.push(contactsByJid[jid]);
-                }
-            }
-
+        if (nextContacts.length !== existingContacts.length) {
             this.contacts$.next(nextContacts);
         }
 
@@ -106,7 +104,6 @@ export class XmppChatAdapter implements ChatService {
     }
 
     logIn(logInRequest: LogInRequest): void {
-        this.logInRequest = logInRequest;
         this.chatConnectionService.logIn(logInRequest);
     }
 

@@ -14,7 +14,10 @@ export class ChatComponent implements OnInit {
     public translations: Translations = {
         'contacts': 'Contacts',
         'noMessages': 'No messages yet.',
-        'placeholder': 'Enter your message!'
+        'placeholder': 'Enter your message!',
+        'subscriptionRequestMessage': 'I want to add you as a contact.',
+        'acceptSubscriptionRequest': 'Accept',
+        'denySubscriptionRequest': 'Deny'
     };
 
     showChatComponent = false;

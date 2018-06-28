@@ -23,6 +23,15 @@
             <div class="chat-messages-empty" *ngIf="chatWindowState.contact.messages.length === 0">
                 {{translations?.noMessages}}
             </div>
+            <div class="chat-message chat-message--in" *ngIf="chatWindowState.contact.pendingIn">
+                <p>
+                    {{translations?.subscriptionRequestMessage}}
+                </p>
+                <ul class="chat-presence-subscription-actions">
+                    <li><a (click)="acceptSubscriptionRequest($event)" href="#">{{translations?.acceptSubscriptionRequest}}</a></li>
+                    <li><a (click)="denySubscriptionRequest($event)" href="#">{{translations?.denySubscriptionRequest}}</a></li>
+                </ul>
+            </div>
         </div>
         <div class="chat-input-container">
             <input class="chat-input"
