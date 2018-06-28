@@ -26,11 +26,11 @@ describe('chat service', () => {
     };
 
     beforeEach(() => {
-        const spy = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin']);
+        const xmppClientSpy = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin']);
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: spy},
+                {provide: XmppClientToken, useValue: xmppClientSpy},
                 XmppChatConnectionService,
                 {provide: ChatServiceToken, useClass: XmppChatAdapter},
                 LogService,

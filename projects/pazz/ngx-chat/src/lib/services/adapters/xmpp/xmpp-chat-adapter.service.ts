@@ -21,9 +21,11 @@ export class XmppChatAdapter implements ChatService {
     contactRequestsReceived$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingIn)));
     contactRequestsSent$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingOut)));
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
+    plugins: ChatPlugin[] = [];
+    rosterPlugin: RosterPlugin;
+    messageArchivePlugin: MessageArchivePlugin;
+    stanzaUuidPlugin: StanzaUuidPlugin;
     private logInRequest: LogInRequest;
-    private plugins: ChatPlugin[] = [];
-    private rosterPlugin: RosterPlugin;
 
     constructor(public chatConnectionService: XmppChatConnectionService,
                 private logService: LogService,
@@ -50,7 +52,9 @@ export class XmppChatAdapter implements ChatService {
 
     private initializePlugins() {
         this.rosterPlugin = new RosterPlugin(this, this.contactFactory, this.logService);
-        this.plugins = [new MessageArchivePlugin(this), new StanzaUuidPlugin(), this.rosterPlugin];
+        this.messageArchivePlugin = new MessageArchivePlugin(this);
+        this.stanzaUuidPlugin = new StanzaUuidPlugin();
+        this.plugins = [this.messageArchivePlugin, this.stanzaUuidPlugin, this.rosterPlugin];
     }
 
     setContacts(newContacts: Contact[]) {

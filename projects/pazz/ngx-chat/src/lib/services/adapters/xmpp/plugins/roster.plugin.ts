@@ -44,7 +44,7 @@ export class RosterPlugin extends AbstractPlugin {
         // (the latter behavior overrides a MUST-level requirement from [XMPP‑CORE] for the purpose of preventing a presence leak).
 
         const itemChild = stanza.getChild('query').getChild('item');
-        const subscriptionStatus = itemChild.attrs.subscription || 'none';
+        const subscriptionStatus = itemChild.attrs.subscription || 'none';
         const name = itemChild.attrs.name || itemChild.attrs.jid;
         const existingContacts = [].concat(this.chatService.contacts$.getValue()) as Contact[];
         let contact = this.chatService.getContactByJid(itemChild.attrs.jid);
@@ -102,26 +102,36 @@ export class RosterPlugin extends AbstractPlugin {
                     if (show === 'away') {
                         // away
                         this.logService.debug('presence of', stanza.attrs.from, 'away');
+                        fromAsContact.presence$.next(Presence.present);
                     } else if (show === 'chat') {
                         // chat
                         this.logService.debug('presence of', stanza.attrs.from, 'chat');
+                        fromAsContact.presence$.next(Presence.present);
                     } else if (show === 'dnd') {
                         // do not distrb
                         this.logService.debug('presence of', stanza.attrs.from, 'dnd');
+                        fromAsContact.presence$.next(Presence.present);
                     } else if (show === 'xa') {
                         // long away
                         this.logService.debug('presence of', stanza.attrs.from, 'xa');
+                        fromAsContact.presence$.next(Presence.present);
                     } else {
                         // error, undefined
                         this.logService.error('illegal presence:', stanza.attrs.from, show);
                     }
                     return true;
                 }
+            } else if (stanza.attrs.type === 'unavailable' && fromAsContact) {
+                // TODO: a contact can has more than one presence
+                fromAsContact.presence$.next(Presence.unavailable);
+                return true;
             } else if (stanza.attrs.type === 'subscribe') {
                 if (fromAsContact && fromAsContact.isSubscribed()) {
                     // subscriber is already a contact of us, approve subscription
                     fromAsContact.pendingIn = false;
                     this.sendAcceptPresenceSubscriptionRequest(stanza.attrs.from);
+                    fromAsContact.subscription$.next(
+                        this.transitionSubscriptionRequestReceivedAccepted(fromAsContact.subscription$.getValue()));
                     this.chatService.contacts$.next(this.chatService.contacts$.getValue());
                     return true;
                 } else if (fromAsContact) {
@@ -138,28 +148,38 @@ export class RosterPlugin extends AbstractPlugin {
                     this.chatService.contacts$.next(existingContacts);
                     return true;
                 }
-
             } else if (stanza.attrs.type === 'subscribed') {
-                const currentSubscriptionState = fromAsContact.subscription$.getValue();
-                let newSubscriptionState;
-                if (currentSubscriptionState === ContactSubscription.none) {
-                    newSubscriptionState = ContactSubscription.to;
-                } else {
-                    newSubscriptionState = ContactSubscription.both;
-                }
                 fromAsContact.pendingOut = false;
-                fromAsContact.subscription$.next(newSubscriptionState);
+                fromAsContact.subscription$.next(this.transitionSubscriptionRequestSentAccepted(fromAsContact.subscription$.getValue()));
                 this.chatService.contacts$.next(this.chatService.contacts$.getValue());
                 return true;
-            } else  if (stanza.attrs.type === 'unsubscribed') {
+            } else if (stanza.attrs.type === 'unsubscribed') {
                 // TODO: handle unsubscriptions
-            } else if (stanza.attrs.type === 'unavailable' && fromAsContact) {
-                // TODO: a contact can has more than one presence
-                fromAsContact.presence$.next(Presence.unavailable);
-                return true;
             }
         }
         return false;
+    }
+
+    private transitionSubscriptionRequestReceivedAccepted(subscription: ContactSubscription) {
+        switch (subscription) {
+            case ContactSubscription.none:
+                return ContactSubscription.from;
+            case ContactSubscription.to:
+                return ContactSubscription.both;
+            default:
+                return subscription;
+        }
+    }
+
+    private transitionSubscriptionRequestSentAccepted(subscription: ContactSubscription) {
+        switch (subscription) {
+            case ContactSubscription.none:
+                return ContactSubscription.to;
+            case ContactSubscription.from:
+                return ContactSubscription.both;
+            default:
+                return subscription;
+        }
     }
 
     private sendAcceptPresenceSubscriptionRequest(jid) {
