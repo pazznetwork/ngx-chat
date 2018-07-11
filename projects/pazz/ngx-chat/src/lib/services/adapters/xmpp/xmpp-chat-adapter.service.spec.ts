@@ -26,7 +26,7 @@ describe('chat service', () => {
     };
 
     beforeEach(() => {
-        const xmppClientSpy = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin']);
+        const xmppClientSpy = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin', 'send']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -187,5 +187,17 @@ describe('chat service', () => {
         });
 
     });
+
+    describe('states', () => {
+
+        it('should clear contacts when logging out', () => {
+            chatService.contacts$.next([contact1]);
+
+            chatService.logOut();
+
+            expect(chatService.contacts$.getValue()).toEqual([]);
+        });
+
+    })
 
 });

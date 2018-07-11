@@ -108,7 +108,7 @@ export class XmppChatAdapter implements ChatService {
     }
 
     logOut(): void {
-        this.setContacts([]);
+        this.contacts$.next([]);
         this.chatConnectionService.logOut();
     }
 
