@@ -1,8 +1,8 @@
 export enum ContactSubscription {
 
-    to,
-    from,
-    both,
-    none
+    to = 'to',
+    from = 'from',
+    both = 'both',
+    none = 'none'
 
 }

@@ -65,8 +65,8 @@ export class MessageArchivePlugin extends AbstractPlugin {
             stanza.getChild('result').getChild('forwarded').getChild('delay').attrs.stamp
         );
 
-        const sender = this.chatService.getContactByJid(messageElement.attrs.from);
-        const receiver = this.chatService.getContactByJid(messageElement.attrs.to);
+        const sender = this.chatService.getContactById(messageElement.attrs.from);
+        const receiver = this.chatService.getContactById(messageElement.attrs.to);
         const contact = sender || receiver;
         if (contact) {
             contact.appendMessage({

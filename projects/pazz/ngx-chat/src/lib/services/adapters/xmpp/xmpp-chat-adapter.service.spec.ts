@@ -4,15 +4,15 @@ import { x as xml } from '@xmpp/xml';
 import { first, skip, take } from 'rxjs/operators';
 
 import { Contact, Direction, Stanza } from '../../../core';
-import { ChatService, ChatServiceToken } from '../../chat-service';
+import { ChatServiceToken } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { XmppChatAdapter } from './xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
 
-describe('chat service', () => {
+describe('XmppChatAdapter', () => {
 
-    let chatService: ChatService;
+    let chatService: XmppChatAdapter;
     let chatConnectionService: XmppChatConnectionService;
     let contactFactory;
 
@@ -50,39 +50,39 @@ describe('chat service', () => {
     describe('contact management', () => {
 
 
-        it('#setContacts() should store contacts', () => {
+        it('#appendContacts() should store contacts', () => {
 
-            chatService.setContacts(contacts);
+            chatService.appendContacts(contacts);
             expect(chatService.contacts$.getValue())
                 .toEqual(contacts);
 
         });
 
-        it('#getContactByJid() should ignore resources', () => {
+        it('#getContactById() should ignore resources', () => {
 
-            chatService.setContacts(contacts);
-            expect(chatService.getContactByJid('test2@example.com/test123'))
+            chatService.appendContacts(contacts);
+            expect(chatService.getContactById('test2@example.com/test123'))
                 .toEqual(contact2, 'resources should be ignored');
 
         });
 
-        it('#getContactByJid() should return the correct contact', () => {
+        it('#getContactById() should return the correct contact', () => {
 
-            chatService.setContacts(contacts);
+            chatService.appendContacts(contacts);
 
-            expect(chatService.getContactByJid('test@example.com'))
+            expect(chatService.getContactById('test@example.com'))
                 .toEqual(contact1);
 
-            expect(chatService.getContactByJid('test2@example.com'))
+            expect(chatService.getContactById('test2@example.com'))
                 .toEqual(contact2);
 
         });
 
 
-        it('#getContactByJid() should return undefined when no such contact exists', () => {
+        it('#getContactById() should return undefined when no such contact exists', () => {
 
-            chatService.setContacts(contacts);
-            expect(chatService.getContactByJid('non@existing.com'))
+            chatService.appendContacts(contacts);
+            expect(chatService.getContactById('non@existing.com'))
                 .toBeUndefined();
 
         });
@@ -96,42 +96,42 @@ describe('chat service', () => {
                     resolve();
                 });
 
-            chatService.setContacts(contacts);
+            chatService.appendContacts(contacts);
 
         });
 
-        it('#setContacts() should not reset existing contacts', () => {
+        it('#appendContacts() should not reset existing contacts', () => {
 
             const copyOfContact1 = contactFactory.createContact('test@example.com', 'jon doe');
             copyOfContact1.appendMessage(sampleMessage);
-            chatService.setContacts([copyOfContact1]);
-            chatService.setContacts(contacts);
+            chatService.appendContacts([copyOfContact1]);
+            chatService.appendContacts(contacts);
 
-            expect(chatService.getContactByJid(contact1.jidPlain).messages)
+            expect(chatService.getContactById(contact1.jidPlain).messages)
                 .toEqual([sampleMessage]);
 
         });
 
-        it('#setContacts() should not add existing contacts', () => {
+        it('#appendContacts() should not add existing contacts', () => {
 
-            chatService.setContacts([contact1]);
+            chatService.appendContacts([contact1]);
             expect(chatService.contacts$.getValue())
                 .toEqual([contact1]);
 
-            chatService.setContacts([contact1]);
+            chatService.appendContacts([contact1]);
             expect(chatService.contacts$.getValue())
                 .toEqual([contact1]);
 
         });
 
-        it('#setContacts() should not notify on non-updates', () => {
+        it('#appendContacts() should not notify on non-updates', () => {
 
             let updateCount = 0;
             chatService.contacts$.subscribe(() => {
                 updateCount++;
             });
-            chatService.setContacts([contact1]);
-            chatService.setContacts([contact1]);
+            chatService.appendContacts([contact1]);
+            chatService.appendContacts([contact1]);
             expect(updateCount).toEqual(2);
 
         });
@@ -148,15 +148,15 @@ describe('chat service', () => {
                 expect(contact.messages[0].direction).toEqual(Direction.in);
                 done();
             });
-            chatService.setContacts(contacts);
+            chatService.appendContacts(contacts);
             chatConnectionService.onStanzaReceived(
                 xml('message', {from: contact1.jidPlain},
                     xml('body', {}, 'message text')) as Stanza);
         });
 
         it('#messages$ should emit contact on received messages', (done) => {
-            chatService.setContacts(contacts);
-            chatService.getContactByJid(contact1.jidPlain).messages$.pipe(first()).subscribe(message => {
+            chatService.appendContacts(contacts);
+            chatService.getContactById(contact1.jidPlain).messages$.pipe(first()).subscribe(message => {
                 expect(message.body).toEqual('message text');
                 expect(message.direction).toEqual(Direction.in);
                 done();
@@ -168,14 +168,14 @@ describe('chat service', () => {
 
         it('#messages$ should emit a message with the same id a second time the messages of the contact should only have one', (done) => {
             let messagesSeen = 0;
-            chatService.setContacts(contacts);
+            chatService.appendContacts(contacts);
             chatService.message$.pipe(take(2)).subscribe(contact => {
                 expect(contact.messages[0].body).toEqual('message text');
                 expect(contact.messages[0].direction).toEqual(Direction.in);
                 expect(contact.messages[0].id).toEqual('id');
                 messagesSeen++;
                 if (messagesSeen === 2) {
-                    expect(chatService.getContactByJid(contact1.jidPlain).messages.length).toEqual(1);
+                    expect(chatService.getContactById(contact1.jidPlain).messages.length).toEqual(1);
                     done();
                 }
             });
@@ -198,6 +198,6 @@ describe('chat service', () => {
             expect(chatService.contacts$.getValue()).toEqual([]);
         });
 
-    })
+    });
 
 });

@@ -55,6 +55,11 @@
     <button (click)="onAddContact()">Add contact</button>
     <button (click)="onRemoveContact()">Remove contact</button>
 
+    <hr/>
+
+    <button (click)="chatService.enableDebugging = !chatService.enableDebugging">Enable debugging</button>
+    <button (click)="onToggleContactList()">Toggle contact list</button>
+
 </div>
 
-<ngx-chat></ngx-chat>
+<ngx-chat [contacts]="contacts"></ngx-chat>

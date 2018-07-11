@@ -1,5 +1,6 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { Contact, Translations } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
@@ -40,6 +41,9 @@ export class RosterListComponent implements OnInit {
     @Input()
     rosterState: string;
 
+    @Input()
+    contacts: Observable<Contact[]>;
+
     @Output()
     rosterStateChanged: EventEmitter<string> = new EventEmitter<string>();
 
@@ -48,6 +52,9 @@ export class RosterListComponent implements OnInit {
     }
 
     ngOnInit() {
+        if (!this.contacts) {
+            this.contacts = this.chatService.contactsSubscribed$;
+        }
     }
 
     onClickContact(contact: Contact) {

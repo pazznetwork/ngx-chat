@@ -74,7 +74,7 @@ export class RosterPlugin extends AbstractPlugin {
     }
 
     private getOrCreateContact(jid, name?) {
-        let contact = this.chatService.getContactByJid(jid);
+        let contact = this.chatService.getContactById(jid);
         if (!contact) {
             contact = this.contactFactory.createContact(jid, name);
             const existingContacts = [].concat(this.chatService.contacts$.getValue()) as Contact[];
@@ -257,7 +257,7 @@ export class RosterPlugin extends AbstractPlugin {
     }
 
     removeRosterContact(jid: string): void {
-        const contact = this.chatService.getContactByJid(jid);
+        const contact = this.chatService.getContactById(jid);
         if (contact) {
             contact.subscription$.next(ContactSubscription.none);
             contact.pendingOut = false;
@@ -282,7 +282,7 @@ export class RosterPlugin extends AbstractPlugin {
 
     refreshRosterContacts() {
         return this.getRosterContacts().then((contacts) => {
-            this.chatService.setContacts(contacts);
+            this.chatService.appendContacts(contacts);
         });
     }
 }

@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
-import { ChatService, ChatServiceToken, ContactFactoryService } from './ngx-chat-imports';
+import { ChatService, ChatServiceToken, Contact, ContactFactoryService } from './ngx-chat-imports';
 
 @Component({
     selector: 'app-root',
@@ -14,8 +15,10 @@ export class AppComponent {
     public password: string;
     public jid: string;
     public otherJid: any;
+    public contacts: Observable<Contact[]> = this.chatService.contactsSubscribed$;
 
-    constructor(@Inject(ChatServiceToken) private chatService: ChatService, private contactFactory: ContactFactoryService) {
+    constructor(@Inject(ChatServiceToken) public chatService: ChatService,
+                private contactFactory: ContactFactoryService) {
         const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
         this.domain = contactData.domain;
         this.uri = contactData.uri;
@@ -34,18 +37,10 @@ export class AppComponent {
 
         this.chatService.logIn(logInRequest);
 
-        // either: set contacts explicitly
-        this.chatService.setContacts([
-            this.contactFactory.createContact('user@host', 'user1'),
-            this.contactFactory.createContact('user2@host', 'user2'),
-        ]);
-
-        // or: fetch the contact list from the server
         this.chatService.state$.pipe(
             filter(state => state === 'online'),
             first()
         ).subscribe(() => {
-            this.chatService.reloadContacts();
         });
     }
 
@@ -62,4 +57,14 @@ export class AppComponent {
         this.chatService.removeContact(this.otherJid);
     }
 
+    onToggleContactList() {
+        if (this.contacts === this.chatService.contactsSubscribed$) {
+            this.contacts = of([
+                this.contactFactory.createContact('user@host', 'user1'),
+                this.contactFactory.createContact('user2@host', 'user2'),
+            ]);
+        } else {
+            this.contacts = this.chatService.contactsSubscribed$;
+        }
+    }
 }

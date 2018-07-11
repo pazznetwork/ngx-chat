@@ -1,6 +1,7 @@
 import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 
-import { Translations } from '../core';
+import { Contact, Translations } from '../core';
 import { ChatService, ChatServiceToken } from '../services/chat-service';
 
 @Component({
@@ -19,6 +20,9 @@ export class ChatComponent implements OnInit {
         'acceptSubscriptionRequest': 'Accept',
         'denySubscriptionRequest': 'Deny'
     };
+
+    @Input()
+    public contacts: Observable<Contact[]>;
 
     showChatComponent = false;
     rosterState = 'hidden';

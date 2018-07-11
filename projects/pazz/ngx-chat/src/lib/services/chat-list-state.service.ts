@@ -33,7 +33,7 @@ export class ChatListStateService {
     public openChatCollapsed(jidPlain: string) {
         if (!this.isChatWithJidOpen(jidPlain)) {
             const openChats = this.openChats$.getValue();
-            const chatWindow = new ChatWindowState(this.chatService.getContactByJid(jidPlain), true);
+            const chatWindow = new ChatWindowState(this.chatService.getOrCreateContactById(jidPlain), true);
             const copyWithNewContact = [chatWindow].concat(openChats);
             this.openChats$.next(copyWithNewContact);
         }

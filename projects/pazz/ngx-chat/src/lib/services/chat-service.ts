@@ -14,11 +14,11 @@ export interface ChatService {
     contactRequestsReceived$: Observable<Contact[]>;
     enableDebugging: boolean;
 
-    setContacts(newContacts: Contact[]): void;
-
     reloadContacts(): void;
 
-    getContactByJid(jidPlain: string): Contact;
+    getContactById(jidPlain: string): Contact | undefined;
+
+    getOrCreateContactById(jidPlain: string): Contact;
 
     addContact(identifier: string): void;
 

@@ -60,7 +60,7 @@ export class XmppChatAdapter implements ChatService {
         this.plugins = [this.messageArchivePlugin, this.stanzaUuidPlugin, this.rosterPlugin];
     }
 
-    setContacts(newContacts: Contact[]) {
+    appendContacts(newContacts: Contact[]) {
 
         const contactsByJid = {};
         const existingContacts = [].concat(this.contacts$.getValue()) as Contact[];
@@ -90,9 +90,18 @@ export class XmppChatAdapter implements ChatService {
         this.rosterPlugin.refreshRosterContacts();
     }
 
-    getContactByJid(jidPlain: string) {
+    getContactById(jidPlain: string) {
         const bareJidToFind = parseJid(jidPlain).bare();
         return this.contacts$.getValue().find(contact => contact.jidBare.equals(bareJidToFind));
+    }
+
+    getOrCreateContactById(jidPlain: string) {
+        let contact = this.getContactById(jidPlain);
+        if (!contact) {
+            contact = this.contactFactory.createContact(jidPlain);
+            this.appendContacts([contact]);
+        }
+        return contact;
     }
 
     addContact(identifier: string) {
@@ -120,7 +129,7 @@ export class XmppChatAdapter implements ChatService {
             plugin.beforeSendMessage(messageStanza);
         }
         this.chatConnectionService.send(messageStanza).then(() => {
-            const contact = this.getContactByJid(jid);
+            const contact = this.getContactById(jid);
             if (contact) {
                 const message = {
                     direction: Direction.out,
@@ -139,7 +148,7 @@ export class XmppChatAdapter implements ChatService {
 
     private onMessageReceived(messageStanza: MessageWithBodyStanza) {
         this.logService.debug('message received <=', messageStanza.getChildText('body'));
-        const contact = this.getContactByJid(messageStanza.attrs.from);
+        const contact = this.getContactById(messageStanza.attrs.from);
 
         if (contact) {
 
