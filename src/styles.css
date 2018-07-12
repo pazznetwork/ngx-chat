@@ -1,1 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
+body {
+    transition-property: padding-right;
+    transition-duration: 0.4s;
+    padding-right: 0px;
+}
+
+body.has-roster {
+    padding-right: 14em;
+}
