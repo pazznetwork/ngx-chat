@@ -276,7 +276,7 @@ export class RosterPlugin extends AbstractPlugin {
 
     private sendWithdrawPresenceSubscription(jid: string) {
         this.chatService.chatConnectionService.send(
-            xml('presence', {id: this.chatService.chatConnectionService.getNextIqId(), to: jid, type: 'unsubscribe'})
+            xml('presence', {id: this.chatService.chatConnectionService.getNextIqId(), to: jid, type: 'unsubscribed'})
         );
     }
 
