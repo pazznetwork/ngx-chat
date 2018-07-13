@@ -4,13 +4,14 @@ import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
+import {ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza, Translations} from '../../../core';
 import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { MessageArchivePlugin, StanzaUuidPlugin } from './plugins';
 import { RosterPlugin } from './plugins/roster.plugin';
 import { XmppChatConnectionService } from './xmpp-chat-connection.service';
+import { dummyAvatar } from '../../../core/contact-avatar';
 
 @Injectable()
 export class XmppChatAdapter implements ChatService {
@@ -26,6 +27,8 @@ export class XmppChatAdapter implements ChatService {
     messageArchivePlugin: MessageArchivePlugin;
     stanzaUuidPlugin: StanzaUuidPlugin;
     enableDebugging = false;
+    userAvatar$ = new BehaviorSubject(dummyAvatar);
+    translations: Translations;
 
     constructor(public chatConnectionService: XmppChatConnectionService,
                 private logService: LogService,

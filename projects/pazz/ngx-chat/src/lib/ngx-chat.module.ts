@@ -21,13 +21,14 @@ import { ChatListStateService } from './services/chat-list-state.service';
 import { ChatServiceToken } from './services/chat-service';
 import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
+import { ChatMessagesComponent } from './components/chat-messages/chat-messages.component';
+import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 
 
 @NgModule({
     imports: [
         CommonModule,
         FormsModule,
-        BrowserAnimationsModule,
     ],
     declarations: [
         ChatListComponent,
@@ -37,8 +38,14 @@ import { LogService } from './services/log.service';
         RosterContactComponent,
         LinksDirective,
         ChatMessageLinkComponent,
+        ChatMessagesComponent,
+        ChatMessageInputComponent,
     ],
-    exports: [ChatComponent],
+    exports: [
+        ChatComponent,
+        ChatMessagesComponent,
+        ChatMessageInputComponent
+    ],
     entryComponents: [ChatMessageLinkComponent],
 })
 export class NgxChatModule {

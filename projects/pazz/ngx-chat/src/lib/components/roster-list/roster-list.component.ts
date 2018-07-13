@@ -36,9 +36,6 @@ import { ChatService, ChatServiceToken } from '../../services/chat-service';
 export class RosterListComponent implements OnInit {
 
     @Input()
-    public translations: Translations;
-
-    @Input()
     rosterState: string;
 
     @Input()

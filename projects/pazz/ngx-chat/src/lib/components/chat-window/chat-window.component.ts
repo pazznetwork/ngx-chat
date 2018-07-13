@@ -1,9 +1,7 @@
-import { Component, ElementRef, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
-
-import { Translations } from '../../core';
-import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
-import { ChatService, ChatServiceToken } from '../../services/chat-service';
+import {Component, Inject, Input, OnDestroy, OnInit} from '@angular/core';
+import {from, Subscription} from 'rxjs';
+import {ChatListStateService, ChatWindowState} from '../../services/chat-list-state.service';
+import {ChatService, ChatServiceToken} from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -13,18 +11,10 @@ import { ChatService, ChatServiceToken } from '../../services/chat-service';
 export class ChatWindowComponent implements OnInit, OnDestroy {
 
     @Input()
-    public translations: Translations;
-
-    @Input()
     public chatWindowState: ChatWindowState;
 
     @Input()
     public isCollapsed: boolean;
-
-    @ViewChild('messageArea')
-    chatMessageAreaElement: ElementRef<HTMLElement>;
-
-    public message = '';
 
     private subscriptions: Subscription[] = [];
 
@@ -35,18 +25,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.subscriptions.push(this.chatWindowState.contact.messages$.subscribe(() => {
             this.chatWindowState.isCollapsed = false;
-            this.scheduleScrollToLastMessage();
         }));
-        this.scheduleScrollToLastMessage();
     }
 
-    private scheduleScrollToLastMessage() {
-        setTimeout(() => this.scrollToLastMessage(), 0);
-    }
-
-    private scrollToLastMessage() {
-        this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
-    }
 
     ngOnDestroy() {
         this.subscriptions.forEach(subscription => subscription.unsubscribe());
@@ -54,30 +35,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
     public onClickHeader() {
         this.chatWindowState.isCollapsed = !this.chatWindowState.isCollapsed;
-        if (!this.chatWindowState.isCollapsed) {
-            this.scheduleScrollToLastMessage();
-        }
-    }
-
-    public onSendMessage() {
-        if (this.message.trim().length > 0) {
-            this.chatService.sendMessage(this.chatWindowState.contact.jidPlain, this.message);
-            this.message = '';
-        }
     }
 
     public onClickClose() {
         this.chatListService.closeChat(this.chatWindowState.contact);
     }
 
-    acceptSubscriptionRequest(event: Event) {
-        event.preventDefault();
-        this.chatService.addContact(this.chatWindowState.contact.jidBare.toString());
-    }
-
-    denySubscriptionRequest(event: Event) {
-        event.preventDefault();
-        this.chatService.removeContact((this.chatWindowState.contact.jidBare.toString()));
-        this.chatListService.closeChat(this.chatWindowState.contact);
-    }
 }

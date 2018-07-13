@@ -1,0 +1,5 @@
+<input matInput class="chat-input"
+       [(ngModel)]="message"
+       (keyup.enter)="onSendMessage()"
+       type="text"
+       placeholder="{{this.chatService.translations.placeholder}}"/>
