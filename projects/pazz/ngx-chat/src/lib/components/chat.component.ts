@@ -22,7 +22,7 @@ export class ChatComponent implements OnInit, OnChanges {
     };
 
     @Input()
-    public contacts: Observable<Contact[]>;
+    public contacts: undefined | Observable<Contact[]>;
 
     @Input()
     public userAvatar$: undefined | Observable<string>;

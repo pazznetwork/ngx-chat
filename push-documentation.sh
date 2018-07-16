@@ -5,6 +5,8 @@ MESSAGE="$(git show --no-patch --format=%s HEAD)"
 
 rm -rf dist
 npm run build -- --base-href /ngx-chat-ghpages/
+npm run documentation
+cp -r documentation dist/ngx-chat-xmpp-shell/
 cd dist/ngx-chat-xmpp-shell
 git init .
 git remote add origin git@github.com:pazz-dot-com/ngx-chat-ghpages.git

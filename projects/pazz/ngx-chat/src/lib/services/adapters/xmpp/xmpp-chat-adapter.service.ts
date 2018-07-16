@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza, Translations } from '../../../core';
 import { dummyAvatar } from '../../../core/contact-avatar';
@@ -36,8 +36,10 @@ export class XmppChatAdapter implements ChatService {
         this.initializePlugins();
         this.state$.subscribe((state) => this.logService.debug('state changed to:', state));
         chatConnectionService.state$
+            .pipe(filter(nextState => nextState !== this.state$.getValue()))
             .subscribe((nextState) => {
                 if (nextState === 'online') {
+                    this.state$.next('connecting');
                     Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
                         .then(
                             () => this.announceAvailability(),
