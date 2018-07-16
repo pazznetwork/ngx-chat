@@ -68,19 +68,22 @@ export class MessageArchivePlugin extends AbstractPlugin {
         const sender = this.chatService.getContactById(messageElement.attrs.from);
         const receiver = this.chatService.getContactById(messageElement.attrs.to);
         const contact = sender || receiver;
-        if (contact) {
-            contact.appendMessage({
-                direction: sender ? Direction.in : Direction.out,
-                datetime,
-                body: messageElement.getChildText('body'),
-                id: StanzaUuidPlugin.extractIdFromStanza(messageElement)
-            });
-            return true;
-        } else {
-            if (this.messagesWithPendingContact.indexOf(stanza) === -1) {
-                this.messagesWithPendingContact.push(stanza);
+        const messageBody = messageElement.getChildText('body');
+        if (messageBody && messageBody.trim()) {
+            if (contact) {
+                contact.appendMessage({
+                    direction: sender ? Direction.in : Direction.out,
+                    datetime,
+                    body: messageBody,
+                    id: StanzaUuidPlugin.extractIdFromStanza(messageElement)
+                });
+                return true;
+            } else {
+                if (this.messagesWithPendingContact.indexOf(stanza) === -1) {
+                    this.messagesWithPendingContact.push(stanza);
+                }
+                return false;
             }
-            return false;
         }
     }
 

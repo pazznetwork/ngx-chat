@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Contact, Translations } from '../core';
@@ -9,7 +9,7 @@ import { ChatService, ChatServiceToken } from '../services/chat-service';
     templateUrl: './chat.component.html',
     styleUrls: ['./chat.component.less']
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnChanges {
 
     @Input()
     public translations: Translations = {
@@ -24,6 +24,9 @@ export class ChatComponent implements OnInit {
     @Input()
     public contacts: Observable<Contact[]>;
 
+    @Input()
+    public userAvatar$: undefined | Observable<string>;
+
     showChatComponent = false;
     rosterState = 'hidden';
 
@@ -34,6 +37,18 @@ export class ChatComponent implements OnInit {
         this.chatService.state$.subscribe($e => this.onChatStateChange($e));
         const rosterState = localStorage.getItem('pazzNgxChatRosterState') || 'hidden';
         this.onRosterStateChanged(rosterState);
+
+        if (this.userAvatar$) {
+            this.userAvatar$.subscribe(avatar => this.chatService.userAvatar$.next(avatar));
+        }
+
+        this.chatService.translations = this.translations;
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.translations) {
+            this.chatService.translations = this.translations;
+        }
     }
 
     private onChatStateChange(state: string) {

@@ -1,10 +1,8 @@
 <ngx-chat-list *ngIf="showChatComponent"
-               [rosterState]="rosterState"
-               [translations]="translations">
+               [rosterState]="rosterState">
 </ngx-chat-list>
 <ngx-chat-roster-list [rosterState]="rosterState"
                       [contacts]="contacts"
                       *ngIf="showChatComponent"
-                      (rosterStateChanged)="onRosterStateChanged($event)"
-                      [translations]="translations">
+                      (rosterStateChanged)="onRosterStateChanged($event)">
 </ngx-chat-roster-list>

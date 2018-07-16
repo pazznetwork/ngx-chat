@@ -4,7 +4,8 @@ import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
+import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza, Translations } from '../../../core';
+import { dummyAvatar } from '../../../core/contact-avatar';
 import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
@@ -26,6 +27,8 @@ export class XmppChatAdapter implements ChatService {
     messageArchivePlugin: MessageArchivePlugin;
     stanzaUuidPlugin: StanzaUuidPlugin;
     enableDebugging = false;
+    userAvatar$ = new BehaviorSubject(dummyAvatar);
+    translations: Translations;
 
     constructor(public chatConnectionService: XmppChatConnectionService,
                 private logService: LogService,
