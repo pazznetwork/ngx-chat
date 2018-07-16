@@ -1,8 +1,9 @@
-import {animate, state, style, transition, trigger} from '@angular/animations';
-import {Component, Inject, Input, OnInit} from '@angular/core';
-import {Subscription} from 'rxjs';
-import {ChatListStateService} from '../../services/chat-list-state.service';
-import {ChatService, ChatServiceToken} from '../../services/chat-service';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+
+import { ChatListStateService } from '../../services/chat-list-state.service';
+import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-list',

@@ -1,7 +1,7 @@
-import {Component, Inject, Input, OnDestroy, OnInit} from '@angular/core';
-import {from, Subscription} from 'rxjs';
-import {ChatListStateService, ChatWindowState} from '../../services/chat-list-state.service';
-import {ChatService, ChatServiceToken} from '../../services/chat-service';
+import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
+import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-window',

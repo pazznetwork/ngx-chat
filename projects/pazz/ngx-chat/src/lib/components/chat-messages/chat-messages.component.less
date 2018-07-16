@@ -12,16 +12,6 @@
   padding: 0.5em;
   margin: 0.5em;
   word-break: break-word;
-  span{
-    div{
-      display: inline;
-    }
-  }
-  div{
-    small{
-      display: inline-block;
-    }
-  }
 
   &.chat-message--out {
     background-color: #e6ffd1;
@@ -51,6 +41,11 @@
   color: #999;
   font-size: 0.75em;
   text-align: right;
+
+  & small{
+    display: inline-block;
+  }
+
 }
 
 .chat-messages-empty {
@@ -61,10 +56,10 @@
   margin-bottom: 1em;
 }
 
-
 .chat-message-body {
   display: inline;
 }
+
 .chat-message-avatar {
   width: 2em;
   height: 2em;
@@ -74,4 +69,8 @@
     height: 2em;
     border-radius: 1em;
   }
+}
+
+.chat-presence-subscription-actions {
+  list-style: none;
 }

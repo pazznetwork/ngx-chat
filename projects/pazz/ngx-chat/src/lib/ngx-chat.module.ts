@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Client } from '@xmpp/client-core';
 import bind from '@xmpp/plugins/bind';
 import plain from '@xmpp/plugins/sasl-plain';
@@ -9,7 +8,9 @@ import sessionEstablishment from '@xmpp/plugins/session-establishment';
 import websocket from '@xmpp/plugins/websocket';
 
 import { ChatListComponent } from './components/chat-list/chat-list.component';
+import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
+import { ChatMessagesComponent } from './components/chat-messages/chat-messages.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
@@ -21,8 +22,6 @@ import { ChatListStateService } from './services/chat-list-state.service';
 import { ChatServiceToken } from './services/chat-service';
 import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
-import { ChatMessagesComponent } from './components/chat-messages/chat-messages.component';
-import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 
 
 @NgModule({

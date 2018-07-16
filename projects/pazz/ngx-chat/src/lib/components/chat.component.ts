@@ -1,4 +1,4 @@
-import {Component, Inject, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import { Component, Inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Contact, Translations } from '../core';
@@ -41,6 +41,7 @@ export class ChatComponent implements OnInit, OnChanges {
         if (this.userAvatar$) {
             this.userAvatar$.subscribe(avatar => this.chatService.userAvatar$.next(avatar));
         }
+
         this.chatService.translations = this.translations;
     }
 

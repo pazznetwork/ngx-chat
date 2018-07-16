@@ -2,7 +2,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Contact, Translations } from '../../core';
+import { Contact } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 

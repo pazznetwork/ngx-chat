@@ -1,7 +1,6 @@
-import {Component, ElementRef, Inject, Input, OnInit, ViewChild} from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, ElementRef, Inject, Input, OnInit, ViewChild } from '@angular/core';
 
-import {Contact, Translations} from '../../core';
+import { Contact } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 

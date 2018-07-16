@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import {Contact, LogInRequest, Translations} from '../core';
+import { Contact, LogInRequest, Translations } from '../core';
 
 export const ChatServiceToken = new InjectionToken('PazzNgxChatService');
 
