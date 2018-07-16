@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
+
 import { Contact } from '../core';
-import { ChatService } from './chat.service';
+import { ChatService, ChatServiceToken } from './chat-service';
 
 export class ChatWindowState {
     constructor(public contact: Contact,
@@ -15,18 +16,24 @@ export class ChatListStateService {
 
     public openChats$ = new BehaviorSubject<ChatWindowState[]>([]);
 
-    constructor(private chatService: ChatService) {
+    constructor(@Inject(ChatServiceToken) private chatService: ChatService) {
         this.chatService.state$
             .pipe(filter(newState => newState === 'disconnected'))
             .subscribe(() => {
                 this.openChats$.next([]);
             });
+
+        this.chatService.contactRequestsReceived$.subscribe(contacts => {
+            for (const contact of contacts) {
+                this.openChat(contact.jidPlain);
+            }
+        });
     }
 
     public openChatCollapsed(jidPlain: string) {
         if (!this.isChatWithJidOpen(jidPlain)) {
             const openChats = this.openChats$.getValue();
-            const chatWindow = new ChatWindowState(this.chatService.getContactByJid(jidPlain), true);
+            const chatWindow = new ChatWindowState(this.chatService.getOrCreateContactById(jidPlain), true);
             const copyWithNewContact = [chatWindow].concat(openChats);
             this.openChats$.next(copyWithNewContact);
         }

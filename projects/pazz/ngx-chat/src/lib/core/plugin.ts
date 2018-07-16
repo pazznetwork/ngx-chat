@@ -4,9 +4,18 @@ import { MessageWithBodyStanza, Stanza } from './stanza';
 
 export interface ChatPlugin {
 
-    canHandleStanza(stanza: Stanza): boolean;
+    /**
+     * All onBeforeOnline-Promises have to be resolved before the chat service will emit the 'connected' state.
+     * @returns
+     */
+    onBeforeOnline(): PromiseLike<any>;
 
-    handleStanza(stanza: Stanza): void;
+    /**
+     * True if the given stanza was handled by this plugin, false otherwise.
+     * @param stanza
+     * @returns
+     */
+    handleStanza(stanza: Stanza): boolean;
 
     beforeSendMessage(messageStanza: Element): void;
 

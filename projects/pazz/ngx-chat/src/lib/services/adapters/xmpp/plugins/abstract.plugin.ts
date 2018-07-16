@@ -4,6 +4,10 @@ import { ChatPlugin, Message, MessageWithBodyStanza, Stanza } from '../../../../
 
 export abstract class AbstractPlugin implements ChatPlugin {
 
+    onBeforeOnline(): PromiseLike<any> {
+        return Promise.resolve();
+    }
+
     afterSendMessage(message: Message, messageStanza: Element): void {
         return;
     }
@@ -12,12 +16,8 @@ export abstract class AbstractPlugin implements ChatPlugin {
         return;
     }
 
-    canHandleStanza(stanza: Stanza): any {
+    handleStanza(stanza: Stanza): boolean {
         return false;
-    }
-
-    handleStanza(stanza: Stanza): void {
-        return;
     }
 
     afterReceiveMessage(message: Message, messageStanza: MessageWithBodyStanza): void {

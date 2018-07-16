@@ -1,8 +1,7 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Translations } from '../../core';
 import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
-import { ChatService } from '../../services/chat.service';
+import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -12,41 +11,21 @@ import { ChatService } from '../../services/chat.service';
 export class ChatWindowComponent implements OnInit, OnDestroy {
 
     @Input()
-    public translations: Translations;
-
-    @Input()
     public chatWindowState: ChatWindowState;
 
     @Input()
     public isCollapsed: boolean;
 
-    @ViewChild('messageArea')
-    chatMessageAreaElement: ElementRef<HTMLElement>;
-
-    public message = '';
-
     private subscriptions: Subscription[] = [];
 
-    constructor(private chatService: ChatService,
+    constructor(@Inject(ChatServiceToken) private chatService: ChatService,
                 private chatListService: ChatListStateService) {
     }
 
     ngOnInit() {
         this.subscriptions.push(this.chatWindowState.contact.messages$.subscribe(() => {
             this.chatWindowState.isCollapsed = false;
-            this.scheduleScrollToLastMessage();
         }));
-        this.scheduleScrollToLastMessage();
-    }
-
-    private scheduleScrollToLastMessage() {
-        setTimeout(() => this.scrollToLastMessage(), 0);
-    }
-
-    private scrollToLastMessage() {
-        if (this.chatMessageAreaElement) {
-            this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
-        }
     }
 
     ngOnDestroy() {
@@ -55,16 +34,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
     public onClickHeader() {
         this.chatWindowState.isCollapsed = !this.chatWindowState.isCollapsed;
-        if (!this.chatWindowState.isCollapsed) {
-            this.scheduleScrollToLastMessage();
-        }
-    }
-
-    public onSendMessage() {
-        if (this.message.trim().length > 0) {
-            this.chatService.sendMessage(this.chatWindowState.contact.jidPlain, this.message);
-            this.message = '';
-        }
     }
 
     public onClickClose() {

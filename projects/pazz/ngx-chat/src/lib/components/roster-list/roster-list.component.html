@@ -2,13 +2,54 @@
     <div class="roster-drawer__button" *ngIf="rosterState === 'shown'">&raquo;</div>
     <div class="roster-drawer__button" *ngIf="rosterState === 'hidden'">&laquo;</div>
 </div>
+
 <div class="roster-list" [@rosterVisibility]="rosterState">
-    <div class="roster-header">{{translations?.contacts}}</div>
+
+    <div class="roster-header">{{this.chatService.translations.contacts}}</div>
+
     <div class="contact-list-wrapper">
-        <ngx-chat-roster-contact (click)="onClickContact(contact)"
-                           [contact]="contact"
-                           *ngFor="let contact of (this.chatService.contacts$ | async)">
+
+        <ngx-chat-roster-contact *ngFor="let contact of (this.contacts | async)"
+                                 [contact]="contact"
+                                 (click)="onClickContact(contact)">
         </ngx-chat-roster-contact>
+
+        <ng-container *ngIf="this.chatService.enableDebugging">
+            <hr/>
+
+            <div class="contact-pending-request-received-wrapper">
+                debug contact requests in:
+                <div class="contact-pending-request-received" *ngFor="let request of (this.chatService.contactRequestsReceived$ | async)">
+                    {{request.name}}
+                </div>
+            </div>
+
+            <hr/>
+
+            <div class="contact-pending-request-sent-wrapper">
+                debug contact requests out:
+                <div class="contact-pending-request-sent" *ngFor="let request of (this.chatService.contactRequestsSent$ | async)">
+                    {{request.name}}
+                </div>
+            </div>
+
+            <hr/>
+
+            <p>
+                debug contacts (count: {{ (this.chatService.contacts$ | async).length }})<br/>
+            </p>
+            <p *ngFor="let contact of (chatService.contacts$|async)" style="margin-bottom: 1em">
+                <em>{{contact.name}}:</em><br/>
+                subscription={{contact.subscription$ | async}}<br/>
+                presence={{contact.presence$ | async}}<br/>
+                pendingIn={{contact.pendingIn}}<br/>
+                pendingOut={{contact.pendingOut}}
+            </p>
+        </ng-container>
     </div>
-    <div class="roster-footer"></div>
+
+    <!--
+    <div class="roster-footer">
+    </div>
+    -->
 </div>

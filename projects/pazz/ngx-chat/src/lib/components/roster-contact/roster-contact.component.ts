@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Contact } from '../../core';
+import { Contact, Presence } from '../../core';
 
 @Component({
     selector: 'ngx-chat-roster-contact',
@@ -10,6 +10,8 @@ export class RosterContactComponent implements OnInit {
 
     @Input()
     contact: Contact;
+
+    presence = Presence;
 
     constructor() { }
 

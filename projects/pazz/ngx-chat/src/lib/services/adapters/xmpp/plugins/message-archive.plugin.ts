@@ -2,8 +2,7 @@ import { x as xml } from '@xmpp/xml';
 import { filter } from 'rxjs/operators';
 
 import { Direction, Stanza } from '../../../../core';
-import { ChatService } from '../../../chat.service';
-import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractPlugin } from './abstract.plugin';
 import { StanzaUuidPlugin } from './stanza-uuid.plugin';
 
@@ -15,13 +14,8 @@ export class MessageArchivePlugin extends AbstractPlugin {
 
     private messagesWithPendingContact: Stanza[] = [];
 
-    constructor(private chatService: ChatService) {
+    constructor(private chatService: XmppChatAdapter) {
         super();
-
-        this.chatService.state$.pipe(filter(newState => newState === 'online'))
-            .subscribe(() => {
-                this.requestAllArchivedMessages(chatService.chatConnectionService);
-            });
 
         this.chatService.state$.pipe(filter(newState => newState === 'disconnected'))
             .subscribe(() => {
@@ -29,14 +23,19 @@ export class MessageArchivePlugin extends AbstractPlugin {
             });
 
         this.chatService.contacts$.subscribe(() => {
-            this.messagesWithPendingContact.forEach((messageStanza) => this.handleArchivedMessageStanza(messageStanza));
+            this.messagesWithPendingContact = this.messagesWithPendingContact
+                .filter((messageStanza) => !this.consumePendingMessage(messageStanza));
         });
 
     }
 
-    private requestAllArchivedMessages(chatService: XmppChatConnectionService) {
-        this.chatService.chatConnectionService.send(
-            xml('iq', {type: 'set', id: chatService.getNextIqId()},
+    onBeforeOnline(): PromiseLike<any> {
+        return this.requestAllArchivedMessages();
+    }
+
+    private requestAllArchivedMessages() {
+        return this.chatService.chatConnectionService.sendIq(
+            xml('iq', {type: 'set'},
                 xml('query', {xmlns: 'urn:xmpp:mam:2'},
                     xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
                         xml('max', {}, 20),
@@ -47,40 +46,43 @@ export class MessageArchivePlugin extends AbstractPlugin {
         );
     }
 
-    canHandleStanza(stanza: Stanza): any {
+    handleStanza(stanza: Stanza) {
+        if (this.isMamMessageStanza(stanza)) {
+            this.consumePendingMessage(stanza);
+            return true;
+        }
+        return false;
+    }
+
+    private isMamMessageStanza(stanza: Stanza) {
         const result = stanza.getChild('result');
         return stanza.name === 'message' && result && result.attrs.xmlns === 'urn:xmpp:mam:2';
     }
 
-    handleStanza(stanza: Stanza): void {
-        this.handleArchivedMessageStanza(stanza);
-    }
-
-    private handleArchivedMessageStanza(stanza: Stanza) {
+    private consumePendingMessage(stanza: Stanza) {
         const messageElement = stanza.getChild('result').getChild('forwarded').getChild('message');
         const datetime = new Date(
             stanza.getChild('result').getChild('forwarded').getChild('delay').attrs.stamp
         );
 
-        const sender = this.chatService.getContactByJid(messageElement.attrs.from);
-        const receiver = this.chatService.getContactByJid(messageElement.attrs.to);
-        if (sender) {
-            sender.appendMessage({
-                direction: Direction.in,
-                datetime,
-                body: messageElement.getChildText('body'),
-                id: StanzaUuidPlugin.extractIdFromStanza(messageElement)
-            });
-        } else if (receiver) {
-            receiver.appendMessage({
-                direction: Direction.out,
-                datetime,
-                body: messageElement.getChildText('body'),
-                id: StanzaUuidPlugin.extractIdFromStanza(messageElement)
-            });
-        } else {
-            if (this.messagesWithPendingContact.indexOf(stanza) === -1) {
-                this.messagesWithPendingContact.push(stanza);
+        const sender = this.chatService.getContactById(messageElement.attrs.from);
+        const receiver = this.chatService.getContactById(messageElement.attrs.to);
+        const contact = sender || receiver;
+        const messageBody = messageElement.getChildText('body');
+        if (messageBody && messageBody.trim()) {
+            if (contact) {
+                contact.appendMessage({
+                    direction: sender ? Direction.in : Direction.out,
+                    datetime,
+                    body: messageBody,
+                    id: StanzaUuidPlugin.extractIdFromStanza(messageElement)
+                });
+                return true;
+            } else {
+                if (this.messagesWithPendingContact.indexOf(stanza) === -1) {
+                    this.messagesWithPendingContact.push(stanza);
+                }
+                return false;
             }
         }
     }

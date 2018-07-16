@@ -1,8 +1,10 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Contact, Translations } from '../../core';
+import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
+import { Observable } from 'rxjs';
+
+import { Contact } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
-import { ChatService } from '../../services/chat.service';
+import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-roster-list',
@@ -34,21 +36,22 @@ import { ChatService } from '../../services/chat.service';
 export class RosterListComponent implements OnInit {
 
     @Input()
-    public translations: Translations;
+    rosterState: string;
 
     @Input()
-    rosterState: string;
+    contacts: Observable<Contact[]>;
 
     @Output()
     rosterStateChanged: EventEmitter<string> = new EventEmitter<string>();
 
-    protected contacts: Contact[] = [];
-
-    constructor(public chatService: ChatService,
+    constructor(@Inject(ChatServiceToken) public chatService: ChatService,
                 private chatListService: ChatListStateService) {
     }
 
     ngOnInit() {
+        if (!this.contacts) {
+            this.contacts = this.chatService.contactsSubscribed$;
+        }
     }
 
     onClickContact(contact: Contact) {

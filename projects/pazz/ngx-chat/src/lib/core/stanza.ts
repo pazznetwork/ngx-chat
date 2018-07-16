@@ -7,8 +7,6 @@ export interface Stanza extends Element {
     children: Stanza[];
     name: string;
 
-    getChildText(child: string): string;
-
     getChild(child: string): Stanza;
 
 }

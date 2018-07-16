@@ -1,0 +1,27 @@
+<div class="chat-messages" #messageArea>
+    <div *ngFor="let message of contact.messages"
+         class="chat-message"
+         [ngClass]="{'chat-message--in': message.direction === 'in', 'chat-message--out': message.direction === 'out'}">
+        <div *ngIf="showAvatars" class="chat-message-avatar">
+            <img *ngIf="message.direction === 'in'" [src]="contact.avatar"/>
+            <img *ngIf="message.direction === 'out'" [src]="chatService.userAvatar$ | async"/>
+        </div>
+        <span [ngxChatLinks]="message.body" class="chat-message-body"></span>
+        <div class="chat-message-datetime">
+            <small>{{message.datetime | date:'short'}}</small>
+        </div>
+    </div>
+    <div class="chat-messages-empty" *ngIf="contact.messages.length === 0">
+        {{this.chatService.translations.noMessages}}
+    </div>
+    <div class="chat-message chat-message--in" *ngIf="contact.pendingIn">
+        <p>
+            {{this.chatService.translations.subscriptionRequestMessage}}
+        </p>
+        <ul class="chat-presence-subscription-actions">
+            <li><a (click)="acceptSubscriptionRequest($event)" href="#">{{this.chatService.translations.acceptSubscriptionRequest}}</a>
+            </li>
+            <li><a (click)="denySubscriptionRequest($event)" href="#">{{this.chatService.translations.denySubscriptionRequest}}</a></li>
+        </ul>
+    </div>
+</div>

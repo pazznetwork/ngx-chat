@@ -1,5 +1,5 @@
 <div class="chat-list" [@rosterVisibility]="rosterState">
     <div *ngFor="let chatWindowState of (this.chatListService.openChats$ | async)">
-        <ngx-chat-window [chatWindowState]="chatWindowState" [translations]="translations"></ngx-chat-window>
+        <ngx-chat-window [chatWindowState]="chatWindowState"></ngx-chat-window>
     </div>
 </div>

@@ -40,6 +40,37 @@
 
     <button (click)="onLogin()">Log in</button>
     <button (click)="onLogout()">Log out</button>
+
+    <hr />
+
+    <div class="form-group">
+        <div>
+            Contact Management
+        </div>
+        <div>
+            <input [(ngModel)]="otherJid" class="form-control" type="text" placeholder="JID"/>
+        </div>
+    </div>
+
+    <button (click)="onAddContact()">Add contact</button>
+    <button (click)="onRemoveContact()">Remove contact</button>
+
+    <hr/>
+
+    <button (click)="chatService.enableDebugging = !chatService.enableDebugging">Enable debugging</button>
+    <button (click)="onToggleContactList()">Toggle contact list</button>
+
+
+    <div>
+        <h2>Custom component for a chat session</h2>
+        <ng-container *ngIf="(chatService.contactsSubscribed$ | async).length > 0; else messagesComponentInformation">
+            <ngx-chat-messages [contact]="(chatService.contactsSubscribed$ | async)[0]"
+                               [showAvatars]="true"></ngx-chat-messages>
+            <ngx-chat-message-input [contact]="(chatService.contactsSubscribed$ | async)[0]"></ngx-chat-message-input>
+        </ng-container>
+        <ng-template #messagesComponentInformation>You need to be logged in and have contacts to see this component</ng-template>
+    </div>
+
 </div>
 
-<ngx-chat></ngx-chat>
+<ngx-chat [contacts]="contacts"></ngx-chat>

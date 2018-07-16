@@ -11,25 +11,11 @@
         </div>
     </div>
     <div *ngIf="!chatWindowState.isCollapsed" class="chat-content">
-        <div class="chat-messages" #messageArea>
-            <div *ngFor="let message of chatWindowState.contact.messages"
-                 class="chat-message"
-                 [ngClass]="{'chat-message--in': message.direction === 'in', 'chat-message--out': message.direction === 'out'}">
-                <span [ngxChatLinks]="message.body"></span>
-                <div class="chat-message-datetime">
-                    <small>{{message.datetime | date:'short'}}</small>
-                </div>
-            </div>
-            <div class="chat-messages-empty" *ngIf="chatWindowState.contact.messages.length === 0">
-                {{translations?.noMessages}}
-            </div>
-        </div>
+
+        <ngx-chat-messages [contact]="chatWindowState.contact" [showAvatars]="false"></ngx-chat-messages>
+
         <div class="chat-input-container">
-            <input class="chat-input"
-                   [(ngModel)]="message"
-                   (keyup.enter)="onSendMessage()"
-                   type="text"
-                   placeholder="{{translations?.placeholder}}"/>
+            <ngx-chat-message-input [contact]="chatWindowState.contact"></ngx-chat-message-input>
         </div>
     </div>
 </div>
