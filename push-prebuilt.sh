@@ -13,3 +13,5 @@ git reset --soft origin/master
 git add .
 git commit -m "$MESSAGE ($VERSION)"
 git push origin master
+
+npm publish
