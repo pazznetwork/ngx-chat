@@ -9,7 +9,7 @@ npm run documentation
 cp -r documentation dist/ngx-chat-xmpp-shell/
 cd dist/ngx-chat-xmpp-shell
 git init .
-git remote add origin git@github.com:pazz-dot-com/ngx-chat-ghpages.git
+git remote add origin git@github.com:pazznetwork/ngx-chat-ghpages.git
 git fetch
 git reset --soft origin/master
 git add .

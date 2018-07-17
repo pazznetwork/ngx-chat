@@ -6,7 +6,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { IqResponseStanza, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
 import { LogService } from '../../log.service';
 
-export const XmppClientToken = new InjectionToken('PazzNgxChatXmppClient');
+export const XmppClientToken = new InjectionToken('pazznetworkNgxChatXmppClient');
 
 /**
  * Implementation of the XMPP specification according to RFC 6121.

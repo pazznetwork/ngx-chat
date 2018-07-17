@@ -1,4 +1,4 @@
-# @pazz/ngx-chat [![Build status](https://api.travis-ci.com/pazz-dot-com/ngx-chat.svg?branch=master)](https://travis-ci.com/pazz-dot-com/ngx-chat) [![Coverage](https://coveralls.io/repos/github/pazz-dot-com/ngx-chat/badge.svg?branch=master)](https://coveralls.io/github/pazz-dot-com/ngx-chat)
+# @pazznetwork/ngx-chat [![Build status](https://api.travis-ci.com/pazznetwork/ngx-chat.svg?branch=master)](https://travis-ci.com/pazznetwork/ngx-chat) [![Coverage](https://coveralls.io/repos/github/pazznetwork/ngx-chat/badge.svg?branch=master)](https://coveralls.io/github/pazznetwork/ngx-chat)
 
 This library provides an out-of-the-box usable XMPP chat component. It is customizable and offers an API to integrate it with your application.
 
@@ -9,15 +9,15 @@ This library provides an out-of-the-box usable XMPP chat component. It is custom
 * manage and use the server side buddy list or use your own data source for that 
 
 ## Demo
-[Have a look at our demo (valid XMPP credentials required)](https://pazz-dot-com.github.io/ngx-chat-ghpages/) 
+[Have a look at our demo (valid XMPP credentials required)](https://pazznetwork.github.io/ngx-chat-ghpages/) 
 
 ## Documentation
-Below you will find some instructions to getting started. [Have a look at the wiki for FAQ's and the API documentation.](https://github.com/pazz-dot-com/ngx-chat/wiki)
+Below you will find some instructions to getting started. [Have a look at the wiki for FAQ's and the API documentation.](https://github.com/pazznetwork/ngx-chat/wiki)
 
 ## Installation and usage
 First of all, install ngx-chat via npm:
 ```bash
-npm install --save @pazz/ngx-chat @xmpp/client
+npm install --save @pazznetwork/ngx-chat @xmpp/client
 ```
 
 After that, import it in your root module:
@@ -70,7 +70,7 @@ body.has-roster {
 ## Development
 
 If you want to develop on ngx-chat, clone this repository.
-The Library can be found in the `projects/pazz/ngx-chat` folder.
+The Library can be found in the `projects/pazznetwork/ngx-chat` folder.
 In the `src` folder you find the demo application.
 
 ### Build the plugin

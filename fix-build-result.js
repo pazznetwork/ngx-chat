@@ -11,7 +11,7 @@ glob("projects/**/*.d.ts", (err, files) => {
 
 function rebuildDefinitions(files) {
     // somehow running ng build results in a broken index.d.ts file, concat it manually
-    concat(files, 'dist/pazz/ngx-chat/index.d.ts', function(err) {
+    concat(files, 'dist/pazznetwork/ngx-chat/index.d.ts', function(err) {
         if (err) throw err;
 
         console.log("rebuilt index.d.ts ...");
@@ -22,7 +22,7 @@ function rebuildDefinitions(files) {
 
 function appendReferenceToIndexDefinition() {
     // add a reference to the newly built index.d.ts
-    const path = './dist/pazz/ngx-chat/public_api.d.ts';
+    const path = './dist/pazznetwork/ngx-chat/public_api.d.ts';
     const content = fs.readFileSync(path);
     fs.writeFileSync(path, '/// <reference path="index.d.ts" />\n' + content);
     console.log("appended reference, done with build post processing");

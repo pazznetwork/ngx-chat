@@ -4,18 +4,18 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng build @pazz/ngx-chat && ng serve",
+    "start": "ng build @pazznetwork/ngx-chat && ng serve",
     "clean": "rimraf dist && rimraf coverage && rimraf documentation",
-    "build-lib": "npm run clean && ng build @pazz/ngx-chat --prod && node fix-build-result.js",
+    "build-lib": "npm run clean && ng build @pazznetwork/ngx-chat --prod && node fix-build-result.js",
     "build": "npm run build-lib && ng build --prod --stats-json",
-    "test": "ng test @pazz/ngx-chat --watch",
-    "test:once": "ng test @pazz/ngx-chat --code-coverage --watch=false",
-    "ci": "npm run build && ng test @pazz/ngx-chat --code-coverage --watch=false --browsers Chrome_ci && ng lint @pazz/ngx-chat",
-    "lint": "ng lint @pazz/ngx-chat",
+    "test": "ng test @pazznetwork/ngx-chat --watch",
+    "test:once": "ng test @pazznetwork/ngx-chat --code-coverage --watch=false",
+    "ci": "npm run build && ng test @pazznetwork/ngx-chat --code-coverage --watch=false --browsers Chrome_ci && ng lint @pazznetwork/ngx-chat",
+    "lint": "ng lint @pazznetwork/ngx-chat",
     "e2e": "ng e2e",
     "bundle-report": "webpack-bundle-analyzer dist/ngx-chat-xmpp-shell/stats.json",
-    "documentation": "compodoc --tsconfig projects/pazz/ngx-chat/tsconfig.lib.json",
-    "documentation:serve": "compodoc --tsconfig projects/pazz/ngx-chat/tsconfig.lib.json --serve --watch"
+    "documentation": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json",
+    "documentation:serve": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json --serve --watch"
   },
   "dependencies": {
     "@angular/animations": "^6.0.9",

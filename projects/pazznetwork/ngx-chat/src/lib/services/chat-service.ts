@@ -2,7 +2,7 @@ import { InjectionToken } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Contact, LogInRequest, Translations } from '../core';
 
-export const ChatServiceToken = new InjectionToken('PazzNgxChatService');
+export const ChatServiceToken = new InjectionToken('pazznetworkNgxChatService');
 
 /**
  * ChatService is your main API for using ngx-chat. Can be injected in your services like in the following example:

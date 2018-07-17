@@ -61,7 +61,7 @@ export class ChatComponent implements OnInit, OnChanges {
 
     ngOnInit() {
         this.chatService.state$.subscribe($e => this.onChatStateChange($e));
-        const rosterState = localStorage.getItem('pazzNgxChatRosterState') || 'hidden';
+        const rosterState = localStorage.getItem('pazznetworkNgxChatRosterState') || 'hidden';
         this.onRosterStateChanged(rosterState);
 
         if (this.userAvatar$) {
@@ -83,7 +83,7 @@ export class ChatComponent implements OnInit, OnChanges {
     }
 
     onRosterStateChanged(state: string) {
-        localStorage.setItem('pazzNgxChatRosterState', state);
+        localStorage.setItem('pazznetworkNgxChatRosterState', state);
         this.rosterState = state;
         this.updateBodyClass();
     }
