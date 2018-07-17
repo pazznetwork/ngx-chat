@@ -4,6 +4,23 @@ import { Observable } from 'rxjs';
 import { Contact, Translations } from '../core';
 import { ChatService, ChatServiceToken } from '../services/chat-service';
 
+/**
+ * The main UI component. Should be instantiated near the root of your application.
+ *
+ * ```html
+ * <!-- plain usage, no configuration -->
+ * <ngx-chat></ngx-chat>
+ *
+ * <!-- if supplied, translations contain an object with the structure of the Translations interface. -->
+ * <ngx-chat translations="{'contacts': 'Kontakte', ...}"></ngx-chat>
+ *
+ * <!-- if supplied, the contacts input attribute takes an Observable<Contact[]> as source for your roster list -->
+ * <ngx-chat contacts="..."></ngx-chat>
+ *
+ * <!-- if supplied, userAvatar$ contains an Obervable<string>, which is used as the src attribute of the img for the current user. -->
+ * <ngx-chat userAvatar$="Observable.of('http://...')"></ngx-chat>
+ * ```
+ */
 @Component({
     selector: 'ngx-chat',
     templateUrl: './chat.component.html',
@@ -11,6 +28,9 @@ import { ChatService, ChatServiceToken } from '../services/chat-service';
 })
 export class ChatComponent implements OnInit, OnChanges {
 
+    /**
+     * If supplied, translations contain an object with the structure of the Translations interface.
+     */
     @Input()
     public translations: Translations = {
         'contacts': 'Contacts',
@@ -21,9 +41,15 @@ export class ChatComponent implements OnInit, OnChanges {
         'denySubscriptionRequest': 'Deny'
     };
 
+    /**
+     * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your roster list.
+     */
     @Input()
-    public contacts: undefined | Observable<Contact[]>;
+    public contacts: undefined | Observable<Contact[]>;
 
+    /**
+     * If supplied, userAvatar$ contains an Obervable<string>, which is used as the src attribute of the img for the current user.
+     */
     @Input()
     public userAvatar$: undefined | Observable<string>;
 
