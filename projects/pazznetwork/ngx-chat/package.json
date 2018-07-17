@@ -9,5 +9,14 @@
     "@xmpp/client": "^0.3.0"
   },
   "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {},
+  "keywords": ["ngx-chat", "xmpp", "angular", "chat"],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pazznetwork/ngx-chat.git"
+  },
+  "homepage": "https://github.com/pazznetwork/ngx-chat",
+  "bugs": {
+    "url": "https://github.com/pazznetwork/ngx-chat/issues"
+  }
 }

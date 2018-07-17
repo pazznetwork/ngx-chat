@@ -5,6 +5,7 @@ MESSAGE="$(git show --no-patch --format=%s HEAD)"
 
 rm -rf dist
 npm run build-lib
+cp README.md dist/pazznetwork/ngx-chat
 cd dist/pazznetwork/ngx-chat
 git init .
 git remote add origin git@github.com:pazznetwork/ngx-chat-xmpp-alpha-prebuilt.git
