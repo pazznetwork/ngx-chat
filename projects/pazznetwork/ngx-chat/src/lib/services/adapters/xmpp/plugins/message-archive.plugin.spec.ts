@@ -18,14 +18,14 @@ describe('message archive plugin', () => {
     let client;
     let logService: LogService;
     let contact1: Contact;
-    const jid = 'somejid@example.com/test';
+    const userJid = parseJid('somejid@example.com/test');
 
     const validArchiveStanza =
         xml('message', {},
             xml('result', {xmlns: 'urn:xmpp:mam:2'},
                 xml('forwarded', {},
                     xml('delay', {stamp: '2018-07-18T08:47:44.233057Z'}),
-                    xml('message', {to: jid, from: 'test@example.com/resource'},
+                    xml('message', {to: userJid.toString(), from: 'test@example.com/resource'},
                         xml('origin-id', {id: 'id'}),
                         xml('body', {}, 'message text')))));
 
@@ -52,7 +52,7 @@ describe('message archive plugin', () => {
     it('should send a request, create contacts and add messages ', () => {
         const messageArchivePlugin = new MessageArchivePlugin(chatAdapter);
         chatAdapter.addPlugins([messageArchivePlugin]);
-        chatConnectionService.onOnline(parseJid(jid));
+        chatConnectionService.onOnline(userJid);
 
         chatConnectionService.onStanzaReceived(validArchiveStanza);
 
@@ -68,7 +68,7 @@ describe('message archive plugin', () => {
     });
 
     it('should not request messages if message archive plugin is not set ', () => {
-        chatConnectionService.onOnline(jid);
+        chatConnectionService.onOnline(userJid);
 
         chatConnectionService.onStanzaReceived(validArchiveStanza);
 
