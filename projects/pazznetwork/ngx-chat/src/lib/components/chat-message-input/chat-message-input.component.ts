@@ -23,7 +23,7 @@ export class ChatMessageInputComponent implements OnInit {
 
     public onSendMessage() {
         if (this.message.trim().length > 0) {
-            this.chatService.sendMessage(this.contact.jidPlain, this.message);
+            this.chatService.sendMessage(this.contact.jidBare.toString(), this.message);
             this.message = '';
         }
     }

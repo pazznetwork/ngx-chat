@@ -8,7 +8,7 @@ import { AbstractPlugin } from './abstract.plugin';
 /**
  * https://xmpp.org/extensions/xep-0359.html
  */
-export class StanzaUuidPlugin extends AbstractPlugin {
+export class MessageUuidPlugin extends AbstractPlugin {
 
     public static extractIdFromStanza(messageStanza: Element) {
         const originIdElement = messageStanza.getChild('origin-id');
@@ -21,11 +21,11 @@ export class StanzaUuidPlugin extends AbstractPlugin {
     }
 
     afterSendMessage(message: Message, messageStanza: Element): void {
-        message.id = StanzaUuidPlugin.extractIdFromStanza(messageStanza);
+        message.id = MessageUuidPlugin.extractIdFromStanza(messageStanza);
     }
 
     afterReceiveMessage(message: Message, messageStanza: MessageWithBodyStanza) {
-        message.id = StanzaUuidPlugin.extractIdFromStanza(messageStanza);
+        message.id = MessageUuidPlugin.extractIdFromStanza(messageStanza);
     }
 
 }

@@ -12,23 +12,24 @@ export interface ContactMetadata {
 
 export class Contact {
 
+    public avatar = dummyAvatar;
+    public metadata: ContactMetadata = {};
+
     public messages$: Subject<Message>;
     public messages: Message[] = [];
-    public avatar = dummyAvatar;
+    private messageIdToMessage: { [key: string]: Message } = {};
+
     public jidBare: JID;
-    public jid: JID;
-    public metadata: ContactMetadata = {};
     public presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
     public subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
     public pendingOut = false;
     public pendingIn = false;
-    private messageIdToMessage: { [key: string]: Message } = {};
 
     /**
      * Do not call directly, use {@link ContactFactoryService#createContact} instead.
      * @deprecated
      */
-    constructor(public readonly jidPlain: string,
+    constructor(jidPlain: string,
                 public name: string,
                 private logService: LogService,
                 avatar?: string) {
@@ -36,8 +37,7 @@ export class Contact {
         if (avatar) {
             this.avatar = avatar;
         }
-        this.jid = parseJid(jidPlain);
-        this.jidBare = this.jid.bare();
+        this.jidBare = parseJid(jidPlain).bare();
     }
 
     appendMessage(message: Message) {
@@ -51,8 +51,9 @@ export class Contact {
         return true;
     }
 
-    public equalsBareJid(other: Contact) {
-        return this.jidBare.equals(other.jidBare);
+    public equalsBareJid(other: Contact | JID) {
+        const otherJid = other instanceof Contact ? other.jidBare : other.bare();
+        return this.jidBare.equals(otherJid);
     }
 
     isSubscribed() {

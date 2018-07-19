@@ -17,6 +17,8 @@ import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
 import { LinksDirective } from './directives/links.directive';
+import { MessageArchivePlugin, MessageUuidPlugin } from './services/adapters/xmpp/plugins';
+import { RosterPlugin } from './services/adapters/xmpp/plugins/roster.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
@@ -65,7 +67,7 @@ export class NgxChatModule {
                 {
                     provide: ChatServiceToken,
                     deps: [XmppChatConnectionService, LogService, ContactFactoryService],
-                    useClass: XmppChatAdapter
+                    useFactory: NgxChatModule.chatAdapter
                 },
                 {
                     provide: XmppChatConnectionService,
@@ -79,6 +81,17 @@ export class NgxChatModule {
             ],
         };
 
+    }
+
+    private static chatAdapter(chatConnectionService, logService, contactFactory) {
+        const xmppChatAdapter = new XmppChatAdapter(chatConnectionService, logService, contactFactory);
+
+        const rosterPlugin = new RosterPlugin(xmppChatAdapter, contactFactory, logService);
+        const messageArchivePlugin = new MessageArchivePlugin(xmppChatAdapter);
+        const stanzaUuidPlugin = new MessageUuidPlugin();
+
+        xmppChatAdapter.addPlugins([rosterPlugin, messageArchivePlugin, stanzaUuidPlugin]);
+        return xmppChatAdapter;
     }
 
     private static chatConnectionService(client: Client, logService: LogService) {

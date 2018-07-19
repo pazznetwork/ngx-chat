@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 
 import { Contact, ContactSubscription, Presence, Stanza } from '../../../../core';
@@ -34,8 +35,9 @@ describe('roster plugin', () => {
         contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
         logService = TestBed.get(LogService);
+        chatAdapter.addPlugins([new RosterPlugin(chatAdapter, contactFactory, logService)]);
 
-        chatConnectionService.myJidWithResource = 'me@example.com';
+        chatConnectionService.userJid = new JID('me', 'example.com', 'something');
     });
 
     describe('loading roster', () => {
@@ -93,7 +95,7 @@ describe('roster plugin', () => {
                 .toEqual(Presence.unavailable);
 
             const handled = chatAdapter.rosterPlugin.handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'})
             );
             expect(handled).toBeTruthy();
 
@@ -109,7 +111,7 @@ describe('roster plugin', () => {
                 .toEqual(Presence.unavailable);
 
             const handled = chatAdapter.rosterPlugin.handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com'},
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'},
                     xml('show', {}, show))
             );
             expect(handled).toBeTruthy();
@@ -141,7 +143,7 @@ describe('roster plugin', () => {
             expect(contact.presence$.getValue()).toEqual(Presence.present);
 
             const handled = chatAdapter.rosterPlugin.handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com', type: 'unavailable'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'unavailable'})
             );
             expect(handled).toBeTruthy();
 
@@ -163,7 +165,7 @@ describe('roster plugin', () => {
             contact.subscription$.next(ContactSubscription.to);
 
             const handled = chatAdapter.rosterPlugin.handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com', type: 'subscribe'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
             );
             expect(handled).toBeTruthy();
 
@@ -179,7 +181,7 @@ describe('roster plugin', () => {
             contact.subscription$.next(ContactSubscription.none);
 
             const handled = chatAdapter.rosterPlugin.handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com', type: 'subscribe'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
             );
             expect(handled).toBeTruthy();
 
@@ -194,7 +196,7 @@ describe('roster plugin', () => {
             chatAdapter.contacts$.next([contact]);
 
             const handled = chatAdapter.rosterPlugin.handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com', type: 'subscribe'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
             );
             expect(handled).toBeTruthy();
 
@@ -203,7 +205,7 @@ describe('roster plugin', () => {
 
         it('should add a pending in flag and create a contact when we never seen him before', async () => {
             const handled = chatAdapter.rosterPlugin.handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com', type: 'subscribe'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
             );
             expect(handled).toBeTruthy();
 
@@ -221,7 +223,7 @@ describe('roster plugin', () => {
             contact.pendingOut = true;
 
             const handled = chatAdapter.rosterPlugin.handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com', type: 'subscribed'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribed'})
             );
             expect(handled).toBeTruthy();
 

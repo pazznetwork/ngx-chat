@@ -55,7 +55,7 @@ export class RosterListComponent implements OnInit {
     }
 
     onClickContact(contact: Contact) {
-        this.chatListService.openChat(contact.jidPlain);
+        this.chatListService.openChat(contact.jidBare);
     }
 
     toggleVisibility() {

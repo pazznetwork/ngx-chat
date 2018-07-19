@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
+import { JID } from '@xmpp/jid';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -25,28 +26,29 @@ export class ChatListStateService {
 
         this.chatService.contactRequestsReceived$.subscribe(contacts => {
             for (const contact of contacts) {
-                this.openChat(contact.jidPlain);
+                this.openChat(contact.jidBare);
             }
         });
     }
 
-    public openChatCollapsed(jidPlain: string) {
-        if (!this.isChatWithJidOpen(jidPlain)) {
+    public openChatCollapsed(jid: JID) {
+        if (!this.isChatWithJidOpen(jid)) {
             const openChats = this.openChats$.getValue();
-            const chatWindow = new ChatWindowState(this.chatService.getOrCreateContactById(jidPlain), true);
+            const contact = this.chatService.getOrCreateContactById(jid.bare().toString());
+            const chatWindow = new ChatWindowState(contact, true);
             const copyWithNewContact = [chatWindow].concat(openChats);
             this.openChats$.next(copyWithNewContact);
         }
     }
 
-    public openChat(jidPlain: string) {
-        this.openChatCollapsed(jidPlain);
-        this.findChatWindowStateByJid(jidPlain).isCollapsed = false;
+    public openChat(jid: JID) {
+        this.openChatCollapsed(jid);
+        this.findChatWindowStateByJid(jid).isCollapsed = false;
     }
 
     public closeChat(contactToClose: Contact) {
         const openChats = this.openChats$.getValue();
-        const index = this.findChatWindowStateIndexByJid(contactToClose.jidPlain);
+        const index = this.findChatWindowStateIndexByJid(contactToClose.jidBare);
         if (index >= 0) {
             const copyWithoutContact = openChats.slice();
             copyWithoutContact.splice(index, 1);
@@ -54,17 +56,17 @@ export class ChatListStateService {
         }
     }
 
-    private isChatWithJidOpen(jidPlain: string) {
-        return this.findChatWindowStateIndexByJid(jidPlain) >= 0;
+    private isChatWithJidOpen(jid: JID) {
+        return this.findChatWindowStateIndexByJid(jid) >= 0;
     }
 
-    private findChatWindowStateIndexByJid(jidPlain: string) {
+    private findChatWindowStateIndexByJid(jid: JID) {
         return this.openChats$.getValue()
-            .findIndex((chatWindowState) => chatWindowState.contact.jidPlain === jidPlain);
+            .findIndex((chatWindowState) => chatWindowState.contact.equalsBareJid(jid));
     }
 
-    private findChatWindowStateByJid(jidPlain: string) {
+    private findChatWindowStateByJid(jid: JID) {
         return this.openChats$.getValue()
-            .find((chatWindowState) => chatWindowState.contact.jidPlain === jidPlain);
+            .find((chatWindowState) => chatWindowState.contact.equalsBareJid(jid));
     }
 }

@@ -35,7 +35,7 @@ export class ChatListComponent implements OnInit {
 
     public ngOnInit() {
         this.messageSubscription = this.chatService.message$.subscribe(contact => {
-            this.chatListService.openChat(contact.jidPlain);
+            this.chatListService.openChat(contact.jidBare);
         });
     }
 

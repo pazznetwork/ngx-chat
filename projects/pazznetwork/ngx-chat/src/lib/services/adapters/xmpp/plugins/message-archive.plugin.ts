@@ -1,10 +1,10 @@
+import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
-import { filter } from 'rxjs/operators';
 
 import { Direction, Stanza } from '../../../../core';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractPlugin } from './abstract.plugin';
-import { StanzaUuidPlugin } from './stanza-uuid.plugin';
+import { MessageUuidPlugin } from './message-uuid.plugin';
 
 /**
  * https://xmpp.org/extensions/xep-0313.html
@@ -12,21 +12,8 @@ import { StanzaUuidPlugin } from './stanza-uuid.plugin';
  */
 export class MessageArchivePlugin extends AbstractPlugin {
 
-    private messagesWithPendingContact: Stanza[] = [];
-
     constructor(private chatService: XmppChatAdapter) {
         super();
-
-        this.chatService.state$.pipe(filter(newState => newState === 'disconnected'))
-            .subscribe(() => {
-                this.messagesWithPendingContact = [];
-            });
-
-        this.chatService.contacts$.subscribe(() => {
-            this.messagesWithPendingContact = this.messagesWithPendingContact
-                .filter((messageStanza) => !this.consumePendingMessage(messageStanza));
-        });
-
     }
 
     onBeforeOnline(): PromiseLike<any> {
@@ -48,7 +35,7 @@ export class MessageArchivePlugin extends AbstractPlugin {
 
     handleStanza(stanza: Stanza) {
         if (this.isMamMessageStanza(stanza)) {
-            this.consumePendingMessage(stanza);
+            this.handleMamMessageStanza(stanza);
             return true;
         }
         return false;
@@ -59,31 +46,25 @@ export class MessageArchivePlugin extends AbstractPlugin {
         return stanza.name === 'message' && result && result.attrs.xmlns === 'urn:xmpp:mam:2';
     }
 
-    private consumePendingMessage(stanza: Stanza) {
+    private handleMamMessageStanza(stanza: Stanza) {
         const messageElement = stanza.getChild('result').getChild('forwarded').getChild('message');
-        const datetime = new Date(
-            stanza.getChild('result').getChild('forwarded').getChild('delay').attrs.stamp
-        );
+        const isAddressedToMe = this.chatService.chatConnectionService.userJid.bare()
+            .equals(parseJid(messageElement.attrs.to).bare());
 
-        const sender = this.chatService.getContactById(messageElement.attrs.from);
-        const receiver = this.chatService.getContactById(messageElement.attrs.to);
-        const contact = sender || receiver;
         const messageBody = messageElement.getChildText('body');
         if (messageBody && messageBody.trim()) {
-            if (contact) {
-                contact.appendMessage({
-                    direction: sender ? Direction.in : Direction.out,
-                    datetime,
-                    body: messageBody,
-                    id: StanzaUuidPlugin.extractIdFromStanza(messageElement)
-                });
-                return true;
-            } else {
-                if (this.messagesWithPendingContact.indexOf(stanza) === -1) {
-                    this.messagesWithPendingContact.push(stanza);
-                }
-                return false;
-            }
+            const contactJid = isAddressedToMe ? messageElement.attrs.from : messageElement.attrs.to;
+            const contact = this.chatService.getOrCreateContactById(contactJid);
+            const datetime = new Date(
+                stanza.getChild('result').getChild('forwarded').getChild('delay').attrs.stamp
+            );
+
+            contact.appendMessage({
+                direction: isAddressedToMe ? Direction.in : Direction.out,
+                datetime,
+                body: messageBody,
+                id: MessageUuidPlugin.extractIdFromStanza(messageElement)
+            });
         }
     }
 

@@ -7,6 +7,7 @@ import { Contact, Direction, Stanza } from '../../../core';
 import { ChatServiceToken } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
+import { MessageUuidPlugin } from './plugins';
 import { XmppChatAdapter } from './xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
 
@@ -41,6 +42,7 @@ describe('XmppChatAdapter', () => {
         chatService = TestBed.get(ChatServiceToken);
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         contactFactory = TestBed.get(ContactFactoryService);
+        chatService.addPlugins([new MessageUuidPlugin()]);
 
         contact1 = contactFactory.createContact('test@example.com', 'jon doe');
         contact2 = contactFactory.createContact('test2@example.com', 'jane dane');
@@ -107,7 +109,7 @@ describe('XmppChatAdapter', () => {
             chatService.appendContacts([copyOfContact1]);
             chatService.appendContacts(contacts);
 
-            expect(chatService.getContactById(contact1.jidPlain).messages)
+            expect(chatService.getContactById(contact1.jidBare.toString()).messages)
                 .toEqual([sampleMessage]);
 
         });
@@ -150,19 +152,19 @@ describe('XmppChatAdapter', () => {
             });
             chatService.appendContacts(contacts);
             chatConnectionService.onStanzaReceived(
-                xml('message', {from: contact1.jidPlain},
+                xml('message', {from: contact1.jidBare.toString()},
                     xml('body', {}, 'message text')) as Stanza);
         });
 
         it('#messages$ should emit contact on received messages', (done) => {
             chatService.appendContacts(contacts);
-            chatService.getContactById(contact1.jidPlain).messages$.pipe(first()).subscribe(message => {
+            chatService.getContactById(contact1.jidBare.toString()).messages$.pipe(first()).subscribe(message => {
                 expect(message.body).toEqual('message text');
                 expect(message.direction).toEqual(Direction.in);
                 done();
             });
             chatConnectionService.onStanzaReceived(
-                xml('message', {from: contact1.jidPlain},
+                xml('message', {from: contact1.jidBare.toString()},
                     xml('body', {}, 'message text')) as Stanza);
         });
 
@@ -175,11 +177,11 @@ describe('XmppChatAdapter', () => {
                 expect(contact.messages[0].id).toEqual('id');
                 messagesSeen++;
                 if (messagesSeen === 2) {
-                    expect(chatService.getContactById(contact1.jidPlain).messages.length).toEqual(1);
+                    expect(chatService.getContactById(contact1.jidBare.toString()).messages.length).toEqual(1);
                     done();
                 }
             });
-            const sampleMessageStanzaWithId = xml('message', {from: contact1.jidPlain},
+            const sampleMessageStanzaWithId = xml('message', {from: contact1.jidBare.toString()},
                 xml('origin-id', {id: 'id'}),
                 xml('body', {}, 'message text')) as Stanza;
             chatConnectionService.onStanzaReceived(sampleMessageStanzaWithId);

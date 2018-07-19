@@ -69,14 +69,16 @@ export interface ChatService {
     reloadContacts(): void;
 
     /**
-     * Returns the contact with the given ID or undefined if no contact with the given ID is found.
+     * Returns the contact with the given ID or undefined if no contact with the given ID is found. In case of XMPP it does not have to be
+     * bare, the search will convert it to a bare JID.
      * @param id The ID of the contact.
      * @returns Either the Contact or undefined.
      */
     getContactById(id: string): Contact | undefined;
 
     /**
-     * Always returns a contact with the given ID. If no contact exists, a new one is created and announced via contacts$.
+     * Always returns a contact with the given ID. If no contact exists, a new one is created and announced via contacts$. In case of XMPP
+     * it does not have to be bare, the search will convert it to a bare JID.
      * @param id The ID of the contact.
      * @returns The new contact instance.
      */

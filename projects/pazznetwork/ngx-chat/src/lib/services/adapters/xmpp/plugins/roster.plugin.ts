@@ -1,3 +1,4 @@
+import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { Contact, ContactSubscription, Presence, PresenceStanza, Stanza } from '../../../../core';
 import { ContactFactoryService } from '../../../contact-factory.service';
@@ -89,7 +90,7 @@ export class RosterPlugin extends AbstractPlugin {
 
     private handlePresenceStanza(stanza: PresenceStanza) {
         const fromAsContact = this.getOrCreateContact(stanza.attrs.from);
-        const isAddressedToMe = stanza.attrs.to === this.chatService.chatConnectionService.myJidWithResource;
+        const isAddressedToMe = this.chatService.chatConnectionService.userJid.bare().equals(parseJid(stanza.attrs.to).bare());
         if (isAddressedToMe) {
             if (!stanza.attrs.type) {
                 if (stanza.getChild('show') == null) {

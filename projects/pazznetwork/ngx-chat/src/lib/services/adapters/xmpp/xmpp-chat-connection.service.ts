@@ -1,5 +1,6 @@
 import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Client } from '@xmpp/client-core';
+import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -23,7 +24,10 @@ export class XmppChatConnectionService {
     public stanzaMessage$ = new Subject<MessageWithBodyStanza>();
     public stanzaUnknown$ = new Subject<Stanza>();
 
-    public myJidWithResource: string;
+    /**
+     * User JID with resouce, not bare.
+     */
+    public userJid: JID;
     private iqId = new Date().getTime();
 
     private iqStanzaResponseCallbacks: { [key: string]: ((any) => void) } = {};
@@ -41,14 +45,16 @@ export class XmppChatConnectionService {
             this.logService.debug('status =', status, value ? value.toString() : '');
         });
 
-        this.client.on('online', (jid: any) => {
-            this.logService.debug('online =', 'online as', jid.toString());
-            this.myJidWithResource = jid.toString();
-            this.state$.next('online');
-        });
+        this.client.on('online', (jid: JID) => this.onOnline(jid));
 
         this.client.on('stanza', (stanza: Stanza) => this.onStanzaReceived(stanza));
 
+    }
+
+    public onOnline(jid: JID) {
+        this.logService.debug('online =', 'online as', jid.toString());
+        this.userJid = jid;
+        this.state$.next('online');
     }
 
     public sendPresence() {
@@ -66,7 +72,7 @@ export class XmppChatConnectionService {
         return new Promise((resolve, reject) => {
             const id = this.getNextIqId();
             request.attrs.id = id;
-            request.attrs.from = this.myJidWithResource;
+            request.attrs.from = this.userJid.toString();
             this.iqStanzaResponseCallbacks[id] = (response: IqResponseStanza) => {
                 if (response.attrs.type === 'result') {
                     resolve(response);
@@ -80,7 +86,7 @@ export class XmppChatConnectionService {
 
     public sendIqAckResult(id) {
         this.send(
-            xml('iq', {from: this.myJidWithResource, id: id, type: 'result'})
+            xml('iq', {from: this.userJid.toString(), id: id, type: 'result'})
         );
     }
 
