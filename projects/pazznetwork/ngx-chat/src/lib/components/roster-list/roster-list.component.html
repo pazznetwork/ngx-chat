@@ -45,6 +45,7 @@
                 pendingIn={{contact.pendingIn}}<br/>
                 pendingOut={{contact.pendingOut}}
             </p>
+            <p class="roster-debug-state">state: {{this.chatService.state$ | async}}</p>
         </ng-container>
     </div>
 
