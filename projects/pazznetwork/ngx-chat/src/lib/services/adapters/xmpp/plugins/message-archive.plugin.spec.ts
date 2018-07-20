@@ -3,6 +3,7 @@ import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 
 import { Contact, Direction } from '../../../../core';
+import { createXmppClientMock } from '../../../../testutils/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -15,26 +16,26 @@ describe('message archive plugin', () => {
     let chatConnectionService: XmppChatConnectionService;
     let chatAdapter: XmppChatAdapter;
     let contactFactory: ContactFactoryService;
-    let client;
+    let xmppClientMock;
     let logService: LogService;
     let contact1: Contact;
-    const userJid = parseJid('somejid@example.com/test');
+    const userJid = parseJid('me@example.com/myresource');
 
     const validArchiveStanza =
         xml('message', {},
             xml('result', {xmlns: 'urn:xmpp:mam:2'},
                 xml('forwarded', {},
                     xml('delay', {stamp: '2018-07-18T08:47:44.233057Z'}),
-                    xml('message', {to: userJid.toString(), from: 'test@example.com/resource'},
+                    xml('message', {to: userJid.toString(), from: 'someone@else.com/resource'},
                         xml('origin-id', {id: 'id'}),
                         xml('body', {}, 'message text')))));
 
     beforeEach(() => {
-        client = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin', 'send', 'start', 'handle']);
+        xmppClientMock = createXmppClientMock();
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: client},
+                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 XmppChatAdapter,
                 LogService,
@@ -46,7 +47,7 @@ describe('message archive plugin', () => {
         contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
         logService = TestBed.get(LogService);
-        contact1 = contactFactory.createContact('test@example.com', 'jon doe');
+        contact1 = contactFactory.createContact('someone@else.com', 'jon doe');
     });
 
     it('should send a request, create contacts and add messages ', () => {

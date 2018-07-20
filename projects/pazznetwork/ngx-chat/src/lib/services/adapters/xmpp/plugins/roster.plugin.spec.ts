@@ -3,6 +3,7 @@ import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 
 import { Contact, ContactSubscription, Presence, Stanza } from '../../../../core';
+import { createXmppClientMock } from '../../../../testutils/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -15,15 +16,15 @@ describe('roster plugin', () => {
     let chatConnectionService: XmppChatConnectionService;
     let chatAdapter: XmppChatAdapter;
     let contactFactory: ContactFactoryService;
-    let client;
+    let xmppClientMock;
     let logService: LogService;
 
     beforeEach(() => {
-        client = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin', 'send']);
+        xmppClientMock = createXmppClientMock();
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: client},
+                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 XmppChatAdapter,
                 LogService,
@@ -44,7 +45,7 @@ describe('roster plugin', () => {
 
         it('should handle loading roster', async () => {
 
-            client.send.and.callFake((content) => {
+            xmppClientMock.send.and.callFake((content) => {
                 chatConnectionService.onStanzaReceived(
                     xml('iq', {type: 'result', id: content.attrs.id},
                         xml('query', {},
@@ -75,7 +76,7 @@ describe('roster plugin', () => {
     describe('handling presence stanzas', () => {
 
         async function setupMockContact(): Promise<Contact> {
-            client.send.and.callFake((content) => {
+            xmppClientMock.send.and.callFake((content) => {
                 chatConnectionService.onStanzaReceived(
                     xml('iq', {type: 'result', id: content.attrs.id},
                         xml('query', {},
@@ -152,8 +153,8 @@ describe('roster plugin', () => {
         });
 
         function assertAcceptedPresenceSubscription() {
-            expect(client.send).toHaveBeenCalledTimes(2);
-            const stanzaSent = client.send.calls.mostRecent().args[0];
+            expect(xmppClientMock.send).toHaveBeenCalledTimes(2);
+            const stanzaSent = xmppClientMock.send.calls.mostRecent().args[0];
             expect(stanzaSent.name).toEqual('presence');
             expect(stanzaSent.attrs.type).toEqual('subscribed');
             expect(stanzaSent.attrs.to).toEqual('test@example.com');

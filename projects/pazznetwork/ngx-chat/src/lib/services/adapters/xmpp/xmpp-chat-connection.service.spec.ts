@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
+import { createXmppClientMock } from '../../../testutils/xmppClientMock';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
@@ -9,14 +10,14 @@ describe('chat connection service', () => {
 
     let chatConnectionService;
     let contactFactory;
-    let client;
+    let xmppClientMock;
 
     beforeEach(() => {
-        client = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin', 'send']);
+        xmppClientMock = xmppClientMock = createXmppClientMock();
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: client},
+                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 LogService,
                 ContactFactoryService

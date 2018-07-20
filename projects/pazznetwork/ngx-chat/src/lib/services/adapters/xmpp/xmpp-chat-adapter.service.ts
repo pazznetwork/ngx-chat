@@ -132,18 +132,17 @@ export class XmppChatAdapter implements ChatService {
             plugin.beforeSendMessage(messageStanza);
         }
         this.chatConnectionService.send(messageStanza).then(() => {
-            const contact = this.getContactById(jid);
-            if (contact) {
-                const message = {
-                    direction: Direction.out,
-                    body,
-                    datetime: new Date()
-                };
-                for (const plugin of this.plugins) {
-                    plugin.afterSendMessage(message, messageStanza);
-                }
-                contact.appendMessage(message);
+            const contact = this.getOrCreateContactById(jid);
+            const message = {
+                direction: Direction.out,
+                body,
+                datetime: new Date()
+            };
+            for (const plugin of this.plugins) {
+                plugin.afterSendMessage(message, messageStanza);
             }
+            contact.appendMessage(message);
+            this.message$.next(contact);
         }, (rej) => {
             this.logService.error('rejected', rej);
         });

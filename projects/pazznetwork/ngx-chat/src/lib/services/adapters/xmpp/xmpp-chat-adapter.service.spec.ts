@@ -1,9 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { Client } from '@xmpp/client-core';
+import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { first, skip, take } from 'rxjs/operators';
 
 import { Contact, Direction, Stanza } from '../../../core';
+import { createXmppClientMock } from '../../../testutils/xmppClientMock';
 import { ChatServiceToken } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
@@ -27,11 +28,11 @@ describe('XmppChatAdapter', () => {
     };
 
     beforeEach(() => {
-        const xmppClientSpy = jasmine.createSpyObj('Client', ['getValue', 'on', 'plugin', 'send']);
+        const xmppClientMock = createXmppClientMock();
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientSpy},
+                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 {provide: ChatServiceToken, useClass: XmppChatAdapter},
                 LogService,
@@ -47,6 +48,8 @@ describe('XmppChatAdapter', () => {
         contact1 = contactFactory.createContact('test@example.com', 'jon doe');
         contact2 = contactFactory.createContact('test2@example.com', 'jane dane');
         contacts = [contact1, contact2];
+
+        chatConnectionService.userJid = new JID('me', 'example.com', 'something');
     });
 
     describe('contact management', () => {
@@ -156,7 +159,19 @@ describe('XmppChatAdapter', () => {
                     xml('body', {}, 'message text')) as Stanza);
         });
 
-        it('#messages$ should emit contact on received messages', (done) => {
+        it('#messages$ should emit contact on sending messages', (done) => {
+            chatService.message$.pipe(first()).subscribe(contact => {
+                expect(contact.name).toEqual(contact1.name);
+                expect(contact.messages.length).toEqual(1);
+                expect(contact.messages[0].body).toEqual('send message text');
+                expect(contact.messages[0].direction).toEqual(Direction.out);
+                done();
+            });
+            chatService.appendContacts(contacts);
+            chatService.sendMessage(contact1.jidBare.toString(), 'send message text');
+        });
+
+        it('#messages$ in contact should emit message on received messages', (done) => {
             chatService.appendContacts(contacts);
             chatService.getContactById(contact1.jidBare.toString()).messages$.pipe(first()).subscribe(message => {
                 expect(message.body).toEqual('message text');
@@ -168,7 +183,17 @@ describe('XmppChatAdapter', () => {
                     xml('body', {}, 'message text')) as Stanza);
         });
 
-        it('#messages$ should emit a message with the same id a second time the messages of the contact should only have one', (done) => {
+        it('#messages$ in contact should emit on sending messages', (done) => {
+            chatService.appendContacts(contacts);
+            chatService.getContactById(contact1.jidBare.toString()).messages$.pipe(first()).subscribe(message => {
+                expect(message.direction).toEqual(Direction.out);
+                expect(message.body).toEqual('send message text');
+                done();
+            });
+            chatService.sendMessage(contact1.jidBare.toString(), 'send message text');
+        });
+
+        it('#messages$ should emit a message with the same id a second time, the message in the contact should only exist once', (done) => {
             let messagesSeen = 0;
             chatService.appendContacts(contacts);
             chatService.message$.pipe(take(2)).subscribe(contact => {
