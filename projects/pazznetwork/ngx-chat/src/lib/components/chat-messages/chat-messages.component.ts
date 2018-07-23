@@ -1,4 +1,5 @@
-import { Component, ElementRef, Inject, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { Contact } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
@@ -9,10 +10,10 @@ import { ChatService, ChatServiceToken } from '../../services/chat-service';
     templateUrl: './chat-messages.component.html',
     styleUrls: ['./chat-messages.component.less']
 })
-export class ChatMessagesComponent implements OnInit {
+export class ChatMessagesComponent implements OnInit, OnDestroy {
 
     @Input()
-    public contact: Contact;
+    contact: Contact;
 
     @Input()
     showAvatars: boolean;
@@ -20,15 +21,21 @@ export class ChatMessagesComponent implements OnInit {
     @ViewChild('messageArea')
     chatMessageAreaElement: ElementRef<HTMLElement>;
 
+    private messageSubscription: Subscription;
+
     constructor(public chatListService: ChatListStateService,
                 @Inject(ChatServiceToken) public chatService: ChatService) {
     }
 
-    public ngOnInit() {
-        this.contact.messages$.subscribe(() => {
+    ngOnInit() {
+        this.messageSubscription = this.contact.messages$.subscribe(() => {
             this.scheduleScrollToLastMessage();
         });
         this.scheduleScrollToLastMessage();
+    }
+
+    ngOnDestroy(): void {
+        this.messageSubscription.unsubscribe();
     }
 
     acceptSubscriptionRequest(event: Event) {
