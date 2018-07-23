@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
-import { createXmppClientMock } from '../../../testutils/xmppClientMock';
+
+import { createXmppClientMock } from '../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';

@@ -4,7 +4,7 @@ import { x as xml } from '@xmpp/xml';
 import { first, skip, take } from 'rxjs/operators';
 
 import { Contact, Direction, Stanza } from '../../../core';
-import { createXmppClientMock } from '../../../testutils/xmppClientMock';
+import { createXmppClientMock } from '../../../test/xmppClientMock';
 import { ChatServiceToken } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';

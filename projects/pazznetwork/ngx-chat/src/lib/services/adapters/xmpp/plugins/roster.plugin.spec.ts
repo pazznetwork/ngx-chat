@@ -3,7 +3,7 @@ import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 
 import { Contact, ContactSubscription, Presence, Stanza } from '../../../../core';
-import { createXmppClientMock } from '../../../../testutils/xmppClientMock';
+import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';

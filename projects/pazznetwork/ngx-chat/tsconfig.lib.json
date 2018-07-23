@@ -28,9 +28,7 @@
   },
   "exclude": [
     "src/test.ts",
-    "**/*.spec.ts"
-  ],
-  "typeRoots": [
-    "./src/manual_typings"
+    "**/*.spec.ts",
+    "src/lib/test/**"
   ]
 }
