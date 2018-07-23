@@ -1,7 +1,9 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, Inject, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
+import { Direction } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
@@ -34,9 +36,11 @@ export class ChatListComponent implements OnInit {
     }
 
     public ngOnInit() {
-        this.messageSubscription = this.chatService.message$.subscribe(contact => {
-            this.chatListService.openChat(contact);
-        });
+        this.messageSubscription = this.chatService.message$
+            .pipe(filter(contact => contact.messages[contact.messages.length - 1].direction === Direction.in))
+            .subscribe(contact => {
+                this.chatListService.openChat(contact);
+            });
     }
 
 }
