@@ -10,7 +10,16 @@
   },
   "devDependencies": {},
   "dependencies": {},
-  "keywords": ["ngx-chat", "xmpp", "angular", "chat"],
+  "keywords": [
+    "ngx-chat",
+    "xmpp",
+    "angular",
+    "chat",
+    "component",
+    "service",
+    "library",
+    "jabber"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/pazznetwork/ngx-chat.git"
