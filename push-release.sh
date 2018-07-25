@@ -9,3 +9,5 @@ cp README.md dist/pazznetwork/ngx-chat
 cd dist/pazznetwork/ngx-chat
 
 npm publish
+
+./push-documentation.sh
