@@ -33,12 +33,6 @@ export class ChatComponent implements OnInit, OnChanges {
      */
     @Input()
     public translations: Translations = {
-        'contacts': 'Contacts',
-        'noMessages': 'No messages yet.',
-        'placeholder': 'Enter your message!',
-        'subscriptionRequestMessage': 'I want to add you as a contact.',
-        'acceptSubscriptionRequest': 'Accept',
-        'denySubscriptionRequest': 'Deny'
     };
 
     /**
@@ -56,6 +50,16 @@ export class ChatComponent implements OnInit, OnChanges {
     showChatComponent = false;
     rosterState = 'hidden';
 
+    private defaultTranslations = {
+        'contacts': 'Contacts',
+        'noMessages': 'No messages yet.',
+        'placeholder': 'Enter your message!',
+        'subscriptionRequestMessage': 'I want to add you as a contact.',
+        'acceptSubscriptionRequest': 'Accept',
+        'denySubscriptionRequest': 'Deny',
+        'dateTimeFormat': 'short',
+    };
+
     constructor(@Inject(ChatServiceToken) private chatService: ChatService) {
     }
 
@@ -68,13 +72,15 @@ export class ChatComponent implements OnInit, OnChanges {
             this.userAvatar$.subscribe(avatar => this.chatService.userAvatar$.next(avatar));
         }
 
-        this.chatService.translations = this.translations;
+        this.mergeAndSetTranslations();
+    }
+
+    private mergeAndSetTranslations() {
+        this.chatService.translations = {...this.defaultTranslations, ...this.translations};
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.translations) {
-            this.chatService.translations = this.translations;
-        }
+        this.mergeAndSetTranslations();
     }
 
     private onChatStateChange(state: string) {

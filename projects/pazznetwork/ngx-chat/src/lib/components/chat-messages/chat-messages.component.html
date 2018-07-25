@@ -8,7 +8,7 @@
         </div>
         <span [ngxChatLinks]="message.body" class="chat-message-body"></span>
         <div class="chat-message-datetime">
-            <small>{{message.datetime | date:'short'}}</small>
+            <small>{{message.datetime | date:chatService.translations.dateTimeFormat}}</small>
         </div>
     </div>
     <div class="chat-messages-empty" *ngIf="contact.messages.length === 0">
@@ -19,9 +19,12 @@
             {{this.chatService.translations.subscriptionRequestMessage}}
         </p>
         <ul class="chat-presence-subscription-actions">
-            <li><a (click)="acceptSubscriptionRequest($event)" href="#">{{this.chatService.translations.acceptSubscriptionRequest}}</a>
+            <li>
+                <a (click)="acceptSubscriptionRequest($event)" href="#">{{this.chatService.translations.acceptSubscriptionRequest}}</a>
             </li>
-            <li><a (click)="denySubscriptionRequest($event)" href="#">{{this.chatService.translations.denySubscriptionRequest}}</a></li>
+            <li>
+                <a (click)="denySubscriptionRequest($event)" href="#">{{this.chatService.translations.denySubscriptionRequest}}</a>
+            </li>
         </ul>
     </div>
 </div>
