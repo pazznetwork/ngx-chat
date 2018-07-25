@@ -6,8 +6,10 @@ MESSAGE="$(git show --no-patch --format=%s HEAD)"
 rm -rf dist
 npm run build-lib
 cp README.md dist/pazznetwork/ngx-chat
-cd dist/pazznetwork/ngx-chat
+pushd dist/pazznetwork/ngx-chat
 
 npm publish
+
+popd
 
 ./push-documentation.sh
