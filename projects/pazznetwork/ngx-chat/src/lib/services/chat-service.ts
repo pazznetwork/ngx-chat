@@ -115,4 +115,8 @@ export interface ChatService {
      */
     sendMessage(id: string, body: string): void;
 
+    /**
+     * Requests all archived messages for all contacts from the server.
+     */
+    loadCompleteHistory(): Promise<void>;
 }

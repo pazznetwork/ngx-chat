@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { filter, first } from 'rxjs/operators';
 import { ChatService, ChatServiceToken, Contact, ContactFactoryService } from './ngx-chat-imports';
 
 @Component({
@@ -36,12 +35,6 @@ export class AppComponent {
         localStorage.setItem('data', JSON.stringify(logInRequest));
 
         this.chatService.logIn(logInRequest);
-
-        this.chatService.state$.pipe(
-            filter(state => state === 'online'),
-            first()
-        ).subscribe(() => {
-        });
     }
 
     onLogout() {

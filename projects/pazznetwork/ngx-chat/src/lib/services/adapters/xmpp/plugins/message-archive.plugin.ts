@@ -17,20 +17,43 @@ export class MessageArchivePlugin extends AbstractPlugin {
     }
 
     onBeforeOnline(): PromiseLike<any> {
-        return this.requestAllArchivedMessages();
+        return this.requestNewestMessages();
     }
 
-    private requestAllArchivedMessages() {
+    private requestNewestMessages() {
+        // TODO: load last messages per contact instead globally
         return this.chatService.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
                 xml('query', {xmlns: 'urn:xmpp:mam:2'},
                     xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
-                        xml('max', {}, 20),
+                        xml('max', {}, 250),
                         xml('before')
                     )
                 )
             )
         );
+    }
+
+    async loadAllMessages() {
+        let lastMamResponse = await this.chatService.chatConnectionService.sendIq(
+            xml('iq', {type: 'set'},
+                xml('query', {xmlns: 'urn:xmpp:mam:2'})
+            )
+        );
+
+        while (lastMamResponse.getChild('fin').attrs.complete !== 'true') {
+            const lastReceivedMessageId = lastMamResponse.getChild('fin').getChild('set').getChildText('last');
+            lastMamResponse = await this.chatService.chatConnectionService.sendIq(
+                xml('iq', {type: 'set'},
+                    xml('query', {xmlns: 'urn:xmpp:mam:2'},
+                        xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
+                            xml('max', {}, 250),
+                            xml('after', {}, lastReceivedMessageId)
+                        )
+                    )
+                )
+            );
+        }
     }
 
     handleStanza(stanza: Stanza) {

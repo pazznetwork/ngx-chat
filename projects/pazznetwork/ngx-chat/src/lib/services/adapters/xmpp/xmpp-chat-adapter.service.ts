@@ -9,6 +9,7 @@ import { dummyAvatar } from '../../../core/contact-avatar';
 import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
+import { MessageArchivePlugin } from './plugins';
 import { RosterPlugin } from './plugins/roster.plugin';
 import { XmppChatConnectionService } from './xmpp-chat-connection.service';
 
@@ -23,6 +24,7 @@ export class XmppChatAdapter implements ChatService {
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
     plugins: ChatPlugin[] = [];
     rosterPlugin: RosterPlugin;
+    messageArchivePlugin: MessageArchivePlugin;
     enableDebugging = false;
     userAvatar$ = new BehaviorSubject(dummyAvatar);
     translations: Translations;
@@ -58,6 +60,8 @@ export class XmppChatAdapter implements ChatService {
         plugins.forEach(plugin => {
             if (plugin instanceof RosterPlugin) {
                 this.rosterPlugin = plugin;
+            } else if (plugin instanceof MessageArchivePlugin) {
+                this.messageArchivePlugin = plugin;
             }
             this.plugins.push(plugin);
         });
@@ -148,6 +152,10 @@ export class XmppChatAdapter implements ChatService {
         });
     }
 
+    loadCompleteHistory() {
+        return this.messageArchivePlugin.loadAllMessages();
+    }
+
     private onMessageReceived(messageStanza: MessageWithBodyStanza) {
         this.logService.debug('message received <=', messageStanza.getChildText('body'));
         const contact = this.getOrCreateContactById(messageStanza.attrs.from);
@@ -181,5 +189,4 @@ export class XmppChatAdapter implements ChatService {
         }
 
     }
-
 }

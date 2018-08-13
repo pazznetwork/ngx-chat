@@ -70,10 +70,13 @@ export class XmppChatConnectionService {
 
     public sendIq(request: Element): Promise<IqResponseStanza> {
         return new Promise((resolve, reject) => {
-            const id = this.getNextIqId();
-            request.attrs.id = id;
+
+            if (!request.attrs.id) {
+                request.attrs.id = this.getNextIqId();
+            }
+
             request.attrs.from = this.userJid.toString();
-            this.iqStanzaResponseCallbacks[id] = (response: IqResponseStanza) => {
+            this.iqStanzaResponseCallbacks[request.attrs.id] = (response: IqResponseStanza) => {
                 if (response.attrs.type === 'result') {
                     resolve(response);
                 } else {
