@@ -5,11 +5,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
+import { IqComponent } from './iq/iq.component';
 import { NgxChatModule } from './ngx-chat-imports';
 
 @NgModule({
     declarations: [
         AppComponent,
+        IqComponent,
     ],
     imports: [
         BrowserModule,

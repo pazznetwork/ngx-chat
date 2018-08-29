@@ -18,7 +18,7 @@ export class AppComponent {
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
                 private contactFactory: ContactFactoryService) {
-        const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
+        const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
         this.domain = contactData.domain;
         this.uri = contactData.uri;
         this.password = contactData.password;
