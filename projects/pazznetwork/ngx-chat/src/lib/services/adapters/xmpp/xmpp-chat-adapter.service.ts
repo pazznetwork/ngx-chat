@@ -23,8 +23,6 @@ export class XmppChatAdapter implements ChatService {
     contactRequestsSent$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingOut)));
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
     plugins: ChatPlugin[] = [];
-    rosterPlugin: RosterPlugin;
-    messageArchivePlugin: MessageArchivePlugin;
     enableDebugging = false;
     userAvatar$ = new BehaviorSubject(dummyAvatar);
     translations: Translations;
@@ -58,11 +56,6 @@ export class XmppChatAdapter implements ChatService {
 
     public addPlugins(plugins: ChatPlugin[]) {
         plugins.forEach(plugin => {
-            if (plugin instanceof RosterPlugin) {
-                this.rosterPlugin = plugin;
-            } else if (plugin instanceof MessageArchivePlugin) {
-                this.messageArchivePlugin = plugin;
-            }
             this.plugins.push(plugin);
         });
     }
@@ -94,7 +87,7 @@ export class XmppChatAdapter implements ChatService {
     }
 
     reloadContacts(): void {
-        this.rosterPlugin.refreshRosterContacts();
+        this.getPlugin(RosterPlugin).refreshRosterContacts();
     }
 
     getContactById(jidPlain: string) {
@@ -112,11 +105,11 @@ export class XmppChatAdapter implements ChatService {
     }
 
     addContact(identifier: string) {
-        this.rosterPlugin.addRosterContact(identifier);
+        this.getPlugin(RosterPlugin).addRosterContact(identifier);
     }
 
     removeContact(identifier: string) {
-        this.rosterPlugin.removeRosterContact(identifier);
+        this.getPlugin(RosterPlugin).removeRosterContact(identifier);
     }
 
     logIn(logInRequest: LogInRequest): void {
@@ -153,7 +146,16 @@ export class XmppChatAdapter implements ChatService {
     }
 
     loadCompleteHistory() {
-        return this.messageArchivePlugin.loadAllMessages();
+        return this.getPlugin(MessageArchivePlugin).loadAllMessages();
+    }
+
+    getPlugin<T extends ChatPlugin>(constructor: { new(...args: any[]): T }): T {
+        for (const plugin of this.plugins) {
+            if (plugin.constructor === constructor) {
+                return plugin as T;
+            }
+        }
+        throw new Error('plugin not found: ' + constructor);
     }
 
     private onMessageReceived(messageStanza: MessageWithBodyStanza) {

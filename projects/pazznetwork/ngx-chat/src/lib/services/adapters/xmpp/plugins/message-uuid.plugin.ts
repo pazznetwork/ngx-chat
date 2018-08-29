@@ -3,12 +3,12 @@ import { Element } from 'ltx';
 import { v4 as uuid } from 'uuid';
 
 import { Message, MessageWithBodyStanza } from '../../../../core';
-import { AbstractPlugin } from './abstract.plugin';
+import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 
 /**
  * https://xmpp.org/extensions/xep-0359.html
  */
-export class MessageUuidPlugin extends AbstractPlugin {
+export class MessageUuidPlugin extends AbstractXmppPlugin {
 
     public static extractIdFromStanza(messageStanza: Element) {
         const originIdElement = messageStanza.getChild('origin-id');

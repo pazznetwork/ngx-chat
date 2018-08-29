@@ -4,12 +4,12 @@ import { Contact, ContactSubscription, Presence, PresenceStanza, Stanza } from '
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { AbstractPlugin } from './abstract.plugin';
+import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 
 /**
  * https://xmpp.org/rfcs/rfc6121.html#roster-add-success
  */
-export class RosterPlugin extends AbstractPlugin {
+export class RosterPlugin extends AbstractXmppPlugin {
 
     constructor(private chatService: XmppChatAdapter, private contactFactory: ContactFactoryService, private logService: LogService) {
         super();

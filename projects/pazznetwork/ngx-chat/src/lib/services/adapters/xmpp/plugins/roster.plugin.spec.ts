@@ -85,7 +85,7 @@ describe('roster plugin', () => {
                     ) as Stanza
                 );
             });
-            await chatAdapter.rosterPlugin.refreshRosterContacts();
+            await chatAdapter.getPlugin(RosterPlugin).refreshRosterContacts();
             return chatAdapter.contacts$.getValue()[0];
         }
 
@@ -95,7 +95,7 @@ describe('roster plugin', () => {
             expect(contact.presence$.getValue())
                 .toEqual(Presence.unavailable);
 
-            const handled = chatAdapter.rosterPlugin.handleStanza(
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'})
             );
             expect(handled).toBeTruthy();
@@ -111,7 +111,7 @@ describe('roster plugin', () => {
             expect(contact.presence$.getValue())
                 .toEqual(Presence.unavailable);
 
-            const handled = chatAdapter.rosterPlugin.handleStanza(
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'},
                     xml('show', {}, show))
             );
@@ -143,7 +143,7 @@ describe('roster plugin', () => {
             contact.presence$.next(Presence.present);
             expect(contact.presence$.getValue()).toEqual(Presence.present);
 
-            const handled = chatAdapter.rosterPlugin.handleStanza(
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'unavailable'})
             );
             expect(handled).toBeTruthy();
@@ -165,7 +165,7 @@ describe('roster plugin', () => {
             contact.pendingIn = true;
             contact.subscription$.next(ContactSubscription.to);
 
-            const handled = chatAdapter.rosterPlugin.handleStanza(
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
             );
             expect(handled).toBeTruthy();
@@ -181,7 +181,7 @@ describe('roster plugin', () => {
             contact.pendingIn = true;
             contact.subscription$.next(ContactSubscription.none);
 
-            const handled = chatAdapter.rosterPlugin.handleStanza(
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
             );
             expect(handled).toBeTruthy();
@@ -196,7 +196,7 @@ describe('roster plugin', () => {
             const contact = contactFactory.createContact('test@example.com', 'jon doe');
             chatAdapter.contacts$.next([contact]);
 
-            const handled = chatAdapter.rosterPlugin.handleStanza(
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
             );
             expect(handled).toBeTruthy();
@@ -205,7 +205,7 @@ describe('roster plugin', () => {
         });
 
         it('should add a pending in flag and create a contact when we never seen him before', async () => {
-            const handled = chatAdapter.rosterPlugin.handleStanza(
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
             );
             expect(handled).toBeTruthy();
@@ -223,7 +223,7 @@ describe('roster plugin', () => {
             contact.subscription$.next(ContactSubscription.none);
             contact.pendingOut = true;
 
-            const handled = chatAdapter.rosterPlugin.handleStanza(
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribed'})
             );
             expect(handled).toBeTruthy();

@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Contact, LogInRequest, Translations } from '../core';
+import { ChatPlugin, Contact, LogInRequest, Translations } from '../core';
 
 export const ChatServiceToken = new InjectionToken('pazznetworkNgxChatService');
 
@@ -119,4 +119,10 @@ export interface ChatService {
      * Requests all archived messages for all contacts from the server.
      */
     loadCompleteHistory(): Promise<void>;
+
+    /**
+     * Returns the plugin instance for the given constructor
+     * @param constructor The plugin constructor, e.g. {@link RosterPlugin}
+     */
+    getPlugin<T extends ChatPlugin>(constructor: { new(...args: any[]): T }): T;
 }

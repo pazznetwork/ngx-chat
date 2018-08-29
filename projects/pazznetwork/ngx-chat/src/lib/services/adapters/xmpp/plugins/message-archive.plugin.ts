@@ -3,14 +3,14 @@ import { x as xml } from '@xmpp/xml';
 
 import { Direction, Stanza } from '../../../../core';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { AbstractPlugin } from './abstract.plugin';
+import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { MessageUuidPlugin } from './message-uuid.plugin';
 
 /**
  * https://xmpp.org/extensions/xep-0313.html
  * Message Archive Management
  */
-export class MessageArchivePlugin extends AbstractPlugin {
+export class MessageArchivePlugin extends AbstractXmppPlugin {
 
     constructor(private chatService: XmppChatAdapter) {
         super();

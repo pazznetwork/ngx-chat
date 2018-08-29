@@ -2,7 +2,7 @@ import { Element } from 'ltx';
 
 import { ChatPlugin, Message, MessageWithBodyStanza, Stanza } from '../../../../core';
 
-export abstract class AbstractPlugin implements ChatPlugin {
+export abstract class AbstractXmppPlugin implements ChatPlugin {
 
     onBeforeOnline(): PromiseLike<any> {
         return Promise.resolve();
