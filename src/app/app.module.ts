@@ -7,11 +7,13 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { IqComponent } from './iq/iq.component';
 import { NgxChatModule } from './ngx-chat-imports';
+import { SendStanzaComponent } from './send-stanza/send-stanza.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         IqComponent,
+        SendStanzaComponent,
     ],
     imports: [
         BrowserModule,
