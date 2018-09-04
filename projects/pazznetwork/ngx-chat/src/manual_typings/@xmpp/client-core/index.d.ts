@@ -4,6 +4,8 @@ declare module '@xmpp/client-core' {
 
         public timeout: number;
 
+        public startOptions: { uri: string, domain: string };
+
         public on(eventName: string, callback: any): void;
 
         public handle(eventName: string, callback: any): void;
