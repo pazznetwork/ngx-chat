@@ -1,0 +1,11 @@
+<div class="chat-message"
+     [ngClass]="{'chat-message--in': message.direction === 'in', 'chat-message--out': message.direction === 'out'}">
+    <div *ngIf="showAvatars" class="chat-message-avatar">
+        <img *ngIf="message.direction === 'in'" [src]="avatar"/>
+        <img *ngIf="message.direction === 'out'" [src]="chatService.userAvatar$ | async"/>
+    </div>
+    <span [ngxChatLinks]="message.body" class="chat-message-body"></span>
+    <div class="chat-message-datetime">
+        <small>{{message.datetime | date:chatService.translations.dateTimeFormat}} {{nick}}</small>
+    </div>
+</div>

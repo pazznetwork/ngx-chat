@@ -8,6 +8,9 @@ export abstract class AbstractXmppPlugin implements ChatPlugin {
         return Promise.resolve();
     }
 
+    onOffline() {
+    }
+
     afterSendMessage(message: Message, messageStanza: Element): void {
         return;
     }
@@ -25,4 +28,3 @@ export abstract class AbstractXmppPlugin implements ChatPlugin {
     }
 
 }
-

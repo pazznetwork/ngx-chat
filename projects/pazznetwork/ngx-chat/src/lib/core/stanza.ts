@@ -14,7 +14,9 @@ export interface Stanza extends Element {
 export interface IqResponseStanza extends Stanza {
     attrs: {
         id: string;
-        type: 'result' | 'error'
+        type: 'result' | 'error';
+        from?: string;
+        to?: string;
     };
 }
 

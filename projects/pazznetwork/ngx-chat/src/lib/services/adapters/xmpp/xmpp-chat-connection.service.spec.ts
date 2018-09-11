@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
+import { testLogService } from '../../../test/logService';
 
 import { createXmppClientMock } from '../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../contact-factory.service';
@@ -20,7 +21,7 @@ describe('chat connection service', () => {
             providers: [
                 {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
-                LogService,
+                {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
             ]
         });
@@ -32,20 +33,6 @@ describe('chat connection service', () => {
     it('#getNextIqId() should generate new iq ids', () => {
         expect(chatConnectionService.getNextIqId())
             .not.toEqual(chatConnectionService.getNextIqId(), 'two consecutive iq ids should not match');
-    });
-
-    describe('receiving messages', () => {
-
-        it('should emit events on receiving a message', (done) => {
-            chatConnectionService.stanzaMessage$.pipe(first()).subscribe(async (stanza) => {
-                await expect(stanza.getChildText('body')).toEqual('message text');
-                done();
-            });
-            chatConnectionService.onStanzaReceived(
-                xml('message', {},
-                    xml('body', {}, 'message text')));
-        });
-
     });
 
 });

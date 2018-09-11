@@ -6,7 +6,7 @@ declare module '@xmpp/jid' {
         domain: string;
         resource: string;
 
-        constructor(local: string, domain: string, resource: string);
+        constructor(local: string, domain: string, resource?: string);
 
         bare(): JID;
 

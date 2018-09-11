@@ -1,0 +1,11 @@
+<div class="chat-messages" #messageArea>
+    <!-- TODO: avatar -->
+    <ngx-chat-message *ngFor="let message of room.messages"
+                      [message]="message"
+                      [showAvatars]="true"
+                      [nick]="chatService.getOrCreateContactById(message.from.toString()).name">
+    </ngx-chat-message>
+    <div class="chat-messages-empty" *ngIf="room.messages.length === 0">
+        {{this.chatService.translations.noMessages}}
+    </div>
+</div>

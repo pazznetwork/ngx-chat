@@ -12,6 +12,9 @@
             "element",
             "app",
             "kebab-case"
+        ],
+        "no-console": [
+            false
         ]
     }
 }

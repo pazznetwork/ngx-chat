@@ -11,6 +11,11 @@ export interface ChatPlugin {
     onBeforeOnline(): PromiseLike<any>;
 
     /**
+     * Hook for plugins to clear up data.
+     */
+    onOffline();
+
+    /**
      * True if the given stanza was handled by this plugin, false otherwise.
      * @param stanza
      * @returns

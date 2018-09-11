@@ -3,12 +3,14 @@ import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 
 import { Contact, Direction } from '../../../../core';
+import { testLogService } from '../../../../test/logService';
 import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
 import { MessageArchivePlugin } from './message-archive.plugin';
+import { MessagePlugin } from './message.plugin';
 
 
 describe('message archive plugin', () => {
@@ -38,7 +40,7 @@ describe('message archive plugin', () => {
                 {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 XmppChatAdapter,
-                LogService,
+                {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
             ]
         });

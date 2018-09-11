@@ -3,6 +3,7 @@ import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 
 import { Contact, ContactSubscription, Presence, Stanza } from '../../../../core';
+import { testLogService } from '../../../../test/logService';
 import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
@@ -27,7 +28,7 @@ describe('roster plugin', () => {
                 {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 XmppChatAdapter,
-                LogService,
+                {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
             ]
         });
@@ -125,15 +126,15 @@ describe('roster plugin', () => {
             await testPresenceAfterShow('away');
         });
 
-        it('should handle presence show stanzas with a show "away" element', async () => {
+        it('should handle presence show stanzas with a show "chat" element', async () => {
             await testPresenceAfterShow('chat');
         });
 
-        it('should handle presence show stanzas with a show "away" element', async () => {
+        it('should handle presence show stanzas with a show "dnd" element', async () => {
             await testPresenceAfterShow('dnd');
         });
 
-        it('should handle presence show stanzas with a show "away" element', async () => {
+        it('should handle presence show stanzas with a show "xa" element', async () => {
             await testPresenceAfterShow('xa');
         });
 
@@ -237,6 +238,14 @@ describe('roster plugin', () => {
             });
         });
 
+        it('should not accept muc presence stanzas', async () => {
+            const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'},
+                    xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'})
+                )
+            );
+            expect(handled).toBeFalsy();
+        });
 
     });
 

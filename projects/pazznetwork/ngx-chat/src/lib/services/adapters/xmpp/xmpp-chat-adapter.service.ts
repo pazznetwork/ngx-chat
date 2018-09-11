@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
-import { x as xml } from '@xmpp/xml';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { ChatPlugin, Contact, Direction, LogInRequest, MessageWithBodyStanza, Stanza, Translations } from '../../../core';
+import { ChatPlugin, Contact, LogInRequest, Stanza, Translations } from '../../../core';
 import { dummyAvatar } from '../../../core/contact-avatar';
 import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
-import { MessageArchivePlugin } from './plugins';
-import { RosterPlugin } from './plugins/roster.plugin';
+import { MessageArchivePlugin, RosterPlugin } from './plugins';
+import { MessagePlugin } from './plugins/message.plugin';
 import { XmppChatConnectionService } from './xmpp-chat-connection.service';
 
 @Injectable()
@@ -30,7 +29,7 @@ export class XmppChatAdapter implements ChatService {
     constructor(public chatConnectionService: XmppChatConnectionService,
                 private logService: LogService,
                 private contactFactory: ContactFactoryService) {
-        this.state$.subscribe((state) => this.logService.debug('state changed to:', state));
+        this.state$.subscribe((state) => this.logService.info('state changed to:', state));
         chatConnectionService.state$
             .pipe(filter(nextState => nextState !== this.state$.getValue()))
             .subscribe((nextState) => {
@@ -39,13 +38,25 @@ export class XmppChatAdapter implements ChatService {
                     Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
                         .then(
                             () => this.announceAvailability(),
-                            () => this.announceAvailability()
+                            (e) => {
+                                this.logService.error('error while connecting', e);
+                                this.announceAvailability();
+                            }
                         );
                 } else {
+                    if (nextState === 'disconnected') {
+                        this.contacts$.next([]);
+                        this.plugins.forEach(plugin => {
+                            try {
+                                plugin.onOffline();
+                            } catch (e) {
+                                this.logService.error('erro while handling offline in ', plugin);
+                            }
+                        });
+                    }
                     this.state$.next(nextState);
                 }
             });
-        this.chatConnectionService.stanzaMessage$.subscribe((stanza) => this.onMessageReceived(stanza));
         this.chatConnectionService.stanzaUnknown$.subscribe((stanza) => this.onUnknownStanza(stanza));
     }
 
@@ -60,32 +71,6 @@ export class XmppChatAdapter implements ChatService {
         });
     }
 
-    appendContacts(newContacts: Contact[]) {
-
-        const contactsByJid = {};
-        const existingContacts = [].concat(this.contacts$.getValue()) as Contact[];
-
-        for (const newContact of newContacts) {
-            contactsByJid[newContact.jidBare.toString()] = newContact;
-        }
-
-        for (const existingContact of existingContacts) {
-            contactsByJid[existingContact.jidBare.toString()] = existingContact;
-        }
-
-        const nextContacts = [];
-        for (const jid in contactsByJid) {
-            if (contactsByJid.hasOwnProperty(jid)) {
-                nextContacts.push(contactsByJid[jid]);
-            }
-        }
-
-        if (nextContacts.length !== existingContacts.length) {
-            this.contacts$.next(nextContacts);
-        }
-
-    }
-
     reloadContacts(): void {
         this.getPlugin(RosterPlugin).refreshRosterContacts();
     }
@@ -95,11 +80,11 @@ export class XmppChatAdapter implements ChatService {
         return this.contacts$.getValue().find(contact => contact.jidBare.equals(bareJidToFind));
     }
 
-    getOrCreateContactById(jidPlain: string) {
+    getOrCreateContactById(jidPlain: string, name?: string) {
         let contact = this.getContactById(jidPlain);
         if (!contact) {
-            contact = this.contactFactory.createContact(parseJid(jidPlain).bare().toString());
-            this.appendContacts([contact]);
+            contact = this.contactFactory.createContact(parseJid(jidPlain).bare().toString(), name);
+            this.contacts$.next([contact, ...this.contacts$.getValue()]);
         }
         return contact;
     }
@@ -117,32 +102,11 @@ export class XmppChatAdapter implements ChatService {
     }
 
     logOut(): void {
-        this.contacts$.next([]);
         this.chatConnectionService.logOut();
     }
 
     sendMessage(jid: string, body: string) {
-        const messageStanza = xml('message', {to: jid, from: this.chatConnectionService.userJid.toString(), type: 'chat'},
-            xml('body', {}, body)
-        );
-        for (const plugin of this.plugins) {
-            plugin.beforeSendMessage(messageStanza);
-        }
-        this.chatConnectionService.send(messageStanza).then(() => {
-            const contact = this.getOrCreateContactById(jid);
-            const message = {
-                direction: Direction.out,
-                body,
-                datetime: new Date()
-            };
-            for (const plugin of this.plugins) {
-                plugin.afterSendMessage(message, messageStanza);
-            }
-            contact.appendMessage(message);
-            this.message$.next(contact);
-        }, (rej) => {
-            this.logService.error('rejected', rej);
-        });
+        this.getPlugin(MessagePlugin).sendMessage(jid, body);
     }
 
     loadCompleteHistory() {
@@ -158,31 +122,18 @@ export class XmppChatAdapter implements ChatService {
         throw new Error('plugin not found: ' + constructor);
     }
 
-    private onMessageReceived(messageStanza: MessageWithBodyStanza) {
-        this.logService.debug('message received <=', messageStanza.getChildText('body'));
-        const contact = this.getOrCreateContactById(messageStanza.attrs.from);
-
-        const message = {
-            body: messageStanza.getChildText('body'),
-            direction: Direction.in,
-            datetime: new Date()
-        };
-
-        for (const plugin of this.plugins) {
-            plugin.afterReceiveMessage(message, messageStanza);
-        }
-
-        contact.appendMessage(message);
-        this.message$.next(contact);
-    }
-
     private onUnknownStanza(stanza: Stanza) {
 
         let handled = false;
 
         for (const plugin of this.plugins) {
-            if (plugin.handleStanza(stanza)) {
-                handled = true;
+            try {
+                if (plugin.handleStanza(stanza)) {
+                    this.logService.debug(plugin.constructor.name, 'handled', stanza.toString());
+                    handled = true;
+                }
+            } catch (e) {
+                this.logService.error('error handling stanza in ', plugin.constructor.name, e);
             }
         }
 

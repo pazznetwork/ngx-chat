@@ -1,30 +1,42 @@
 import { Injectable } from '@angular/core';
 
+export enum LogLevel {
+    Disabled = 0,
+    Error,
+    Warn,
+    Info,
+    Debug,
+}
+
 @Injectable()
 export class LogService {
 
-    private readonly enableLogging = true;
+    public static readonly LOG_PREFIX = 'ChatService:';
+    public logLevel = LogLevel.Info;
+    public writer = console;
 
-    constructor() {
-    }
-
-    public warn(...messages: any[]) {
-        if (this.enableLogging) {
-            console.warn('ChatService:', ...messages); // tslint:disable-line
+    public error(...messages: any[]) {
+        if (this.logLevel >= LogLevel.Error) {
+            this.writer.error(LogService.LOG_PREFIX, ...messages);
         }
     }
 
-    public error(...messages: any[]) {
-        if (this.enableLogging) {
-            console.error('ChatService:', ...messages); // tslint:disable-line
+    public warn(...messages: any[]) {
+        if (this.logLevel >= LogLevel.Warn) {
+            this.writer.warn(LogService.LOG_PREFIX, ...messages);
+        }
+    }
+
+    public info(...messages: any[]) {
+        if (this.logLevel >= LogLevel.Info) {
+            this.writer.info(LogService.LOG_PREFIX, ...messages);
         }
     }
 
     public debug(...messages: any[]) {
-        if (this.enableLogging) {
-            console.log('ChatService:', ...messages); // tslint:disable-line
+        if (this.logLevel >= LogLevel.Debug) {
+            this.writer.log(LogService.LOG_PREFIX, ...messages);
         }
     }
-
 
 }

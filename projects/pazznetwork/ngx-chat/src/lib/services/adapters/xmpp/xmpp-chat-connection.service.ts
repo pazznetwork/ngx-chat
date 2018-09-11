@@ -4,7 +4,7 @@ import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { IqResponseStanza, LogInRequest, MessageWithBodyStanza, Stanza } from '../../../core';
+import { IqResponseStanza, LogInRequest, Stanza } from '../../../core';
 import { LogService } from '../../log.service';
 
 export const XmppClientToken = new InjectionToken('pazznetworkNgxChatXmppClient');
@@ -19,17 +19,14 @@ export const XmppClientToken = new InjectionToken('pazznetworkNgxChatXmppClient'
 export class XmppChatConnectionService {
 
     public state$ = new BehaviorSubject<'disconnected' | 'online'>('disconnected');
-
-    public stanzaError$ = new Subject<Stanza>();
-    public stanzaMessage$ = new Subject<MessageWithBodyStanza>();
     public stanzaUnknown$ = new Subject<Stanza>();
+    public id = Math.random().toString();
 
     /**
      * User JID with resouce, not bare.
      */
     public userJid: JID;
     private iqId = new Date().getTime();
-
     private iqStanzaResponseCallbacks: { [key: string]: ((any) => void) } = {};
 
     constructor(@Inject(XmppClientToken) public client: Client,
@@ -42,12 +39,14 @@ export class XmppChatConnectionService {
         });
 
         this.client.on('status', (status: any, value: any) => {
-            this.logService.debug('status =', status, value ? value.toString() : '');
+            this.logService.info('status update =', status, value ? value.toString() : '');
         });
 
         this.client.on('online', (jid: JID) => this.onOnline(jid));
 
-        this.client.on('stanza', (stanza: Stanza) => this.onStanzaReceived(stanza));
+        this.client.on('stanza', (stanza: Stanza) => {
+            this.onStanzaReceived(stanza);
+        });
 
     }
 
@@ -75,6 +74,10 @@ export class XmppChatConnectionService {
                 request.attrs.id = this.getNextIqId();
             }
 
+            if (!request.attrs.type) {
+                throw new Error('iq stanza without type: ' + request.toString());
+            }
+
             request.attrs.from = this.userJid.toString();
             this.iqStanzaResponseCallbacks[request.attrs.id] = (response: IqResponseStanza) => {
                 if (response.attrs.type === 'result') {
@@ -95,29 +98,21 @@ export class XmppChatConnectionService {
 
     public onStanzaReceived(stanza: Stanza) {
 
-        this.logService.debug('<<<', stanza);
-
-        if (stanza.attrs.type === 'error') {
-            this.logService.debug('error <=', stanza.toString());
-            this.stanzaError$.next(stanza);
-        } else if (this.isMessageStanza(stanza)) {
-            this.stanzaMessage$.next(stanza);
-        } else if (this.isIqStanzaResponse(stanza)) {
-            const callback = this.iqStanzaResponseCallbacks[stanza.attrs.id];
-            if (callback) {
+        let handled = false;
+        if (this.isIqStanzaResponse(stanza)) {
+            const iqResponseCallback = this.iqStanzaResponseCallbacks[stanza.attrs.id];
+            if (iqResponseCallback) {
+                this.logService.debug('<<<', stanza.toString(), 'handled by callback', iqResponseCallback);
                 delete this.iqStanzaResponseCallbacks[stanza.attrs.id];
-                callback(stanza);
-            } else {
-                // run plugins
-                this.stanzaUnknown$.next(stanza);
+                iqResponseCallback(stanza);
+                handled = true;
             }
-        } else {
+        }
+
+        if (!handled) {
             this.stanzaUnknown$.next(stanza);
         }
-    }
 
-    private isMessageStanza(stanza: Stanza): stanza is MessageWithBodyStanza {
-        return stanza.name === 'message' && !!stanza.getChildText('body');
     }
 
     private isIqStanzaResponse(stanza: Stanza): stanza is IqResponseStanza {

@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { ChatService, ChatServiceToken, Contact, ContactFactoryService } from './ngx-chat-imports';
+import { ChatService, ChatServiceToken, Contact, ContactFactoryService, MultiUserChatPlugin } from './ngx-chat-imports';
 
 @Component({
     selector: 'app-root',
@@ -15,6 +15,7 @@ export class AppComponent {
     public jid: string;
     public otherJid: any;
     public contacts: Observable<Contact[]> = this.chatService.contactsSubscribed$;
+    public multiUserChatPlugin: MultiUserChatPlugin;
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
                 private contactFactory: ContactFactoryService) {
@@ -23,6 +24,10 @@ export class AppComponent {
         this.uri = contactData.uri;
         this.password = contactData.password;
         this.jid = contactData.jid;
+
+        this.chatService.state$.subscribe((state) => this.stateChanged(state));
+        this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
+
     }
 
     onLogin() {
@@ -59,5 +64,9 @@ export class AppComponent {
         } else {
             this.contacts = this.chatService.contactsSubscribed$;
         }
+    }
+
+    private async stateChanged(state: 'disconnected' | 'connecting' | 'online') {
+        console.log('state changed!', state);
     }
 }

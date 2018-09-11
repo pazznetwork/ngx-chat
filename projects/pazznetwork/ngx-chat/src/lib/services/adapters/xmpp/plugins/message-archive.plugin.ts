@@ -82,11 +82,12 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
                 stanza.getChild('result').getChild('forwarded').getChild('delay').attrs.stamp
             );
 
-            contact.appendMessage({
+            contact.addMessage({
                 direction: isAddressedToMe ? Direction.in : Direction.out,
                 datetime,
                 body: messageBody,
-                id: MessageUuidPlugin.extractIdFromStanza(messageElement)
+                id: MessageUuidPlugin.extractIdFromStanza(messageElement),
+                delayed: true
             });
         }
     }

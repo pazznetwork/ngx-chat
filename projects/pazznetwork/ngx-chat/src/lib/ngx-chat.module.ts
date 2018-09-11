@@ -6,19 +6,28 @@ import bind from '@xmpp/plugins/bind';
 import plain from '@xmpp/plugins/sasl-plain';
 import sessionEstablishment from '@xmpp/plugins/session-establishment';
 import websocket from '@xmpp/plugins/websocket';
-
-import { ChatListComponent } from './components/chat-list/chat-list.component';
 import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
 import { ChatMessageTextComponent } from './components/chat-message-text/chat-message-text.component';
-import { ChatMessagesComponent } from './components/chat-messages/chat-messages.component';
+import { ChatMessageComponent } from './components/chat-message/chat-message.component';
+import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
+import { ChatRoomMessagesComponent } from './components/chat-room-messages/chat-room-messages.component';
+import { ChatWindowListComponent } from './components/chat-window-list/chat-window-list.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
 import { LinksDirective } from './directives/links.directive';
-import { MessageArchivePlugin, MessageUuidPlugin } from './services/adapters/xmpp/plugins';
-import { RosterPlugin } from './services/adapters/xmpp/plugins/roster.plugin';
+import {
+    BookmarkPlugin,
+    MessageArchivePlugin,
+    MessageUuidPlugin,
+    MultiUserChatPlugin,
+    PublishSubscribePlugin,
+    RosterPlugin,
+    ServiceDiscoveryPlugin
+} from './services/adapters/xmpp/plugins';
+import { MessagePlugin } from './services/adapters/xmpp/plugins/message.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
@@ -33,25 +42,28 @@ import { LogService } from './services/log.service';
         FormsModule,
     ],
     declarations: [
-        ChatListComponent,
-        ChatWindowComponent,
         ChatComponent,
-        RosterListComponent,
-        RosterContactComponent,
-        LinksDirective,
-        ChatMessagesComponent,
+        ChatMessageComponent,
         ChatMessageInputComponent,
         ChatMessageLinkComponent,
+        ChatMessageListComponent,
         ChatMessageTextComponent,
+        ChatRoomMessagesComponent,
+        ChatWindowComponent,
+        ChatWindowListComponent,
+        LinksDirective,
+        RosterContactComponent,
+        RosterListComponent,
     ],
     exports: [
         ChatComponent,
-        ChatMessagesComponent,
-        ChatMessageInputComponent
+        ChatMessageInputComponent,
+        ChatMessageListComponent,
+        ChatRoomMessagesComponent,
     ],
     entryComponents: [
         ChatMessageLinkComponent,
-        ChatMessageTextComponent
+        ChatMessageTextComponent,
     ],
 })
 export class NgxChatModule {
@@ -86,11 +98,17 @@ export class NgxChatModule {
     private static chatAdapter(chatConnectionService, logService, contactFactory) {
         const xmppChatAdapter = new XmppChatAdapter(chatConnectionService, logService, contactFactory);
 
-        const rosterPlugin = new RosterPlugin(xmppChatAdapter, contactFactory, logService);
-        const messageArchivePlugin = new MessageArchivePlugin(xmppChatAdapter);
-        const stanzaUuidPlugin = new MessageUuidPlugin();
+        xmppChatAdapter.addPlugins([
+            new BookmarkPlugin(xmppChatAdapter),
+            new MessageArchivePlugin(xmppChatAdapter),
+            new MessagePlugin(xmppChatAdapter, logService),
+            new MessageUuidPlugin(),
+            new MultiUserChatPlugin(xmppChatAdapter, logService),
+            new PublishSubscribePlugin(xmppChatAdapter),
+            new RosterPlugin(xmppChatAdapter, contactFactory, logService),
+            new ServiceDiscoveryPlugin(xmppChatAdapter),
+        ]);
 
-        xmppChatAdapter.addPlugins([rosterPlugin, messageArchivePlugin, stanzaUuidPlugin]);
         return xmppChatAdapter;
     }
 

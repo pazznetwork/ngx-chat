@@ -6,11 +6,11 @@ import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
-    selector: 'ngx-chat-messages',
-    templateUrl: './chat-messages.component.html',
-    styleUrls: ['./chat-messages.component.less']
+    selector: 'ngx-chat-message-list',
+    templateUrl: './chat-message-list.component.html',
+    styleUrls: ['./chat-message-list.component.less']
 })
-export class ChatMessagesComponent implements OnInit, OnDestroy {
+export class ChatMessageListComponent implements OnInit, OnDestroy {
 
     @Input()
     contact: Contact;

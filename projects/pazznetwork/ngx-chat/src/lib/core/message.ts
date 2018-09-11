@@ -3,6 +3,7 @@ export interface Message {
     body: string;
     datetime: Date;
     id?: string;
+    delayed: boolean;
 }
 
 export enum Direction {

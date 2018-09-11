@@ -8,9 +8,9 @@ import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
-    selector: 'ngx-chat-list',
-    templateUrl: './chat-list.component.html',
-    styleUrls: ['./chat-list.component.less'],
+    selector: 'ngx-chat-window-list',
+    templateUrl: './chat-window-list.component.html',
+    styleUrls: ['./chat-window-list.component.less'],
     animations: [
         trigger('rosterVisibility', [
             state('hidden', style({
@@ -24,7 +24,7 @@ import { ChatService, ChatServiceToken } from '../../services/chat-service';
         ])
     ]
 })
-export class ChatListComponent implements OnInit {
+export class ChatWindowListComponent implements OnInit {
 
     @Input()
     rosterState: string;

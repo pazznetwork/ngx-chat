@@ -121,7 +121,7 @@
       "root": "projects/pazznetwork/ngx-chat",
       "sourceRoot": "projects/pazznetwork/ngx-chat/src",
       "projectType": "library",
-      "prefix": "lib",
+      "prefix": "ngx",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",

@@ -27,10 +27,11 @@ describe('contact', () => {
             datetime: new Date(),
             body: '',
             direction: Direction.in,
-            id: '1'
+            id: '1',
+            delayed: false
         };
-        contact.appendMessage(message);
-        contact.appendMessage(message);
+        contact.addMessage(message);
+        contact.addMessage(message);
         expect(contact.messages.length).toEqual(1);
     });
 
@@ -39,42 +40,43 @@ describe('contact', () => {
         const message = {
             datetime: new Date(),
             body: '',
-            direction: Direction.in
+            direction: Direction.in,
+            delayed: false
         };
-        contact.appendMessage(message);
-        contact.appendMessage(message);
+        contact.addMessage(message);
+        contact.addMessage(message);
         expect(contact.messages.length).toEqual(2);
     });
 
     it('should append messages in correct order 1', () => {
         const contact = new Contact('test@example1.com/resource', 'john doe');
-        contact.appendMessage(createMessageForDate(1500));
-        contact.appendMessage(createMessageForDate(1400));
-        contact.appendMessage(createMessageForDate(1700));
+        contact.addMessage(createMessageForDate(1500));
+        contact.addMessage(createMessageForDate(1400));
+        contact.addMessage(createMessageForDate(1700));
         expect(contact.messages.map(m => m.datetime.getTime())).toEqual([1400, 1500, 1700]);
     });
 
     it('should append messages in correct order 2', () => {
         const contact = new Contact('test@example1.com/resource', 'john doe');
-        contact.appendMessage(createMessageForDate(1400));
-        contact.appendMessage(createMessageForDate(1500));
-        contact.appendMessage(createMessageForDate(1700));
+        contact.addMessage(createMessageForDate(1400));
+        contact.addMessage(createMessageForDate(1500));
+        contact.addMessage(createMessageForDate(1700));
         expect(contact.messages.map(m => m.datetime.getTime())).toEqual([1400, 1500, 1700]);
     });
 
     it('should append messages in correct order 3', () => {
         const contact = new Contact('test@example1.com/resource', 'john doe');
-        contact.appendMessage(createMessageForDate(1700));
-        contact.appendMessage(createMessageForDate(1500));
-        contact.appendMessage(createMessageForDate(1400));
+        contact.addMessage(createMessageForDate(1700));
+        contact.addMessage(createMessageForDate(1500));
+        contact.addMessage(createMessageForDate(1400));
         expect(contact.messages.map(m => m.datetime.getTime())).toEqual([1400, 1500, 1700]);
     });
 
     it('should append messages in correct order 4', () => {
         const contact = new Contact('test@example1.com/resource', 'john doe');
-        contact.appendMessage(createMessageForDate(1400));
-        contact.appendMessage(createMessageForDate(1700));
-        contact.appendMessage(createMessageForDate(1500));
+        contact.addMessage(createMessageForDate(1400));
+        contact.addMessage(createMessageForDate(1700));
+        contact.addMessage(createMessageForDate(1500));
         expect(contact.messages.map(m => m.datetime.getTime())).toEqual([1400, 1500, 1700]);
     });
 
@@ -82,7 +84,8 @@ describe('contact', () => {
         return {
             datetime: new Date(new Date(date)),
             body: '',
-            direction: Direction.in
+            direction: Direction.in,
+            delayed: false
         };
     }
 
