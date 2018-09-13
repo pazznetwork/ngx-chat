@@ -1,5 +1,5 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -24,7 +24,7 @@ import { ChatService, ChatServiceToken } from '../../services/chat-service';
         ])
     ]
 })
-export class ChatWindowListComponent implements OnInit {
+export class ChatWindowListComponent implements OnInit, OnDestroy {
 
     @Input()
     rosterState: string;
@@ -41,6 +41,10 @@ export class ChatWindowListComponent implements OnInit {
             .subscribe(contact => {
                 this.chatListService.openChat(contact);
             });
+    }
+
+    ngOnDestroy(): void {
+        this.messageSubscription.unsubscribe();
     }
 
 }

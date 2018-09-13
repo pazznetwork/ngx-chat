@@ -1,7 +1,6 @@
 import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { Contact, ContactSubscription, Presence, PresenceStanza, Stanza } from '../../../../core';
-import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
@@ -11,7 +10,8 @@ import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
  */
 export class RosterPlugin extends AbstractXmppPlugin {
 
-    constructor(private chatService: XmppChatAdapter, private contactFactory: ContactFactoryService, private logService: LogService) {
+    constructor(private chatService: XmppChatAdapter,
+                private logService: LogService) {
         super();
     }
 

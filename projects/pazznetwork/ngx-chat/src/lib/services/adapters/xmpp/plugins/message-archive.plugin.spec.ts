@@ -10,7 +10,6 @@ import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
 import { MessageArchivePlugin } from './message-archive.plugin';
-import { MessagePlugin } from './message.plugin';
 
 
 describe('message archive plugin', () => {
@@ -19,7 +18,6 @@ describe('message archive plugin', () => {
     let chatAdapter: XmppChatAdapter;
     let contactFactory: ContactFactoryService;
     let xmppClientMock;
-    let logService: LogService;
     let contact1: Contact;
     const userJid = parseJid('me@example.com/myresource');
 
@@ -48,7 +46,6 @@ describe('message archive plugin', () => {
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
-        logService = TestBed.get(LogService);
         contact1 = contactFactory.createContact('someone@else.com', 'jon doe');
     });
 

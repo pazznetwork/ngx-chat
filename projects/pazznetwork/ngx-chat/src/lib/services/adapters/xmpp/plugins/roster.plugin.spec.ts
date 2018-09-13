@@ -37,7 +37,7 @@ describe('roster plugin', () => {
         contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
         logService = TestBed.get(LogService);
-        chatAdapter.addPlugins([new RosterPlugin(chatAdapter, contactFactory, logService)]);
+        chatAdapter.addPlugins([new RosterPlugin(chatAdapter, logService)]);
 
         chatConnectionService.userJid = new JID('me', 'example.com', 'something');
     });
@@ -68,7 +68,7 @@ describe('roster plugin', () => {
             contact3.pendingOut = true;
             const contact4 = contactFactory.createContact('test4@example.com');
 
-            const contacts = await new RosterPlugin(chatAdapter, contactFactory, logService).getRosterContacts();
+            const contacts = await new RosterPlugin(chatAdapter, logService).getRosterContacts();
             expect(contacts).toEqual([contact1, contact2, contact3, contact4]);
         });
 

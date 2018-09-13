@@ -24,7 +24,7 @@ export class Contact {
 
     private messageStore: MessageStore<Message>;
 
-    get messages$() {
+    get messages$(): Subject<Message> {
         return this.messageStore.messages$;
     }
 
@@ -38,7 +38,7 @@ export class Contact {
      */
     constructor(jidPlain: string,
                 public name: string,
-                private logService?: LogService,
+                logService?: LogService,
                 avatar?: string) {
         if (avatar) {
             this.avatar = avatar;

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
-import { first, skip, take } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
 
 import { Contact, Direction, Stanza } from '../../../core';
 import { testLogService } from '../../../test/logService';

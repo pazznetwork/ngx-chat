@@ -1,6 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { x as xml } from '@xmpp/xml';
-import { first } from 'rxjs/operators';
 import { testLogService } from '../../../test/logService';
 
 import { createXmppClientMock } from '../../../test/xmppClientMock';
@@ -11,7 +9,6 @@ import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connecti
 describe('chat connection service', () => {
 
     let chatConnectionService;
-    let contactFactory;
     let xmppClientMock;
 
     beforeEach(() => {
@@ -27,7 +24,6 @@ describe('chat connection service', () => {
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
-        contactFactory = TestBed.get(ContactFactoryService);
     });
 
     it('#getNextIqId() should generate new iq ids', () => {

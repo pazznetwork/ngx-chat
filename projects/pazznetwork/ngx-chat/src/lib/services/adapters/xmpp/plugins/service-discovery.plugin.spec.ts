@@ -14,9 +14,7 @@ describe('service discovery plugin', () => {
 
     let chatConnectionService: XmppChatConnectionService;
     let chatAdapter: XmppChatAdapter;
-    let contactFactory: ContactFactoryService;
     let xmppClientMock;
-    let logService: LogService;
 
     beforeEach(() => {
         xmppClientMock = createXmppClientMock();
@@ -33,9 +31,7 @@ describe('service discovery plugin', () => {
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
-        contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
-        logService = TestBed.get(LogService);
         chatAdapter.addPlugins([new ServiceDiscoveryPlugin(chatAdapter)]);
 
         chatConnectionService.userJid = new JID('me', 'example.com', 'something');

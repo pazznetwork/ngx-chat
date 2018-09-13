@@ -11,21 +11,21 @@ export interface SavedConference {
     autojoin: boolean;
 }
 
-export class BookmarkPlugin extends AbstractXmppPlugin {
+export const STORAGE_BOOKMARKS = 'storage:bookmarks';
 
-    private static readonly STORAGE_BOOKMARKS = 'storage:bookmarks';
+export class BookmarkPlugin extends AbstractXmppPlugin {
 
     constructor(private xmppChatAdapter: XmppChatAdapter) {
         super();
     }
 
     async retrieveMultiUserChatRooms(): Promise<SavedConference[]> {
-        const itemNodes = await this.xmppChatAdapter.getPlugin(PublishSubscribePlugin).retrieveNodeItems(BookmarkPlugin.STORAGE_BOOKMARKS);
+        const itemNodes = await this.xmppChatAdapter.getPlugin(PublishSubscribePlugin).retrieveNodeItems(STORAGE_BOOKMARKS);
         return itemNodes.map(itemNode => this.convertElementToSavedConference(itemNode));
     }
 
     private convertElementToSavedConference(itemNode: Element): SavedConference {
-        const conferenceNode = itemNode.getChild('storage', BookmarkPlugin.STORAGE_BOOKMARKS).getChild('conference');
+        const conferenceNode = itemNode.getChild('storage', STORAGE_BOOKMARKS).getChild('conference');
         return {
             name: conferenceNode.attrs.name,
             jid: conferenceNode.attrs.jid,
@@ -35,9 +35,9 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
 
     saveConference(conferenceToSave: SavedConference): Promise<IqResponseStanza> {
         return this.xmppChatAdapter.getPlugin(PublishSubscribePlugin).publishPrivate(
-            'storage:bookmarks',
+            STORAGE_BOOKMARKS,
             conferenceToSave.jid,
-            xml('storage', {xmlns: BookmarkPlugin.STORAGE_BOOKMARKS},
+            xml('storage', {xmlns: STORAGE_BOOKMARKS},
                 this.convertSavedConferenceToElement(conferenceToSave)
             )
         );

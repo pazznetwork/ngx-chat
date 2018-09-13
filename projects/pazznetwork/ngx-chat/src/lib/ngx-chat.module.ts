@@ -105,7 +105,7 @@ export class NgxChatModule {
             new MessageUuidPlugin(),
             new MultiUserChatPlugin(xmppChatAdapter, logService),
             new PublishSubscribePlugin(xmppChatAdapter),
-            new RosterPlugin(xmppChatAdapter, contactFactory, logService),
+            new RosterPlugin(xmppChatAdapter, logService),
             new ServiceDiscoveryPlugin(xmppChatAdapter),
         ]);
 

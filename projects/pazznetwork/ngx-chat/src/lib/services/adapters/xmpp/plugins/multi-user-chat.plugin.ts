@@ -32,12 +32,11 @@ export interface Occupant {
 
 export class Room {
 
-    occupants: BehaviorSubject<Occupant>[];
     roomJid: JID;
     occupantJid: JID;
     private messageStore: MessageStore<RoomMessage>;
 
-    constructor(occupantJid: JID, private logService: LogService) {
+    constructor(occupantJid: JID, logService: LogService) {
         this.roomJid = occupantJid.bare();
         this.occupantJid = occupantJid;
         this.messageStore = new MessageStore<RoomMessage>(logService);

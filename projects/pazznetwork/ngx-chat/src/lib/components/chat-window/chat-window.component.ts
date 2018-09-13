@@ -1,7 +1,6 @@
-import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
-import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -18,8 +17,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
     private subscriptions: Subscription[] = [];
 
-    constructor(@Inject(ChatServiceToken) private chatService: ChatService,
-                private chatListService: ChatListStateService) {
+    constructor(private chatListService: ChatListStateService) {
     }
 
     ngOnInit() {

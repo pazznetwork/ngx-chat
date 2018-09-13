@@ -1,4 +1,4 @@
-import { ComponentFactoryResolver, Directive, ElementRef, Input, OnChanges, ViewContainerRef } from '@angular/core';
+import { ComponentFactoryResolver, Directive, Input, OnChanges, ViewContainerRef } from '@angular/core';
 import { ChatMessageLinkComponent } from '../components/chat-message-link/chat-message-link.component';
 import { ChatMessageTextComponent } from '../components/chat-message-text/chat-message-text.component';
 
@@ -9,8 +9,7 @@ export class LinksDirective implements OnChanges {
 
     @Input('ngxChatLinks') ngxChatLinks: string;
 
-    constructor(private el: ElementRef,
-                private resolver: ComponentFactoryResolver,
+    constructor(private resolver: ComponentFactoryResolver,
                 private viewContainerRef: ViewContainerRef) {
     }
 
