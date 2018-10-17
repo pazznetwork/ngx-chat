@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input } from '@angular/core';
 import { Room } from '../../services/adapters/xmpp/plugins';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
@@ -7,15 +7,12 @@ import { ChatService, ChatServiceToken } from '../../services/chat-service';
     templateUrl: './chat-room-messages.component.html',
     styleUrls: ['./chat-room-messages.component.less']
 })
-export class ChatRoomMessagesComponent implements OnInit {
+export class ChatRoomMessagesComponent {
 
     @Input()
     room: Room;
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService) {
-    }
-
-    ngOnInit() {
     }
 
 }

@@ -104,7 +104,7 @@ class QueryMemberListStanzaBuilder extends AbstractStanzaBuilder {
 
 }
 
-export interface MemberlistModification {
+export interface MemberlistItem {
     jid: JID;
     affiliation: Affiliation;
     nick?: string;
@@ -112,11 +112,11 @@ export interface MemberlistModification {
 
 class ModifyMemberListStanzaBuilder extends AbstractStanzaBuilder {
 
-    constructor(private roomJid: string, private modifications: MemberlistModification[]) {
+    constructor(private roomJid: string, private modifications: MemberlistItem[]) {
         super();
     }
 
-    static build(roomJid: string, modifications: MemberlistModification[]): Stanza {
+    static build(roomJid: string, modifications: MemberlistItem[]): Stanza {
         return new ModifyMemberListStanzaBuilder(roomJid, modifications).toStanza();
     }
 
@@ -128,7 +128,7 @@ class ModifyMemberListStanzaBuilder extends AbstractStanzaBuilder {
         );
     }
 
-    private buildItem(modification: MemberlistModification) {
+    private buildItem(modification: MemberlistItem) {
         const item = xml('item', {jid: modification.jid.toString(), affiliation: Affiliation[modification.affiliation]});
         if (modification.nick) {
             item.attrs.nick = modification.nick;
@@ -232,7 +232,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     private async joinRoomInternal(roomJid: JID) {
         const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
-        const occupantJid = new JID(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
+        const occupantJid = new JID(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
         const roomJoinedPromise = new Promise<Stanza>(resolve => this.roomJoinPromises[occupantJid.toString()] = resolve);
         await this.xmppChatAdapter.chatConnectionService.send(
             xml('presence', {from: userJid.toString(), to: occupantJid.toString()},
@@ -245,8 +245,13 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             throw new Error('error joining room: ' + presenceResponse.toString());
         }
 
-        const room = new Room(occupantJid, this.logService);
-        this.rooms$.next([room].concat(this.rooms$.getValue()));
+        let room;
+        try {
+            room = this.getRoomByJid(roomJid);
+        } catch {
+            room = new Room(occupantJid, this.logService);
+            this.rooms$.next([room].concat(this.rooms$.getValue()));
+        }
 
         return {presenceResponse, room};
     }
@@ -255,7 +260,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return (await this.joinRoomInternal(occupantJid)).room;
     }
 
-    async queryMemberList(room: Room): Promise<Occupant[]> {
+    async queryMemberList(room: Room): Promise<MemberlistItem[]> {
         const responsePromises = [
             this.xmppChatAdapter.chatConnectionService.sendIq(QueryMemberListStanzaBuilder.build(room.roomJid.toString(), 'admin')),
             this.xmppChatAdapter.chatConnectionService.sendIq(QueryMemberListStanzaBuilder.build(room.roomJid.toString(), 'member')),
@@ -264,18 +269,36 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         ];
 
         const memberQueryResponses = await Promise.all(responsePromises);
-        let members = [];
+        let members: MemberlistItem[] = [];
         for (const memberQueryResponse of memberQueryResponses) {
             const membersFromQueryResponse = memberQueryResponse.getChild('query').getChildren('item')
                 .map(memberItem => ({
-                    jid: memberItem.attrs.jid,
+                    jid: parseJid(memberItem.attrs.jid),
                     nick: memberItem.attrs.nick,
-                    affiliation: memberItem.attrs.affiliation
+                    affiliation: this.reverseMapAffiliation(memberItem.attrs.affiliation),
                 }));
             members = members.concat(membersFromQueryResponse);
         }
 
         return members;
+    }
+
+    private reverseMapAffiliation(value: string): Affiliation {
+        if (!value || value === 'none') {
+            return Affiliation.none;
+        } else if (value === 'member') {
+            return Affiliation.member;
+        } else if (value === 'admin') {
+            return Affiliation.admin;
+        } else if (value === 'owner') {
+            return Affiliation.owner;
+        } else if (value === 'outcast') {
+            return Affiliation.outcast;
+        } else {
+            const message = 'unexpected affilation: ' + value;
+            this.logService.error(message);
+            throw new Error(message);
+        }
     }
 
     async modifyMemberList(room: Room, jid: JID, affiliation: Affiliation, nick?: string): Promise<IqResponseStanza> {
