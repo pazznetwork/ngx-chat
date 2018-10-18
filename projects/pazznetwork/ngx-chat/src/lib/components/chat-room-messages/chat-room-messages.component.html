@@ -2,8 +2,9 @@
     <!-- TODO: avatar -->
     <ngx-chat-message *ngFor="let message of room.messages"
                       [message]="message"
+                      [avatar]="getOrCreateContactWithFullJid(message.from).avatar"
                       [showAvatars]="true"
-                      [nick]="chatService.getOrCreateContactById(message.from.toString()).name">
+                      [nick]="getOrCreateContactWithFullJid(message.from).name">
     </ngx-chat-message>
     <div class="chat-messages-empty" *ngIf="room.messages.length === 0">
         {{this.chatService.translations.noMessages}}

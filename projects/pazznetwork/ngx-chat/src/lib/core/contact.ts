@@ -16,6 +16,8 @@ export class Contact {
     public avatar = dummyAvatar;
     public metadata: ContactMetadata = {};
 
+    /** use {@link jidBare}, jid resource is only set for chat room contacts */
+    public jidFull: JID;
     public jidBare: JID;
     public presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
     public subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
@@ -43,7 +45,9 @@ export class Contact {
         if (avatar) {
             this.avatar = avatar;
         }
-        this.jidBare = parseJid(jidPlain).bare();
+        const jid = parseJid(jidPlain);
+        this.jidFull = jid;
+        this.jidBare = jid.bare();
         this.messageStore = new MessageStore(logService);
     }
 
