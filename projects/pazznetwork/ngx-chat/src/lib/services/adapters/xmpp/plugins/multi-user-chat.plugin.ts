@@ -230,6 +230,27 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         }
     }
 
+    async destroyRoom(roomJid: JID) {
+        const roomDestroyedResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
+            xml('iq', {type: 'set', to: roomJid.toString()},
+                xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'},
+                    xml('destroy'))));
+
+        const child = roomDestroyedResponse.getChild('error');
+        if (child) {
+            throw new Error('error destroying room:' + child.attrs.type);
+        }
+
+        // TODO: refactor so that we instead listen to the presence destroy stanza
+        const allRoomsWithoutDestroyedRoom = this.rooms$.getValue().filter(
+            room => !room.roomJid.equals(roomJid)
+        );
+
+        this.rooms$.next(allRoomsWithoutDestroyedRoom);
+
+        return roomDestroyedResponse;
+    }
+
     private async joinRoomInternal(roomJid: JID) {
         const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
         const occupantJid = new JID(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
