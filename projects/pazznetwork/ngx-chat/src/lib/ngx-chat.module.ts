@@ -8,9 +8,9 @@ import sessionEstablishment from '@xmpp/plugins/session-establishment';
 import websocket from '@xmpp/plugins/websocket';
 import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
+import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
 import { ChatMessageTextComponent } from './components/chat-message-text/chat-message-text.component';
 import { ChatMessageComponent } from './components/chat-message/chat-message.component';
-import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
 import { ChatRoomMessagesComponent } from './components/chat-room-messages/chat-room-messages.component';
 import { ChatWindowListComponent } from './components/chat-window-list/chat-window-list.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
@@ -24,6 +24,7 @@ import {
     MessageUuidPlugin,
     MultiUserChatPlugin,
     PublishSubscribePlugin,
+    PushPlugin,
     RosterPlugin,
     ServiceDiscoveryPlugin
 } from './services/adapters/xmpp/plugins';
@@ -107,6 +108,7 @@ export class NgxChatModule {
             new PublishSubscribePlugin(xmppChatAdapter),
             new RosterPlugin(xmppChatAdapter, logService),
             new ServiceDiscoveryPlugin(xmppChatAdapter),
+            new PushPlugin(xmppChatAdapter),
         ]);
 
         return xmppChatAdapter;
