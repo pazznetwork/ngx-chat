@@ -18,14 +18,14 @@ export class LinksDirective implements OnChanges {
 
         if (message) {
             const urlRegex = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-            const links = this.getAllMatches(urlRegex, message);
+            const links = message.match(urlRegex) || [];
 
             const chatMessageTextFactory = this.resolver.resolveComponentFactory(ChatMessageTextComponent);
             const chatMessageLinkFactory = this.resolver.resolveComponentFactory(ChatMessageLinkComponent);
 
             let lastIndex = 0;
             for (let i = 0; i < links.length; i++) {
-                const currentIndex = message.indexOf(links[i]);
+                const currentIndex = message.indexOf(links[i], lastIndex);
 
                 const textBeforeLink = this.viewContainerRef.createComponent(chatMessageTextFactory);
                 textBeforeLink.instance.text = message.substring(lastIndex, currentIndex);
@@ -40,18 +40,6 @@ export class LinksDirective implements OnChanges {
             const textAfterLastLinkSpan = this.viewContainerRef.createComponent(chatMessageTextFactory);
             textAfterLastLinkSpan.instance.text = message.substring(lastIndex);
         }
-    }
-
-    private getAllMatches(urlRegex: RegExp, message: string) {
-        const matches: string[] = [];
-        let match;
-        do {
-            match = urlRegex.exec(message);
-            if (match) {
-                matches.push(match[0]);
-            }
-        } while (match);
-        return matches;
     }
 
     private shorten(url: string) {
