@@ -12,7 +12,7 @@ declare module '@xmpp/client-core' {
 
         public write(message: string): void;
 
-        public start(options: StartOptions): void;
+        public start(): void;
 
         public stop(): void;
 

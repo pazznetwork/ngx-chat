@@ -6,7 +6,7 @@ import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { PushPlugin } from './push.plugin';
 
 describe('push plugin', () => {
@@ -27,7 +27,8 @@ describe('push plugin', () => {
             findService: () => pushService
         };
 
-        const xmppChatConnectionService = new XmppChatConnectionService(xmppClientMock, testLogService());
+        const xmppChatConnectionService = new XmppChatConnectionService(testLogService());
+        xmppChatConnectionService.client = xmppClientMock;
 
         const chatAdapterMock: any = {
             getPlugin: () => serviceDiscoveryPluginMock,
@@ -36,7 +37,6 @@ describe('push plugin', () => {
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 {provide: XmppChatConnectionService, useValue: xmppChatConnectionService},
                 {provide: XmppChatAdapter, useValue: chatAdapterMock},
                 {provide: LogService, useValue: testLogService()},

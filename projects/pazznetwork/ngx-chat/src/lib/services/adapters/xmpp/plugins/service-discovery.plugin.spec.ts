@@ -7,7 +7,7 @@ import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 
 describe('service discovery plugin', () => {
@@ -22,7 +22,6 @@ describe('service discovery plugin', () => {
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
@@ -31,10 +30,11 @@ describe('service discovery plugin', () => {
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
         chatAdapter = TestBed.get(XmppChatAdapter);
         chatAdapter.addPlugins([new ServiceDiscoveryPlugin(chatAdapter)]);
 
-        chatConnectionService.userJid = new JID('me', 'example.com', 'something');
+        chatConnectionService.userJid = new JID('me', 'jabber.example.com', 'something');
     });
 
     it('should discover the multi user chat service', async () => {

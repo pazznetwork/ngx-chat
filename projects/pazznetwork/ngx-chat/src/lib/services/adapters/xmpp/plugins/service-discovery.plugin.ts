@@ -83,13 +83,13 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
     }
 
     private async discoverServerFeatures() {
-        this.services.push(await this.discoverServiceInformation(this.chatAdapter.chatConnectionService.client.startOptions.domain));
+        this.services.push(await this.discoverServiceInformation(this.chatAdapter.chatConnectionService.userJid.domain));
     }
 
     private async discoverServices() {
         const serviceListResponsePromise = this.chatAdapter.chatConnectionService.sendIq(
             new QueryStanzaBuilder(
-                ServiceDiscoveryPlugin.DISCO_ITEMS, this.chatAdapter.chatConnectionService.client.startOptions.domain).toStanza()
+                ServiceDiscoveryPlugin.DISCO_ITEMS, this.chatAdapter.chatConnectionService.userJid.domain).toStanza()
         );
 
         const serviceDomains = (await serviceListResponsePromise)

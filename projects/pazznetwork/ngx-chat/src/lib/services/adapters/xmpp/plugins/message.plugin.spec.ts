@@ -8,7 +8,7 @@ import { ChatServiceToken } from '../../../chat-service';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { MessagePlugin } from './message.plugin';
 
 describe('message plugin', () => {
@@ -22,7 +22,6 @@ describe('message plugin', () => {
         const logService = testLogService();
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 {provide: ChatServiceToken, useClass: XmppChatAdapter},
                 {provide: LogService, useValue: logService},
@@ -32,6 +31,7 @@ describe('message plugin', () => {
 
         chatService = TestBed.get(ChatServiceToken);
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
         chatService.addPlugins([new MessagePlugin(chatService, logService)]);
         chatConnectionService.userJid = new JID('me', 'example.com', 'something');
     });

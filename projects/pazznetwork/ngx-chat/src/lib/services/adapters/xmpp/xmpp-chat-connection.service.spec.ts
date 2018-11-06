@@ -4,7 +4,7 @@ import { testLogService } from '../../../test/logService';
 import { createXmppClientMock } from '../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
-import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
+import { XmppChatConnectionService } from './xmpp-chat-connection.service';
 
 describe('chat connection service', () => {
 
@@ -16,7 +16,6 @@ describe('chat connection service', () => {
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
@@ -24,6 +23,7 @@ describe('chat connection service', () => {
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
     });
 
     it('#getNextIqId() should generate new iq ids', () => {

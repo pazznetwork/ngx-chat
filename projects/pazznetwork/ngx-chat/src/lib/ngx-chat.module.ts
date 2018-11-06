@@ -1,11 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Client } from '@xmpp/client-core';
-import bind from '@xmpp/plugins/bind';
-import plain from '@xmpp/plugins/sasl-plain';
-import sessionEstablishment from '@xmpp/plugins/session-establishment';
-import websocket from '@xmpp/plugins/websocket';
 import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
 import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
@@ -30,7 +25,7 @@ import {
 } from './services/adapters/xmpp/plugins';
 import { MessagePlugin } from './services/adapters/xmpp/plugins/message.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
+import { XmppChatConnectionService } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
 import { ChatServiceToken } from './services/chat-service';
 import { ContactFactoryService } from './services/contact-factory.service';
@@ -84,12 +79,8 @@ export class NgxChatModule {
                 },
                 {
                     provide: XmppChatConnectionService,
-                    deps: [XmppClientToken, LogService],
+                    deps: [LogService],
                     useFactory: NgxChatModule.chatConnectionService
-                },
-                {
-                    provide: XmppClientToken,
-                    useFactory: NgxChatModule.client
                 },
             ],
         };
@@ -114,19 +105,10 @@ export class NgxChatModule {
         return xmppChatAdapter;
     }
 
-    private static chatConnectionService(client: Client, logService: LogService) {
-        const connectionService = new XmppChatConnectionService(client, logService);
+    private static chatConnectionService(logService: LogService) {
+        const connectionService = new XmppChatConnectionService(logService);
         connectionService.initialize();
         return connectionService;
-    }
-
-    private static client() {
-        const client = new Client();
-        client.plugin(bind);
-        client.plugin(plain);
-        client.plugin(sessionEstablishment);
-        client.plugin(websocket);
-        return client;
     }
 
 }

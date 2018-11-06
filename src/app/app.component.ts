@@ -10,9 +10,9 @@ import { ChatService, ChatServiceToken, Contact, ContactFactoryService, MultiUse
 export class AppComponent {
 
     public domain: string;
-    public uri: string;
+    public service: string;
     public password: string;
-    public jid: string;
+    public username: string;
     public otherJid: any;
     public contacts: Observable<Contact[]> = this.chatService.contactsSubscribed$;
     public multiUserChatPlugin: MultiUserChatPlugin;
@@ -21,9 +21,9 @@ export class AppComponent {
                 private contactFactory: ContactFactoryService) {
         const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
         this.domain = contactData.domain;
-        this.uri = contactData.uri;
+        this.service = contactData.service;
         this.password = contactData.password;
-        this.jid = contactData.jid;
+        this.username = contactData.username;
 
         this.chatService.state$.subscribe((state) => this.stateChanged(state));
         this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
@@ -33,9 +33,9 @@ export class AppComponent {
     onLogin() {
         const logInRequest = {
             domain: this.domain,
-            uri: this.uri,
+            service: this.service,
             password: this.password,
-            jid: this.jid,
+            username: this.username,
         };
         localStorage.setItem('data', JSON.stringify(logInRequest));
 

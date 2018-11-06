@@ -50,7 +50,7 @@ export class XmppChatAdapter implements ChatService {
                             try {
                                 plugin.onOffline();
                             } catch (e) {
-                                this.logService.error('erro while handling offline in ', plugin);
+                                this.logService.error('error while handling offline in ', plugin);
                             }
                         });
                     }

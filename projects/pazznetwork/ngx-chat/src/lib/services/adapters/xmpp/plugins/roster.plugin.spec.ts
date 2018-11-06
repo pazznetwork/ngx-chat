@@ -8,7 +8,7 @@ import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { RosterPlugin } from './roster.plugin';
 
 
@@ -25,7 +25,6 @@ describe('roster plugin', () => {
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
@@ -34,6 +33,7 @@ describe('roster plugin', () => {
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
         contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
         logService = TestBed.get(LogService);
