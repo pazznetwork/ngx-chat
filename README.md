@@ -44,9 +44,9 @@ Log in via `ngx-chat` wherever you want (e.g. in a component or a service)
 constructor(@Inject(ChatServiceToken) chatService: ChatService) {
     chatService.logIn({
         domain: 'ngx-chat.example',
-        uri: 'wss://ngx-chat.example:5280/websocket',
+        service: 'wss://ngx-chat.example:5280/websocket',
+        username: 'someuser',
         password: 'password',
-        jid: 'someuser@ngx-chat.example',
     });
 }
 ```
