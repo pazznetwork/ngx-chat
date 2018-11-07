@@ -24,6 +24,7 @@ import {
     ServiceDiscoveryPlugin
 } from './services/adapters/xmpp/plugins';
 import { MessagePlugin } from './services/adapters/xmpp/plugins/message.plugin';
+import { PingPlugin } from './services/adapters/xmpp/plugins/ping.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
@@ -100,6 +101,7 @@ export class NgxChatModule {
             new RosterPlugin(xmppChatAdapter, logService),
             new ServiceDiscoveryPlugin(xmppChatAdapter),
             new PushPlugin(xmppChatAdapter),
+            new PingPlugin(xmppChatAdapter),
         ]);
 
         return xmppChatAdapter;
