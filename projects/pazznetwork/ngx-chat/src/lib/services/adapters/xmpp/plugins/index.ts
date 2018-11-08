@@ -5,5 +5,6 @@ export * from './message-uuid.plugin';
 export * from './multi-user-chat.plugin';
 export * from './publish-subscribe.plugin';
 export * from './push.plugin';
+export * from './registration.plugin';
 export * from './roster.plugin';
 export * from './service-discovery.plugin';

@@ -6,9 +6,6 @@ export interface Stanza extends Element {
     };
     children: Stanza[];
     name: string;
-
-    getChild(child: string): Stanza;
-
 }
 
 export interface IqResponseStanza extends Stanza {

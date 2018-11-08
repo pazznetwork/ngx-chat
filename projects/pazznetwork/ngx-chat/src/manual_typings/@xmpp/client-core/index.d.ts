@@ -1,10 +1,16 @@
 declare module '@xmpp/client-core' {
 
+    import { Element } from 'ltx';
+
     export class Client {
 
         public timeout: number;
 
-        public startOptions: { uri: string, domain: string };
+        public reconnect: Reconnect;
+
+        public iqCaller: IqCaller;
+
+        public startOptions: StartOptions;
 
         public on(eventName: string, callback: any): void;
 
@@ -20,11 +26,25 @@ declare module '@xmpp/client-core' {
 
         public plugin(plugin: any): void;
 
+        public removeAllListeners(): void;
+
     }
 
     export interface StartOptions {
         uri: string;
         domain: string;
+    }
+
+    export interface Reconnect {
+
+        stop(): void;
+
+    }
+
+    export interface IqCaller {
+
+        request(stanza: Element): Promise<Element>;
+
     }
 
 }

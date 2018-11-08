@@ -1,6 +1,15 @@
 import { Component, Inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { ChatService, ChatServiceToken, Contact, ContactFactoryService, MultiUserChatPlugin } from './ngx-chat-imports';
+import {
+    ChatService,
+    ChatServiceToken,
+    Contact,
+    ContactFactoryService,
+    LogLevel,
+    LogService,
+    MultiUserChatPlugin,
+    RegistrationPlugin,
+} from './ngx-chat-imports';
 
 @Component({
     selector: 'app-root',
@@ -16,10 +25,13 @@ export class AppComponent {
     public otherJid: any;
     public contacts: Observable<Contact[]> = this.chatService.contactsSubscribed$;
     public multiUserChatPlugin: MultiUserChatPlugin;
+    public registrationMessage: string;
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
-                private contactFactory: ContactFactoryService) {
+                private contactFactory: ContactFactoryService,
+                private logService: LogService) {
         const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
+        this.logService.logLevel = LogLevel.Debug;
         this.domain = contactData.domain;
         this.service = contactData.service;
         this.password = contactData.password;
@@ -46,6 +58,21 @@ export class AppComponent {
         this.chatService.logOut();
     }
 
+    async onRegister() {
+        this.registrationMessage = 'registering ...';
+        try {
+            await this.chatService.getPlugin(RegistrationPlugin).register(
+                this.username,
+                this.password,
+                this.service,
+                this.domain
+            );
+            this.registrationMessage = 'registration successful';
+        } catch (e) {
+            this.registrationMessage = 'registration failed: ' + e.toString();
+            throw e;
+        }
+    }
 
     onAddContact() {
         this.chatService.addContact(this.otherJid);

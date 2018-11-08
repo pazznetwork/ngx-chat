@@ -40,6 +40,11 @@
 
     <button (click)="onLogin()">Log in</button>
     <button (click)="onLogout()">Log out</button>
+    <button (click)="onRegister()">Register</button>
+
+    <div *ngIf="registrationMessage">
+        <p>{{registrationMessage}}</p>
+    </div>
 
     <hr />
 
