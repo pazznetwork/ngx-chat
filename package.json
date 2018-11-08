@@ -17,7 +17,7 @@
     "bundle-report": "webpack-bundle-analyzer dist/ngx-chat-xmpp-shell/stats.json",
     "documentation": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json",
     "documentation:serve": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json --serve --watch",
-    "changelog": "conventional-changelog --infile CHANGELOG.md --same-file --preset angular --pkg projects/pazznetwork/ngx-chat/package.json"
+    "changelog": "conventional-changelog --infile CHANGELOG.md --same-file --preset angular --pkg projects/pazznetwork/ngx-chat/package.json --release-count 0"
   },
   "dependencies": {
     "@angular/animations": "^6.0.9",
