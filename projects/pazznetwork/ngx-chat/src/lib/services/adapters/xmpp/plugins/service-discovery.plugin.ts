@@ -12,7 +12,7 @@ class QueryStanzaBuilder extends AbstractStanzaBuilder {
     }
 
     toStanza() {
-        const attrs = {type: 'get'};
+        const attrs: { [key: string]: string } = {type: 'get'};
         if (this.to) {
             attrs['to'] = this.to;
         }

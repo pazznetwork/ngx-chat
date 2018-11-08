@@ -13,7 +13,7 @@ export interface ChatPlugin {
     /**
      * Hook for plugins to clear up data.
      */
-    onOffline();
+    onOffline(): void;
 
     /**
      * True if the given stanza was handled by this plugin, false otherwise.

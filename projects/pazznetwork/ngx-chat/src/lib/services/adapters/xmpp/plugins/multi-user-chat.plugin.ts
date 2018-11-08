@@ -2,7 +2,6 @@ import { jid as parseJid, JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
 import { ContactMetadata, Direction, IqResponseStanza, Message, Stanza } from '../../../../core';
 import { MessageStore } from '../../../../core/message-store';
 import { LogService } from '../../../log.service';
@@ -12,7 +11,7 @@ import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 
 export interface RoomCreationOptions {
-    roomId?: string;
+    roomId: string;
     public: boolean;
     membersOnly: boolean;
     nonAnonymous: boolean;
@@ -143,7 +142,7 @@ class ModifyMemberListStanzaBuilder extends AbstractStanzaBuilder {
 export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     rooms$ = new BehaviorSubject<Room[]>([]);
-    private roomJoinPromises: { [roomAndJid: string]: (stanza) => void } = {};
+    private roomJoinPromises: { [roomAndJid: string]: (stanza: Stanza) => void } = {};
 
     constructor(private xmppChatAdapter: XmppChatAdapter, private logService: LogService) {
         super();
@@ -185,7 +184,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
      * @param request
      */
     async createRoom(request: RoomCreationOptions): Promise<Room> {
-        const roomId = request.roomId || uuid();
+        const roomId = request.roomId;
         const service = await this.xmppChatAdapter.getPlugin(ServiceDiscoveryPlugin).findService('conference', 'text');
         const occupantJid = new JID(roomId, service.jid, request.nick);
         const {presenceResponse, room} = await this.joinRoomInternal(occupantJid);
@@ -340,7 +339,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return this.xmppChatAdapter.chatConnectionService.send(roomMessageStanza);
     }
 
-    private convertConfiguration(configurationKeyValuePair) {
+    private convertConfiguration(configurationKeyValuePair: { [key: string]: string[] }) {
         const configurationFields = [];
         for (const configurationKey in configurationKeyValuePair) {
             if (configurationKeyValuePair.hasOwnProperty(configurationKey)) {
@@ -354,15 +353,15 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     }
 
     private extractDefaultConfiguration(fields: Element[]) {
-        const configuration = {};
+        const configuration: { [key: string]: string[] } = {};
         for (const field of fields) {
             configuration[field.attrs.var] = field.getChildren('value').map(value => value.getText());
         }
         return configuration;
     }
 
-    private extractRoomCreationRequestConfiguration(request: RoomCreationOptions) {
-        const configuration = {};
+    private extractRoomCreationRequestConfiguration(request: RoomCreationOptions): { [key: string]: string[] } {
+        const configuration: { [key: string]: string[] } = {};
         configuration['muc#roomconfig_whois'] = [request.nonAnonymous ? 'anyone' : 'moderators'];
         configuration['muc#roomconfig_publicroom'] = [request.public ? '1' : '0'];
         configuration['muc#roomconfig_membersonly'] = [request.membersOnly ? '1' : '0'];

@@ -170,7 +170,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
         }
     }
 
-    private sendAcceptPresenceSubscriptionRequest(jid) {
+    private sendAcceptPresenceSubscriptionRequest(jid: string) {
         const contact = this.chatService.getOrCreateContactById(jid);
         contact.pendingIn = false;
         this.chatService.chatConnectionService.send(

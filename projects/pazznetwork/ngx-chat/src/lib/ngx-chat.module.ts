@@ -20,12 +20,12 @@ import {
     MultiUserChatPlugin,
     PublishSubscribePlugin,
     PushPlugin,
+    RegistrationPlugin,
     RosterPlugin,
     ServiceDiscoveryPlugin
 } from './services/adapters/xmpp/plugins';
 import { MessagePlugin } from './services/adapters/xmpp/plugins/message.plugin';
 import { PingPlugin } from './services/adapters/xmpp/plugins/ping.plugin';
-import { RegistrationPlugin } from './services/adapters/xmpp/plugins/registration.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
@@ -89,7 +89,9 @@ export class NgxChatModule {
 
     }
 
-    private static chatAdapter(chatConnectionService, logService, contactFactory) {
+    private static chatAdapter(chatConnectionService: XmppChatConnectionService,
+                               logService: LogService,
+                               contactFactory: ContactFactoryService) {
         const xmppChatAdapter = new XmppChatAdapter(chatConnectionService, logService, contactFactory);
 
         xmppChatAdapter.addPlugins([

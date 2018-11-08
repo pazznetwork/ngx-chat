@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { JID, jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
-import { Direction } from '../../../../core';
+import { Direction, Stanza } from '../../../../core';
 import { testLogService } from '../../../../test/logService';
 import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
@@ -14,6 +14,7 @@ import { MultiUserChatPlugin } from './multi-user-chat.plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 
 const defaultRoomConfiguration = {
+    roomId: 'roomId',
     public: false,
     membersOnly: true,
     nonAnonymous: true,
@@ -24,7 +25,7 @@ describe('multi user chat plugin', () => {
 
     let chatConnectionService: XmppChatConnectionService;
     let chatAdapter: XmppChatAdapter;
-    let xmppClientMock;
+    let xmppClientMock: any;
     let multiUserChatPlugin: MultiUserChatPlugin;
     let logService: LogService;
 
@@ -62,7 +63,7 @@ describe('multi user chat plugin', () => {
 
         it('should throw if user is not allowed to create rooms', async () => {
 
-            xmppClientMock.send.and.callFake((content) => {
+            xmppClientMock.send.and.callFake((content: Stanza) => {
                 chatConnectionService.onStanzaReceived(
                     xml('presence', {from: content.attrs.to, to: content.attrs.from},
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'}),
@@ -84,7 +85,7 @@ describe('multi user chat plugin', () => {
 
         it('should throw if user is not owner', async () => {
 
-            xmppClientMock.send.and.callFake((content) => {
+            xmppClientMock.send.and.callFake((content: Stanza) => {
                 chatConnectionService.onStanzaReceived(
                     xml('presence', {from: content.attrs.to, to: content.attrs.from},
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
@@ -105,7 +106,7 @@ describe('multi user chat plugin', () => {
 
         it('should throw if room is not configurable', async () => {
 
-            xmppClientMock.send.and.callFake((content) => {
+            xmppClientMock.send.and.callFake((content: Stanza) => {
 
                 if (content.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
@@ -139,7 +140,7 @@ describe('multi user chat plugin', () => {
         });
 
         it('should handle room configurations correctly', async () => {
-            xmppClientMock.send.and.callFake((content) => {
+            xmppClientMock.send.and.callFake((content: Stanza) => {
                 if (content.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: content.attrs.to, to: content.attrs.from},
@@ -187,7 +188,7 @@ describe('multi user chat plugin', () => {
 
         it('should allow users to create and configure rooms', async () => {
 
-            xmppClientMock.send.and.callFake((content) => {
+            xmppClientMock.send.and.callFake((content: Stanza) => {
                 if (content.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: content.attrs.to, to: content.attrs.from},
@@ -237,7 +238,7 @@ describe('multi user chat plugin', () => {
 
         it('should be able to receive messages in rooms', async (resolve) => {
 
-            xmppClientMock.send.and.callFake((content) => {
+            xmppClientMock.send.and.callFake((content: Stanza) => {
                 chatConnectionService.onStanzaReceived(
                     xml('presence', {from: content.attrs.to, to: content.attrs.from},
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'},
@@ -272,7 +273,7 @@ describe('multi user chat plugin', () => {
 
         it('should be able to send messages', async () => {
 
-            xmppClientMock.send.and.callFake((stanza) => {
+            xmppClientMock.send.and.callFake((stanza: Stanza) => {
 
                 if (stanza.name === 'message') {
                     expect(stanza.name).toEqual('message');
@@ -321,12 +322,12 @@ describe('multi user chat plugin', () => {
 
 });
 
-function expectConfigurationOption(configurationList, configurationKey: string, expected: any) {
+function expectConfigurationOption(configurationList: Stanza, configurationKey: string, expected: any) {
     const value = extractConfigurationValue(configurationList, configurationKey);
     expect(value).toEqual(expected);
 }
 
-function extractConfigurationValue(configurationList, configurationKey: string) {
+function extractConfigurationValue(configurationList: Stanza, configurationKey: string) {
     const fieldNodes = configurationList.getChildrenByAttr('var', configurationKey);
     expect(fieldNodes.length).toEqual(1);
     const fieldNode = fieldNodes[0];

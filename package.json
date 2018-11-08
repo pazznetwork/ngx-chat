@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "ng build @pazznetwork/ngx-chat && ng serve",
     "clean": "rimraf out-tsc && rimraf dist && rimraf coverage && rimraf documentation",
-    "compile": "tsc -p projects/pazznetwork/ngx-chat/tsconfig.lib.json --noEmit",
+    "compile": "tsc -p projects/pazznetwork/ngx-chat/tsconfig.lib.json --noEmit --noImplicitAny",
     "build-lib": "npm run compile && npm run clean && ng build @pazznetwork/ngx-chat --prod && node fix-build-result.js",
     "build": "npm run build-lib && ng build --prod --stats-json",
     "test": "ng test @pazznetwork/ngx-chat --watch",

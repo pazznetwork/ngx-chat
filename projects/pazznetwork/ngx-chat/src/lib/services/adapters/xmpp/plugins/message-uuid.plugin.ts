@@ -1,8 +1,8 @@
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
-import { v4 as uuid } from 'uuid';
 
 import { Message, MessageWithBodyStanza } from '../../../../core';
+import { id } from '../../../../core/id-generator';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 
 /**
@@ -17,7 +17,7 @@ export class MessageUuidPlugin extends AbstractXmppPlugin {
     }
 
     beforeSendMessage(messageStanza: Element): void {
-        messageStanza.children.push(xml('origin-id', {xmlns: 'urn:xmpp:sid:0', id: uuid()}));
+        messageStanza.children.push(xml('origin-id', {xmlns: 'urn:xmpp:sid:0', id: id()}));
     }
 
     afterSendMessage(message: Message, messageStanza: Element): void {
