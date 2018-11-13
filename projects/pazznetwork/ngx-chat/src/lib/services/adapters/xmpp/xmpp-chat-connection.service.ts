@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { client as clientFactory } from '@xmpp/client';
+import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { Client } from '@xmpp/client-core';
 import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
@@ -7,6 +6,8 @@ import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IqResponseStanza, LogInRequest, Stanza } from '../../../core';
 import { LogService } from '../../log.service';
+
+export const XmppClientToken = new InjectionToken('pazznetworkNgxChatXmppClient');
 
 /**
  * Implementation of the XMPP specification according to RFC 6121.
@@ -25,13 +26,27 @@ export class XmppChatConnectionService {
      * User JID with resouce, not bare.
      */
     public userJid: JID;
-    public client: Client;
     private iqId = new Date().getTime();
     private iqStanzaResponseCallbacks: { [key: string]: ((arg: any) => void) } = {};
 
-    constructor(private logService: LogService) {}
+    constructor(@Inject(XmppClientToken) public client: Client,
+                private logService: LogService) {}
 
     initialize(): void {
+
+        this.client.on('error', (err: any) => {
+            this.logService.error('chat service error =>', err.toString());
+        });
+
+        this.client.on('status', (status: any, value: any) => {
+            this.logService.info('status update =', status, value ? value.toString() : '');
+        });
+
+        this.client.on('online', (jid: JID) => this.onOnline(jid));
+
+        this.client.on('stanza', (stanza: Stanza) => {
+            this.onStanzaReceived(stanza);
+        });
 
     }
 
@@ -39,11 +54,6 @@ export class XmppChatConnectionService {
         this.logService.debug('online =', 'online as', jid.toString());
         this.userJid = jid;
         this.state$.next('online');
-    }
-
-    public onOffline() {
-        this.logService.debug('offline');
-        this.state$.next('disconnected');
     }
 
     public sendPresence() {
@@ -111,22 +121,10 @@ export class XmppChatConnectionService {
     }
 
     logIn(logInRequest: LogInRequest): void {
-
-        this.client = clientFactory(logInRequest);
-
-        this.client.on('error', (err: any) => {
-            this.logService.error('chat service error =>', err.toString());
+        this.client.start({uri: logInRequest.uri, domain: logInRequest.domain});
+        this.client.handle('authenticate', (authenticate: any) => {
+            return authenticate(logInRequest.jid, logInRequest.password);
         });
-
-        this.client.on('offline', () => this.onOffline());
-
-        this.client.on('online', (jid: JID) => this.onOnline(jid));
-
-        this.client.on('stanza', (stanza: Stanza) => {
-            this.onStanzaReceived(stanza);
-        });
-
-        this.client.start();
     }
 
     logOut(): void {

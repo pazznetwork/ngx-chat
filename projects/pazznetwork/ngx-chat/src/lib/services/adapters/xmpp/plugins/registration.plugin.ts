@@ -1,10 +1,14 @@
-import { client } from '@xmpp/client';
 import { Client } from '@xmpp/client-core';
-import getDomain from '@xmpp/client/lib/getDomain';
 import { timeout } from '@xmpp/events';
+import bind from '@xmpp/plugins/bind';
+import iqCaller from '@xmpp/plugins/iq-caller';
+import plain from '@xmpp/plugins/sasl-plain';
+import sessionEstablishment from '@xmpp/plugins/session-establishment';
+import websocket from '@xmpp/plugins/websocket';
 import { x as xml } from '@xmpp/xml';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
+import { getDomain } from '../../../../core/get-domain';
 import { LogService } from '../../../log.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 
@@ -58,29 +62,18 @@ export class RegistrationPlugin extends AbstractXmppPlugin {
             this.logService.debug('registration plugin', 'cleaning up');
             this.xmppRegistrationFinally$.next();
             await this.client.stop();
-            this.client.removeAllListeners();
         }
     }
 
     private connect(username: string, password: string, service: string, domain?: string) {
         return new Promise(resolveConnectionEstablished => {
-            this.client = client({
-                service,
-                domain,
-                credentials: (proceedWithLogin: any) => {
-                    return new Promise(credentialsResolve => {
-                        resolveConnectionEstablished();
-                        // wait until registration is successful and pass the credentials
-                        this.xmppRegistrationComplete$.pipe(
-                            first(),
-                            takeUntil(this.xmppRegistrationFinally$)
-                        ).subscribe(() => {
-                            this.logService.debug('registration plugin', 'proceeding');
-                            proceedWithLogin({username, password}).then(() => credentialsResolve());
-                        });
-                    });
-                }
-            });
+
+            this.client = new Client();
+            this.client.plugin(bind);
+            this.client.plugin(iqCaller);
+            this.client.plugin(plain);
+            this.client.plugin(sessionEstablishment);
+            this.client.plugin(websocket);
 
             this.client.timeout = this.registrationTimeout;
 
@@ -97,33 +90,39 @@ export class RegistrationPlugin extends AbstractXmppPlugin {
                 this.logService.debug('registration plugin', 'offline event');
             });
 
-            this.client.reconnect.stop();
-            this.client.start();
+            this.client.handle('authenticate', (proceedWithLogin: any) =>
+                new Promise(authenticateResolve => {
+                    resolveConnectionEstablished();
+                    this.xmppRegistrationComplete$.pipe(
+                        first(),
+                        takeUntil(this.xmppRegistrationFinally$)
+                    ).subscribe(() => {
+                        this.logService.debug('registration plugin', 'proceeding');
+                        proceedWithLogin(username, password).then(authenticateResolve);
+                    });
+                })
+            );
+
+            this.client.start({
+                domain: domain || getDomain(service),
+                uri: service
+            });
         });
     }
 
-    private writeRegister(username: string, password: string) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const result = await this.client.iqCaller.request(
-                    xml('iq', {type: 'set'},
-                        xml('query', {xmlns: 'jabber:iq:register'},
-                            xml('username', {}, username),
-                            xml('password', {}, password)
-                        )
-                    )
-                );
-                if (result.attrs.type === 'result') {
-                    resolve();
-                }
-            } catch (e) {
-                reject(e);
-            }
-        });
+    private async writeRegister(username: string, password: string) {
+        await this.client.plugins['iq-caller'].request(
+            xml('iq', {type: 'set'},
+                xml('query', {xmlns: 'jabber:iq:register'},
+                    xml('username', {}, username),
+                    xml('password', {}, password)
+                )
+            )
+        );
     }
 
     private async announceRegistration(domain: string) {
-        await this.client.iqCaller.request(
+        await this.client.plugins['iq-caller'].request(
             xml('iq', {type: 'get', to: domain},
                 xml('query', {xmlns: 'jabber:iq:register'})
             )

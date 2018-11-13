@@ -1,4 +1,5 @@
 import { Component, Inject } from '@angular/core';
+import { jid } from '@xmpp/jid';
 import { Observable, of } from 'rxjs';
 import {
     ChatService,
@@ -19,9 +20,9 @@ import {
 export class AppComponent {
 
     public domain: string;
-    public service: string;
+    public uri: string;
     public password: string;
-    public username: string;
+    public jid: string;
     public otherJid: any;
     public contacts: Observable<Contact[]> = this.chatService.contactsSubscribed$;
     public multiUserChatPlugin: MultiUserChatPlugin;
@@ -33,9 +34,9 @@ export class AppComponent {
         const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
         this.logService.logLevel = LogLevel.Debug;
         this.domain = contactData.domain;
-        this.service = contactData.service;
+        this.uri = contactData.uri;
         this.password = contactData.password;
-        this.username = contactData.username;
+        this.jid = contactData.jid;
 
         this.chatService.state$.subscribe((state) => this.stateChanged(state));
         this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
@@ -45,9 +46,9 @@ export class AppComponent {
     onLogin() {
         const logInRequest = {
             domain: this.domain,
-            service: this.service,
+            uri: this.uri,
             password: this.password,
-            username: this.username,
+            jid: this.jid,
         };
         localStorage.setItem('data', JSON.stringify(logInRequest));
 
@@ -62,9 +63,9 @@ export class AppComponent {
         this.registrationMessage = 'registering ...';
         try {
             await this.chatService.getPlugin(RegistrationPlugin).register(
-                this.username,
+                jid(this.jid).local,
                 this.password,
-                this.service,
+                this.uri,
                 this.domain
             );
             this.registrationMessage = 'registration successful';

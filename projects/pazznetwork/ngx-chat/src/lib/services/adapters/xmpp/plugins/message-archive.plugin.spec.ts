@@ -8,7 +8,7 @@ import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
 import { MessageArchivePlugin } from './message-archive.plugin';
 
 
@@ -35,6 +35,7 @@ describe('message archive plugin', () => {
 
         TestBed.configureTestingModule({
             providers: [
+                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
@@ -43,7 +44,6 @@ describe('message archive plugin', () => {
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
-        chatConnectionService.client = xmppClientMock;
         contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
         contact1 = contactFactory.createContact('someone@else.com', 'jon doe');

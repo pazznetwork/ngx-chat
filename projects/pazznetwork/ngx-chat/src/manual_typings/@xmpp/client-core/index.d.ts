@@ -12,13 +12,15 @@ declare module '@xmpp/client-core' {
 
         public startOptions: StartOptions;
 
+        public plugins: any;
+
         public on(eventName: string, callback: any): void;
 
         public handle(eventName: string, callback: any): void;
 
         public write(message: string): void;
 
-        public start(): void;
+        public start(options: StartOptions): void;
 
         public stop(): void;
 

@@ -12,7 +12,7 @@ import { LogService } from '../../log.service';
 import { MessageUuidPlugin } from './plugins';
 import { MessagePlugin } from './plugins/message.plugin';
 import { XmppChatAdapter } from './xmpp-chat-adapter.service';
-import { XmppChatConnectionService } from './xmpp-chat-connection.service';
+import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
 
 describe('XmppChatAdapter', () => {
 
@@ -30,6 +30,7 @@ describe('XmppChatAdapter', () => {
         const logService = testLogService();
         TestBed.configureTestingModule({
             providers: [
+                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 {provide: ChatServiceToken, useClass: XmppChatAdapter},
                 {provide: LogService, useValue: logService},
@@ -39,7 +40,6 @@ describe('XmppChatAdapter', () => {
 
         chatService = TestBed.get(ChatServiceToken);
         chatConnectionService = TestBed.get(XmppChatConnectionService);
-        chatConnectionService.client = xmppClientMock;
         contactFactory = TestBed.get(ContactFactoryService);
         chatService.addPlugins([new MessageUuidPlugin(), new MessagePlugin(chatService, logService)]);
 

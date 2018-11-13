@@ -8,7 +8,7 @@ import { createXmppClientMock } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
 import { MessageUuidPlugin } from './message-uuid.plugin';
 import { MultiUserChatPlugin } from './multi-user-chat.plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
@@ -34,6 +34,7 @@ describe('multi user chat plugin', () => {
 
         TestBed.configureTestingModule({
             providers: [
+                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
@@ -43,7 +44,6 @@ describe('multi user chat plugin', () => {
 
         logService = TestBed.get(LogService);
         chatConnectionService = TestBed.get(XmppChatConnectionService);
-        chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = new JID('me', 'example.com', 'something');
 
         chatAdapter = TestBed.get(XmppChatAdapter);
