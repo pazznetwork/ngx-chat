@@ -152,9 +152,9 @@ describe('XmppChatAdapter', () => {
     describe('states', () => {
 
         it('should clear contacts when logging out', () => {
-            chatService.state$.next('online');
+            chatService.chatConnectionService.state$.next('online');
             chatService.contacts$.next([contact1]);
-            chatService.logOut();
+            chatService.chatConnectionService.state$.next('disconnected');
             expect(chatService.contacts$.getValue()).toEqual([]);
         });
 

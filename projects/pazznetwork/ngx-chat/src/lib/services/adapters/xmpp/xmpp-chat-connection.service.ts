@@ -36,10 +36,14 @@ export class XmppChatConnectionService {
 
         this.client.on('error', (err: any) => {
             this.logService.error('chat service error =>', err.toString());
+            this.client.stop();
         });
 
         this.client.on('status', (status: any, value: any) => {
             this.logService.info('status update =', status, value ? value.toString() : '');
+            if (status === 'offline') {
+                this.state$.next('disconnected');
+            }
         });
 
         this.client.on('online', (jid: JID) => this.onOnline(jid));
@@ -127,19 +131,16 @@ export class XmppChatConnectionService {
         });
     }
 
-    logOut(): void {
-        this.state$.next('disconnected');
-        const presenceStanza = xml('presence', {type: 'unavailable'});
-        Promise.resolve(this.send(presenceStanza))
-            .then(() => {
-                return Promise.resolve(this.client.stop());
-            })
-            .then(() => {
-                this.logService.debug('logged out');
-            })
-            .catch(() => {
-                this.logService.warn('error while logging out');
-            });
+    async logOut(): Promise<void> {
+        // TODO: move this to a presence plugin in a handler
+        this.logService.debug('logging out');
+        try {
+            await this.send(xml('presence', {type: 'unavailable'}));
+        } catch (e) {
+            this.logService.error('error sending presence unavailable');
+        } finally {
+            this.client.stop();
+        }
     }
 
     getNextIqId() {
