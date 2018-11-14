@@ -80,3 +80,14 @@ In the `src` folder you find the demo application.
 ### Run the plugin tests
 
 `npm run test:once`
+
+
+## Releasing
+```bash
+npm run changelog
+git add .
+git commit -m "docs: release $VERSION"
+git tag v$VERSION
+git push --tags
+./push-release.sh
+```

@@ -1,3 +1,12 @@
+## [0.2.1](https://github.com/pazznetwork/ngx-chat/compare/v0.2.0...v0.2.1) (2018-11-14)
+
+
+### Bug Fixes
+
+* prevent connection loop on kick ([bd8af74](https://github.com/pazznetwork/ngx-chat/commit/bd8af74))
+
+
+
 # [0.2.0](https://github.com/pazznetwork/ngx-chat/compare/v0.1.9...v0.2.0) (2018-11-08)
 
 
