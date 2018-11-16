@@ -5,7 +5,7 @@
             <small>(e.g. jabber.example.com)</small>
         </div>
         <div>
-            <input [(ngModel)]="domain" class="form-control" type="text" placeholder="jabber.example.com"/>
+            <input name="domain" [(ngModel)]="domain" class="form-control" type="text" placeholder="jabber.example.com"/>
         </div>
     </div>
 
@@ -15,7 +15,7 @@
             <small>(e.g. wss://jabber.example.com:5280/websocket)</small>
         </div>
         <div>
-            <input [(ngModel)]="uri" class="form-control" type="text" placeholder="wss://jabber.example.com:5280/websocket"/>
+            <input name="uri" [(ngModel)]="uri" class="form-control" type="text" placeholder="wss://jabber.example.com:5280/websocket"/>
         </div>
     </div>
 
@@ -25,7 +25,7 @@
             <small>(e.g. test@jabber.example.com)</small>
         </div>
         <div>
-            <input [(ngModel)]="jid" class="form-control" type="text" placeholder="test@jabber.example.com"/>
+            <input name="jid" [(ngModel)]="jid" class="form-control" type="text" placeholder="test@jabber.example.com"/>
         </div>
     </div>
 
@@ -34,13 +34,13 @@
             Password
         </div>
         <div>
-            <input [(ngModel)]="password" class="form-control" type="password" placeholder="Password"/>
+            <input name="password" [(ngModel)]="password" class="form-control" type="password" placeholder="Password"/>
         </div>
     </div>
 
-    <button (click)="onLogin()">Log in</button>
-    <button (click)="onLogout()">Log out</button>
-    <button (click)="onRegister()">Register</button>
+    <button name="login" (click)="onLogin()">Log in</button>
+    <button name="logout" (click)="onLogout()">Log out</button>
+    <button name="register" (click)="onRegister()">Register</button>
 
     <div *ngIf="registrationMessage">
         <p>{{registrationMessage}}</p>
