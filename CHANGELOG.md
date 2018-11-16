@@ -1,3 +1,12 @@
+## [0.2.2](https://github.com/pazznetwork/ngx-chat/compare/v0.2.1...v0.2.2) (2018-11-16)
+
+
+### Bug Fixes
+
+* use NgZone to allow e2e test execution ([103f2c6](https://github.com/pazznetwork/ngx-chat/commit/103f2c6))
+
+
+
 ## [0.2.1](https://github.com/pazznetwork/ngx-chat/compare/v0.2.0...v0.2.1) (2018-11-14)
 
 
