@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ModuleWithProviders, NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Client } from '@xmpp/client-core';
 import bind from '@xmpp/plugins/bind';
@@ -82,12 +82,12 @@ export class NgxChatModule {
                 ContactFactoryService,
                 {
                     provide: ChatServiceToken,
-                    deps: [XmppChatConnectionService, LogService, ContactFactoryService],
+                    deps: [XmppChatConnectionService, LogService, ContactFactoryService, NgZone],
                     useFactory: NgxChatModule.chatAdapter
                 },
                 {
                     provide: XmppChatConnectionService,
-                    deps: [XmppClientToken, LogService],
+                    deps: [XmppClientToken, LogService, NgZone],
                     useFactory: NgxChatModule.chatConnectionService
                 },
                 {
@@ -101,7 +101,8 @@ export class NgxChatModule {
 
     private static chatAdapter(chatConnectionService: XmppChatConnectionService,
                                logService: LogService,
-                               contactFactory: ContactFactoryService) {
+                               contactFactory: ContactFactoryService,
+                               ngZone: NgZone) {
         const xmppChatAdapter = new XmppChatAdapter(chatConnectionService, logService, contactFactory);
 
         xmppChatAdapter.addPlugins([
@@ -114,15 +115,15 @@ export class NgxChatModule {
             new RosterPlugin(xmppChatAdapter, logService),
             new ServiceDiscoveryPlugin(xmppChatAdapter),
             new PushPlugin(xmppChatAdapter),
-            new PingPlugin(xmppChatAdapter),
-            new RegistrationPlugin(logService),
+            new PingPlugin(xmppChatAdapter, ngZone),
+            new RegistrationPlugin(logService, ngZone),
         ]);
 
         return xmppChatAdapter;
     }
 
-    private static chatConnectionService(client: Client, logService: LogService) {
-        const connectionService = new XmppChatConnectionService(client, logService);
+    private static chatConnectionService(client: Client, logService: LogService, ngZone: NgZone) {
+        const connectionService = new XmppChatConnectionService(client, logService, ngZone);
         connectionService.initialize();
         return connectionService;
     }

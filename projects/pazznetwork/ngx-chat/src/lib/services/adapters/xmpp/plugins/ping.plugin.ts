@@ -1,3 +1,4 @@
+import { NgZone } from '@angular/core';
 import { x as xml } from '@xmpp/xml';
 import { filter } from 'rxjs/operators';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -11,7 +12,8 @@ export class PingPlugin extends AbstractXmppPlugin {
     private timeoutHandle: any;
     private readonly pingInterval = 5000;
 
-    constructor(private xmppChatAdapter: XmppChatAdapter) {
+    constructor(private xmppChatAdapter: XmppChatAdapter,
+                private ngZone: NgZone) {
         super();
 
         this.xmppChatAdapter.state$.pipe(
@@ -29,7 +31,9 @@ export class PingPlugin extends AbstractXmppPlugin {
 
     private schedulePings() {
         this.unschedulePings();
-        this.timeoutHandle = window.setInterval(() => this.ping(), this.pingInterval);
+        this.ngZone.runOutsideAngular(() => {
+            this.timeoutHandle = window.setInterval(() => this.ping(), this.pingInterval);
+        });
     }
 
     private async ping() {

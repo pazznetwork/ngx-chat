@@ -27,22 +27,22 @@ describe('push plugin', () => {
             findService: () => pushService
         };
 
-        const xmppChatConnectionService = new XmppChatConnectionService(xmppClientMock, testLogService());
-
         const chatAdapterMock: any = {
             getPlugin: () => serviceDiscoveryPluginMock,
-            chatConnectionService: xmppChatConnectionService
+            chatConnectionService: null // is set later
         };
 
         TestBed.configureTestingModule({
             providers: [
                 {provide: XmppClientToken, useValue: xmppClientMock},
-                {provide: XmppChatConnectionService, useValue: xmppChatConnectionService},
+                XmppChatConnectionService,
                 {provide: XmppChatAdapter, useValue: chatAdapterMock},
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService,
             ]
         });
+
+        chatAdapterMock.chatConnectionService = TestBed.get(XmppChatConnectionService);
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         chatConnectionService.userJid = parseJid('someone@example.com');

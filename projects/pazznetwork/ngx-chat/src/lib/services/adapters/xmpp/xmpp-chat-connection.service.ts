@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectionToken } from '@angular/core';
+import { Inject, Injectable, InjectionToken, NgZone } from '@angular/core';
 import { Client } from '@xmpp/client-core';
 import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
@@ -30,26 +30,36 @@ export class XmppChatConnectionService {
     private iqStanzaResponseCallbacks: { [key: string]: ((arg: any) => void) } = {};
 
     constructor(@Inject(XmppClientToken) public client: Client,
-                private logService: LogService) {}
+                private logService: LogService,
+                private ngZone: NgZone) {}
 
     initialize(): void {
-
         this.client.on('error', (err: any) => {
-            this.logService.error('chat service error =>', err.toString());
-            this.client.stop();
+            this.ngZone.run(() => {
+                this.logService.error('chat service error =>', err.toString());
+                this.client.stop();
+            });
         });
 
         this.client.on('status', (status: any, value: any) => {
-            this.logService.info('status update =', status, value ? value.toString() : '');
-            if (status === 'offline') {
-                this.state$.next('disconnected');
-            }
+            this.ngZone.run(() => {
+                this.logService.info('status update =', status, value ? value.toString() : '');
+                if (status === 'offline') {
+                    this.state$.next('disconnected');
+                }
+            });
         });
 
-        this.client.on('online', (jid: JID) => this.onOnline(jid));
+        this.client.on('online', (jid: JID) => {
+            return this.ngZone.run(() => {
+                return this.onOnline(jid);
+            });
+        });
 
         this.client.on('stanza', (stanza: Stanza) => {
-            this.onStanzaReceived(stanza);
+            this.ngZone.run(() => {
+                this.onStanzaReceived(stanza);
+            });
         });
 
     }
@@ -125,9 +135,11 @@ export class XmppChatConnectionService {
     }
 
     logIn(logInRequest: LogInRequest): void {
-        this.client.start({uri: logInRequest.uri, domain: logInRequest.domain});
-        this.client.handle('authenticate', (authenticate: any) => {
-            return authenticate(logInRequest.jid, logInRequest.password);
+        this.ngZone.runOutsideAngular(() => {
+            this.client.start({uri: logInRequest.uri, domain: logInRequest.domain});
+            this.client.handle('authenticate', (authenticate: any) => {
+                return authenticate(logInRequest.jid, logInRequest.password);
+            });
         });
     }
 

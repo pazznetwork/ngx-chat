@@ -1,3 +1,4 @@
+import { NgZone } from '@angular/core';
 import { Client } from '@xmpp/client-core';
 import { timeout } from '@xmpp/events';
 import bind from '@xmpp/plugins/bind';
@@ -23,7 +24,8 @@ export class RegistrationPlugin extends AbstractXmppPlugin {
     private readonly registrationTimeout = 5000;
     private client: Client;
 
-    constructor(private logService: LogService) {
+    constructor(private logService: LogService,
+                private ngZone: NgZone) {
         super();
     }
 
@@ -35,34 +37,36 @@ export class RegistrationPlugin extends AbstractXmppPlugin {
                           password: string,
                           service: string,
                           domain?: string): Promise<void> {
-        try {
-            await timeout((async () => {
-                domain = domain || getDomain(service);
+        await this.ngZone.runOutsideAngular(async () => {
+            try {
+                await timeout((async () => {
+                    domain = domain || getDomain(service);
 
-                this.logService.debug('registration plugin', 'connecting...');
-                await this.connect(username, password, service, domain);
+                    this.logService.debug('registration plugin', 'connecting...');
+                    await this.connect(username, password, service, domain);
 
-                this.logService.debug('registration plugin', 'connection established, starting registration');
-                await this.announceRegistration(domain);
+                    this.logService.debug('registration plugin', 'connection established, starting registration');
+                    await this.announceRegistration(domain);
 
-                this.logService.debug('registration plugin', 'server acknowledged registration request, sending credentials');
-                await this.writeRegister(username, password);
-                this.xmppRegistrationComplete$.next();
+                    this.logService.debug('registration plugin', 'server acknowledged registration request, sending credentials');
+                    await this.writeRegister(username, password);
+                    this.xmppRegistrationComplete$.next();
 
-                this.logService.debug('registration plugin', 'registration successful');
-                await this.xmppLoggedIn$.pipe(first(), takeUntil(this.xmppRegistrationFinally$)).toPromise();
-                this.logService.debug('registration plugin', 'logged in');
+                    this.logService.debug('registration plugin', 'registration successful');
+                    await this.xmppLoggedIn$.pipe(first(), takeUntil(this.xmppRegistrationFinally$)).toPromise();
+                    this.logService.debug('registration plugin', 'logged in');
 
-                this.logService.debug('registration plugin', 'saving encrypted credentials');
-            })(), this.registrationTimeout);
-        } catch (e) {
-            this.logService.error('error registering', e);
-            throw e;
-        } finally {
-            this.logService.debug('registration plugin', 'cleaning up');
-            this.xmppRegistrationFinally$.next();
-            await this.client.stop();
-        }
+                    this.logService.debug('registration plugin', 'saving encrypted credentials');
+                })(), this.registrationTimeout);
+            } catch (e) {
+                this.logService.error('error registering', e);
+                throw e;
+            } finally {
+                this.logService.debug('registration plugin', 'cleaning up');
+                this.xmppRegistrationFinally$.next();
+                await this.client.stop();
+            }
+        });
     }
 
     private connect(username: string, password: string, service: string, domain?: string) {
