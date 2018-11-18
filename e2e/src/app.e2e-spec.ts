@@ -1,28 +1,23 @@
-import { browser } from 'protractor';
+import { browser, by, element, ExpectedConditions } from 'protractor';
 import { AppPage } from './app.po';
 
-describe('workspace-project App', () => {
+describe('ngx-chat', () => {
     let page: AppPage;
 
     beforeEach(() => {
         page = new AppPage();
     });
 
-    it('should display welcome message', () => {
+    it('should be able to log in and log out', () => {
         page.navigateTo();
 
-        page.logIn({
-            jid: '',
-            password: '',
-            uri: '',
-            domain: ''
-        });
+        page.logInWithDefaultCredentials();
 
-        browser.sleep(5000);
+        browser.wait(ExpectedConditions.presenceOf(element(by.css('.roster-list[data-ngx-chat-state="online"]'))), 5000);
 
         page.logOut();
 
-        browser.sleep(5000);
+        browser.wait(ExpectedConditions.not(ExpectedConditions.presenceOf(element(by.css('.roster-list')))), 5000);
 
     });
 });

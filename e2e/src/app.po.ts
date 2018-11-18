@@ -1,5 +1,6 @@
 import { browser, by, element } from 'protractor';
 import { LogInRequest } from '../../projects/pazznetwork/ngx-chat/src/lib/core';
+import { suiteConfig } from './suite-config';
 
 export class AppPage {
 
@@ -13,6 +14,10 @@ export class AppPage {
 
     navigateTo() {
         return browser.get('/');
+    }
+
+    logInWithDefaultCredentials() {
+        this.logIn(suiteConfig);
     }
 
     logIn(logInRequest: LogInRequest) {

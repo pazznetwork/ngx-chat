@@ -11,7 +11,7 @@
     "build": "npm run build-lib && ng build --prod --stats-json",
     "test": "ng test @pazznetwork/ngx-chat --watch",
     "test:once": "ng test @pazznetwork/ngx-chat --code-coverage --watch=false",
-    "ci": "npm run build && ng test @pazznetwork/ngx-chat --code-coverage --watch=false --browsers Chrome_ci && ng lint @pazznetwork/ngx-chat",
+    "ci": "npm run build && ng test @pazznetwork/ngx-chat --code-coverage --watch=false --browsers Chrome_ci && ng lint @pazznetwork/ngx-chat && ng e2e",
     "lint": "ng lint @pazznetwork/ngx-chat",
     "e2e": "ng e2e",
     "bundle-report": "webpack-bundle-analyzer dist/ngx-chat-xmpp-shell/stats.json",
