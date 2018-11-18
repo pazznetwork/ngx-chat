@@ -5,12 +5,12 @@ dist: trusty
 
 language: node_js
 node_js:
-  - "8"
+- "8"
 
 before_script:
-  - yarn global add @angular/cli
-  - "sudo chown root /opt/google/chrome/chrome-sandbox"
-  - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+- yarn global add @angular/cli
+- "sudo chown root /opt/google/chrome/chrome-sandbox"
+- "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
 
 script:
 - npm run ci
