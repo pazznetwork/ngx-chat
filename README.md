@@ -3,13 +3,15 @@
 This library provides an out-of-the-box usable XMPP chat component. It is customizable and offers an API to integrate it with your application.
 
 ## Features
-* connect to XMPP servers via BOSH or websocket
+* connect to XMPP servers via websocket
 * send and receive messages
 * load messages from message history (XEP-0313)
-* manage and use the server side buddy list or use your own data source for that 
+* use the server side buddy list or use your own data source for that, API methods for adding / removing buddies available 
+* supports multi user chat
 
 ## Demo
 [Have a look at our demo (valid XMPP credentials required)](https://pazznetwork.github.io/ngx-chat-ghpages/) 
+![screenshot](https://user-images.githubusercontent.com/4292951/49931801-f5c3d880-fec7-11e8-8a74-6600ea2cf9b0.png)
 
 ## Documentation
 Below you will find some instructions to getting started. [Have a look at the wiki for FAQ's and the API documentation.](https://github.com/pazznetwork/ngx-chat/wiki)
@@ -67,8 +69,25 @@ body.has-roster {
 }
 ```
 
+## FAQ
+
+**Q: Which browsers are supported?**
+A: It is tested in Chrome, Safari and Firefox.
+
+**Q: Does ngx-chat work with self signed certificates?**
+A: Yes, if the following criteria are met:
+* the certificate has to be trusted by the browser you are using. Chrome uses the operating system trust store for certificates while Firefox has a custom implementation.
+* the common name (CN) matches the uri of the service you are connecting to 
+
+**Q: Can ngx-chat be used without the UI?**
+A: Yes. Inject the chat service via `@Inject(ChatServiceToken) public chatService: ChatService`, login via `logIn` and start sending messages via the `sendMessage` method.
+
+**Q: My question is not answered**
+A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-chat/issues/new).
+
 ## Development
 
+Pull requests are welcome!
 If you want to develop on ngx-chat, clone this repository.
 The Library can be found in the `projects/pazznetwork/ngx-chat` folder.
 In the `src` folder you find the demo application.
