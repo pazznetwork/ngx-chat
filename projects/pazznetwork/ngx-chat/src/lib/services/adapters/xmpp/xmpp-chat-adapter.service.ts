@@ -142,4 +142,9 @@ export class XmppChatAdapter implements ChatService {
         }
 
     }
+
+    reconnect(): void {
+        this.chatConnectionService.reconnect();
+    }
+
 }

@@ -38,15 +38,20 @@
         </div>
     </div>
 
-    <button name="login" (click)="onLogin()">Log in</button>
-    <button name="logout" (click)="onLogout()">Log out</button>
-    <button name="register" (click)="onRegister()">Register</button>
+    <div>
+        <button name="login" (click)="onLogin()">Log in</button>
+        <button name="logout" (click)="onLogout()">Log out</button>
+        <button name="register" (click)="onRegister()">Register</button>
+        <button name="reconnect" (click)="onReconnect()">Reconnect</button>
+    </div>
+
+    <div>State: {{chatService.state$ | async}} (internal state: {{client.status}})</div>
 
     <div *ngIf="registrationMessage">
         <p>{{registrationMessage}}</p>
     </div>
 
-    <hr />
+    <hr/>
 
     <div class="form-group">
         <div>

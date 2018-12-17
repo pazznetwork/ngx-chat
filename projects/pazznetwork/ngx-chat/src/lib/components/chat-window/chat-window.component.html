@@ -1,5 +1,5 @@
 <div class="chat-window">
-    <div (click)="onClickHeader()" class="chat-contact-header">
+    <div (click)="onClickHeader()" class="chat-contact-header" [title]="chatWindowState.contact.name">
         <div class="chat-contact-avatar">
             <img [src]="chatWindowState.contact.avatar"/>
         </div>

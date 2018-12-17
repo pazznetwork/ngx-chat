@@ -1,4 +1,5 @@
 import { Component, Inject } from '@angular/core';
+import { Client } from '@xmpp/client-core';
 import { jid } from '@xmpp/jid';
 import { Observable, of } from 'rxjs';
 import {
@@ -10,6 +11,7 @@ import {
     LogService,
     MultiUserChatPlugin,
     RegistrationPlugin,
+    XmppClientToken,
 } from './ngx-chat-imports';
 
 @Component({
@@ -29,6 +31,7 @@ export class AppComponent {
     public registrationMessage: string;
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
+                @Inject(XmppClientToken) public client: Client,
                 private contactFactory: ContactFactoryService,
                 private logService: LogService) {
         const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
@@ -96,5 +99,9 @@ export class AppComponent {
 
     private async stateChanged(state: 'disconnected' | 'connecting' | 'online') {
         console.log('state changed!', state);
+    }
+
+    onReconnect() {
+        this.chatService.reconnect();
     }
 }

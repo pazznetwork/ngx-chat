@@ -29,7 +29,7 @@ export class XmppChatConnectionService {
     private iqId = new Date().getTime();
     private iqStanzaResponseCallbacks: { [key: string]: ((arg: any) => void) } = {};
 
-    constructor(@Inject(XmppClientToken) public client: Client,
+    constructor(@Inject(XmppClientToken) private client: Client,
                 private logService: LogService,
                 private ngZone: NgZone) {}
 
@@ -100,7 +100,12 @@ export class XmppChatConnectionService {
                     reject(response);
                 }
             };
-            this.send(request);
+
+            this.send(request).then(() => {}, (e) => {
+                this.logService.error('error sending iq', e);
+                delete this.iqStanzaResponseCallbacks[request.attrs.id];
+                reject(e);
+            });
         });
     }
 
@@ -159,4 +164,7 @@ export class XmppChatConnectionService {
         return '' + this.iqId++;
     }
 
+    reconnect() {
+        this.client.plugins.reconnect.reconnect();
+    }
 }

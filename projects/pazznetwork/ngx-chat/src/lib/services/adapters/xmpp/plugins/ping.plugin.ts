@@ -1,6 +1,7 @@
 import { NgZone } from '@angular/core';
 import { x as xml } from '@xmpp/xml';
 import { filter } from 'rxjs/operators';
+import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 
@@ -13,6 +14,7 @@ export class PingPlugin extends AbstractXmppPlugin {
     private readonly pingInterval = 5000;
 
     constructor(private xmppChatAdapter: XmppChatAdapter,
+                private logService: LogService,
                 private ngZone: NgZone) {
         super();
 
@@ -37,11 +39,18 @@ export class PingPlugin extends AbstractXmppPlugin {
     }
 
     private async ping() {
-        await this.xmppChatAdapter.chatConnectionService.sendIq(
-            xml('iq', {type: 'get'},
-                xml('ping', {xmlns: 'urn:xmpp:ping'})
-            )
-        );
+        this.logService.debug('ping...');
+        try {
+            await this.xmppChatAdapter.chatConnectionService.sendIq(
+                xml('iq', {type: 'get'},
+                    xml('ping', {xmlns: 'urn:xmpp:ping'})
+                )
+            );
+            // TODO: timeout?
+            this.logService.debug('... pong');
+        } catch (e) {
+            this.logService.error('... pong errored!');
+        }
     }
 
     private unschedulePings() {

@@ -14,6 +14,8 @@ declare module '@xmpp/client-core' {
 
         public plugins: any;
 
+        public status: string;
+
         public on(eventName: string, callback: any): void;
 
         public handle(eventName: string, callback: any): void;
@@ -40,6 +42,8 @@ declare module '@xmpp/client-core' {
     export interface Reconnect {
 
         stop(): void;
+
+        reconnect(): void;
 
     }
 

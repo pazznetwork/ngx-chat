@@ -125,4 +125,9 @@ export interface ChatService {
      * @param constructor The plugin constructor, e.g. {@link RosterPlugin}
      */
     getPlugin<T extends ChatPlugin>(constructor: { new(...args: any[]): T }): T;
+
+    /**
+     * Tries to transparently (= without the user noticing) reconnect to the chat server.
+     */
+    reconnect(): void;
 }
