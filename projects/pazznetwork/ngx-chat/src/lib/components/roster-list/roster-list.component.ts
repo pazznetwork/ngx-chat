@@ -1,6 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { Contact } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
@@ -41,6 +42,17 @@ export class RosterListComponent implements OnInit {
     @Input()
     contacts: Observable<Contact[]>;
 
+    @Input()
+    contactRequestsReceived$: Observable<Contact[]>;
+
+    @Input()
+    contactRequestsSent$: Observable<Contact[]>;
+
+    @Input()
+    contactsUnaffiliated$: Observable<Contact[]>;
+
+    hasNoContacts$: Observable<boolean>;
+
     @Output()
     rosterStateChanged: EventEmitter<string> = new EventEmitter<string>();
 
@@ -52,6 +64,23 @@ export class RosterListComponent implements OnInit {
         if (!this.contacts) {
             this.contacts = this.chatService.contactsSubscribed$;
         }
+        if (!this.contactRequestsReceived$) {
+            this.contactRequestsReceived$ = this.chatService.contactRequestsReceived$;
+        }
+        if (!this.contactRequestsSent$) {
+            this.contactRequestsSent$ = this.chatService.contactRequestsSent$;
+        }
+        if (!this.contactsUnaffiliated$) {
+            this.contactsUnaffiliated$ = this.chatService.contactsUnaffiliated$;
+        }
+        this.hasNoContacts$ = combineLatest(
+            this.contacts,
+            this.contactRequestsReceived$,
+            this.contactRequestsSent$,
+            this.contactsUnaffiliated$,
+        ).pipe(
+            map(([contacts, received, sent, unaffiliated]) => contacts.length + received.length + sent.length + unaffiliated.length === 0)
+        );
     }
 
     onClickContact(contact: Contact) {

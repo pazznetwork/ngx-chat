@@ -65,4 +65,7 @@ export class Contact {
         return subscription === ContactSubscription.both || subscription === ContactSubscription.to;
     }
 
+    isUnaffiliated() {
+        return !this.isSubscribed() && !this.pendingIn && !this.pendingOut && this.messages.length > 0;
+    }
 }

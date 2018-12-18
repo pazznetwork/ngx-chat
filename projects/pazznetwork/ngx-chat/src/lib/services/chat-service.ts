@@ -47,6 +47,11 @@ export interface ChatService {
     contactRequestsReceived$: Observable<Contact[]>;
 
     /**
+     * A list of contacts where the user is not subscribed to and neither a pending request is incoming or outgoing.
+     */
+    contactsUnaffiliated$: Observable<Contact[]>;
+
+    /**
      * If set to true, debug information will be visible in the roster list.
      */
     enableDebugging: boolean;

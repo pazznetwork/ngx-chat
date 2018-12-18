@@ -20,6 +20,8 @@ export class XmppChatAdapter implements ChatService {
     contactsSubscribed$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.isSubscribed())));
     contactRequestsReceived$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingIn)));
     contactRequestsSent$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingOut)));
+    contactsUnaffiliated$: Observable<Contact[]> = this.contacts$.pipe(
+        map(contacts => contacts.filter(contact => contact.isUnaffiliated())));
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
     plugins: ChatPlugin[] = [];
     enableDebugging = false;

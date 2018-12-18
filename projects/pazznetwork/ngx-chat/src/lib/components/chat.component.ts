@@ -32,7 +32,7 @@ export class ChatComponent implements OnInit, OnChanges {
      * If supplied, translations contain an object with the structure of the Translations interface.
      */
     @Input()
-    public translations: Translations = {
+    public translations: Partial<Translations> = {
     };
 
     /**
@@ -50,8 +50,12 @@ export class ChatComponent implements OnInit, OnChanges {
     showChatComponent = false;
     rosterState = 'hidden';
 
-    private defaultTranslations = {
+    private defaultTranslations: Translations = {
         'contacts': 'Contacts',
+        'contactRequestIn': 'Incoming contact requests',
+        'contactRequestOut': 'Outgoing contact requests',
+        'contactsUnaffiliated': 'Other',
+        'noContacts': 'No contacts yet.',
         'noMessages': 'No messages yet.',
         'placeholder': 'Enter your message!',
         'subscriptionRequestMessage': 'I want to add you as a contact.',

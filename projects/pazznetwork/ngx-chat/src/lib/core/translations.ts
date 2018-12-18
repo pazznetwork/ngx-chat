@@ -1,9 +1,13 @@
 export interface Translations {
-    contacts?: string;
-    noMessages?: string;
-    placeholder?: string;
-    subscriptionRequestMessage?: string;
-    acceptSubscriptionRequest?: string;
-    denySubscriptionRequest?: string;
-    dateTimeFormat?: string;
+    contacts: string;
+    contactRequestIn: string;
+    contactRequestOut: string;
+    contactsUnaffiliated: string;
+    noContacts: string;
+    noMessages: string;
+    placeholder: string;
+    subscriptionRequestMessage: string;
+    acceptSubscriptionRequest: string;
+    denySubscriptionRequest: string;
+    dateTimeFormat: string;
 }

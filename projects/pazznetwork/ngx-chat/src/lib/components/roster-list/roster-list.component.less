@@ -15,7 +15,7 @@
   bottom: 0;
   right: 0;
   width: @roster-width;
-  overflow: visible;
+  overflow-y: scroll;
   border-left: 1px solid @general-border-color;
   z-index: 80;
   margin-left: 10px;
@@ -37,8 +37,7 @@
   }
 
   .contact-list-wrapper {
-    height: 100%;
-    overflow-y: scroll;
+    margin-bottom: 1em;
   }
 
   ngx-chat-roster-contact {
@@ -51,6 +50,13 @@
     }
   }
 
+}
+
+.roster-list__empty {
+  color: @general-light;
+  text-align: center;
+  margin-top: 0.5em;
+  font-size: 1.5em;
 }
 
 .roster-drawer {
