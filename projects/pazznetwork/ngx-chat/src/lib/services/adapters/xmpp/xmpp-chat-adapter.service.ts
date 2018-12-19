@@ -17,9 +17,12 @@ export class XmppChatAdapter implements ChatService {
 
     message$ = new Subject<Contact>();
     contacts$ = new BehaviorSubject<Contact[]>([]);
-    contactsSubscribed$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.isSubscribed())));
-    contactRequestsReceived$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingIn)));
-    contactRequestsSent$: Observable<Contact[]> = this.contacts$.pipe(map(contacts => contacts.filter(contact => contact.pendingOut)));
+    contactsSubscribed$: Observable<Contact[]> = this.contacts$.pipe(
+        map(contacts => contacts.filter(contact => contact.isSubscribed())));
+    contactRequestsReceived$: Observable<Contact[]> = this.contacts$.pipe(
+        map(contacts => contacts.filter(contact => contact.pendingIn$.getValue())));
+    contactRequestsSent$: Observable<Contact[]> = this.contacts$.pipe(
+        map(contacts => contacts.filter(contact => contact.pendingOut$.getValue())));
     contactsUnaffiliated$: Observable<Contact[]> = this.contacts$.pipe(
         map(contacts => contacts.filter(contact => contact.isUnaffiliated())));
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
@@ -100,11 +103,15 @@ export class XmppChatAdapter implements ChatService {
     }
 
     logIn(logInRequest: LogInRequest): void {
-        this.chatConnectionService.logIn(logInRequest);
+        if (this.state$.getValue() === 'disconnected') {
+            this.chatConnectionService.logIn(logInRequest);
+        }
     }
 
     logOut(): void {
-        this.chatConnectionService.logOut();
+        if (this.state$.getValue() !== 'disconnected') {
+            this.chatConnectionService.logOut();
+        }
     }
 
     sendMessage(jid: string, body: string) {

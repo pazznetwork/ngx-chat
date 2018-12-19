@@ -7,7 +7,7 @@
     <div class="chat-messages-empty" *ngIf="contact.messages.length === 0">
         {{this.chatService.translations.noMessages}}
     </div>
-    <div class="chat-message chat-message--in" *ngIf="contact.pendingIn">
+    <div class="chat-message chat-message--in" *ngIf="contact.pendingIn$ | async">
         <span>
             {{this.chatService.translations.subscriptionRequestMessage}}
         </span>

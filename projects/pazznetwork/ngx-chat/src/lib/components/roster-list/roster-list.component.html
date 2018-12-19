@@ -86,8 +86,8 @@
             <em>{{contact.name}}:</em><br/>
             subscription={{contact.subscription$ | async}}<br/>
             presence={{contact.presence$ | async}}<br/>
-            pendingIn={{contact.pendingIn}}<br/>
-            pendingOut={{contact.pendingOut}}
+            pendingIn={{contact.pendingIn$ | async}}<br/>
+            pendingOut={{contact.pendingOut$ | async}}
         </p>
         <p class="roster-debug-state">state: {{chatService.state$ | async}}</p>
     </ng-container>

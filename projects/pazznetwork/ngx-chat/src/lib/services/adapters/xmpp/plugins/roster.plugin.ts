@@ -44,7 +44,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
 
         const itemChild = stanza.getChild('query').getChild('item');
         const contact = this.chatService.getOrCreateContactById(itemChild.attrs.jid, itemChild.attrs.name || itemChild.attrs.jid);
-        contact.pendingOut = itemChild.attrs.ask === 'subscribe';
+        contact.pendingOut$.next(itemChild.attrs.ask === 'subscribe');
         const subscriptionStatus = itemChild.attrs.subscription || 'none';
 
         this.chatService.chatConnectionService.sendIqAckResult(stanza.attrs.id);
@@ -52,7 +52,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
         let handled = false;
 
         if (subscriptionStatus === 'remove') {
-            contact.pendingOut = false;
+            contact.pendingOut$.next(false);
             contact.subscription$.next(ContactSubscription.none);
             handled = true;
         } else if (subscriptionStatus === 'none') {
@@ -120,9 +120,9 @@ export class RosterPlugin extends AbstractXmppPlugin {
                 fromAsContact.presence$.next(Presence.unavailable);
                 return true;
             } else if (stanza.attrs.type === 'subscribe') {
-                if (fromAsContact.isSubscribed() || fromAsContact.pendingOut) {
+                if (fromAsContact.isSubscribed() || fromAsContact.pendingOut$.getValue()) {
                     // subscriber is already a contact of us, approve subscription
-                    fromAsContact.pendingIn = false;
+                    fromAsContact.pendingIn$.next(false);
                     this.sendAcceptPresenceSubscriptionRequest(stanza.attrs.from);
                     fromAsContact.subscription$.next(
                         this.transitionSubscriptionRequestReceivedAccepted(fromAsContact.subscription$.getValue()));
@@ -130,12 +130,12 @@ export class RosterPlugin extends AbstractXmppPlugin {
                     return true;
                 } else if (fromAsContact) {
                     // subscriber is known but not subscribed or pending
-                    fromAsContact.pendingIn = true;
+                    fromAsContact.pendingIn$.next(true);
                     this.chatService.contacts$.next(this.chatService.contacts$.getValue());
                     return true;
                 }
             } else if (stanza.attrs.type === 'subscribed') {
-                fromAsContact.pendingOut = false;
+                fromAsContact.pendingOut$.next(false);
                 fromAsContact.subscription$.next(this.transitionSubscriptionRequestSentAccepted(fromAsContact.subscription$.getValue()));
                 this.chatService.contacts$.next(this.chatService.contacts$.getValue());
                 return true;
@@ -172,7 +172,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
 
     private sendAcceptPresenceSubscriptionRequest(jid: string) {
         const contact = this.chatService.getOrCreateContactById(jid);
-        contact.pendingIn = false;
+        contact.pendingIn$.next(false);
         this.chatService.chatConnectionService.send(
             xml('presence', {to: jid, type: 'subscribed', id: this.chatService.chatConnectionService.getNextIqId()})
         );
@@ -204,7 +204,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
                 const contact = this.chatService.getOrCreateContactById(rosterElement.attrs.jid,
                     rosterElement.attrs.name || rosterElement.attrs.jid);
                 contact.subscription$.next(this.parseSubscription(rosterElement.attrs.subscription));
-                contact.pendingOut = rosterElement.attrs.ask === 'subscribe';
+                contact.pendingOut$.next(rosterElement.attrs.ask === 'subscribe');
                 return contact;
             });
     }
@@ -246,8 +246,8 @@ export class RosterPlugin extends AbstractXmppPlugin {
         const contact = this.chatService.getContactById(jid);
         if (contact) {
             contact.subscription$.next(ContactSubscription.none);
-            contact.pendingOut = false;
-            contact.pendingIn = false;
+            contact.pendingOut$.next(false);
+            contact.pendingIn$.next(false);
             this.sendRemoveFromRoster(jid);
             this.sendWithdrawPresenceSubscription(jid);
         }

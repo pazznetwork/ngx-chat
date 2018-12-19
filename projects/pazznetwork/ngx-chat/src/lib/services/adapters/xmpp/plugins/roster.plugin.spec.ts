@@ -65,7 +65,7 @@ describe('roster plugin', () => {
             contact2.subscription$.next(ContactSubscription.to);
             const contact3 = contactFactory.createContact('test3@example.com', 'from ask');
             contact3.subscription$.next(ContactSubscription.from);
-            contact3.pendingOut = true;
+            contact3.pendingOut$.next(true);
             const contact4 = contactFactory.createContact('test4@example.com');
 
             const contacts = await new RosterPlugin(chatAdapter, logService).getRosterContacts();
@@ -163,7 +163,7 @@ describe('roster plugin', () => {
 
         it('should handle subscribe from a contact and promote subscription from "to" to "both"', async () => {
             const contact = await setupMockContact();
-            contact.pendingIn = true;
+            contact.pendingIn$.next(true);
             contact.subscription$.next(ContactSubscription.to);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
@@ -171,15 +171,15 @@ describe('roster plugin', () => {
             );
             expect(handled).toBeTruthy();
 
-            expect(contact.pendingIn).toBeFalsy();
+            expect(contact.pendingIn$.getValue()).toBeFalsy();
             assertAcceptedPresenceSubscription();
             expect(contact.subscription$.getValue()).toEqual(ContactSubscription.both);
         });
 
         it('should handle subscribe from a contact and promote subscription from "none" to "from"', async () => {
             const contact = await setupMockContact();
-            contact.pendingOut = true;
-            contact.pendingIn = true;
+            contact.pendingOut$.next(true);
+            contact.pendingIn$.next(true);
             contact.subscription$.next(ContactSubscription.none);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
@@ -187,7 +187,7 @@ describe('roster plugin', () => {
             );
             expect(handled).toBeTruthy();
 
-            expect(contact.pendingIn).toBeFalsy();
+            expect(contact.pendingIn$.getValue()).toBeFalsy();
             assertAcceptedPresenceSubscription();
             expect(contact.subscription$.getValue()).toEqual(ContactSubscription.from);
         });
@@ -202,7 +202,7 @@ describe('roster plugin', () => {
             );
             expect(handled).toBeTruthy();
 
-            expect(contact.pendingIn).toBeTruthy();
+            expect(contact.pendingIn$.getValue()).toBeTruthy();
         });
 
         it('should add a pending in flag and create a contact when we never seen him before', async () => {
@@ -214,7 +214,7 @@ describe('roster plugin', () => {
             chatAdapter.contactRequestsReceived$.subscribe(contacts => {
                 expect(contacts.length).toEqual(1);
                 const contact = contacts[0];
-                expect(contact.pendingIn).toBeTruthy();
+                expect(contact.pendingIn$.getValue()).toBeTruthy();
                 expect(contact.subscription$.getValue()).toEqual(ContactSubscription.none);
             });
         });
@@ -222,7 +222,7 @@ describe('roster plugin', () => {
         it('should reset pending out on contact and transition subscription state if contact accepts our subscription', async () => {
             const contact = await setupMockContact();
             contact.subscription$.next(ContactSubscription.none);
-            contact.pendingOut = true;
+            contact.pendingOut$.next(true);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribed'})
@@ -233,7 +233,7 @@ describe('roster plugin', () => {
                 expect(contacts.length).toEqual(1);
                 const subscribedContact = contacts[0];
                 expect(subscribedContact).toEqual(contact);
-                expect(subscribedContact.pendingOut).toBeFalsy();
+                expect(subscribedContact.pendingOut$.getValue()).toBeFalsy();
                 expect(subscribedContact.subscription$.getValue()).toEqual(ContactSubscription.to);
             });
         });

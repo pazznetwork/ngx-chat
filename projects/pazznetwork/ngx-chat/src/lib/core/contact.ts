@@ -21,8 +21,8 @@ export class Contact {
     public jidBare: JID;
     public presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
     public subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
-    public pendingOut = false;
-    public pendingIn = false;
+    public pendingOut$ = new BehaviorSubject(false);
+    public pendingIn$ = new BehaviorSubject(false);
 
     private messageStore: MessageStore<Message>;
 
@@ -66,6 +66,6 @@ export class Contact {
     }
 
     isUnaffiliated() {
-        return !this.isSubscribed() && !this.pendingIn && !this.pendingOut && this.messages.length > 0;
+        return !this.isSubscribed() && !this.pendingIn$.getValue() && !this.pendingOut$.getValue() && this.messages.length > 0;
     }
 }
