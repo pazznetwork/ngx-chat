@@ -1,3 +1,29 @@
+## [0.2.3](https://github.com/pazznetwork/ngx-chat/compare/v0.2.2...v0.2.3) (2018-12-19)
+
+
+### Bug Fixes
+
+* try to diagnose reconnect issues in cordova on ios devices ([fb8eec0](https://github.com/pazznetwork/ngx-chat/commit/fb8eec0))
+
+
+### Code Refactoring
+
+* pendingIn / pendingOut converted to BehaviorSubject ([cc9ea2a](https://github.com/pazznetwork/ngx-chat/commit/cc9ea2a))
+
+
+### Features
+
+* roster contains incoming requests, sent requests and others ([0a75f40](https://github.com/pazznetwork/ngx-chat/commit/0a75f40))
+
+
+### BREAKING CHANGES
+
+* the pendingIn / pendingOut properties of Contact have
+been converted to BehaviorSubject and changed to the rxjs naming
+convention.
+
+
+
 ## [0.2.2](https://github.com/pazznetwork/ngx-chat/compare/v0.2.1...v0.2.2) (2018-11-16)
 
 
