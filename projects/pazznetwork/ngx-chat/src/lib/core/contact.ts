@@ -11,6 +11,10 @@ export interface ContactMetadata {
     [key: string]: any;
 }
 
+export interface JidToPresence {
+    [jid: string]: Presence;
+}
+
 export class Contact {
 
     public avatar = dummyAvatar;
@@ -23,6 +27,7 @@ export class Contact {
     public subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
     public pendingOut$ = new BehaviorSubject(false);
     public pendingIn$ = new BehaviorSubject(false);
+    public resources$ = new BehaviorSubject<JidToPresence>({});
 
     private messageStore: MessageStore<Message>;
 
@@ -68,4 +73,27 @@ export class Contact {
     isUnaffiliated() {
         return !this.isSubscribed() && !this.pendingIn$.getValue() && !this.pendingOut$.getValue() && this.messages.length > 0;
     }
+
+    updateResourcePresence(jid: string, presence: Presence) {
+        const resources = this.resources$.getValue();
+        resources[jid] = presence;
+        this.presence$.next(this.reducePresences(resources));
+        this.resources$.next(resources);
+    }
+
+    private reducePresences(jidToPresence: JidToPresence): Presence {
+        let result = Presence.unavailable;
+        for (const jid in jidToPresence) {
+            if (jidToPresence.hasOwnProperty(jid)) {
+                const presence = jidToPresence[jid];
+                if (presence === Presence.present) {
+                    return presence;
+                } else if (presence === Presence.away) {
+                    result = Presence.away;
+                }
+            }
+        }
+        return result;
+    }
+
 }

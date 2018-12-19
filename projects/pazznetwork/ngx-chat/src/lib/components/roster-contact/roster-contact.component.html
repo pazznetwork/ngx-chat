@@ -1,13 +1,13 @@
 <div class="roster-contact" [title]="contact.name">
+
     <div class="roster-contact-avatar">
         <img [src]="contact.avatar"/>
     </div>
+
     <div class="roster-contact-name">
         {{contact.name}}
     </div>
-    <!--
-    <div class="roster-presence">
-        {{(contact.presence$ | async) === presence.present}}
-    </div>
-    -->
+
+    <div class="roster-presence" [ngClass]="'roster-presence--' + (contact.presence$ | async)">●</div>
+
 </div>

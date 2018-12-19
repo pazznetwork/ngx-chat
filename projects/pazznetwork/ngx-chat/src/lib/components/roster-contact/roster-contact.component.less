@@ -38,3 +38,21 @@
   max-width: 9em;
   overflow: hidden;
 }
+
+.roster-presence {
+  padding-top: 0.5em;
+  float: left;
+  margin-left: 0.3em;
+
+  &.roster-presence--present {
+    color: @success;
+  }
+
+  &.roster-presence--away {
+    color: @warning;
+  }
+
+  &.roster-presence--unavailable {
+    color: transparent;
+  }
+}

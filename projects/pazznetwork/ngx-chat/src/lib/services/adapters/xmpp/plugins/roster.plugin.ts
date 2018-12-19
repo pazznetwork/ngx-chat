@@ -78,7 +78,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
     }
 
     private isPresenceStanza(stanza: Stanza): stanza is PresenceStanza {
-        return stanza.name === 'presence' && !stanza.getChild('x');
+        return stanza.name === 'presence' && !stanza.getChild('x', 'http://jabber.org/protocol/muc#user');
     }
 
     private handlePresenceStanza(stanza: PresenceStanza) {
@@ -86,38 +86,24 @@ export class RosterPlugin extends AbstractXmppPlugin {
         const isAddressedToMe = this.chatService.chatConnectionService.userJid.bare().equals(parseJid(stanza.attrs.to).bare());
         if (isAddressedToMe) {
             if (!stanza.attrs.type) {
-                if (stanza.getChild('show') == null) {
-                    // TODO: a contact can has more than one presence
-                    fromAsContact.presence$.next(Presence.present);
-                    return true;
+                // https://xmpp.org/rfcs/rfc3921.html#stanzas-presence-children-show
+                const show = stanza.getChildText('show');
+                const presenceMapping: { [key: string]: Presence } = {
+                    'chat': Presence.present,
+                    null: Presence.present,
+                    'away': Presence.away,
+                    'dnd': Presence.away,
+                    'xa': Presence.away,
+                };
+                const presence = presenceMapping[show];
+                if (presence) {
+                    fromAsContact.updateResourcePresence(stanza.attrs.from, presence);
                 } else {
-                    // https://xmpp.org/rfcs/rfc3921.html#stanzas-presence-children-show
-                    const show = stanza.getChildText('show');
-                    if (show === 'away') {
-                        // away
-                        this.logService.debug('presence of', stanza.attrs.from, 'away');
-                        fromAsContact.presence$.next(Presence.present);
-                    } else if (show === 'chat') {
-                        // chat
-                        this.logService.debug('presence of', stanza.attrs.from, 'chat');
-                        fromAsContact.presence$.next(Presence.present);
-                    } else if (show === 'dnd') {
-                        // do not distrb
-                        this.logService.debug('presence of', stanza.attrs.from, 'dnd');
-                        fromAsContact.presence$.next(Presence.present);
-                    } else if (show === 'xa') {
-                        // long away
-                        this.logService.debug('presence of', stanza.attrs.from, 'xa');
-                        fromAsContact.presence$.next(Presence.present);
-                    } else {
-                        // error, undefined
-                        this.logService.error('illegal presence:', stanza.attrs.from, show);
-                    }
-                    return true;
+                    this.logService.error('illegal presence:', stanza.attrs.from, show);
                 }
+                return true;
             } else if (stanza.attrs.type === 'unavailable') {
-                // TODO: a contact can has more than one presence
-                fromAsContact.presence$.next(Presence.unavailable);
+                fromAsContact.updateResourcePresence(stanza.attrs.from, Presence.unavailable);
                 return true;
             } else if (stanza.attrs.type === 'subscribe') {
                 if (fromAsContact.isSubscribed() || fromAsContact.pendingOut$.getValue()) {

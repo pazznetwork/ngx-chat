@@ -1,6 +1,7 @@
 export enum Presence {
 
     present = 'present',
-    unavailable = 'unavailable'
+    unavailable = 'unavailable',
+    away = 'away',
 
 }

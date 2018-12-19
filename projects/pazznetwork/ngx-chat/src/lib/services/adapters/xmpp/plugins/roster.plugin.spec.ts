@@ -106,7 +106,7 @@ describe('roster plugin', () => {
 
         });
 
-        async function testPresenceAfterShow(show: string) {
+        async function testPresenceAfterShow(show: string, expectedPresence: Presence) {
             const contact = await setupMockContact();
 
             expect(contact.presence$.getValue())
@@ -119,38 +119,54 @@ describe('roster plugin', () => {
             expect(handled).toBeTruthy();
 
             expect(contact.presence$.getValue())
-                .toEqual(Presence.present);
+                .toEqual(expectedPresence);
         }
 
         it('should handle presence show stanzas with a show "away" element', async () => {
-            await testPresenceAfterShow('away');
+            await testPresenceAfterShow('away', Presence.away);
         });
 
         it('should handle presence show stanzas with a show "chat" element', async () => {
-            await testPresenceAfterShow('chat');
+            await testPresenceAfterShow('chat', Presence.present);
         });
 
         it('should handle presence show stanzas with a show "dnd" element', async () => {
-            await testPresenceAfterShow('dnd');
+            await testPresenceAfterShow('dnd', Presence.away);
         });
 
         it('should handle presence show stanzas with a show "xa" element', async () => {
-            await testPresenceAfterShow('xa');
+            await testPresenceAfterShow('xa', Presence.away);
         });
 
         it('should handle presence unavailable stanzas', async () => {
             const contact = await setupMockContact();
 
-            contact.presence$.next(Presence.present);
+            contact.updateResourcePresence(contact.jidBare.toString() + '/bla', Presence.present);
             expect(contact.presence$.getValue()).toEqual(Presence.present);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'unavailable'})
+                xml('presence', {from: 'test@example.com/bla', to: 'me@example.com/bla', type: 'unavailable'})
             );
             expect(handled).toBeTruthy();
 
-            expect(contact.presence$.getValue())
-                .toEqual(Presence.unavailable);
+            expect(contact.presence$.getValue()).toEqual(Presence.unavailable);
+        });
+
+        it('should handle multiple resources and summarize the status', async () => {
+            const contact = await setupMockContact();
+
+            contact.updateResourcePresence(contact.jidBare.toString() + '/foo', Presence.away);
+            expect(contact.presence$.getValue()).toEqual(Presence.away);
+
+            contact.updateResourcePresence(contact.jidBare.toString() + '/bar', Presence.present);
+            expect(contact.presence$.getValue()).toEqual(Presence.present);
+
+            contact.updateResourcePresence(contact.jidBare.toString() + '/bar', Presence.unavailable);
+            expect(contact.presence$.getValue()).toEqual(Presence.away);
+
+            contact.updateResourcePresence(contact.jidBare.toString() + '/foo', Presence.unavailable);
+            expect(contact.presence$.getValue()).toEqual(Presence.unavailable);
+
         });
 
         function assertAcceptedPresenceSubscription() {
