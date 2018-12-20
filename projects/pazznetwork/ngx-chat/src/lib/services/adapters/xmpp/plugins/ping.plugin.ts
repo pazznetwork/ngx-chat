@@ -11,7 +11,7 @@ import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 export class PingPlugin extends AbstractXmppPlugin {
 
     private timeoutHandle: any;
-    private readonly pingInterval = 5000;
+    private readonly pingInterval = 60_000;
 
     constructor(private xmppChatAdapter: XmppChatAdapter,
                 private logService: LogService,
