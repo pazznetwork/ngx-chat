@@ -90,6 +90,12 @@
 
     <app-multi-user-chat></app-multi-user-chat>
 
+    <div>
+        <h2>Unread messages count:</h2>
+        Sum unread messages: {{unreadMessageCountPlugin.unreadMessageCountSum$ | async}}
+        <pre>{{unreadMessageCountPlugin.jidToUnreadCount$ | async | json}}</pre>
+    </div>
+
 </div>
 
 <ngx-chat [contacts]="contacts"></ngx-chat>

@@ -1,5 +1,5 @@
 import { x as xml } from '@xmpp/xml';
-import { Direction, MessageWithBodyStanza, Stanza } from '../../../../core';
+import { Direction, Message, MessageWithBodyStanza, Stanza } from '../../../../core';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
@@ -46,20 +46,20 @@ export class MessagePlugin extends AbstractXmppPlugin {
         );
 
         this.xmppChatAdapter.plugins.forEach(plugin => plugin.beforeSendMessage(messageStanza));
+        const contact = this.xmppChatAdapter.getOrCreateContactById(jid);
+        const message: Message = {
+            direction: Direction.out,
+            body,
+            datetime: new Date(),
+            delayed: false
+        };
+        // TODO: on rejection mark message that it was not sent successfully
+        contact.addMessage(message);
         this.xmppChatAdapter.chatConnectionService.send(messageStanza).then(() => {
-            const contact = this.xmppChatAdapter.getOrCreateContactById(jid);
-            const message = {
-                direction: Direction.out,
-                body,
-                datetime: new Date(),
-                delayed: false
-            };
-
             this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterSendMessage(message, messageStanza));
-            contact.addMessage(message);
             this.xmppChatAdapter.message$.next(contact);
         }, (rej) => {
-            this.logService.error('rejected', rej);
+            this.logService.error('rejected message ' + message.id, rej);
         });
     }
 

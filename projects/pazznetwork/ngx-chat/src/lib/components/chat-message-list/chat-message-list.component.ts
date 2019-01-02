@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 
 import { Contact } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
+import { ChatMessageListRegistryService } from '../../services/chat-message-list-registry.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
@@ -24,7 +25,8 @@ export class ChatMessageListComponent implements OnInit, OnDestroy {
     private messageSubscription: Subscription;
 
     constructor(public chatListService: ChatListStateService,
-                @Inject(ChatServiceToken) public chatService: ChatService) {
+                @Inject(ChatServiceToken) public chatService: ChatService,
+                private chatMessageListRegistry: ChatMessageListRegistryService) {
     }
 
     ngOnInit() {
@@ -32,10 +34,12 @@ export class ChatMessageListComponent implements OnInit, OnDestroy {
             this.scheduleScrollToLastMessage();
         });
         this.scheduleScrollToLastMessage();
+        this.chatMessageListRegistry.incrementOpenWindowCount(this.contact);
     }
 
     ngOnDestroy(): void {
         this.messageSubscription.unsubscribe();
+        this.chatMessageListRegistry.decrementOpenWindowCount(this.contact);
     }
 
     acceptSubscriptionRequest(event: Event) {

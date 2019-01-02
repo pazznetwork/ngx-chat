@@ -11,6 +11,7 @@ import {
     LogService,
     MultiUserChatPlugin,
     RegistrationPlugin,
+    UnreadMessageCountPlugin,
     XmppClientToken,
 } from './ngx-chat-imports';
 
@@ -28,6 +29,7 @@ export class AppComponent {
     public otherJid: any;
     public contacts: Observable<Contact[]> = this.chatService.contactsSubscribed$;
     public multiUserChatPlugin: MultiUserChatPlugin;
+    public unreadMessageCountPlugin: UnreadMessageCountPlugin;
     public registrationMessage: string;
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
@@ -43,7 +45,7 @@ export class AppComponent {
 
         this.chatService.state$.subscribe((state) => this.stateChanged(state));
         this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
-
+        this.unreadMessageCountPlugin = this.chatService.getPlugin(UnreadMessageCountPlugin);
     }
 
     onLogin() {
@@ -104,4 +106,5 @@ export class AppComponent {
     onReconnect() {
         this.chatService.reconnect();
     }
+
 }

@@ -11,6 +11,9 @@ export class ChatWindowState {
     }
 }
 
+/**
+ * Used to open chat windows programmatically.
+ */
 @Injectable()
 export class ChatListStateService {
 

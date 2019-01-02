@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ModuleWithProviders, NgModule, NgZone } from '@angular/core';
+import { APP_INITIALIZER, Injector, ModuleWithProviders, NgModule, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Client } from '@xmpp/client-core';
 import bind from '@xmpp/plugins/bind';
@@ -22,19 +22,21 @@ import { LinksDirective } from './directives/links.directive';
 import {
     BookmarkPlugin,
     MessageArchivePlugin,
+    MessagePlugin,
     MessageUuidPlugin,
     MultiUserChatPlugin,
+    PingPlugin,
     PublishSubscribePlugin,
     PushPlugin,
     RegistrationPlugin,
     RosterPlugin,
-    ServiceDiscoveryPlugin
+    ServiceDiscoveryPlugin,
+    UnreadMessageCountPlugin
 } from './services/adapters/xmpp/plugins';
-import { MessagePlugin } from './services/adapters/xmpp/plugins/message.plugin';
-import { PingPlugin } from './services/adapters/xmpp/plugins/ping.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
+import { ChatMessageListRegistryService } from './services/chat-message-list-registry.service';
 import { ChatServiceToken } from './services/chat-service';
 import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
@@ -82,8 +84,8 @@ export class NgxChatModule {
                 ContactFactoryService,
                 {
                     provide: ChatServiceToken,
-                    deps: [XmppChatConnectionService, LogService, ContactFactoryService, NgZone],
-                    useFactory: NgxChatModule.chatAdapter
+                    deps: [XmppChatConnectionService, LogService, ContactFactoryService],
+                    useFactory: NgxChatModule.xmppChatAdapter
                 },
                 {
                     provide: XmppChatConnectionService,
@@ -94,32 +96,49 @@ export class NgxChatModule {
                     provide: XmppClientToken,
                     useFactory: NgxChatModule.client
                 },
+                {
+                    provide: APP_INITIALIZER,
+                    deps: [Injector],
+                    useFactory: NgxChatModule.initializePlugins,
+                    multi: true,
+                }
             ],
         };
 
     }
 
-    private static chatAdapter(chatConnectionService: XmppChatConnectionService,
-                               logService: LogService,
-                               contactFactory: ContactFactoryService,
-                               ngZone: NgZone) {
-        const xmppChatAdapter = new XmppChatAdapter(chatConnectionService, logService, contactFactory);
+    private static xmppChatAdapter(chatConnectionService: XmppChatConnectionService,
+                                   logService: LogService,
+                                   contactFactory: ContactFactoryService): XmppChatAdapter {
+        return new XmppChatAdapter(chatConnectionService, logService, contactFactory);
+    }
 
-        xmppChatAdapter.addPlugins([
-            new BookmarkPlugin(xmppChatAdapter),
-            new MessageArchivePlugin(xmppChatAdapter),
-            new MessagePlugin(xmppChatAdapter, logService),
-            new MessageUuidPlugin(),
-            new MultiUserChatPlugin(xmppChatAdapter, logService),
-            new PublishSubscribePlugin(xmppChatAdapter),
-            new RosterPlugin(xmppChatAdapter, logService),
-            new ServiceDiscoveryPlugin(xmppChatAdapter),
-            new PushPlugin(xmppChatAdapter),
-            new PingPlugin(xmppChatAdapter, logService, ngZone),
-            new RegistrationPlugin(logService, ngZone),
-        ]);
+    private static initializePlugins(injector: Injector) {
+        const initializer = function () {
+            const logService = injector.get(LogService);
+            const ngZone = injector.get(NgZone);
+            const xmppChatAdapter = injector.get(ChatServiceToken) as XmppChatAdapter;
+            const publishSubscribePlugin = new PublishSubscribePlugin(xmppChatAdapter);
+            const chatMessageListRegistryService = injector.get(ChatMessageListRegistryService);
+            const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
+                xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin);
 
-        return xmppChatAdapter;
+            xmppChatAdapter.addPlugins([
+                new BookmarkPlugin(xmppChatAdapter),
+                new MessageArchivePlugin(xmppChatAdapter),
+                new MessagePlugin(xmppChatAdapter, logService),
+                new MessageUuidPlugin(),
+                new MultiUserChatPlugin(xmppChatAdapter, logService),
+                publishSubscribePlugin,
+                new RosterPlugin(xmppChatAdapter, logService),
+                new ServiceDiscoveryPlugin(xmppChatAdapter),
+                new PushPlugin(xmppChatAdapter),
+                new PingPlugin(xmppChatAdapter, logService, ngZone),
+                new RegistrationPlugin(logService, ngZone),
+                unreadMessageCountPlugin,
+            ]);
+        };
+        return initializer;
     }
 
     private static chatConnectionService(client: Client, logService: LogService, ngZone: NgZone) {
