@@ -7,6 +7,6 @@
                       [nick]="getOrCreateContactWithFullJid(message.from).name">
     </ngx-chat-message>
     <div class="chat-messages-empty" *ngIf="room.messages.length === 0">
-        {{this.chatService.translations.noMessages}}
+        {{chatService.translations.noMessages}}
     </div>
 </div>

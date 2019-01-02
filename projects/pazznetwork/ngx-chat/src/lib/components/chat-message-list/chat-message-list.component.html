@@ -5,18 +5,18 @@
                       [showAvatars]="showAvatars">
     </ngx-chat-message>
     <div class="chat-messages-empty" *ngIf="contact.messages.length === 0">
-        {{this.chatService.translations.noMessages}}
+        {{chatService.translations.noMessages}}
     </div>
     <div class="chat-message chat-message--in" *ngIf="contact.pendingIn$ | async">
         <span>
-            {{this.chatService.translations.subscriptionRequestMessage}}
+            {{chatService.translations.subscriptionRequestMessage}}
         </span>
         <ul class="chat-presence-subscription-actions">
             <li>
-                <a (click)="acceptSubscriptionRequest($event)" href="#">{{this.chatService.translations.acceptSubscriptionRequest}}</a>
+                <a (click)="acceptSubscriptionRequest($event)" href="#">{{chatService.translations.acceptSubscriptionRequest}}</a>
             </li>
             <li>
-                <a (click)="denySubscriptionRequest($event)" href="#">{{this.chatService.translations.denySubscriptionRequest}}</a>
+                <a (click)="denySubscriptionRequest($event)" href="#">{{chatService.translations.denySubscriptionRequest}}</a>
             </li>
         </ul>
     </div>
