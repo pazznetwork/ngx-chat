@@ -13,6 +13,9 @@ export interface SavedConference {
 
 export const STORAGE_BOOKMARKS = 'storage:bookmarks';
 
+/**
+ * XEP-0048
+ */
 export class BookmarkPlugin extends AbstractXmppPlugin {
 
     constructor(private xmppChatAdapter: XmppChatAdapter) {

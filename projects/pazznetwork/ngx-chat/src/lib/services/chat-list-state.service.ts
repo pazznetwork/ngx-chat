@@ -54,16 +54,16 @@ export class ChatListStateService {
         }
     }
 
-    private isChatWithContactOpen(contact: Contact) {
+    isChatWithContactOpen(contact: Contact): boolean {
         return this.findChatWindowStateIndexByContact(contact) >= 0;
     }
 
-    private findChatWindowStateIndexByContact(contact: Contact) {
+    private findChatWindowStateIndexByContact(contact: Contact): number {
         return this.openChats$.getValue()
             .findIndex((chatWindowState) => chatWindowState.contact.equalsBareJid(contact));
     }
 
-    private findChatWindowStateByContact(contact: Contact) {
+    private findChatWindowStateByContact(contact: Contact): ChatWindowState {
         return this.openChats$.getValue()
             .find((chatWindowState) => chatWindowState.contact.equalsBareJid(contact));
     }

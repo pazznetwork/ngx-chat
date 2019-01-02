@@ -93,7 +93,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
         });
     }
 
-    async retrieveNodeItems(node: string) {
+    async retrieveNodeItems(node: string): Promise<Element[]> {
         try {
             const iqResponseStanza = await this.xmppChatAdapter.chatConnectionService.sendIq(
                 new RetrieveDataStanzaBuilder(node).toStanza()
