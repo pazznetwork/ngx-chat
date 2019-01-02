@@ -88,12 +88,7 @@
 
     <app-send-stanza></app-send-stanza>
 
-    <div>
-        <h2>Chat rooms</h2>
-        <div *ngFor="let room of (multiUserChatPlugin.rooms$ | async)">
-            {{room.roomJid.bare().toString()}}
-        </div>
-    </div>
+    <app-multi-user-chat></app-multi-user-chat>
 
 </div>
 

@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { IqComponent } from './iq/iq.component';
+import { MultiUserChatComponent } from './multi-user-chat/multi-user-chat.component';
 import { NgxChatModule } from './ngx-chat-imports';
 import { SendStanzaComponent } from './send-stanza/send-stanza.component';
 
@@ -14,6 +15,7 @@ import { SendStanzaComponent } from './send-stanza/send-stanza.component';
         AppComponent,
         IqComponent,
         SendStanzaComponent,
+        MultiUserChatComponent,
     ],
     imports: [
         BrowserModule,
