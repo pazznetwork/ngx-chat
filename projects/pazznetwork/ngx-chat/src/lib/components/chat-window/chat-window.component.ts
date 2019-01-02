@@ -12,9 +12,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     @Input()
     public chatWindowState: ChatWindowState;
 
-    @Input()
-    public isCollapsed: boolean;
-
     private subscriptions: Subscription[] = [];
 
     constructor(private chatListService: ChatListStateService) {
