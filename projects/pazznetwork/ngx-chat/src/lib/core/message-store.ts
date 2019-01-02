@@ -1,6 +1,7 @@
 import { Subject } from 'rxjs';
 import { LogService } from '../services/log.service';
 import { Message } from './message';
+import { insertSortedLast } from './utils-array';
 
 export class MessageStore<T extends Message> {
 
@@ -19,11 +20,9 @@ export class MessageStore<T extends Message> {
             }
             return false;
         }
-        this.messages.push(message);
-        // TODO: insert on correct index via binary search instead of sorting complete list all the time
-        this.messages.sort((a, b) => a.datetime.getTime() - b.datetime.getTime());
-        this.messages$.next(message);
+        insertSortedLast(message, this.messages, m => m.datetime);
         this.messageIdToMessage[message.id] = message;
+        this.messages$.next(message);
         return true;
     }
 
