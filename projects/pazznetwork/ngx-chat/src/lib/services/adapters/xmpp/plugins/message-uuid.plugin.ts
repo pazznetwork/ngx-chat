@@ -13,7 +13,7 @@ export class MessageUuidPlugin extends AbstractXmppPlugin {
     public static extractIdFromStanza(messageStanza: Element) {
         const originIdElement = messageStanza.getChild('origin-id');
         const stanzaIdElement = messageStanza.getChild('stanza-id');
-        return (originIdElement && originIdElement.attrs.id) || (stanzaIdElement && stanzaIdElement.attrs.id);
+        return messageStanza.attrs.id || (originIdElement && originIdElement.attrs.id) || (stanzaIdElement && stanzaIdElement.attrs.id);
     }
 
     beforeSendMessage(messageStanza: Element): void {
