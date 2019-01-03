@@ -1,3 +1,19 @@
+## [0.2.5](https://github.com/pazznetwork/ngx-chat/compare/v0.2.4...v0.2.5) (2019-01-03)
+
+
+### Bug Fixes
+
+* increase ping interval from 5 seconds to 60 seconds ([fbec21b](https://github.com/pazznetwork/ngx-chat/commit/fbec21b))
+* use message id attribute first ([c0bb556](https://github.com/pazznetwork/ngx-chat/commit/c0bb556))
+
+
+### Features
+
+* add unread message count to contact in roster list ([6b9a4e2](https://github.com/pazznetwork/ngx-chat/commit/6b9a4e2))
+* unread message count plugin ([9195e63](https://github.com/pazznetwork/ngx-chat/commit/9195e63))
+
+
+
 ## [0.2.4](https://github.com/pazznetwork/ngx-chat/compare/v0.2.3...v0.2.4) (2018-12-19)
 
 
