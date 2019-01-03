@@ -8,19 +8,13 @@
 }
 
 .roster-contact {
-  text-align: left;
-
-  &:after {
-    content: '';
-    display: table;
-    clear: both;
-  }
+  display: flex;
+  justify-content: space-between;
 }
 
 .roster-contact-avatar {
   width: 2em;
   height: 2em;
-  float: left;
 
   img {
     width: 2em;
@@ -30,18 +24,21 @@
 }
 
 .roster-contact-name {
-  float: left;
   padding-left: 0.5em;
   padding-top: 0.5em;
   white-space: nowrap;
   text-overflow: ellipsis;
-  max-width: 9em;
   overflow: hidden;
+  flex-grow: 1;
+}
+
+.roster-contact-status {
+  white-space: nowrap;
 }
 
 .roster-presence {
+  display: inline-block;
   padding-top: 0.5em;
-  float: left;
   margin-left: 0.3em;
 
   &.roster-presence--present {
@@ -55,4 +52,17 @@
   &.roster-presence--unavailable {
     color: transparent;
   }
+}
+
+.unread-message-badge {
+  display: inline-block;
+  padding-top: 0.2em;
+  background-color: #ff5940;
+  color: #fff;
+  border-radius: 50%;
+  align-self: center;
+  margin-top: 0.25em;
+  width: 1.5em;
+  height: 1.5em;
+  text-align: center;
 }

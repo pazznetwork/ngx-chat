@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { Contact } from '../../core';
@@ -11,7 +11,7 @@ import { ChatService, ChatServiceToken } from '../../services/chat-service';
     templateUrl: './chat-message-list.component.html',
     styleUrls: ['./chat-message-list.component.less']
 })
-export class ChatMessageListComponent implements OnInit, OnDestroy {
+export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
 
     @Input()
     contact: Contact;
@@ -35,6 +35,13 @@ export class ChatMessageListComponent implements OnInit, OnDestroy {
         });
         this.scheduleScrollToLastMessage();
         this.chatMessageListRegistry.incrementOpenWindowCount(this.contact);
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.contact && changes.contact.previousValue && changes.contact.currentValue) {
+            this.chatMessageListRegistry.decrementOpenWindowCount(changes.contact.previousValue);
+            this.chatMessageListRegistry.incrementOpenWindowCount(changes.contact.currentValue);
+        }
     }
 
     ngOnDestroy(): void {
