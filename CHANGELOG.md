@@ -1,3 +1,15 @@
+## [0.2.6](https://github.com/pazznetwork/ngx-chat/compare/v0.2.5...v0.2.6) (2019-01-04)
+
+
+### Bug Fixes
+
+* chat window header spacing ([f23174b](https://github.com/pazznetwork/ngx-chat/commit/f23174b))
+* remove wrong border on chat window input ([63090d1](https://github.com/pazznetwork/ngx-chat/commit/63090d1))
+* try to fix reconnect issues when using iOS, disable ping plugin ([2dace50](https://github.com/pazznetwork/ngx-chat/commit/2dace50))
+* unaffiliated contacts not showing when receiving the first message ([9ecca74](https://github.com/pazznetwork/ngx-chat/commit/9ecca74))
+
+
+
 ## [0.2.5](https://github.com/pazznetwork/ngx-chat/compare/v0.2.4...v0.2.5) (2019-01-03)
 
 
