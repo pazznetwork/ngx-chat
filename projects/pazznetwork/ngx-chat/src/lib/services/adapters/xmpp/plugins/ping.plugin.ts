@@ -1,4 +1,5 @@
 import { NgZone } from '@angular/core';
+import { timeout } from '@xmpp/events';
 import { x as xml } from '@xmpp/xml';
 import { filter } from 'rxjs/operators';
 import { LogService } from '../../../log.service';
@@ -41,15 +42,27 @@ export class PingPlugin extends AbstractXmppPlugin {
     private async ping() {
         this.logService.debug('ping...');
         try {
-            await this.xmppChatAdapter.chatConnectionService.sendIq(
+            await timeout(this.sendPing(), 10_000);
+            this.logService.debug('... pong');
+        } catch (e) {
+            if (this.xmppChatAdapter.state$.getValue() === 'online'
+                && this.xmppChatAdapter.chatConnectionService.state$.getValue() === 'online') {
+                this.logService.error('... pong errored, it thinks it is online, scheduling reconnect!');
+                // TODO: state handling necessary! we have to prevent two reconnects at the same time!
+                this.xmppChatAdapter.reconnect();
+            }
+        }
+    }
+
+    private sendPing() {
+        try {
+            return this.xmppChatAdapter.chatConnectionService.sendIq(
                 xml('iq', {type: 'get'},
                     xml('ping', {xmlns: 'urn:xmpp:ping'})
                 )
             );
-            // TODO: timeout?
-            this.logService.debug('... pong');
         } catch (e) {
-            this.logService.error('... pong errored!');
+            return Promise.reject(e);
         }
     }
 

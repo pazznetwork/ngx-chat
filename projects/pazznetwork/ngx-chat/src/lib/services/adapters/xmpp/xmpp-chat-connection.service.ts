@@ -36,14 +36,18 @@ export class XmppChatConnectionService {
     initialize(): void {
         this.client.on('error', (err: any) => {
             this.ngZone.run(() => {
-                this.logService.error('chat service error =>', err.toString());
-                this.client.stop();
+                this.logService.error('chat service error =>', err.toString(), err);
+                if (err.toString().indexOf('connection error ') >= 0) { // thrown by iOS when gone offline due to battery saving
+                    this.reconnect();
+                } else {
+                    this.client.stop(); // e.g. kicked
+                }
             });
         });
 
         this.client.on('status', (status: any, value: any) => {
             this.ngZone.run(() => {
-                this.logService.info('status update =', status, value ? value.toString() : '');
+                this.logService.info('status update =', status, value ? JSON.stringify(value) : '');
                 if (status === 'offline') {
                     this.state$.next('disconnected');
                 }
@@ -62,10 +66,15 @@ export class XmppChatConnectionService {
             });
         });
 
+        this.client.plugins.reconnect.on('reconnected', () => {
+            this.ngZone.run(() => {
+                this.sendPresence();
+            });
+        });
     }
 
     public onOnline(jid: JID) {
-        this.logService.debug('online =', 'online as', jid.toString());
+        this.logService.info('online =', 'online as', jid.toString());
         this.userJid = jid;
         this.state$.next('online');
     }
@@ -78,7 +87,11 @@ export class XmppChatConnectionService {
 
     public send(content: any): PromiseLike<void> {
         this.logService.debug('>>>', content);
-        return this.client.send(content);
+        try {
+            return this.client.send(content);
+        } catch (e) {
+            return Promise.reject(e);
+        }
     }
 
     public sendIq(request: Element): Promise<IqResponseStanza> {
@@ -165,6 +178,8 @@ export class XmppChatConnectionService {
     }
 
     reconnect() {
+        this.logService.warn('hard reconnect...');
+        this.state$.next('disconnected');
         this.client.plugins.reconnect.reconnect();
     }
 }

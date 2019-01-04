@@ -25,7 +25,6 @@ import {
     MessagePlugin,
     MessageUuidPlugin,
     MultiUserChatPlugin,
-    PingPlugin,
     PublishSubscribePlugin,
     PushPlugin,
     RegistrationPlugin,
@@ -133,7 +132,7 @@ export class NgxChatModule {
                 new RosterPlugin(xmppChatAdapter, logService),
                 new ServiceDiscoveryPlugin(xmppChatAdapter),
                 new PushPlugin(xmppChatAdapter),
-                new PingPlugin(xmppChatAdapter, logService, ngZone),
+                // new PingPlugin(xmppChatAdapter, logService, ngZone),
                 new RegistrationPlugin(logService, ngZone),
                 unreadMessageCountPlugin,
             ]);
