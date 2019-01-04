@@ -71,7 +71,7 @@ export class Contact {
     }
 
     isUnaffiliated() {
-        return !this.isSubscribed() && !this.pendingIn$.getValue() && !this.pendingOut$.getValue() && this.messages.length > 0;
+        return !this.isSubscribed() && !this.pendingIn$.getValue() && !this.pendingOut$.getValue();
     }
 
     updateResourcePresence(jid: string, presence: Presence) {

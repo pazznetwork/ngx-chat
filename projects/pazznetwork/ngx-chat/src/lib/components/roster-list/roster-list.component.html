@@ -46,10 +46,12 @@
         <div class="roster-header">{{chatService.translations.contactsUnaffiliated}}</div>
         <div class="contact-list-wrapper">
 
-            <ngx-chat-roster-contact *ngFor="let contact of (contactsUnaffiliated$ | async)"
-                                     [contact]="contact"
-                                     (click)="onClickContact(contact)">
-            </ngx-chat-roster-contact>
+            <ng-container *ngFor="let contact of (contactsUnaffiliated$ | async)">
+                <ngx-chat-roster-contact *ngIf="contact.messages.length > 0"
+                                         [contact]="contact"
+                                         (click)="onClickContact(contact)">
+                </ngx-chat-roster-contact>
+            </ng-container>
 
         </div>
     </ng-container>
