@@ -18,21 +18,16 @@
 }
 
 .chat-contact-header {
-  text-align: left;
+  display: flex;
+  justify-content: space-between;
   border-bottom: 1px solid @general-border-color;
   cursor: pointer;
-
-  &:after {
-    content: '';
-    display: table;
-    clear: both;
-  }
+  line-height: 2em;
 }
 
 .chat-contact-avatar {
   width: 2em;
   height: 2em;
-  float: left;
 
   img {
     width: 2em;
@@ -41,18 +36,16 @@
 }
 
 .chat-contact-name {
-  float: left;
-  padding-left: 0.5em;
-  padding-top: 0.5em;
+  padding: 0 0.5em;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width: 8em;
+  flex-grow: 1;
   overflow: hidden;
 }
 
 .chat-close {
-  float: right;
-  margin: 0.5rem;
+  flex: 1;
+  padding: 0 0.5em;
 }
 
 .chat-content {
