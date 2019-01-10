@@ -1,5 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Direction } from '../../core';
 import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
 
 @Component({
@@ -12,19 +14,25 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     @Input()
     public chatWindowState: ChatWindowState;
 
-    private subscriptions: Subscription[] = [];
+    private ngDestroy = new Subject<void>();
 
     constructor(private chatListService: ChatListStateService) {
     }
 
     ngOnInit() {
-        this.subscriptions.push(this.chatWindowState.contact.messages$.subscribe(() => {
-            this.chatWindowState.isCollapsed = false;
-        }));
+        this.chatWindowState.contact.messages$
+            .pipe(
+                filter(message => message.direction === Direction.in),
+                takeUntil(this.ngDestroy)
+            )
+            .subscribe(() => {
+                this.chatWindowState.isCollapsed = false;
+            });
     }
 
     ngOnDestroy() {
-        this.subscriptions.forEach(subscription => subscription.unsubscribe());
+        this.ngDestroy.next();
+        this.ngDestroy.complete();
     }
 
     public onClickHeader() {
