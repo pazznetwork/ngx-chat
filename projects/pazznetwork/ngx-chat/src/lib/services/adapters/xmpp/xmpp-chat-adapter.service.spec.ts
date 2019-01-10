@@ -97,14 +97,8 @@ describe('XmppChatAdapter', () => {
                     xml('body', {}, 'message text')) as Stanza);
         });
 
-        it('#messages$ should emit contact on sending messages', (done) => {
-            chatService.message$.pipe(first()).subscribe(contact => {
-                expect(contact.jidBare.toString()).toEqual(contact1.jidBare.toString());
-                expect(contact.messages.length).toEqual(1);
-                expect(contact.messages[0].body).toEqual('send message text');
-                expect(contact.messages[0].direction).toEqual(Direction.out);
-                done();
-            });
+        it('#messages$ should not emit contact on sending messages', () => {
+            chatService.message$.pipe(first()).subscribe(() => fail());
             chatService.sendMessage(contact1.jidBare.toString(), 'send message text');
         });
 

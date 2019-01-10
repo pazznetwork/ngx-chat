@@ -25,7 +25,6 @@ export class MessagePlugin extends AbstractXmppPlugin {
 
     private handleMessageStanza(messageStanza: MessageWithBodyStanza) {
         this.logService.debug('message received <=', messageStanza.getChildText('body'));
-        const contact = this.xmppChatAdapter.getOrCreateContactById(messageStanza.attrs.from);
 
         const message = {
             body: messageStanza.getChildText('body'),
@@ -35,7 +34,7 @@ export class MessagePlugin extends AbstractXmppPlugin {
         };
 
         this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageStanza));
-
+        const contact = this.xmppChatAdapter.getOrCreateContactById(messageStanza.attrs.from);
         contact.addMessage(message);
         this.xmppChatAdapter.message$.next(contact);
     }
@@ -46,18 +45,17 @@ export class MessagePlugin extends AbstractXmppPlugin {
         );
 
         this.xmppChatAdapter.plugins.forEach(plugin => plugin.beforeSendMessage(messageStanza));
-        const contact = this.xmppChatAdapter.getOrCreateContactById(jid);
         const message: Message = {
             direction: Direction.out,
             body,
             datetime: new Date(),
             delayed: false
         };
-        // TODO: on rejection mark message that it was not sent successfully
+        const contact = this.xmppChatAdapter.getOrCreateContactById(jid);
         contact.addMessage(message);
+        // TODO: on rejection mark message that it was not sent successfully
         this.xmppChatAdapter.chatConnectionService.send(messageStanza).then(() => {
             this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterSendMessage(message, messageStanza));
-            this.xmppChatAdapter.message$.next(contact);
         }, (rej) => {
             this.logService.error('rejected message ' + message.id, rej);
         });
