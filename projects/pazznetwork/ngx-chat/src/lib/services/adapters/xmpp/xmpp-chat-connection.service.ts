@@ -97,16 +97,18 @@ export class XmppChatConnectionService {
     public sendIq(request: Element): Promise<IqResponseStanza> {
         return new Promise((resolve, reject) => {
 
-            if (!request.attrs.id) {
-                request.attrs.id = this.getNextIqId();
-            }
+            request.attrs = {
+                id: this.getNextIqId(),
+                from: this.userJid.toString(),
+                ...request.attrs,
+            };
+            const {id} = request.attrs;
 
             if (!request.attrs.type) {
                 throw new Error('iq stanza without type: ' + request.toString());
             }
 
-            request.attrs.from = this.userJid.toString();
-            this.iqStanzaResponseCallbacks[request.attrs.id] = (response: IqResponseStanza) => {
+            this.iqStanzaResponseCallbacks[id] = (response: IqResponseStanza) => {
                 if (response.attrs.type === 'result') {
                     resolve(response);
                 } else {
@@ -116,7 +118,7 @@ export class XmppChatConnectionService {
 
             this.send(request).then(() => {}, (e) => {
                 this.logService.error('error sending iq', e);
-                delete this.iqStanzaResponseCallbacks[request.attrs.id];
+                delete this.iqStanzaResponseCallbacks[id];
                 reject(e);
             });
         });

@@ -32,6 +32,7 @@ import {
     ServiceDiscoveryPlugin,
     UnreadMessageCountPlugin
 } from './services/adapters/xmpp/plugins';
+import { MessageCarbonsPlugin } from './services/adapters/xmpp/plugins/message-carbons.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
@@ -134,6 +135,7 @@ export class NgxChatModule {
                 new PushPlugin(xmppChatAdapter),
                 // new PingPlugin(xmppChatAdapter, logService, ngZone),
                 new RegistrationPlugin(logService, ngZone),
+                new MessageCarbonsPlugin(xmppChatAdapter),
                 unreadMessageCountPlugin,
             ]);
         };
