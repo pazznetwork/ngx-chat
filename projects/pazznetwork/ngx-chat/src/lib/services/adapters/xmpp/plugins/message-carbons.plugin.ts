@@ -26,8 +26,9 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
         const forwarded = receivedOrSentElement && receivedOrSentElement.getChild('forwarded', 'urn:xmpp:forward:0');
         const messageElement = forwarded && forwarded.getChild('message', 'jabber:client');
         const carbonFrom = stanza.attrs.from;
-        const me = this.xmppChatAdapter.chatConnectionService.userJid.bare().toString();
-        if (stanza.is('message') && receivedOrSentElement && forwarded && messageElement && me === carbonFrom) {
+        const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
+        if (stanza.is('message') && receivedOrSentElement && forwarded && messageElement && userJid
+            && userJid.bare().toString() === carbonFrom) {
             return this.handleCarbonMessageStanza(messageElement, receivedOrSentElement, stanza);
         }
         return false;

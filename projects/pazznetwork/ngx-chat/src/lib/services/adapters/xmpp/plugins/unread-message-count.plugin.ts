@@ -1,7 +1,7 @@
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { delay, filter, map, share } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, filter, map, share } from 'rxjs/operators';
 import { Contact } from '../../../../core';
 import { findSortedInsertionIndexLast } from '../../../../core/utils-array';
 import { extractValues, sum } from '../../../../core/utils-object';
@@ -11,7 +11,7 @@ import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { PublishSubscribePlugin } from './publish-subscribe.plugin';
 
-const STORAGE_NGX_CHAT_LAST_CLIENTS = 'ngxchat:unreadmessagedate';
+const STORAGE_NGX_CHAT_LAST_READ_DATE = 'ngxchat:unreadmessagedate';
 const wrapperNodeName = 'entries';
 const nodeName = 'last-read';
 
@@ -53,7 +53,14 @@ class LastReadEntriesNodeBuilder extends AbstractStanzaBuilder {
  */
 export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
 
+    /**
+     * already debounced to prevent the issues described in {@link this.jidToUnreadCount$}.
+     */
     public unreadMessageCountSum$: Observable<number>;
+    /**
+     * emits as soon as the unread message count changes, you might want to debounce it with e.g. half a a second, as
+     * new messages might be acknowledged in another session.
+     */
     public jidToUnreadCount$: BehaviorSubject<JidToNumber> = new BehaviorSubject({});
     private jidToLastReadDate: JidToDate = {};
 
@@ -88,8 +95,13 @@ export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
                 this.updateContactUnreadMessageState(contact);
             });
 
+        this.publishSubscribePlugin.publish$
+            .subscribe((event) => this.handlePubSubEvent(event));
+
         this.unreadMessageCountSum$ = this.jidToUnreadCount$.pipe(
             map(jidToCount => sum(extractValues(jidToCount))),
+            debounceTime(500),
+            distinctUntilChanged(),
             share()
         );
     }
@@ -103,12 +115,15 @@ export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
     }
 
     private async fetchLastSeenDates(): Promise<JidToDate> {
-        const entries = await this.publishSubscribePlugin.retrieveNodeItems(STORAGE_NGX_CHAT_LAST_CLIENTS);
+        const entries = await this.publishSubscribePlugin.retrieveNodeItems(STORAGE_NGX_CHAT_LAST_READ_DATE);
+        return this.parseLastSeenDates(entries);
+    }
 
+    private parseLastSeenDates(itemElement: Element[]): JidToDate {
         const result: JidToDate = {};
 
-        if (entries.length === 1) {
-            for (const lastReadEntry of entries[0].getChild(wrapperNodeName).getChildren(nodeName)) {
+        if (itemElement.length === 1) {
+            for (const lastReadEntry of itemElement[0].getChild(wrapperNodeName).getChildren(nodeName)) {
                 const {jid, date} = lastReadEntry.attrs;
                 const parsedDate = new Date(+date);
                 if (!isNaN(parsedDate.getTime())) {
@@ -149,7 +164,25 @@ export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
             }
         }
 
-        this.publishSubscribePlugin.publishPrivate(STORAGE_NGX_CHAT_LAST_CLIENTS, 'current', lastReadNodeBuilder.toStanza());
+        this.publishSubscribePlugin.publishPrivate(STORAGE_NGX_CHAT_LAST_READ_DATE, 'current', lastReadNodeBuilder.toStanza());
     }
 
+    private handlePubSubEvent(event: Element) {
+        const items = event.getChild('items');
+        const itemsNode = items && items.attrs.node;
+        const item = items && items.getChildren('item');
+        if (itemsNode === STORAGE_NGX_CHAT_LAST_READ_DATE && item) {
+            const publishedLastJidToDate = this.parseLastSeenDates(item);
+            this.mergeJidToDates(publishedLastJidToDate);
+        }
+    }
+
+    private mergeJidToDates(newJidToDate: JidToDate) {
+        for (const jid in newJidToDate) {
+            if (!this.jidToLastReadDate[jid] || this.jidToLastReadDate[jid] < newJidToDate[jid]) {
+                this.jidToLastReadDate[jid] = newJidToDate[jid];
+                this.updateContactUnreadMessageState(this.chatService.getOrCreateContactById(jid));
+            }
+        }
+    }
 }

@@ -20,7 +20,6 @@ export class XmppChatConnectionService {
 
     public state$ = new BehaviorSubject<'disconnected' | 'online'>('disconnected');
     public stanzaUnknown$ = new Subject<Stanza>();
-    public id = Math.random().toString();
 
     /**
      * User JID with resouce, not bare.

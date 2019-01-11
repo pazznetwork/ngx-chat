@@ -9,8 +9,8 @@
     </div>
 
     <div class="roster-contact-status">
-        <div *ngIf="(unreadMessageCount$ | async) > 0"
-             class="unread-message-badge">{{unreadMessageCount$ | async}}</div>
+        <div *ngIf="unreadCount"
+             class="unread-message-badge">{{unreadCount}}</div>
         <div *ngIf="(contact.presence$ | async) !== presence.unavailable"
              class="roster-presence"
              [ngClass]="'roster-presence--' + (contact.presence$ | async)">●

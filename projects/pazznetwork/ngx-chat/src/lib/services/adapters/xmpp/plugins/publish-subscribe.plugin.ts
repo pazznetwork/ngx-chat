@@ -1,12 +1,14 @@
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { IqResponseStanza } from '../../../../core';
+import { IqResponseStanza, Stanza } from '../../../../core';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
+
+export const PUBSUB_EVENT_XMLNS = 'http://jabber.org/protocol/pubsub#event';
 
 class PublishPrivateDataStanzaBuilder extends AbstractStanzaBuilder {
 
@@ -63,6 +65,7 @@ class RetrieveDataStanzaBuilder extends AbstractStanzaBuilder {
  */
 export class PublishSubscribePlugin extends AbstractXmppPlugin {
 
+    publish$ = new Subject<Stanza>();
     private supportsPrivatePublish = new BehaviorSubject<boolean | 'unknown'>('unknown');
 
     constructor(private xmppChatAdapter: XmppChatAdapter) {
@@ -91,6 +94,15 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
                     }
                 });
         });
+    }
+
+    handleStanza(stanza: Stanza): boolean {
+        const eventElement = stanza.getChild('event', PUBSUB_EVENT_XMLNS);
+        if (stanza.is('message') && eventElement) {
+            this.publish$.next(eventElement);
+            return true;
+        }
+        return false;
     }
 
     async retrieveNodeItems(node: string): Promise<Element[]> {
