@@ -1,3 +1,20 @@
+## [0.2.7](https://github.com/pazznetwork/ngx-chat/compare/v0.2.6...v0.2.7) (2019-01-11)
+
+
+### Bug Fixes
+
+* do not emit messages$ when sending a message ([cb906a5](https://github.com/pazznetwork/ngx-chat/commit/cb906a5))
+* do not open minimized chat window when sending message ([fdee840](https://github.com/pazznetwork/ngx-chat/commit/fdee840))
+* unread messages only counts incoming messages, not sent ones ([fe89ab8](https://github.com/pazznetwork/ngx-chat/commit/fe89ab8))
+
+
+### Features
+
+* add support for message carbons (XEP-0280) ([9762de5](https://github.com/pazznetwork/ngx-chat/commit/9762de5))
+* synchronize 'last read date' via pubsub ([65a8a67](https://github.com/pazznetwork/ngx-chat/commit/65a8a67))
+
+
+
 ## [0.2.6](https://github.com/pazznetwork/ngx-chat/compare/v0.2.5...v0.2.6) (2019-01-04)
 
 
