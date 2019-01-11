@@ -2,7 +2,7 @@ import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { debounceTime, delay, distinctUntilChanged, filter, map, share } from 'rxjs/operators';
-import { Contact } from '../../../../core';
+import { Contact, Direction } from '../../../../core';
 import { findSortedInsertionIndexLast } from '../../../../core/utils-array';
 import { extractValues, sum } from '../../../../core/utils-object';
 import { ChatMessageListRegistryService } from '../../../chat-message-list-registry.service';
@@ -152,7 +152,10 @@ export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
     }
 
     private calculateUnreadMessageCount(contact: Contact, date: Date) {
-        return contact.messages.length - findSortedInsertionIndexLast(date, contact.messages, message => message.datetime);
+        const firstUnreadMessageIndex = findSortedInsertionIndexLast(date, contact.messages, message => message.datetime);
+        return contact.messages.slice(firstUnreadMessageIndex)
+            .filter(message => message.direction === Direction.in)
+            .length;
     }
 
     private persistLastSeenDates() {
