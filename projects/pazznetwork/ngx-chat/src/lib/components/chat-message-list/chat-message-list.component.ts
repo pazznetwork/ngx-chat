@@ -33,14 +33,19 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
         this.messageSubscription = this.contact.messages$.subscribe(() => {
             this.scheduleScrollToLastMessage();
         });
-        this.scheduleScrollToLastMessage();
         this.chatMessageListRegistry.incrementOpenWindowCount(this.contact);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.contact && changes.contact.previousValue && changes.contact.currentValue) {
-            this.chatMessageListRegistry.decrementOpenWindowCount(changes.contact.previousValue);
-            this.chatMessageListRegistry.incrementOpenWindowCount(changes.contact.currentValue);
+        const contact = changes.contact;
+
+        if (contact && contact.previousValue && contact.currentValue) {
+            this.chatMessageListRegistry.decrementOpenWindowCount(contact.previousValue);
+            this.chatMessageListRegistry.incrementOpenWindowCount(contact.currentValue);
+        }
+
+        if (contact && contact.currentValue) {
+            this.scheduleScrollToLastMessage();
         }
     }
 
