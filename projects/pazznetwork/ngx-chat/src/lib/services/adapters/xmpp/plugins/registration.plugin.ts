@@ -59,7 +59,7 @@ export class RegistrationPlugin extends AbstractXmppPlugin {
                     this.logService.debug('registration plugin', 'saving encrypted credentials');
                 })(), this.registrationTimeout);
             } catch (e) {
-                this.logService.error('error registering', e);
+                this.logService.warn('error registering', e);
                 throw e;
             } finally {
                 this.logService.debug('registration plugin', 'cleaning up');
