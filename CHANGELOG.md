@@ -1,3 +1,17 @@
+## [0.2.8](https://github.com/pazznetwork/ngx-chat/compare/v0.2.7...v0.2.8) (2019-01-16)
+
+
+### Bug Fixes
+
+* show most recent message in chat-message-list when contact changes ([53112ab](https://github.com/pazznetwork/ngx-chat/commit/53112ab))
+
+
+### Features
+
+* group messages by date, minor UI improvements for messages ([925e8d2](https://github.com/pazznetwork/ngx-chat/commit/925e8d2))
+
+
+
 ## [0.2.7](https://github.com/pazznetwork/ngx-chat/compare/v0.2.6...v0.2.7) (2019-01-11)
 
 
