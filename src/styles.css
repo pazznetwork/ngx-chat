@@ -29,11 +29,6 @@ body.has-roster {
     font-size: 16px;
 }
 
-small {
-    font-size: 12px;
-    color: #444;
-}
-
 button {
     padding: 0.5em;
     border: 1px solid #5385c3;

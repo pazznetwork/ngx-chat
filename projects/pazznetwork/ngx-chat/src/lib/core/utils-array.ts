@@ -12,7 +12,7 @@ export function insertSortedLast<U>(elemToInsert: U, list: U[], keyExtractor: (a
 }
 
 /**
- * Find the last matching element in a presorted list.
+ * Find the highest possible index where the given element should be inserted so that the order of the list is preserved.
  * @param needle the needle to find
  * @param haystack the pre sorted list
  * @param keyExtractor an optional needle mapper, defaults to toString
@@ -34,4 +34,29 @@ export function findSortedInsertionIndexLast<U, V>(needle: U, haystack: V[], key
     }
 
     return low;
+}
+
+/**
+ * Find the index of an element in a sorted list. If list contains no matching element, return -1.
+ */
+export function findSortedIndex<U, V>(needle: U, haystack: V[], keyExtractor: (a: V) => any = toString) {
+    let low = 0;
+    let high = haystack.length;
+
+    while (low !== high) {
+
+        const cur = Math.floor(low + (high - low) / 2);
+
+        const extractedKey = keyExtractor(haystack[cur]);
+        if (needle < extractedKey) {
+            high = cur;
+        } else if (needle > extractedKey) {
+            low = cur + 1;
+        } else {
+            return cur;
+        }
+
+    }
+
+    return -1;
 }

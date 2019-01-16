@@ -3,7 +3,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { LogService } from '../services/log.service';
 import { dummyAvatar } from './contact-avatar';
 import { Message } from './message';
-import { MessageStore } from './message-store';
+import { DateMessagesGroup, MessageStore } from './message-store';
 import { Presence } from './presence';
 import { ContactSubscription } from './subscription';
 
@@ -37,6 +37,10 @@ export class Contact {
 
     get messages() {
         return this.messageStore.messages;
+    }
+
+    get dateMessagesGroups(): DateMessagesGroup[] {
+        return this.messageStore.dateMessageGroups;
     }
 
     /**

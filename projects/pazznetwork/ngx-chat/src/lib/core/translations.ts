@@ -9,5 +9,7 @@ export interface Translations {
     subscriptionRequestMessage: string;
     acceptSubscriptionRequest: string;
     denySubscriptionRequest: string;
-    dateTimeFormat: string;
+    timeFormat: string;
+    dateFormat: string;
+    locale: string;
 }

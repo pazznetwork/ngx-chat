@@ -61,7 +61,9 @@ export class ChatComponent implements OnInit, OnChanges {
         'subscriptionRequestMessage': 'I want to add you as a contact.',
         'acceptSubscriptionRequest': 'Accept',
         'denySubscriptionRequest': 'Deny',
-        'dateTimeFormat': 'short',
+        'timeFormat': 'shortTime',
+        'dateFormat': 'EEEE, MM/dd/yyyy',
+        'locale': undefined
     };
 
     constructor(@Inject(ChatServiceToken) private chatService: ChatService) {

@@ -1,4 +1,4 @@
-import { findSortedInsertionIndexLast, insertSortedLast } from './utils-array';
+import { findSortedIndex, findSortedInsertionIndexLast, insertSortedLast } from './utils-array';
 
 describe('array utils', () => {
 
@@ -30,6 +30,15 @@ describe('array utils', () => {
             }
         });
 
+    });
+
+    describe('#findSortedIndex', () => {
+        it('should find the correct index of an element in a sorted list', () => {
+            expect(findSortedIndex(-50, [-50, 2, 100])).toEqual(0);
+            expect(findSortedIndex(2, [-50, 2, 100])).toEqual(1);
+            expect(findSortedIndex(100, [-50, 2, 100])).toEqual(2);
+            expect(findSortedIndex(42, [-50, 2, 100])).toEqual(-1);
+        });
     });
 
 });

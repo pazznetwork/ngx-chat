@@ -1,9 +1,13 @@
 <div class="chat-messages" #messageArea>
-    <ngx-chat-message *ngFor="let message of contact.messages"
-                      [avatar]="contact.avatar"
-                      [message]="message"
-                      [showAvatars]="showAvatars">
-    </ngx-chat-message>
+    <ng-container *ngFor="let dateMessagesGroup of contact.dateMessagesGroups">
+        <div class="chat-messages-date-group">{{dateMessagesGroup.date | date:chatService.translations.dateFormat:undefined:chatService.translations.locale}}</div>
+        <ngx-chat-message *ngFor="let message of dateMessagesGroup.messages"
+                          [nick]="message.direction === Direction.in ? contact.name : ''"
+                          [avatar]="contact.avatar"
+                          [message]="message"
+                          [showAvatars]="showAvatars">
+        </ngx-chat-message>
+    </ng-container>
     <div class="chat-messages-empty" *ngIf="contact.messages.length === 0">
         {{chatService.translations.noMessages}}
     </div>

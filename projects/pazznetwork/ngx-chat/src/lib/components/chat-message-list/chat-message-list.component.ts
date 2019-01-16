@@ -1,7 +1,7 @@
 import { Component, ElementRef, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { Contact } from '../../core';
+import { Contact, Direction } from '../../core';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatMessageListRegistryService } from '../../services/chat-message-list-registry.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
@@ -23,6 +23,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
     chatMessageAreaElement: ElementRef<HTMLElement>;
 
     private messageSubscription: Subscription;
+    Direction = Direction;
 
     constructor(public chatListService: ChatListStateService,
                 @Inject(ChatServiceToken) public chatService: ChatService,
