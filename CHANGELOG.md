@@ -1,3 +1,12 @@
+## [0.2.9](https://github.com/pazznetwork/ngx-chat/compare/v0.2.8...v0.2.9) (2019-01-17)
+
+
+### Bug Fixes
+
+* reduce logging level, fix message ui ([98c7caa](https://github.com/pazznetwork/ngx-chat/commit/98c7caa))
+
+
+
 ## [0.2.8](https://github.com/pazznetwork/ngx-chat/compare/v0.2.7...v0.2.8) (2019-01-16)
 
 
