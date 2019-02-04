@@ -20,7 +20,10 @@ export class MessagePlugin extends AbstractXmppPlugin {
     }
 
     private isMessageStanza(stanza: Stanza): stanza is MessageWithBodyStanza {
-        return stanza.name === 'message' && stanza.attrs.type !== 'groupchat' && !!stanza.getChildText('body');
+        return stanza.name === 'message'
+            && stanza.attrs.type !== 'groupchat'
+            && stanza.attrs.type !== 'error'
+            && !!stanza.getChildText('body');
     }
 
     private handleMessageStanza(messageStanza: MessageWithBodyStanza) {
