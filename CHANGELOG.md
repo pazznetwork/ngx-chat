@@ -1,3 +1,14 @@
+<a name="0.2.10"></a>
+## [0.2.10](https://github.com/pazznetwork/ngx-chat/compare/v0.2.9...v0.2.10) (2019-02-04)
+
+
+### Bug Fixes
+
+* skip handling of message stanzas with type 'error' ([b4418d3](https://github.com/pazznetwork/ngx-chat/commit/b4418d3))
+
+
+
+<a name="0.2.9"></a>
 ## [0.2.9](https://github.com/pazznetwork/ngx-chat/compare/v0.2.8...v0.2.9) (2019-01-17)
 
 
@@ -7,6 +18,7 @@
 
 
 
+<a name="0.2.8"></a>
 ## [0.2.8](https://github.com/pazznetwork/ngx-chat/compare/v0.2.7...v0.2.8) (2019-01-16)
 
 
@@ -21,6 +33,7 @@
 
 
 
+<a name="0.2.7"></a>
 ## [0.2.7](https://github.com/pazznetwork/ngx-chat/compare/v0.2.6...v0.2.7) (2019-01-11)
 
 
@@ -38,6 +51,7 @@
 
 
 
+<a name="0.2.6"></a>
 ## [0.2.6](https://github.com/pazznetwork/ngx-chat/compare/v0.2.5...v0.2.6) (2019-01-04)
 
 
@@ -50,6 +64,7 @@
 
 
 
+<a name="0.2.5"></a>
 ## [0.2.5](https://github.com/pazznetwork/ngx-chat/compare/v0.2.4...v0.2.5) (2019-01-03)
 
 
@@ -66,6 +81,7 @@
 
 
 
+<a name="0.2.4"></a>
 ## [0.2.4](https://github.com/pazznetwork/ngx-chat/compare/v0.2.3...v0.2.4) (2018-12-19)
 
 
@@ -75,6 +91,7 @@
 
 
 
+<a name="0.2.3"></a>
 ## [0.2.3](https://github.com/pazznetwork/ngx-chat/compare/v0.2.2...v0.2.3) (2018-12-19)
 
 
@@ -101,6 +118,7 @@ convention.
 
 
 
+<a name="0.2.2"></a>
 ## [0.2.2](https://github.com/pazznetwork/ngx-chat/compare/v0.2.1...v0.2.2) (2018-11-16)
 
 
@@ -110,6 +128,7 @@ convention.
 
 
 
+<a name="0.2.1"></a>
 ## [0.2.1](https://github.com/pazznetwork/ngx-chat/compare/v0.2.0...v0.2.1) (2018-11-14)
 
 
@@ -119,6 +138,7 @@ convention.
 
 
 
+<a name="0.2.0"></a>
 # [0.2.0](https://github.com/pazznetwork/ngx-chat/compare/v0.1.9...v0.2.0) (2018-11-08)
 
 
@@ -128,6 +148,7 @@ convention.
 
 
 
+<a name="0.1.9"></a>
 ## [0.1.9](https://github.com/pazznetwork/ngx-chat/compare/v0.1.8...v0.1.9) (2018-11-08)
 
 
@@ -138,12 +159,25 @@ convention.
 
 
 
+<a name="0.1.8"></a>
 ## [0.1.8](https://github.com/pazznetwork/ngx-chat/compare/a08dc5a...v0.1.8) (2018-11-06)
 
 
 ### Bug Fixes
 
 * links parsing for multiple occurrences of the same link ([a08dc5a](https://github.com/pazznetwork/ngx-chat/commit/a08dc5a))
+
+
+### Code Refactoring
+
+* update to xmpp.js 0.5.2 ([264ca31](https://github.com/pazznetwork/ngx-chat/commit/264ca31))
+
+
+### BREAKING CHANGES
+
+* * changed LogInRequest interface
+* make chatConnectionService.client private
+* removed XmppClientToken
 
 
 
