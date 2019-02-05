@@ -107,6 +107,6 @@ npm run changelog
 git add .
 git commit -m "docs: release $VERSION"
 git tag v$VERSION
-git push --tags
+git push origin master --tags
 ./push-release.sh
 ```
