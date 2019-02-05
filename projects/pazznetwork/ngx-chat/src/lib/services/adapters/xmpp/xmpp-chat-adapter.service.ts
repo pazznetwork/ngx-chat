@@ -8,8 +8,7 @@ import { dummyAvatar } from '../../../core/contact-avatar';
 import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
-import { MessageArchivePlugin, RosterPlugin } from './plugins';
-import { MessagePlugin } from './plugins/message.plugin';
+import { MessageArchivePlugin, MessagePlugin, RosterPlugin } from './plugins';
 import { XmppChatConnectionService } from './xmpp-chat-connection.service';
 
 @Injectable()

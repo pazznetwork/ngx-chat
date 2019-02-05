@@ -3,6 +3,9 @@
 </ngx-chat-window-list>
 <ngx-chat-roster-list [rosterState]="rosterState"
                       [contacts]="contacts"
+                      [contactRequestsReceived$]="contactRequestsReceived$"
+                      [contactRequestsSent$]="contactRequestsSent$"
+                      [contactsUnaffiliated$]="contactsUnaffiliated$"
                       *ngIf="showChatComponent"
                       (rosterStateChanged)="onRosterStateChanged($event)">
 </ngx-chat-roster-list>
