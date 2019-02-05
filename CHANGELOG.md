@@ -1,3 +1,13 @@
+<a name="0.2.11"></a>
+## [0.2.11](https://github.com/pazznetwork/ngx-chat/compare/v0.2.10...v0.2.11) (2019-02-05)
+
+
+### Features
+
+* allow parameterization of contact list states ([1b9a059](https://github.com/pazznetwork/ngx-chat/commit/1b9a059))
+
+
+
 <a name="0.2.10"></a>
 ## [0.2.10](https://github.com/pazznetwork/ngx-chat/compare/v0.2.9...v0.2.10) (2019-02-04)
 
