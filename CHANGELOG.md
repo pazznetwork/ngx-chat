@@ -1,3 +1,14 @@
+<a name="0.2.12"></a>
+## [0.2.12](https://github.com/pazznetwork/ngx-chat/compare/v0.2.11...v0.2.12) (2019-02-18)
+
+
+### Features
+
+* add support for http file upload ([99c7fd1](https://github.com/pazznetwork/ngx-chat/commit/99c7fd1))
+* reconnect with last known credentials ([599705a](https://github.com/pazznetwork/ngx-chat/commit/599705a))
+
+
+
 <a name="0.2.11"></a>
 ## [0.2.11](https://github.com/pazznetwork/ngx-chat/compare/v0.2.10...v0.2.11) (2019-02-05)
 
