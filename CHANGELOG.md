@@ -1,3 +1,13 @@
+<a name="0.2.13"></a>
+## [0.2.13](https://github.com/pazznetwork/ngx-chat/compare/v0.2.12...v0.2.13) (2019-02-18)
+
+
+### Bug Fixes
+
+* add HttpFileUploadService to public api ([9b380d3](https://github.com/pazznetwork/ngx-chat/commit/9b380d3))
+
+
+
 <a name="0.2.12"></a>
 ## [0.2.12](https://github.com/pazznetwork/ngx-chat/compare/v0.2.11...v0.2.12) (2019-02-18)
 
