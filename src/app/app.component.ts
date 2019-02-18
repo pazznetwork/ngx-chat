@@ -46,6 +46,9 @@ export class AppComponent {
         this.chatService.state$.subscribe((state) => this.stateChanged(state));
         this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
         this.unreadMessageCountPlugin = this.chatService.getPlugin(UnreadMessageCountPlugin);
+
+        // @ts-ignore
+        window.chatService = chatService;
     }
 
     onLogin() {
