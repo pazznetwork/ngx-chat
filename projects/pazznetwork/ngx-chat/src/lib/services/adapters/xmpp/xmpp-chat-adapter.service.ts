@@ -29,6 +29,7 @@ export class XmppChatAdapter implements ChatService {
     enableDebugging = false;
     userAvatar$ = new BehaviorSubject(dummyAvatar);
     translations: Translations;
+    private lastLogInRequest: LogInRequest;
 
     constructor(public chatConnectionService: XmppChatConnectionService,
                 private logService: LogService,
@@ -102,6 +103,7 @@ export class XmppChatAdapter implements ChatService {
     }
 
     logIn(logInRequest: LogInRequest): void {
+        this.lastLogInRequest = logInRequest;
         if (this.state$.getValue() === 'disconnected') {
             this.chatConnectionService.logIn(logInRequest);
         }
@@ -151,8 +153,12 @@ export class XmppChatAdapter implements ChatService {
 
     }
 
-    reconnect(): void {
-        this.chatConnectionService.reconnect();
+    reconnectSilently(): void {
+        this.chatConnectionService.reconnectSilently();
+    }
+
+    reconnect() {
+        this.logIn(this.lastLogInRequest);
     }
 
 }

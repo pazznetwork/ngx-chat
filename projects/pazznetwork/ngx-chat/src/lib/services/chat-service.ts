@@ -134,5 +134,11 @@ export interface ChatService {
     /**
      * Tries to transparently (= without the user noticing) reconnect to the chat server.
      */
+    reconnectSilently(): void;
+
+    /**
+     * Tries to reconnect with the same credentials the user logged in last.
+     */
     reconnect(): void;
+
 }

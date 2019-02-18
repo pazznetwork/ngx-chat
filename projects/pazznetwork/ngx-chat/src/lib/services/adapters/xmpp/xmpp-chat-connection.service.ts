@@ -37,7 +37,7 @@ export class XmppChatConnectionService {
             this.ngZone.run(() => {
                 this.logService.error('chat service error =>', err.toString(), err);
                 if (err.toString().indexOf('connection error ') >= 0) { // thrown by iOS when gone offline due to battery saving
-                    this.reconnect();
+                    this.reconnectSilently();
                 } else {
                     this.client.stop(); // e.g. kicked
                 }
@@ -178,7 +178,7 @@ export class XmppChatConnectionService {
         return '' + this.iqId++;
     }
 
-    reconnect() {
+    reconnectSilently() {
         this.logService.warn('hard reconnect...');
         this.state$.next('disconnected');
         this.client.plugins.reconnect.reconnect();
