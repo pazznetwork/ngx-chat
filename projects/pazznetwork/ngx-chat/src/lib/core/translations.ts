@@ -12,4 +12,5 @@ export interface Translations {
     timeFormat: string;
     dateFormat: string;
     locale: string;
+    dropMessage: string;
 }

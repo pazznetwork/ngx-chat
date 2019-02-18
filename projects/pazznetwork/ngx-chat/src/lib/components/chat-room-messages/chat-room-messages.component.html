@@ -1,5 +1,4 @@
 <div class="chat-messages" #messageArea>
-    <!-- TODO: avatar -->
     <ngx-chat-message *ngFor="let message of room.messages"
                       [message]="message"
                       [avatar]="getOrCreateContactWithFullJid(message.from).avatar"

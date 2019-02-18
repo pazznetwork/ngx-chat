@@ -5,6 +5,9 @@
         <img *ngIf="message.direction === 'out'" [src]="chatService.userAvatar$ | async"/>
     </div>
     <span [ngxChatLinks]="message.body"></span>
+    <div class="chat-message-image-wrapper" *ngIf="imageLink">
+        <img class="chat-message-image" [src]="imageLink"/>
+    </div>
     <div class="chat-message-footer">
         <small title="{{nick}}" class="chat-message-name">{{nick}}</small>
         <small class="chat-message-datetime">{{message.datetime | date:chatService.translations.timeFormat}}</small>

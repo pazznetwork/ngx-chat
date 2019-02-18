@@ -1,6 +1,7 @@
 import { ComponentFactoryResolver, Directive, Input, OnChanges, ViewContainerRef } from '@angular/core';
 import { ChatMessageLinkComponent } from '../components/chat-message-link/chat-message-link.component';
 import { ChatMessageTextComponent } from '../components/chat-message-text/chat-message-text.component';
+import { extractUrls } from '../core/utils-links';
 
 @Directive({
     selector: '[ngxChatLinks]'
@@ -17,8 +18,7 @@ export class LinksDirective implements OnChanges {
         const message: string = this.ngxChatLinks;
 
         if (message) {
-            const urlRegex = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-            const links = message.match(urlRegex) || [];
+            const links = extractUrls(message);
 
             const chatMessageTextFactory = this.resolver.resolveComponentFactory(ChatMessageTextComponent);
             const chatMessageLinkFactory = this.resolver.resolveComponentFactory(ChatMessageLinkComponent);

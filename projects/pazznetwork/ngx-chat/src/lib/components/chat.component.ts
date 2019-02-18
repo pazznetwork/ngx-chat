@@ -84,7 +84,8 @@ export class ChatComponent implements OnInit, OnChanges {
         'denySubscriptionRequest': 'Deny',
         'timeFormat': 'shortTime',
         'dateFormat': 'EEEE, MM/dd/yyyy',
-        'locale': undefined
+        'locale': undefined,
+        'dropMessage': 'Drop your file to send it',
     };
 
     constructor(@Inject(ChatServiceToken) private chatService: ChatService) {

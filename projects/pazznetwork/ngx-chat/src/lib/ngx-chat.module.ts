@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, Injector, ModuleWithProviders, NgModule, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Client } from '@xmpp/client-core';
@@ -7,6 +8,7 @@ import reconnect from '@xmpp/plugins/reconnect';
 import plain from '@xmpp/plugins/sasl-plain';
 import sessionEstablishment from '@xmpp/plugins/session-establishment';
 import websocket from '@xmpp/plugins/websocket';
+import { FileDropComponent } from './components/chat-filedrop/file-drop.component';
 import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
 import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
@@ -32,6 +34,7 @@ import {
     ServiceDiscoveryPlugin,
     UnreadMessageCountPlugin
 } from './services/adapters/xmpp/plugins';
+import { HttpFileUploadPlugin } from './services/adapters/xmpp/plugins/http-file-upload.plugin';
 import { MessageCarbonsPlugin } from './services/adapters/xmpp/plugins/message-carbons.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
@@ -46,6 +49,7 @@ import { LogService } from './services/log.service';
     imports: [
         CommonModule,
         FormsModule,
+        HttpClientModule,
     ],
     declarations: [
         ChatComponent,
@@ -60,12 +64,14 @@ import { LogService } from './services/log.service';
         LinksDirective,
         RosterContactComponent,
         RosterListComponent,
+        FileDropComponent,
     ],
     exports: [
         ChatComponent,
         ChatMessageInputComponent,
         ChatMessageListComponent,
         ChatRoomMessagesComponent,
+        FileDropComponent,
     ],
     entryComponents: [
         ChatMessageLinkComponent,
@@ -122,6 +128,7 @@ export class NgxChatModule {
             const chatMessageListRegistryService = injector.get(ChatMessageListRegistryService);
             const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
                 xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin);
+            const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(xmppChatAdapter);
 
             xmppChatAdapter.addPlugins([
                 new BookmarkPlugin(xmppChatAdapter),
@@ -131,12 +138,13 @@ export class NgxChatModule {
                 new MultiUserChatPlugin(xmppChatAdapter, logService),
                 publishSubscribePlugin,
                 new RosterPlugin(xmppChatAdapter, logService),
-                new ServiceDiscoveryPlugin(xmppChatAdapter),
+                serviceDiscoveryPlugin,
                 new PushPlugin(xmppChatAdapter),
                 // new PingPlugin(xmppChatAdapter, logService, ngZone),
                 new RegistrationPlugin(logService, ngZone),
                 new MessageCarbonsPlugin(xmppChatAdapter),
                 unreadMessageCountPlugin,
+                new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter),
             ]);
         };
         return initializer;
