@@ -1,3 +1,13 @@
+<a name="0.2.14"></a>
+## [0.2.14](https://github.com/pazznetwork/ngx-chat/compare/v0.2.13...v0.2.14) (2019-02-25)
+
+
+### Features
+
+* message states (sent, received, read) ([7384950](https://github.com/pazznetwork/ngx-chat/commit/7384950))
+
+
+
 <a name="0.2.13"></a>
 ## [0.2.13](https://github.com/pazznetwork/ngx-chat/compare/v0.2.12...v0.2.13) (2019-02-18)
 
