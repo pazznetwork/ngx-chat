@@ -1,3 +1,13 @@
+<a name="0.2.15"></a>
+## [0.2.15](https://github.com/pazznetwork/ngx-chat/compare/v0.2.14...v0.2.15) (2019-02-25)
+
+
+### Bug Fixes
+
+* improve handling of unset message state dates ([6e81c29](https://github.com/pazznetwork/ngx-chat/commit/6e81c29))
+
+
+
 <a name="0.2.14"></a>
 ## [0.2.14](https://github.com/pazznetwork/ngx-chat/compare/v0.2.13...v0.2.14) (2019-02-25)
 
