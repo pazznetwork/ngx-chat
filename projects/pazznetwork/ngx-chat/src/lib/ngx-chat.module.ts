@@ -23,8 +23,11 @@ import { RosterListComponent } from './components/roster-list/roster-list.compon
 import { LinksDirective } from './directives/links.directive';
 import {
     BookmarkPlugin,
+    HttpFileUploadPlugin,
     MessageArchivePlugin,
+    MessageCarbonsPlugin,
     MessagePlugin,
+    MessageStatePlugin,
     MessageUuidPlugin,
     MultiUserChatPlugin,
     PublishSubscribePlugin,
@@ -34,8 +37,6 @@ import {
     ServiceDiscoveryPlugin,
     UnreadMessageCountPlugin
 } from './services/adapters/xmpp/plugins';
-import { HttpFileUploadPlugin } from './services/adapters/xmpp/plugins/http-file-upload.plugin';
-import { MessageCarbonsPlugin } from './services/adapters/xmpp/plugins/message-carbons.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatListStateService } from './services/chat-list-state.service';
@@ -145,6 +146,7 @@ export class NgxChatModule {
                 new MessageCarbonsPlugin(xmppChatAdapter),
                 unreadMessageCountPlugin,
                 new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter),
+                new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService),
             ]);
         };
         return initializer;

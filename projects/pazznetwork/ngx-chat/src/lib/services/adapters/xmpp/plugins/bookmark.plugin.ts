@@ -37,7 +37,7 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
     }
 
     saveConference(conferenceToSave: SavedConference): Promise<IqResponseStanza> {
-        return this.xmppChatAdapter.getPlugin(PublishSubscribePlugin).publishPrivate(
+        return this.xmppChatAdapter.getPlugin(PublishSubscribePlugin).storePrivatePayloadPersistent(
             STORAGE_BOOKMARKS,
             conferenceToSave.jid,
             xml('storage', {xmlns: STORAGE_BOOKMARKS},

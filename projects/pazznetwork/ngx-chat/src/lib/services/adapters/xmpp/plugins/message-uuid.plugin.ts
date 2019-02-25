@@ -16,8 +16,12 @@ export class MessageUuidPlugin extends AbstractXmppPlugin {
         return messageStanza.attrs.id || (originIdElement && originIdElement.attrs.id) || (stanzaIdElement && stanzaIdElement.attrs.id);
     }
 
-    beforeSendMessage(messageStanza: Element): void {
-        messageStanza.children.push(xml('origin-id', {xmlns: 'urn:xmpp:sid:0', id: id()}));
+    beforeSendMessage(messageStanza: Element, message: Message): void {
+        const generatedId = id();
+        messageStanza.children.push(xml('origin-id', {xmlns: 'urn:xmpp:sid:0', id: generatedId}));
+        if (message) {
+            message.id = generatedId;
+        }
     }
 
     afterSendMessage(message: Message, messageStanza: Element): void {

@@ -60,3 +60,28 @@ export function findSortedIndex<U, V>(needle: U, haystack: V[], keyExtractor: (a
 
     return -1;
 }
+
+/**
+ * Like {@link Array.prototype.findIndex} but finds the last index instead.
+ *
+ * @param arr
+ * @param predicate
+ */
+export function findLastIndex<T>(arr: T[], predicate: (x: T) => boolean) {
+    for (let i = arr.length - 1; i >= 0; i--) {
+        if (predicate(arr[i])) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Like {@link Array.prototype.find} but finds the last matching element instead.
+ *
+ * @param arr
+ * @param predicate
+ */
+export function findLast<T>(arr: T[], predicate: (x: T) => boolean) {
+    return arr[findLastIndex(arr, predicate)];
+}

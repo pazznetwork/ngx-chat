@@ -2,10 +2,11 @@ import { JID, jid as parseJid } from '@xmpp/jid';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { LogService } from '../services/log.service';
 import { dummyAvatar } from './contact-avatar';
-import { Message } from './message';
+import { Direction, Message } from './message';
 import { DateMessagesGroup, MessageStore } from './message-store';
 import { Presence } from './presence';
 import { ContactSubscription } from './subscription';
+import { findLast } from './utils-array';
 
 export interface ContactMetadata {
     [key: string]: any;
@@ -35,12 +36,24 @@ export class Contact {
         return this.messageStore.messages$;
     }
 
-    get messages() {
+    get messages(): Message[] {
         return this.messageStore.messages;
     }
 
     get dateMessagesGroups(): DateMessagesGroup[] {
         return this.messageStore.dateMessageGroups;
+    }
+
+    get mostRecentMessage() {
+        return this.messageStore.messages[this.messageStore.messages.length - 1];
+    }
+
+    get mostRecentMessageReceived() {
+        return findLast(this.messageStore.messages, msg => msg.direction === Direction.in);
+    }
+
+    get mostRecentMessageSent() {
+        return findLast(this.messageStore.messages, msg => msg.direction === Direction.out);
     }
 
     /**
@@ -83,6 +96,10 @@ export class Contact {
         resources[jid] = presence;
         this.presence$.next(this.reducePresences(resources));
         this.resources$.next(resources);
+    }
+
+    getMessageById(id: string) {
+        return this.messageStore.messageIdToMessage[id];
     }
 
     private reducePresences(jidToPresence: JidToPresence): Presence {

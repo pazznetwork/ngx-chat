@@ -1,4 +1,5 @@
 import { Element } from 'ltx';
+import { MessageReceivedEvent } from '../services/adapters/xmpp/plugins';
 import { Message } from './message';
 import { MessageWithBodyStanza, Stanza } from './stanza';
 
@@ -22,9 +23,9 @@ export interface ChatPlugin {
      */
     handleStanza(stanza: Stanza): boolean;
 
-    beforeSendMessage(messageStanza: Element): void;
+    beforeSendMessage(messageStanza: Element, message?: Message): void;
 
     afterSendMessage(message: Message, messageStanza: Element): void;
 
-    afterReceiveMessage(message: Message, messageStanza: MessageWithBodyStanza): void;
+    afterReceiveMessage(message: Message, messageStanza: MessageWithBodyStanza, MessageReceivedEvent: MessageReceivedEvent): void;
 }

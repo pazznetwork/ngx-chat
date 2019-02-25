@@ -4,6 +4,10 @@ import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 
+export class MessageReceivedEvent {
+    discard = false;
+}
+
 export class MessagePlugin extends AbstractXmppPlugin {
 
     constructor(private xmppChatAdapter: XmppChatAdapter,
@@ -36,10 +40,13 @@ export class MessagePlugin extends AbstractXmppPlugin {
             delayed: !!messageStanza.getChild('delay')
         };
 
-        this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageStanza));
-        const contact = this.xmppChatAdapter.getOrCreateContactById(messageStanza.attrs.from);
-        contact.addMessage(message);
-        this.xmppChatAdapter.message$.next(contact);
+        const messageReceivedEvent = new MessageReceivedEvent();
+        this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageStanza, messageReceivedEvent));
+        if (!messageReceivedEvent.discard) {
+            const contact = this.xmppChatAdapter.getOrCreateContactById(messageStanza.attrs.from);
+            contact.addMessage(message);
+            this.xmppChatAdapter.message$.next(contact);
+        }
     }
 
     sendMessage(jid: string, body: string) {
@@ -47,13 +54,13 @@ export class MessagePlugin extends AbstractXmppPlugin {
             xml('body', {}, body)
         );
 
-        this.xmppChatAdapter.plugins.forEach(plugin => plugin.beforeSendMessage(messageStanza));
         const message: Message = {
             direction: Direction.out,
             body,
             datetime: new Date(),
             delayed: false
         };
+        this.xmppChatAdapter.plugins.forEach(plugin => plugin.beforeSendMessage(messageStanza, message));
         const contact = this.xmppChatAdapter.getOrCreateContactById(jid);
         contact.addMessage(message);
         // TODO: on rejection mark message that it was not sent successfully

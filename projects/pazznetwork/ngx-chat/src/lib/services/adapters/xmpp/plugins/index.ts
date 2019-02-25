@@ -2,6 +2,8 @@ export * from './abstract-xmpp-plugin';
 export * from './bookmark.plugin';
 export * from './http-file-upload.plugin';
 export * from './message-archive.plugin';
+export * from './message-carbons.plugin';
+export * from './message-state.plugin';
 export * from './message-uuid.plugin';
 export * from './message.plugin';
 export * from './multi-user-chat.plugin';

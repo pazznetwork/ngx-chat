@@ -1,6 +1,7 @@
 import { Element } from 'ltx';
 
 import { ChatPlugin, Message, MessageWithBodyStanza, Stanza } from '../../../../core';
+import { MessageReceivedEvent } from './message.plugin';
 
 export abstract class AbstractXmppPlugin implements ChatPlugin {
 
@@ -15,7 +16,7 @@ export abstract class AbstractXmppPlugin implements ChatPlugin {
         return;
     }
 
-    beforeSendMessage(messageStanza: Element): void {
+    beforeSendMessage(messageStanza: Element, message: Message): void {
         return;
     }
 
@@ -23,7 +24,7 @@ export abstract class AbstractXmppPlugin implements ChatPlugin {
         return false;
     }
 
-    afterReceiveMessage(message: Message, messageStanza: MessageWithBodyStanza): void {
+    afterReceiveMessage(message: Message, messageStanza: MessageWithBodyStanza, messageReceivedEvent: MessageReceivedEvent): void {
         return;
     }
 

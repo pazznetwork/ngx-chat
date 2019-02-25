@@ -3,6 +3,7 @@ import { Element } from 'ltx';
 import { Direction, Stanza } from '../../../../core';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
+import { MessageReceivedEvent } from './message.plugin';
 
 /**
  * XEP-0280 Message Carbons
@@ -29,29 +30,32 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
         const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
         if (stanza.is('message') && receivedOrSentElement && forwarded && messageElement && userJid
             && userJid.bare().toString() === carbonFrom) {
-            return this.handleCarbonMessageStanza(messageElement, receivedOrSentElement, stanza);
+            return this.handleCarbonMessageStanza(messageElement, receivedOrSentElement);
         }
         return false;
     }
 
-    private handleCarbonMessageStanza(messageElement: Element, receivedOrSent: Element, messageStanza: Stanza) {
+    private handleCarbonMessageStanza(messageElement: Element, receivedOrSent: Element) {
         const direction = receivedOrSent.is('received') ? Direction.in : Direction.out;
 
         const message = {
             body: messageElement.getChildText('body'),
             direction,
             datetime: new Date(),
-            delayed: false
+            delayed: false,
         };
 
-        this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageStanza));
-        const {from, to} = messageElement.attrs;
-        const contactJid = direction === Direction.in ? from : to;
-        const contact = this.xmppChatAdapter.getOrCreateContactById(contactJid);
-        contact.addMessage(message);
+        const messageReceivedEvent = new MessageReceivedEvent();
+        this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageElement, messageReceivedEvent));
+        if (!messageReceivedEvent.discard) {
+            const {from, to} = messageElement.attrs;
+            const contactJid = direction === Direction.in ? from : to;
+            const contact = this.xmppChatAdapter.getOrCreateContactById(contactJid);
+            contact.addMessage(message);
 
-        if (direction === Direction.in) {
-            this.xmppChatAdapter.message$.next(contact);
+            if (direction === Direction.in) {
+                this.xmppChatAdapter.message$.next(contact);
+            }
         }
 
         return true;

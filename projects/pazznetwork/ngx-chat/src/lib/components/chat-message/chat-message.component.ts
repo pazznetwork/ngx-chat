@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Inject, Input, OnInit } from '@angular/core';
-import { Message } from '../../core';
+import { Contact, Message, MessageState } from '../../core';
 import { extractUrls } from '../../core/utils-links';
+import { MessageStatePlugin, StateDate } from '../../services/adapters/xmpp/plugins';
 import { XmppChatAdapter } from '../../services/adapters/xmpp/xmpp-chat-adapter.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
@@ -26,12 +27,21 @@ export class ChatMessageComponent implements OnInit {
     @Input()
     nick: string;
 
+    @Input()
+    contact: Contact;
+
     imageLink: string;
+
+    MessageState = MessageState;
+
+    private messageStatePlugin: MessageStatePlugin;
 
     constructor(
         @Inject(ChatServiceToken) public chatService: ChatService,
         private httpClient: HttpClient,
-    ) {}
+    ) {
+        this.messageStatePlugin = this.chatService.getPlugin(MessageStatePlugin);
+    }
 
     ngOnInit() {
         this.tryFindImageLink();
@@ -52,6 +62,26 @@ export class ChatMessageComponent implements OnInit {
                 } catch (e) {
                 }
             }
+        }
+    }
+
+    getMessageState() {
+        if (this.message.state) {
+            return this.message.state;
+        } else if (this.messageStatePlugin) {
+            const date = this.message.datetime;
+            const states = this.messageStatePlugin.getContactMessageState(this.contact.jidBare.toString());
+            return this.getStateForDate(date, states);
+        }
+    }
+
+    private getStateForDate(date: Date, states: StateDate) {
+        if (date <= states.lastRecipientSeen) {
+            return MessageState.RECIPIENT_SEEN;
+        } else if (date <= states.lastRecipientReceived) {
+            return MessageState.RECIPIENT_RECEIVED;
+        } else if (date <= states.lastSent) {
+            return MessageState.SENT;
         }
     }
 }

@@ -10,19 +10,37 @@ import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 
 export const PUBSUB_EVENT_XMLNS = 'http://jabber.org/protocol/pubsub#event';
 
-class PublishPrivateDataStanzaBuilder extends AbstractStanzaBuilder {
+interface PublishOptions {
+    node?: string;
+    id?: any;
+    data?: Element;
+    persistItems?: boolean;
+}
 
-    constructor(private node: string, private id: string, private data: Element) {
+class PublishStanzaBuilder extends AbstractStanzaBuilder {
+
+    private publishOptions: PublishOptions = {
+        persistItems: false,
+    };
+
+    constructor(options: PublishOptions) {
         super();
+        if (options) {
+            this.publishOptions = {...this.publishOptions, ...options};
+        }
     }
 
     toStanza() {
+        const {node, id, persistItems} = this.publishOptions;
+
+        // necessary as a 'event-only' publish is currently broken in ejabberd, see
+        // https://github.com/processone/ejabberd/issues/2799
+        const data = this.publishOptions.data || xml('data');
+
         return xml('iq', {type: 'set'},
             xml('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'},
-                xml('publish', {node: this.node},
-                    xml('item', {id: this.id},
-                        this.data
-                    )
+                xml('publish', {node},
+                    xml('item', {id}, data)
                 ),
                 xml('publish-options', {},
                     xml('x', {xmlns: 'jabber:x:data', type: 'submit'},
@@ -30,7 +48,7 @@ class PublishPrivateDataStanzaBuilder extends AbstractStanzaBuilder {
                             xml('value', {}, 'http://jabber.org/protocol/pubsub#publish-options')
                         ),
                         xml('field', {var: 'pubsub#persist_items'},
-                            xml('value', {}, 'true')
+                            xml('value', {}, persistItems ? 1 : 0)
                         ),
                         xml('field', {var: 'pubsub#access_model'},
                             xml('value', {}, 'whitelist')
@@ -80,7 +98,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
         this.supportsPrivatePublish.next('unknown');
     }
 
-    publishPrivate(node: string, id: string, data: Element): Promise<IqResponseStanza> {
+    storePrivatePayloadPersistent(node: string, id: string, data: Element): Promise<IqResponseStanza> {
         return new Promise((resolve, reject) => {
             this.supportsPrivatePublish
                 .pipe(filter(support => support !== 'unknown'))
@@ -89,7 +107,23 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
                         reject('does not support private publish subscribe');
                     } else {
                         resolve(this.xmppChatAdapter.chatConnectionService.sendIq(
-                            new PublishPrivateDataStanzaBuilder(node, id, data).toStanza()
+                            new PublishStanzaBuilder({node, id, data, persistItems: true}).toStanza()
+                        ));
+                    }
+                });
+        });
+    }
+
+    privateNotify(node: string, data?: Element, id?: string): Promise<IqResponseStanza> {
+        return new Promise((resolve, reject) => {
+            this.supportsPrivatePublish
+                .pipe(filter(support => support !== 'unknown'))
+                .subscribe((support: boolean) => {
+                    if (!support) {
+                        reject('does not support private publish subscribe');
+                    } else {
+                        resolve(this.xmppChatAdapter.chatConnectionService.sendIq(
+                            new PublishStanzaBuilder({node, id, data, persistItems: false}).toStanza()
                         ));
                     }
                 });

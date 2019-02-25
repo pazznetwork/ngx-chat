@@ -15,7 +15,7 @@ export class MessageStore<T extends Message> {
     public messages$: Subject<T>;
     public messages: T[] = [];
     public dateMessageGroups: DateMessagesGroup[] = [];
-    private messageIdToMessage: { [key: string]: T } = {};
+    public messageIdToMessage: { [key: string]: T } = {};
 
     constructor(private logService: LogService) {
         this.messages$ = new Subject<T>();
@@ -24,7 +24,7 @@ export class MessageStore<T extends Message> {
     addMessage(message: T) {
         if (message.id && this.messageIdToMessage[message.id]) {
             if (this.logService) {
-                this.logService.info(`received message but message with id ${message.id} already exists`);
+                this.logService.warn(`message with id ${message.id} already exists`);
             }
             return false;
         }

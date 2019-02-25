@@ -8,6 +8,7 @@ import { LogService } from '../../../log.service';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
+import { MessageReceivedEvent } from './message.plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 
 export interface RoomCreationOptions {
@@ -394,10 +395,13 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             delayed: !!stanza.getChild('delay')
         };
 
+        const messageReceivedEvent = new MessageReceivedEvent();
         for (const plugin of this.xmppChatAdapter.plugins) {
-            plugin.afterReceiveMessage(message, stanza);
+            plugin.afterReceiveMessage(message, stanza, messageReceivedEvent);
         }
-        room.addMessage(message);
+        if (!messageReceivedEvent.discard) {
+            room.addMessage(message);
+        }
 
         return true;
     }

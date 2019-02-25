@@ -81,13 +81,14 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
             const datetime = new Date(
                 stanza.getChild('result').getChild('forwarded').getChild('delay').attrs.stamp
             );
+            const direction = isAddressedToMe ? Direction.in : Direction.out;
 
             contact.addMessage({
-                direction: isAddressedToMe ? Direction.in : Direction.out,
+                direction,
                 datetime,
                 body: messageBody,
                 id: MessageUuidPlugin.extractIdFromStanza(messageElement),
-                delayed: true
+                delayed: true,
             });
         }
     }

@@ -167,7 +167,10 @@ export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
             }
         }
 
-        this.publishSubscribePlugin.publishPrivate(STORAGE_NGX_CHAT_LAST_READ_DATE, 'current', lastReadNodeBuilder.toStanza());
+        this.publishSubscribePlugin.storePrivatePayloadPersistent(
+            STORAGE_NGX_CHAT_LAST_READ_DATE,
+            'current',
+            lastReadNodeBuilder.toStanza());
     }
 
     private handlePubSubEvent(event: Element) {
