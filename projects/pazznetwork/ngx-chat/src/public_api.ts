@@ -14,3 +14,4 @@ export * from './lib/services/chat-service';
 export * from './lib/services/chat-list-state.service';
 export * from './lib/services/contact-factory.service';
 export * from './lib/services/log.service';
+export { LinkOpener, LinkOpenerToken } from './lib/components/chat-message-link/chat-message-link.component';
