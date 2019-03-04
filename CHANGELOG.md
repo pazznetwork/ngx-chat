@@ -1,3 +1,13 @@
+<a name="0.2.16"></a>
+## [0.2.16](https://github.com/pazznetwork/ngx-chat/compare/v0.2.15...v0.2.16) (2019-03-04)
+
+
+### Features
+
+* add LinkOpener ([f22ce6d](https://github.com/pazznetwork/ngx-chat/commit/f22ce6d))
+
+
+
 <a name="0.2.15"></a>
 ## [0.2.15](https://github.com/pazznetwork/ngx-chat/compare/v0.2.14...v0.2.15) (2019-02-25)
 
