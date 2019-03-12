@@ -1,3 +1,13 @@
+<a name="0.2.17"></a>
+## [0.2.17](https://github.com/pazznetwork/ngx-chat/compare/v0.2.16...v0.2.17) (2019-03-12)
+
+
+### Bug Fixes
+
+* add default value for message state handling ([b52309a](https://github.com/pazznetwork/ngx-chat/commit/b52309a))
+
+
+
 <a name="0.2.16"></a>
 ## [0.2.16](https://github.com/pazznetwork/ngx-chat/compare/v0.2.15...v0.2.16) (2019-03-04)
 
