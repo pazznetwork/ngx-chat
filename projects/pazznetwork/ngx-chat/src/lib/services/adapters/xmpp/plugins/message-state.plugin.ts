@@ -75,9 +75,9 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
             for (const lastReadEntry of itemElement[0].getChild(wrapperNodeName).getChildren(nodeName)) {
                 const {lastRecipientReceived, lastRecipientSeen, lastSent, jid} = lastReadEntry.attrs;
                 results[jid] = {
-                    lastRecipientSeen: new Date(+lastRecipientSeen),
-                    lastRecipientReceived: new Date(+lastRecipientReceived),
-                    lastSent: new Date(+lastSent),
+                    lastRecipientSeen: new Date(+lastRecipientSeen || 0),
+                    lastRecipientReceived: new Date(+lastRecipientReceived || 0),
+                    lastSent: new Date(+lastSent || 0),
                 };
             }
         }
