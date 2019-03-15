@@ -75,7 +75,7 @@ export class ChatComponent implements OnInit, OnChanges {
         'contacts': 'Contacts',
         'contactRequestIn': 'Incoming contact requests',
         'contactRequestOut': 'Outgoing contact requests',
-        'contactsUnaffiliated': 'Other',
+        'contactsUnaffiliated': 'Unknown',
         'noContacts': 'No contacts yet.',
         'noMessages': 'No messages yet.',
         'placeholder': 'Enter your message!',

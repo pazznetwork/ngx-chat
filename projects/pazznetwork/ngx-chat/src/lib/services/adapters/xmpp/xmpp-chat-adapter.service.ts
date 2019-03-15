@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { ChatPlugin, Contact, LogInRequest, Stanza, Translations } from '../../../core';
@@ -15,6 +15,8 @@ import { XmppChatConnectionService } from './xmpp-chat-connection.service';
 export class XmppChatAdapter implements ChatService {
 
     message$ = new Subject<Contact>();
+    messageSent$: Subject<Contact> = new Subject();
+
     contacts$ = new BehaviorSubject<Contact[]>([]);
     contactsSubscribed$: Observable<Contact[]> = this.contacts$.pipe(
         map(contacts => contacts.filter(contact => contact.isSubscribed())));
@@ -23,7 +25,7 @@ export class XmppChatAdapter implements ChatService {
     contactRequestsSent$: Observable<Contact[]> = this.contacts$.pipe(
         map(contacts => contacts.filter(contact => contact.pendingOut$.getValue())));
     contactsUnaffiliated$: Observable<Contact[]> = this.contacts$.pipe(
-        map(contacts => contacts.filter(contact => contact.isUnaffiliated())));
+        map(contacts => contacts.filter(contact => contact.isUnaffiliated() && contact.messages.length > 0)));
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
     plugins: ChatPlugin[] = [];
     enableDebugging = false;
@@ -63,6 +65,13 @@ export class XmppChatAdapter implements ChatService {
                 }
             });
         this.chatConnectionService.stanzaUnknown$.subscribe((stanza) => this.onUnknownStanza(stanza));
+
+        merge(this.messageSent$, this.message$).subscribe(_contact => {
+            // re-emit contacts when sending or receiving a message to refresh contcat groups
+            // if the sending contact was in 'other', he still is in other now, but passes the 'messages.length > 0' predicate, so that
+            // he should be seen now.
+            this.contacts$.next(this.contacts$.getValue());
+        });
     }
 
     private announceAvailability() {

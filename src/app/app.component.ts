@@ -3,6 +3,7 @@ import { Client } from '@xmpp/client-core';
 import { jid } from '@xmpp/jid';
 import { Observable, of } from 'rxjs';
 import {
+    ChatListStateService,
     ChatService,
     ChatServiceToken,
     Contact,
@@ -35,7 +36,8 @@ export class AppComponent {
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
                 @Inject(XmppClientToken) public client: Client,
                 private contactFactory: ContactFactoryService,
-                private logService: LogService) {
+                private logService: LogService,
+                private chatListStateService: ChatListStateService) {
         const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
         this.logService.logLevel = LogLevel.Debug;
         this.domain = contactData.domain;
@@ -100,6 +102,10 @@ export class AppComponent {
         } else {
             this.contacts = this.chatService.contactsSubscribed$;
         }
+    }
+
+    onOpenChat() {
+        this.chatListStateService.openChat(this.chatService.getOrCreateContactById(this.otherJid));
     }
 
     private async stateChanged(state: 'disconnected' | 'connecting' | 'online') {
