@@ -1,4 +1,5 @@
 export interface Translations {
+    chat: string;
     contacts: string;
     contactRequestIn: string;
     contactRequestOut: string;

@@ -5,8 +5,12 @@
 
 <div class="roster-list" [@rosterVisibility]="rosterState" [attr.data-ngx-chat-state]="chatService.state$ | async">
 
+    <div class="roster-header">
+        {{ chatService.translations.chat }}
+    </div>
+
     <ng-container *ngIf="(contacts | async).length > 0">
-        <div class="roster-header">{{chatService.translations.contacts}}</div>
+        <div class="roster-group-header">{{chatService.translations.contacts}}</div>
 
         <div class="contact-list-wrapper">
 
@@ -19,7 +23,7 @@
     </ng-container>
 
     <ng-container *ngIf="(contactRequestsReceived$ | async).length > 0">
-        <div class="roster-header">{{chatService.translations.contactRequestIn}}</div>
+        <div class="roster-group-header">{{chatService.translations.contactRequestIn}}</div>
         <div class="contact-list-wrapper">
 
             <ngx-chat-roster-contact *ngFor="let contact of (contactRequestsReceived$ | async)"
@@ -31,7 +35,7 @@
     </ng-container>
 
     <ng-container *ngIf="(contactRequestsSent$ | async).length > 0">
-        <div class="roster-header">{{chatService.translations.contactRequestOut}}</div>
+        <div class="roster-group-header">{{chatService.translations.contactRequestOut}}</div>
         <div class="contact-list-wrapper">
 
             <ngx-chat-roster-contact *ngFor="let contact of (contactRequestsSent$ | async)"
@@ -43,7 +47,7 @@
     </ng-container>
 
     <ng-container *ngIf="(contactsUnaffiliated$ | async).length > 0">
-        <div class="roster-header">{{chatService.translations.contactsUnaffiliated}}</div>
+        <div class="roster-group-header">{{chatService.translations.contactsUnaffiliated}}</div>
         <div class="contact-list-wrapper">
 
             <ng-container *ngFor="let contact of (contactsUnaffiliated$ | async)">

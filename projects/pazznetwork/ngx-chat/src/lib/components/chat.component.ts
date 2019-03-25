@@ -72,6 +72,7 @@ export class ChatComponent implements OnInit, OnChanges {
     rosterState = 'hidden';
 
     private defaultTranslations: Translations = {
+        'chat': 'Chat',
         'contacts': 'Contacts',
         'contactRequestIn': 'Incoming contact requests',
         'contactRequestOut': 'Outgoing contact requests',
