@@ -68,8 +68,13 @@ export class ChatComponent implements OnInit, OnChanges {
     @Input()
     public userAvatar$: undefined | Observable<string>;
 
+    /**
+     * 'shown' shows roster list, 'hidden' hides it.
+     */
+    @Input()
+    rosterState: 'shown' | 'hidden';
+
     showChatComponent = false;
-    rosterState = 'hidden';
 
     private defaultTranslations: Translations = {
         'chat': 'Chat',
@@ -94,8 +99,7 @@ export class ChatComponent implements OnInit, OnChanges {
 
     ngOnInit() {
         this.chatService.state$.subscribe($e => this.onChatStateChange($e));
-        const rosterState = localStorage.getItem('pazznetworkNgxChatRosterState') || 'hidden';
-        this.onRosterStateChanged(rosterState);
+        this.onRosterStateChanged(this.rosterState);
 
         if (this.userAvatar$) {
             this.userAvatar$.subscribe(avatar => this.chatService.userAvatar$.next(avatar));
@@ -117,8 +121,7 @@ export class ChatComponent implements OnInit, OnChanges {
         this.updateBodyClass();
     }
 
-    onRosterStateChanged(state: string) {
-        localStorage.setItem('pazznetworkNgxChatRosterState', state);
+    onRosterStateChanged(state: 'shown' | 'hidden') {
         this.rosterState = state;
         this.updateBodyClass();
     }
