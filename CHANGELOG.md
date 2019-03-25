@@ -1,3 +1,13 @@
+<a name="0.2.19"></a>
+## [0.2.19](https://github.com/pazznetwork/ngx-chat/compare/v0.2.18...v0.2.19) (2019-03-25)
+
+
+### Features
+
+* roster list can now be shown & hidden via @Input ([a08943f](https://github.com/pazznetwork/ngx-chat/commit/a08943f))
+
+
+
 <a name="0.2.18"></a>
 ## [0.2.18](https://github.com/pazznetwork/ngx-chat/compare/v0.2.17...v0.2.18) (2019-03-25)
 
