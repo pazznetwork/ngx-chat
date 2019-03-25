@@ -126,6 +126,7 @@ export class XmppChatAdapter implements ChatService {
 
     sendMessage(jid: string, body: string) {
         this.getPlugin(MessagePlugin).sendMessage(jid, body);
+        this.messageSent$.next(this.getOrCreateContactById(jid));
     }
 
     loadCompleteHistory() {
