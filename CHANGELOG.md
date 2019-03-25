@@ -1,3 +1,21 @@
+<a name="0.2.18"></a>
+## [0.2.18](https://github.com/pazznetwork/ngx-chat/compare/v0.2.17...v0.2.18) (2019-03-25)
+
+
+### Bug Fixes
+
+* replace word-break with hyphens ([b7dca18](https://github.com/pazznetwork/ngx-chat/commit/b7dca18))
+* unknown contact group is now only displayed if messages exist ([60ce906](https://github.com/pazznetwork/ngx-chat/commit/60ce906))
+* wider contact list, fix contact list (and message) overflowing ([a414d8f](https://github.com/pazznetwork/ngx-chat/commit/a414d8f))
+* word breaking in firefox ([b9af244](https://github.com/pazznetwork/ngx-chat/commit/b9af244))
+
+
+### Features
+
+* add roster list header ([00a96c2](https://github.com/pazznetwork/ngx-chat/commit/00a96c2))
+
+
+
 <a name="0.2.17"></a>
 ## [0.2.17](https://github.com/pazznetwork/ngx-chat/compare/v0.2.16...v0.2.17) (2019-03-12)
 

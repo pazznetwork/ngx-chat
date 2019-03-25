@@ -103,6 +103,8 @@ In the `src` folder you find the demo application.
 
 ## Releasing
 ```bash
+# increment version number in package.json
+VERSION=0.2.18 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"
