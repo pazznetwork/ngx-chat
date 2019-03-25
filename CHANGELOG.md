@@ -1,3 +1,13 @@
+<a name="0.2.20"></a>
+## [0.2.20](https://github.com/pazznetwork/ngx-chat/compare/v0.2.19...v0.2.20) (2019-03-25)
+
+
+### Bug Fixes
+
+* emit message sent event ([a7b27f7](https://github.com/pazznetwork/ngx-chat/commit/a7b27f7))
+
+
+
 <a name="0.2.19"></a>
 ## [0.2.19](https://github.com/pazznetwork/ngx-chat/compare/v0.2.18...v0.2.19) (2019-03-25)
 
