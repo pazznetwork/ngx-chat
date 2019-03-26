@@ -1,3 +1,13 @@
+<a name="0.2.21"></a>
+## [0.2.21](https://github.com/pazznetwork/ngx-chat/compare/v0.2.20...v0.2.21) (2019-03-26)
+
+
+### Bug Fixes
+
+* further overflow behavior adjustments ([7b25dbb](https://github.com/pazznetwork/ngx-chat/commit/7b25dbb))
+
+
+
 <a name="0.2.20"></a>
 ## [0.2.20](https://github.com/pazznetwork/ngx-chat/compare/v0.2.19...v0.2.20) (2019-03-25)
 
