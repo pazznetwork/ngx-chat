@@ -5,10 +5,13 @@
   "peerDependencies": {
     "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
     "@angular/core": "^6.0.0-rc.0 || ^6.0.0",
+    "@angular/cdk": "^6.0.0-rc.0 || ^6.0.0",
     "@types/ltx": "^2.6.3",
     "@xmpp/client": "^0.3.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@angular/cdk": "^7.3.6"
+  },
   "dependencies": {},
   "keywords": [
     "ngx-chat",

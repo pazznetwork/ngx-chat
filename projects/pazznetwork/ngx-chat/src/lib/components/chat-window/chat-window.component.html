@@ -15,7 +15,7 @@
 
             <ngx-chat-message-list [contact]="chatWindowState.contact" [showAvatars]="false"></ngx-chat-message-list>
 
-            <div class="chat-input-container">
+            <div class="chat-input-container" (click)="onFocus()">
                 <ngx-chat-message-input [contact]="chatWindowState.contact"></ngx-chat-message-input>
             </div>
         </div>

@@ -1,5 +1,8 @@
-<input class="chat-input"
-       [(ngModel)]="message"
-       (keyup.enter)="onSendMessage()"
-       type="text"
-       placeholder="{{chatService.translations.placeholder}}"/>
+<textarea class="chat-input"
+          #chatInput
+          [(ngModel)]="message"
+          (keydown.enter)="onSendMessage()"
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="1"
+          cdkAutosizeMaxRows="5"
+          placeholder="{{chatService.translations.placeholder}}"></textarea>

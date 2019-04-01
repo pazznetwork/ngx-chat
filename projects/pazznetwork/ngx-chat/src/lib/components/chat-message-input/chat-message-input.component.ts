@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Inject, Input, OnInit, ViewChild } from '@angular/core';
 
 import { Contact } from '../../core';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
@@ -15,17 +15,25 @@ export class ChatMessageInputComponent implements OnInit {
 
     public message = '';
 
+    @ViewChild('chatInput')
+    chatInput: ElementRef;
+
     constructor(@Inject(ChatServiceToken) public chatService: ChatService) {
     }
 
     ngOnInit() {
     }
 
-    public onSendMessage() {
+    onSendMessage() {
         if (this.message.trim().length > 0) {
             this.chatService.sendMessage(this.contact.jidBare.toString(), this.message);
             this.message = '';
         }
+        return false;
+    }
+
+    focus() {
+        this.chatInput.nativeElement.focus();
     }
 
 }

@@ -19,7 +19,7 @@ Below you will find some instructions to getting started. [Have a look at the wi
 ## Installation and usage
 First of all, install ngx-chat via npm:
 ```bash
-npm install --save @pazznetwork/ngx-chat @xmpp/client
+npm install --save @pazznetwork/ngx-chat @xmpp/client @angular/cdk
 ```
 
 After that, import it in your root module:

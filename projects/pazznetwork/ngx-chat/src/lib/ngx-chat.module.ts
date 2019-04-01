@@ -1,3 +1,4 @@
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, Injector, ModuleWithProviders, NgModule, NgZone } from '@angular/core';
@@ -51,6 +52,7 @@ import { LogService } from './services/log.service';
         CommonModule,
         FormsModule,
         HttpClientModule,
+        TextFieldModule,
     ],
     declarations: [
         ChatComponent,
@@ -73,6 +75,7 @@ import { LogService } from './services/log.service';
         ChatMessageListComponent,
         ChatRoomMessagesComponent,
         FileDropComponent,
+        LinksDirective,
     ],
     entryComponents: [
         ChatMessageLinkComponent,
