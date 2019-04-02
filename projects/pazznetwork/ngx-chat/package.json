@@ -9,9 +9,7 @@
     "@types/ltx": "^2.6.3",
     "@xmpp/client": "^0.3.0"
   },
-  "devDependencies": {
-    "@angular/cdk": "^7.3.6"
-  },
+  "devDependencies": {},
   "dependencies": {},
   "keywords": [
     "ngx-chat",
