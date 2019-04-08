@@ -50,6 +50,7 @@
     "@types/node": "~8.9.4",
     "codelyzer": "~4.2.1",
     "concat-files": "^0.1.1",
+    "conventional-changelog-cli": "^2.0.12",
     "coveralls": "^3.0.2",
     "glob": "^7.1.2",
     "husky": "^1.1.3",
