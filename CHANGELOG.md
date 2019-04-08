@@ -1,3 +1,39 @@
+<a name="0.2.24"></a>
+## [0.2.24](https://github.com/pazznetwork/ngx-chat/compare/v0.2.23...v0.2.24) (2019-04-08)
+
+
+### Bug Fixes
+
+* alignment of chat close button ([c9770cb](https://github.com/pazznetwork/ngx-chat/commit/c9770cb))
+
+
+### Features
+
+* add chat actions API ([cb4b235](https://github.com/pazznetwork/ngx-chat/commit/cb4b235))
+* add selectFile util function, e.g. for file upload ([e39bb79](https://github.com/pazznetwork/ngx-chat/commit/e39bb79))
+
+
+
+<a name="0.2.23"></a>
+## [0.2.23](https://github.com/pazznetwork/ngx-chat/compare/v0.2.22...v0.2.23) (2019-04-02)
+
+
+### Bug Fixes
+
+* remove devDependency on [@angular](https://github.com/angular)/cdk (it is a peer dependency) ([db2bdaf](https://github.com/pazznetwork/ngx-chat/commit/db2bdaf))
+
+
+
+<a name="0.2.22"></a>
+## [0.2.22](https://github.com/pazznetwork/ngx-chat/compare/v0.2.21...v0.2.22) (2019-04-01)
+
+
+### Features
+
+* multiline text input ([26bf992](https://github.com/pazznetwork/ngx-chat/commit/26bf992))
+
+
+
 <a name="0.2.21"></a>
 ## [0.2.21](https://github.com/pazznetwork/ngx-chat/compare/v0.2.20...v0.2.21) (2019-03-26)
 
