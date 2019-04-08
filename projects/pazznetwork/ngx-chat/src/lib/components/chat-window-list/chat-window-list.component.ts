@@ -12,7 +12,7 @@ import { ChatListStateService } from '../../services/chat-list-state.service';
                 right: '1em',
             })),
             state('shown', style({
-                right: '16em',
+                right: '15em',
             })),
             transition('hidden => shown', animate('400ms ease')),
             transition('shown => hidden', animate('400ms ease'))

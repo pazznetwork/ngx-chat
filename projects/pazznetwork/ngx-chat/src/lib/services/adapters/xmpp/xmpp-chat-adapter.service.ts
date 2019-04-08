@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { ChatActionContext } from '../../../components/chat-window/chat-window.component';
 
 import { ChatPlugin, Contact, LogInRequest, Stanza, Translations } from '../../../core';
 import { dummyAvatar } from '../../../core/contact-avatar';
@@ -31,6 +32,14 @@ export class XmppChatAdapter implements ChatService {
     enableDebugging = false;
     userAvatar$ = new BehaviorSubject(dummyAvatar);
     translations: Translations;
+    chatActions = [{
+        id: 'sendMessage',
+        cssClass: 'chat-window-send',
+        html: '&raquo;',
+        onClick: (chatActionContext: ChatActionContext) => {
+            chatActionContext.chatWindow.sendMessage();
+        },
+    }];
     private lastLogInRequest: LogInRequest;
 
     constructor(public chatConnectionService: XmppChatConnectionService,

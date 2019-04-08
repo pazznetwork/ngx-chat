@@ -1,5 +1,5 @@
 <div class="chat-window">
-    <ngx-chat-filedrop (fileUpload)="onFileUpload($event)" [dropMessage]="chatService.translations.dropMessage">
+    <ngx-chat-filedrop (fileUpload)="uploadFile($event)" [dropMessage]="chatService.translations.dropMessage">
         <div (click)="onClickHeader()" class="chat-contact-header" [title]="chatWindowState.contact.name">
             <div class="chat-contact-avatar">
                 <img [src]="chatWindowState.contact.avatar"/>
@@ -17,6 +17,12 @@
 
             <div class="chat-input-container" (click)="onFocus()">
                 <ngx-chat-message-input [contact]="chatWindowState.contact"></ngx-chat-message-input>
+                <div *ngFor="let action of chatService.chatActions"
+                     (click)="onActionClick(action)"
+                     class="chat-action"
+                     [ngClass]="action.cssClass"
+                     [innerHTML]="action.html">
+                </div>
             </div>
         </div>
     </ngx-chat-filedrop>

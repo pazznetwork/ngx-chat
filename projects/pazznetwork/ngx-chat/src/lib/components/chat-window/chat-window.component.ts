@@ -51,7 +51,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
         this.chatListService.closeChat(this.chatWindowState.contact);
     }
 
-    async onFileUpload(file: File) {
+    sendMessage() {
+        this.messageInput.onSendMessage();
+    }
+
+    async uploadFile(file: File) {
         const url = await this.chatService.getPlugin(HttpFileUploadPlugin).upload(file);
         this.chatService.sendMessage(this.chatWindowState.contact.jidBare.toString(), url);
     }
@@ -59,4 +63,27 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     onFocus() {
         this.messageInput.focus();
     }
+
+    onActionClick(chatAction: ChatAction) {
+        chatAction.onClick({
+            contact: this.chatWindowState.contact.jidBare.toString(),
+            chatWindow: this,
+        });
+    }
+}
+
+export interface ChatAction {
+    cssClass: { [className: string]: boolean } | string | string[];
+    /**
+     * to identify actions
+     */
+    id: string;
+    html: string;
+
+    onClick(chatActionContext: ChatActionContext): void;
+}
+
+export interface ChatActionContext {
+    contact: string;
+    chatWindow: ChatWindowComponent;
 }
