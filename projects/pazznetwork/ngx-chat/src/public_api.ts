@@ -2,6 +2,7 @@
  * Public API Surface of ngx-chat
  */
 
+export { selectFile } from './lib/core/utils-file';
 export * from './lib/ngx-chat.module';
 export * from './lib/components/chat.component';
 export * from './lib/components/chat-message-list/chat-message-list.component';
