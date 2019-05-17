@@ -86,7 +86,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
     publish$ = new Subject<Stanza>();
     private supportsPrivatePublish = new BehaviorSubject<boolean | 'unknown'>('unknown');
 
-    constructor(private xmppChatAdapter: XmppChatAdapter) {
+    constructor(private xmppChatAdapter: XmppChatAdapter, private serviceDiscoveryPlugin: ServiceDiscoveryPlugin) {
         super();
     }
 
@@ -153,7 +153,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
     private async determineSupportForPrivatePublish() {
         let isSupported: boolean;
         try {
-            const service = await this.xmppChatAdapter.getPlugin(ServiceDiscoveryPlugin).findService('pubsub', 'pep');
+            const service = await this.serviceDiscoveryPlugin.findService('pubsub', 'pep');
             isSupported = service.features.indexOf('http://jabber.org/protocol/pubsub#publish-options') > -1;
         } catch (e) {
             isSupported = false;

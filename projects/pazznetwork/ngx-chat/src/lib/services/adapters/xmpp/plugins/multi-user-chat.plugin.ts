@@ -145,7 +145,9 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     rooms$ = new BehaviorSubject<Room[]>([]);
     private roomJoinPromises: { [roomAndJid: string]: (stanza: Stanza) => void } = {};
 
-    constructor(private xmppChatAdapter: XmppChatAdapter, private logService: LogService) {
+    constructor(private xmppChatAdapter: XmppChatAdapter,
+                private logService: LogService,
+                private serviceDiscoveryPlugin: ServiceDiscoveryPlugin) {
         super();
     }
 
@@ -186,7 +188,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
      */
     async createRoom(request: RoomCreationOptions): Promise<Room> {
         const roomId = request.roomId;
-        const service = await this.xmppChatAdapter.getPlugin(ServiceDiscoveryPlugin).findService('conference', 'text');
+        const service = await this.serviceDiscoveryPlugin.findService('conference', 'text');
         const occupantJid = new JID(roomId, service.jid, request.nick);
         const {presenceResponse, room} = await this.joinRoomInternal(occupantJid);
 

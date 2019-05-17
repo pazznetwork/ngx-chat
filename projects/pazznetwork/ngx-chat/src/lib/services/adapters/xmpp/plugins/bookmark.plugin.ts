@@ -1,7 +1,6 @@
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { IqResponseStanza } from '../../../../core';
-import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { PublishSubscribePlugin } from './publish-subscribe.plugin';
 
@@ -18,12 +17,12 @@ export const STORAGE_BOOKMARKS = 'storage:bookmarks';
  */
 export class BookmarkPlugin extends AbstractXmppPlugin {
 
-    constructor(private xmppChatAdapter: XmppChatAdapter) {
+    constructor(private publishSubscribePlugin: PublishSubscribePlugin) {
         super();
     }
 
     async retrieveMultiUserChatRooms(): Promise<SavedConference[]> {
-        const itemNodes = await this.xmppChatAdapter.getPlugin(PublishSubscribePlugin).retrieveNodeItems(STORAGE_BOOKMARKS);
+        const itemNodes = await this.publishSubscribePlugin.retrieveNodeItems(STORAGE_BOOKMARKS);
         return itemNodes.map(itemNode => this.convertElementToSavedConference(itemNode));
     }
 
@@ -37,7 +36,7 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
     }
 
     saveConference(conferenceToSave: SavedConference): Promise<IqResponseStanza> {
-        return this.xmppChatAdapter.getPlugin(PublishSubscribePlugin).storePrivatePayloadPersistent(
+        return this.publishSubscribePlugin.storePrivatePayloadPersistent(
             STORAGE_BOOKMARKS,
             conferenceToSave.jid,
             xml('storage', {xmlns: STORAGE_BOOKMARKS},

@@ -18,17 +18,7 @@ describe('push plugin', () => {
     beforeEach(() => {
         xmppClientMock = createXmppClientMock();
 
-        const pushService = {
-            jid: 'push.jabber.example.com',
-            category: 'pubsub',
-            type: 'push'
-        };
-        const serviceDiscoveryPluginMock: any = {
-            findService: () => pushService
-        };
-
         const chatAdapterMock: any = {
-            getPlugin: () => serviceDiscoveryPluginMock,
             chatConnectionService: null // is set later
         };
 
@@ -47,7 +37,15 @@ describe('push plugin', () => {
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         chatConnectionService.userJid = parseJid('someone@example.com');
 
-        pushPlugin = new PushPlugin(chatAdapterMock);
+        const pushService = {
+            jid: 'push.jabber.example.com',
+            category: 'pubsub',
+            type: 'push'
+        };
+        const serviceDiscoveryPluginMock: any = {
+            findService: () => pushService
+        };
+        pushPlugin = new PushPlugin(chatAdapterMock, serviceDiscoveryPluginMock);
     });
 
     it('should resolve if registration is successful', async () => {

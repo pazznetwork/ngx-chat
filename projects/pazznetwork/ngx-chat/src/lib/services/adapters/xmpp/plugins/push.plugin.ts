@@ -8,7 +8,8 @@ import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
  */
 export class PushPlugin extends AbstractXmppPlugin {
 
-    constructor(private xmppChatAdapter: XmppChatAdapter) {
+    constructor(private xmppChatAdapter: XmppChatAdapter,
+                private serviceDiscoveryPlugin: ServiceDiscoveryPlugin) {
         super();
     }
 
@@ -25,7 +26,7 @@ export class PushPlugin extends AbstractXmppPlugin {
     }
 
     private async getPushServiceComponent() {
-        return await this.xmppChatAdapter.getPlugin(ServiceDiscoveryPlugin).findService('pubsub', 'push');
+        return await this.serviceDiscoveryPlugin.findService('pubsub', 'push');
     }
 
     async unregister(node?: string, jid?: string): Promise<any> {

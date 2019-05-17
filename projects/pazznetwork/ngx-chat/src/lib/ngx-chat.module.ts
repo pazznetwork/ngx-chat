@@ -128,22 +128,22 @@ export class NgxChatModule {
             const logService = injector.get(LogService);
             const ngZone = injector.get(NgZone);
             const xmppChatAdapter = injector.get(ChatServiceToken) as XmppChatAdapter;
-            const publishSubscribePlugin = new PublishSubscribePlugin(xmppChatAdapter);
+            const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(xmppChatAdapter);
+            const publishSubscribePlugin = new PublishSubscribePlugin(xmppChatAdapter, serviceDiscoveryPlugin);
             const chatMessageListRegistryService = injector.get(ChatMessageListRegistryService);
             const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
                 xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin);
-            const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(xmppChatAdapter);
 
             xmppChatAdapter.addPlugins([
-                new BookmarkPlugin(xmppChatAdapter),
+                new BookmarkPlugin(publishSubscribePlugin),
                 new MessageArchivePlugin(xmppChatAdapter),
                 new MessagePlugin(xmppChatAdapter, logService),
                 new MessageUuidPlugin(),
-                new MultiUserChatPlugin(xmppChatAdapter, logService),
+                new MultiUserChatPlugin(xmppChatAdapter, logService, serviceDiscoveryPlugin),
                 publishSubscribePlugin,
                 new RosterPlugin(xmppChatAdapter, logService),
                 serviceDiscoveryPlugin,
-                new PushPlugin(xmppChatAdapter),
+                new PushPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
                 // new PingPlugin(xmppChatAdapter, logService, ngZone),
                 new RegistrationPlugin(logService, ngZone),
                 new MessageCarbonsPlugin(xmppChatAdapter),

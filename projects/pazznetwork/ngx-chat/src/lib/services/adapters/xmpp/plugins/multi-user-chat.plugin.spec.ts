@@ -11,7 +11,6 @@ import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
 import { MessageUuidPlugin } from './message-uuid.plugin';
 import { MultiUserChatPlugin } from './multi-user-chat.plugin';
-import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 
 const defaultRoomConfiguration = {
     roomId: 'roomId',
@@ -48,13 +47,17 @@ describe('multi user chat plugin', () => {
 
         chatAdapter = TestBed.get(XmppChatAdapter);
 
-        const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(chatAdapter);
-        spyOn(serviceDiscoveryPlugin, 'findService').and.returnValue({
-                jid: 'conference.jabber.example.com'
-            }
-        );
+        const conferenceService = {
+            jid: 'conference.jabber.example.com',
+        };
+        const serviceDiscoveryPluginMock: any = {
+            findService: () => conferenceService
+        };
 
-        chatAdapter.addPlugins([new MultiUserChatPlugin(chatAdapter, logService), serviceDiscoveryPlugin, new MessageUuidPlugin()]);
+        chatAdapter.addPlugins([
+            new MultiUserChatPlugin(chatAdapter, logService, serviceDiscoveryPluginMock),
+            new MessageUuidPlugin()
+        ]);
 
         multiUserChatPlugin = chatAdapter.getPlugin(MultiUserChatPlugin);
     });
