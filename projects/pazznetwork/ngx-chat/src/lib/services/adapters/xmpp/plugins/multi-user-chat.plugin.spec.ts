@@ -255,7 +255,7 @@ describe('multi user chat plugin', () => {
             const rooms = multiUserChatPlugin.rooms$.getValue();
             expect(rooms.length).toEqual(1);
 
-            rooms[0].message$
+            rooms[0].messages$
                 .pipe(first())
                 .subscribe((message) => {
                     expect(message.body).toEqual('message content here');

@@ -68,7 +68,7 @@ export class ChatMessageComponent implements OnInit {
     getMessageState() {
         if (this.message.state) {
             return this.message.state;
-        } else if (this.messageStatePlugin) {
+        } else if (this.messageStatePlugin && this.contact) {
             const date = this.message.datetime;
             const states = this.messageStatePlugin.getContactMessageState(this.contact.jidBare.toString());
             return this.getStateForDate(date, states);

@@ -46,7 +46,7 @@ export class Room {
         return this.messageStore.messages;
     }
 
-    get message$(): Subject<RoomMessage> {
+    get messages$(): Subject<RoomMessage> {
         return this.messageStore.messages$;
     }
 
@@ -105,7 +105,7 @@ class QueryMemberListStanzaBuilder extends AbstractStanzaBuilder {
 }
 
 export interface MemberlistItem {
-    jid: JID;
+    jid: string;
     affiliation: Affiliation;
     nick?: string;
 }
@@ -129,7 +129,7 @@ class ModifyMemberListStanzaBuilder extends AbstractStanzaBuilder {
     }
 
     private buildItem(modification: MemberlistItem) {
-        const item = xml('item', {jid: modification.jid.toString(), affiliation: Affiliation[modification.affiliation]});
+        const item = xml('item', {jid: modification.jid, affiliation: Affiliation[modification.affiliation]});
         if (modification.nick) {
             item.attrs.nick = modification.nick;
         }
@@ -294,7 +294,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         for (const memberQueryResponse of memberQueryResponses) {
             const membersFromQueryResponse = memberQueryResponse.getChild('query').getChildren('item')
                 .map(memberItem => ({
-                    jid: parseJid(memberItem.attrs.jid),
+                    jid: memberItem.attrs.jid,
                     nick: memberItem.attrs.nick,
                     affiliation: this.reverseMapAffiliation(memberItem.attrs.affiliation),
                 }));
@@ -322,9 +322,9 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         }
     }
 
-    async modifyMemberList(room: Room, jid: JID, affiliation: Affiliation, nick?: string): Promise<IqResponseStanza> {
+    async modifyMemberList(roomJid: string, jid: string, affiliation: Affiliation, nick?: string): Promise<IqResponseStanza> {
         return await this.xmppChatAdapter.chatConnectionService.sendIq(
-            ModifyMemberListStanzaBuilder.build(room.roomJid.toString(), [{jid, affiliation, nick}])
+            ModifyMemberListStanzaBuilder.build(roomJid, [{jid, affiliation, nick}])
         );
     }
 

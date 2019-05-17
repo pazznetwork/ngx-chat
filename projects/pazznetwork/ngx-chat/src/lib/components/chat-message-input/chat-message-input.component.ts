@@ -1,6 +1,7 @@
 import { Component, ElementRef, Inject, Input, OnInit, ViewChild } from '@angular/core';
 
 import { Contact } from '../../core';
+import { MultiUserChatPlugin, Room } from '../../services/adapters/xmpp/plugins';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({
@@ -12,6 +13,9 @@ export class ChatMessageInputComponent implements OnInit {
 
     @Input()
     public contact: Contact;
+
+    @Input()
+    public room: Room;
 
     public message = '';
 
@@ -26,7 +30,11 @@ export class ChatMessageInputComponent implements OnInit {
 
     onSendMessage() {
         if (this.message.trim().length > 0) {
-            this.chatService.sendMessage(this.contact.jidBare.toString(), this.message);
+            if (this.room) {
+                this.chatService.getPlugin(MultiUserChatPlugin).sendMessage(this.room, this.message);
+            } else {
+                this.chatService.sendMessage(this.contact.jidBare.toString(), this.message);
+            }
             this.message = '';
         }
         return false;
