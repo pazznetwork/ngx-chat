@@ -1,3 +1,19 @@
+<a name="0.3.0"></a>
+# [0.3.0](https://github.com/pazznetwork/ngx-chat/compare/v0.2.24...v0.3.0) (2019-05-21)
+
+
+### Bug Fixes
+
+* multi user chat ([290a0cb](https://github.com/pazznetwork/ngx-chat/commit/290a0cb))
+* remove getPlugin-calls in plugins, dependencies are now explicit ([fd8215b](https://github.com/pazznetwork/ngx-chat/commit/fd8215b)), closes [#4](https://github.com/pazznetwork/ngx-chat/issues/4)
+
+
+### Features
+
+* MucSub / Browser notifications ([a44973f](https://github.com/pazznetwork/ngx-chat/commit/a44973f))
+
+
+
 <a name="0.2.24"></a>
 ## [0.2.24](https://github.com/pazznetwork/ngx-chat/compare/v0.2.23...v0.2.24) (2019-04-08)
 
