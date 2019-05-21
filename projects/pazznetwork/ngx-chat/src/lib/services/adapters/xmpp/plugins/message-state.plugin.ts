@@ -130,8 +130,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         if (messageStateElement) {
             // we received a message state or a message via carbon from another resource, discard it
             messageReceivedEvent.discard = true;
-        } else if (messageReceived.direction === Direction.in) {
-            // TODO: prevent handling of MUC
+        } else if (messageReceived.direction === Direction.in && stanza.attrs.type !== 'groupchat') {
             this.acknowledgeReceivedMessage(stanza);
         }
     }

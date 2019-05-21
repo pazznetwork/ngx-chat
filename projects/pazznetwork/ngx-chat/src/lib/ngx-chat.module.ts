@@ -38,8 +38,10 @@ import {
     ServiceDiscoveryPlugin,
     UnreadMessageCountPlugin
 } from './services/adapters/xmpp/plugins';
+import { MucSubPlugin } from './services/adapters/xmpp/plugins/muc-sub.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
+import { ChatBackgroundNotificationService } from './services/chat-background-notification.service';
 import { ChatListStateService } from './services/chat-list-state.service';
 import { ChatMessageListRegistryService } from './services/chat-message-list-registry.service';
 import { ChatServiceToken } from './services/chat-service';
@@ -92,6 +94,7 @@ export class NgxChatModule {
                 ChatListStateService,
                 LogService,
                 ContactFactoryService,
+                ChatBackgroundNotificationService,
                 {
                     provide: ChatServiceToken,
                     deps: [XmppChatConnectionService, LogService, ContactFactoryService],
@@ -150,6 +153,7 @@ export class NgxChatModule {
                 unreadMessageCountPlugin,
                 new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter),
                 new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService),
+                new MucSubPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
             ]);
         };
         return initializer;

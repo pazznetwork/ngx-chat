@@ -3,6 +3,7 @@ import { Client } from '@xmpp/client-core';
 import { jid } from '@xmpp/jid';
 import { Observable, of } from 'rxjs';
 import {
+    ChatBackgroundNotificationService,
     ChatListStateService,
     ChatService,
     ChatServiceToken,
@@ -37,7 +38,8 @@ export class AppComponent {
                 @Inject(XmppClientToken) public client: Client,
                 private contactFactory: ContactFactoryService,
                 private logService: LogService,
-                private chatListStateService: ChatListStateService) {
+                private chatListStateService: ChatListStateService,
+                chatBackgroundNotificationService: ChatBackgroundNotificationService) {
         const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
         this.logService.logLevel = LogLevel.Debug;
         this.domain = contactData.domain;
@@ -48,6 +50,8 @@ export class AppComponent {
         this.chatService.state$.subscribe((state) => this.stateChanged(state));
         this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
         this.unreadMessageCountPlugin = this.chatService.getPlugin(UnreadMessageCountPlugin);
+
+        chatBackgroundNotificationService.enable();
 
         // @ts-ignore
         window.chatService = chatService;

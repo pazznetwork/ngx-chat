@@ -12,12 +12,15 @@ import { MessageReceivedEvent } from './message.plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 
 export interface RoomCreationOptions {
+    name?: string;
     roomId: string;
     public: boolean;
     membersOnly: boolean;
     nonAnonymous: boolean;
     persistentRoom: boolean;
     nick?: string;
+    /** ejabberd MucSub */
+    allowSubscription?: boolean;
 }
 
 export interface RoomMessage extends Message {
@@ -35,6 +38,7 @@ export class Room {
     roomJid: JID;
     occupantJid: JID;
     private messageStore: MessageStore<RoomMessage>;
+    name: string;
 
     constructor(occupantJid: JID, logService: LogService) {
         this.roomJid = occupantJid.bare();
@@ -48,6 +52,10 @@ export class Room {
 
     get messages$(): Subject<RoomMessage> {
         return this.messageStore.messages$;
+    }
+
+    get mostRecentMessage() {
+        return this.messageStore.messages[this.messageStore.messages.length - 1];
     }
 
     addMessage(message: RoomMessage) {
@@ -143,6 +151,7 @@ class ModifyMemberListStanzaBuilder extends AbstractStanzaBuilder {
 export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     rooms$ = new BehaviorSubject<Room[]>([]);
+    message$ = new Subject<Room>();
     private roomJoinPromises: { [roomAndJid: string]: (stanza: Stanza) => void } = {};
 
     constructor(private xmppChatAdapter: XmppChatAdapter,
@@ -190,7 +199,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const roomId = request.roomId;
         const service = await this.serviceDiscoveryPlugin.findService('conference', 'text');
         const occupantJid = new JID(roomId, service.jid, request.nick);
-        const {presenceResponse, room} = await this.joinRoomInternal(occupantJid);
+        const {presenceResponse, room} = await this.joinRoomInternal(occupantJid, request.name);
 
         const itemElement = presenceResponse.getChild('x').getChild('item');
         if (itemElement.attrs.affiliation !== 'owner') {
@@ -253,7 +262,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return roomDestroyedResponse;
     }
 
-    private async joinRoomInternal(roomJid: JID) {
+    private async joinRoomInternal(roomJid: JID, name?: string) {
         const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
         const occupantJid = new JID(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
         const roomJoinedPromise = new Promise<Stanza>(resolve => this.roomJoinPromises[occupantJid.toString()] = resolve);
@@ -273,6 +282,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             room = this.getRoomByJid(roomJid);
         } catch {
             room = new Room(occupantJid, this.logService);
+            room.name = name;
             this.rooms$.next([room].concat(this.rooms$.getValue()));
         }
 
@@ -369,6 +379,11 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         configuration['muc#roomconfig_publicroom'] = [request.public ? '1' : '0'];
         configuration['muc#roomconfig_membersonly'] = [request.membersOnly ? '1' : '0'];
         configuration['muc#roomconfig_persistentroom'] = [request.persistentRoom ? '1' : '0'];
+
+        if (request.allowSubscription !== undefined) {
+            configuration['allow_subscription'] = [request.allowSubscription === true ? '1' : '0'];
+        }
+
         return configuration;
     }
 
@@ -403,6 +418,10 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         }
         if (!messageReceivedEvent.discard) {
             room.addMessage(message);
+        }
+
+        if (!message.delayed) {
+            this.message$.next(room);
         }
 
         return true;

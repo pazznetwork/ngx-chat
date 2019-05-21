@@ -6,6 +6,7 @@ export * from './message-carbons.plugin';
 export * from './message-state.plugin';
 export * from './message-uuid.plugin';
 export * from './message.plugin';
+export * from './muc-sub.plugin';
 export * from './multi-user-chat.plugin';
 export * from './ping.plugin';
 export * from './publish-subscribe.plugin';
