@@ -19,8 +19,10 @@ export class ChatBackgroundNotificationService {
     }
 
     enable() {
-        this.requestNotificationPermission();
-        this.enabled = true;
+        if (this.supportsNotification()) {
+            this.requestNotificationPermission();
+            this.enabled = true;
+        }
     }
 
     disable() {
@@ -61,7 +63,13 @@ export class ChatBackgroundNotificationService {
 
     private shouldDisplayNotification() {
         const notification = Notification as any;
-        return this.enabled && document.visibilityState === 'hidden' && 'Notification' in window && notification.permission === 'granted';
+        return this.enabled
+            && document.visibilityState === 'hidden'
+            && this.supportsNotification()
+            && notification.permission === 'granted';
     }
 
+    private supportsNotification() {
+        return 'Notification' in window;
+    }
 }
