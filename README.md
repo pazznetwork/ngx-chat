@@ -9,6 +9,10 @@ This library provides an out-of-the-box usable XMPP chat component. It is custom
 * use the server side buddy list or use your own data source for that, API methods for adding / removing buddies available 
 * supports multi user chat
 
+## Compatibility
+* Angular 6, 7 (untested), 8 (untested)
+* requires node >= 8 && npm >= 5 for build
+
 ## Demo
 [Have a look at our demo (valid XMPP credentials required)](https://pazznetwork.github.io/ngx-chat-ghpages/) 
 ![screenshot](https://user-images.githubusercontent.com/4292951/49931801-f5c3d880-fec7-11e8-8a74-6600ea2cf9b0.png)
