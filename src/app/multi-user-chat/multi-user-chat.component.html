@@ -8,12 +8,21 @@
         </div>
 
         <ngx-chat-room-messages *ngIf="selectedRoom" [room]="selectedRoom"></ngx-chat-room-messages>
+        <span *ngIf="(multiUserChatPlugin.rooms$ | async).length === 0">(no room joined yet)</span>
         <ngx-chat-message-input [room]="selectedRoom"></ngx-chat-message-input>
 
-        <span *ngIf="(multiUserChatPlugin.rooms$ | async).length === 0">(no room joined yet)</span>
+        <hr/>
+
 
         <input [(ngModel)]="roomJid" class="form-control" type="text" placeholder="room"/>
+
         <button (click)="joinRoom(roomJid)">Join room</button>
+        <button (click)="queryAllRooms()">List all rooms</button>
+
+        <div *ngFor="let room of allRooms">
+            {{room.name}}: {{room.jid}}
+            <button (click)="joinRoom(room.jid)">join</button>
+        </div>
     </div>
 
     <ng-template #offline>

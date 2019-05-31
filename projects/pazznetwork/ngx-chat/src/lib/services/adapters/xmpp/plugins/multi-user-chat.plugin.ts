@@ -118,6 +118,11 @@ export interface MemberlistItem {
     nick?: string;
 }
 
+export interface RoomSummary {
+    jid: string;
+    name: string;
+}
+
 class ModifyMemberListStanzaBuilder extends AbstractStanzaBuilder {
 
     constructor(private roomJid: string, private modifications: MemberlistItem[]) {
@@ -291,6 +296,43 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     async joinRoom(occupantJid: JID): Promise<Room> {
         return (await this.joinRoomInternal(occupantJid)).room;
+    }
+
+    async queryAllRooms(): Promise<RoomSummary[]> {
+        const conferenceServer = await this.serviceDiscoveryPlugin.findService('conference', 'text');
+
+        const result = [];
+
+        let roomResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
+            xml('iq', {type: 'get', to: conferenceServer.jid.toString()},
+                xml('query', {xmlns: ServiceDiscoveryPlugin.DISCO_ITEMS})
+            )
+        );
+        result.push(...this.convertRoomQueryResponse(roomResponse));
+
+
+        const fin = roomResponse.getChild('fin');
+        while (fin && fin.attrs.complete !== 'true') {
+            const lastReceivedRoom = fin.getChild('set').getChildText('last');
+            roomResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
+                xml('iq', {type: 'get', to: conferenceServer.jid.toString()},
+                    xml('query', {xmlns: 'urn:xmpp:mam:2'},
+                        xml('set', {xmlns: ServiceDiscoveryPlugin.DISCO_ITEMS},
+                            xml('max', {}, 250),
+                            xml('after', {}, lastReceivedRoom)
+                        )
+                    )
+                )
+            );
+            result.push(...await this.convertRoomQueryResponse(roomResponse));
+        }
+        return result;
+    }
+
+    private convertRoomQueryResponse(iq: IqResponseStanza): RoomSummary[] {
+        const queryElement = iq.getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS);
+        const roomElements = queryElement && queryElement.getChildren('item');
+        return roomElements.map(room => room.attrs);
     }
 
     async queryMemberList(room: Room): Promise<MemberlistItem[]> {

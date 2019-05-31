@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { jid as parseJid } from '@xmpp/jid';
-import { ChatService, ChatServiceToken, MultiUserChatPlugin, Room } from '../ngx-chat-imports';
+import { ChatService, ChatServiceToken, MultiUserChatPlugin, Room, RoomSummary } from '../ngx-chat-imports';
 
 @Component({
     selector: 'app-multi-user-chat',
@@ -12,6 +12,7 @@ export class MultiUserChatComponent implements OnInit {
     multiUserChatPlugin: MultiUserChatPlugin;
     roomJid: string;
     selectedRoom: Room;
+    allRooms: RoomSummary[] = [];
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService) {
         this.multiUserChatPlugin = chatService.getPlugin(MultiUserChatPlugin);
@@ -20,9 +21,12 @@ export class MultiUserChatComponent implements OnInit {
     ngOnInit() {
     }
 
-    joinRoom(roomJid: string) {
+    async joinRoom(roomJid: string) {
         const occupantJid = parseJid(roomJid);
-        this.multiUserChatPlugin.joinRoom(occupantJid);
+        this.selectedRoom = await this.multiUserChatPlugin.joinRoom(occupantJid);
     }
 
+    async queryAllRooms() {
+        this.allRooms = await this.multiUserChatPlugin.queryAllRooms();
+    }
 }
