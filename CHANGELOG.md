@@ -1,3 +1,23 @@
+<a name="0.3.2"></a>
+## [0.3.2](https://github.com/pazznetwork/ngx-chat/compare/v0.3.1...v0.3.2) (2019-05-31)
+
+
+### Bug Fixes
+
+* muc compatibility when mod_vcard module in ejabberd is enabled ([6873ba6](https://github.com/pazznetwork/ngx-chat/commit/6873ba6))
+
+
+
+<a name="0.3.1"></a>
+## [0.3.1](https://github.com/pazznetwork/ngx-chat/compare/v0.3.0...v0.3.1) (2019-05-29)
+
+
+### Bug Fixes
+
+* only ask for notifications if browser supports them ([cfbec9a](https://github.com/pazznetwork/ngx-chat/commit/cfbec9a))
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/pazznetwork/ngx-chat/compare/v0.2.24...v0.3.0) (2019-05-21)
 
