@@ -175,10 +175,10 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     }
 
     private isRoomPresenceStanza(stanza: Stanza) {
-        return stanza.name === 'presence'
-            && stanza.getChild('x')
-            && stanza.getChild('x').attrs.xmlns
-            && stanza.getChild('x').attrs.xmlns.startsWith('http://jabber.org/protocol/muc');
+        return stanza.name === 'presence' && (
+            stanza.getChild('x', 'http://jabber.org/protocol/muc')
+            || stanza.getChild('x', 'http://jabber.org/protocol/muc#user')
+        );
     }
 
     private handleRoomPresenceStanza(stanza: Stanza): boolean {

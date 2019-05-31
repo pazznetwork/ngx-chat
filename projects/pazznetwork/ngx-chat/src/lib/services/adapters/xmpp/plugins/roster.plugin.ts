@@ -25,10 +25,9 @@ export class RosterPlugin extends AbstractXmppPlugin {
     }
 
     private isRosterPushStanza(stanza: Stanza) {
-        const queryChild = stanza.getChild('query');
         return stanza.name === 'iq'
             && stanza.attrs.type === 'set'
-            && queryChild && queryChild.attrs.xmlns === 'jabber:iq:roster';
+            && stanza.getChild('query', 'jabber:iq:roster');
     }
 
     private handleRosterPushStanza(stanza: Stanza) {
