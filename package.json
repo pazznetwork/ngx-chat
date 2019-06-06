@@ -14,7 +14,7 @@
     "ci": "npm run build && ng test @pazznetwork/ngx-chat --code-coverage --watch=false --browsers Chrome_ci && ng lint @pazznetwork/ngx-chat && ng e2e",
     "lint": "ng lint @pazznetwork/ngx-chat",
     "e2e": "ng e2e",
-    "bundle-report": "webpack-bundle-analyzer dist/ngx-chat-xmpp-shell/stats.json",
+    "bundle-report": "webpack-bundle-analyzer dist/ngx-chat-xmpp-shell/stats-es5.json",
     "documentation": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json",
     "documentation:serve": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json --serve --watch",
     "changelog": "conventional-changelog --infile CHANGELOG.md --same-file --preset angular --pkg projects/pazznetwork/ngx-chat/package.json --release-count 0"
