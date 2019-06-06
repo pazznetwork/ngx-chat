@@ -149,7 +149,7 @@ export class XmppChatConnectionService {
     }
 
     private isIqStanzaResponse(stanza: Stanza): stanza is IqResponseStanza {
-        const stanzaType = stanza.attrs['type'];
+        const stanzaType = stanza.attrs.type;
         return stanza.name === 'iq' && (stanzaType === 'result' || stanzaType === 'error');
     }
 

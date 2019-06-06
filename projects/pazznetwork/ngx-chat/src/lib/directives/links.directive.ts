@@ -8,6 +8,7 @@ import { extractUrls } from '../core/utils-links';
 })
 export class LinksDirective implements OnChanges {
 
+    // tslint:disable-next-line:no-input-rename
     @Input('ngxChatLinks') ngxChatLinks: string;
 
     constructor(private resolver: ComponentFactoryResolver,
@@ -24,17 +25,17 @@ export class LinksDirective implements OnChanges {
             const chatMessageLinkFactory = this.resolver.resolveComponentFactory(ChatMessageLinkComponent);
 
             let lastIndex = 0;
-            for (let i = 0; i < links.length; i++) {
-                const currentIndex = message.indexOf(links[i], lastIndex);
+            for (const link of links) {
+                const currentIndex = message.indexOf(link, lastIndex);
 
                 const textBeforeLink = this.viewContainerRef.createComponent(chatMessageTextFactory);
                 textBeforeLink.instance.text = message.substring(lastIndex, currentIndex);
 
                 const linkRef = this.viewContainerRef.createComponent(chatMessageLinkFactory);
-                linkRef.instance.link = links[i];
-                linkRef.instance.text = this.shorten(links[i]);
+                linkRef.instance.link = link;
+                linkRef.instance.text = this.shorten(link);
 
-                lastIndex = currentIndex + links[i].length;
+                lastIndex = currentIndex + link.length;
             }
 
             const textAfterLastLinkSpan = this.viewContainerRef.createComponent(chatMessageTextFactory);

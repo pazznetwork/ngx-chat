@@ -77,21 +77,21 @@ export class ChatComponent implements OnInit, OnChanges {
     showChatComponent = false;
 
     private defaultTranslations: Translations = {
-        'chat': 'Chat',
-        'contacts': 'Contacts',
-        'contactRequestIn': 'Incoming contact requests',
-        'contactRequestOut': 'Outgoing contact requests',
-        'contactsUnaffiliated': 'Unknown',
-        'noContacts': 'No contacts yet.',
-        'noMessages': 'No messages yet.',
-        'placeholder': 'Enter your message!',
-        'subscriptionRequestMessage': 'I want to add you as a contact.',
-        'acceptSubscriptionRequest': 'Accept',
-        'denySubscriptionRequest': 'Deny',
-        'timeFormat': 'shortTime',
-        'dateFormat': 'EEEE, MM/dd/yyyy',
-        'locale': undefined,
-        'dropMessage': 'Drop your file to send it',
+        chat: 'Chat',
+        contacts: 'Contacts',
+        contactRequestIn: 'Incoming contact requests',
+        contactRequestOut: 'Outgoing contact requests',
+        contactsUnaffiliated: 'Unknown',
+        noContacts: 'No contacts yet.',
+        noMessages: 'No messages yet.',
+        placeholder: 'Enter your message!',
+        subscriptionRequestMessage: 'I want to add you as a contact.',
+        acceptSubscriptionRequest: 'Accept',
+        denySubscriptionRequest: 'Deny',
+        timeFormat: 'shortTime',
+        dateFormat: 'EEEE, MM/dd/yyyy',
+        locale: undefined,
+        dropMessage: 'Drop your file to send it',
     };
 
     constructor(@Inject(ChatServiceToken) private chatService: ChatService) {

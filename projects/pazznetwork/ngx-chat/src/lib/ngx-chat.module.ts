@@ -127,7 +127,8 @@ export class NgxChatModule {
     }
 
     private static initializePlugins(injector: Injector) {
-        const initializer = function () {
+        // tslint:disable-next-line:only-arrow-functions
+        const initializer = function() {
             const logService = injector.get(LogService);
             const ngZone = injector.get(NgZone);
             const xmppChatAdapter = injector.get(ChatServiceToken) as XmppChatAdapter;

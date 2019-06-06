@@ -23,8 +23,8 @@ describe('array utils', () => {
         it('should insert elements and sort the list correctly', () => {
             const list = [];
             const numbers = [5, 1, 7, 9, 123, -23, -24, 0, 0, 0];
-            for (const number of numbers) {
-                insertSortedLast(number, list);
+            for (const num of numbers) {
+                insertSortedLast(num, list);
                 const sortedCopy = [].concat(list).sort();
                 expect(list).toEqual(sortedCopy);
             }

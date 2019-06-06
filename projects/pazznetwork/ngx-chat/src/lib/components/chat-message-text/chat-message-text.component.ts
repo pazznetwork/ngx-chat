@@ -6,7 +6,7 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class ChatMessageTextComponent implements OnInit {
 
-  @Input() text: String;
+  @Input() text: string;
   lines: string[];
 
   constructor() { }

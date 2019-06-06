@@ -111,7 +111,6 @@ export interface ChatService {
 
     /**
      * Logs the user in. Will modify state$ accordingly. If login fails, state will stay in 'disconnected'.
-     * @param logInRequest
      */
     logIn(logInRequest: LogInRequest): void;
 
@@ -136,7 +135,7 @@ export interface ChatService {
      * Returns the plugin instance for the given constructor
      * @param constructor The plugin constructor, e.g. {@link RosterPlugin}
      */
-    getPlugin<T extends ChatPlugin>(constructor: { new(...args: any[]): T }): T;
+    getPlugin<T extends ChatPlugin>(constructor: new(...args: any[]) => T): T;
 
     /**
      * Tries to transparently (= without the user noticing) reconnect to the chat server.

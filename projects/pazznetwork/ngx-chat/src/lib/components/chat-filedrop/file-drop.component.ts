@@ -43,6 +43,7 @@ export class FileDropComponent implements OnInit {
 
         this.isDropTarget = false;
 
+        // tslint:disable-next-line:prefer-for-of
         for (let i = 0; i < event.dataTransfer.items.length; i++) {
             const dataTransferItem = event.dataTransfer.items[i];
             if (dataTransferItem.kind === 'file') {

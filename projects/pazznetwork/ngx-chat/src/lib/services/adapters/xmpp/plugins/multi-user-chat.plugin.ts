@@ -198,7 +198,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     /**
      * Resolves if room could be configured as requested, rejects if room did exist or server did not accept configuration.
-     * @param request
      */
     async createRoom(request: RoomCreationOptions): Promise<Room> {
         const roomId = request.roomId;
@@ -423,6 +422,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         configuration['muc#roomconfig_persistentroom'] = [request.persistentRoom ? '1' : '0'];
 
         if (request.allowSubscription !== undefined) {
+            // tslint:disable-next-line:no-string-literal
             configuration['allow_subscription'] = [request.allowSubscription === true ? '1' : '0'];
         }
 

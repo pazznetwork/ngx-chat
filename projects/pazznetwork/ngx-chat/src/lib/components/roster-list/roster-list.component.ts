@@ -73,12 +73,12 @@ export class RosterListComponent implements OnInit {
         if (!this.contactsUnaffiliated$) {
             this.contactsUnaffiliated$ = this.chatService.contactsUnaffiliated$;
         }
-        this.hasNoContacts$ = combineLatest(
+        this.hasNoContacts$ = combineLatest([
             this.contacts,
             this.contactRequestsReceived$,
             this.contactRequestsSent$,
             this.contactsUnaffiliated$,
-        ).pipe(
+        ]).pipe(
             map(([contacts, received, sent, unaffiliated]) => contacts.length + received.length + sent.length + unaffiliated.length === 0)
         );
     }

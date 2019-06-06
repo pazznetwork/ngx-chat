@@ -88,11 +88,11 @@ export class RosterPlugin extends AbstractXmppPlugin {
                 // https://xmpp.org/rfcs/rfc3921.html#stanzas-presence-children-show
                 const show = stanza.getChildText('show');
                 const presenceMapping: { [key: string]: Presence } = {
-                    'chat': Presence.present,
+                    chat: Presence.present,
                     null: Presence.present,
-                    'away': Presence.away,
-                    'dnd': Presence.away,
-                    'xa': Presence.away,
+                    away: Presence.away,
+                    dnd: Presence.away,
+                    xa: Presence.away,
                 };
                 const presence = presenceMapping[show];
                 if (presence) {

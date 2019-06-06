@@ -1,6 +1,5 @@
 /**
  * Object.values replacement => return list of values for each key in obj
- * @param obj
  */
 export function extractValues<U>(obj: { [key: string]: U }): U[] {
     const result = [] as U[];

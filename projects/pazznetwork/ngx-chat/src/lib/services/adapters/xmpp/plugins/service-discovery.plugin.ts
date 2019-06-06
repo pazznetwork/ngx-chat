@@ -14,7 +14,7 @@ class QueryStanzaBuilder extends AbstractStanzaBuilder {
     toStanza() {
         const attrs: { [key: string]: string } = {type: 'get'};
         if (this.to) {
-            attrs['to'] = this.to;
+            attrs.to = this.to;
         }
         return xml('iq', attrs,
             xml('query', {xmlns: this.xmlns})
