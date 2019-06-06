@@ -19,7 +19,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
     @Input()
     showAvatars: boolean;
 
-    @ViewChild('messageArea')
+    @ViewChild('messageArea', {static: false})
     chatMessageAreaElement: ElementRef<HTMLElement>;
 
     private messageSubscription: Subscription;

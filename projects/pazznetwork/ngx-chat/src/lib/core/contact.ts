@@ -58,7 +58,6 @@ export class Contact {
 
     /**
      * Do not call directly, use {@link ContactFactoryService#createContact} instead.
-     * @deprecated
      */
     constructor(jidPlain: string,
                 public name: string,
