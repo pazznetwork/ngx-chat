@@ -10,7 +10,7 @@ This library provides an out-of-the-box usable XMPP chat component. It is custom
 * supports multi user chat
 
 ## Compatibility
-* Angular 6, 7 (untested), 8 (untested)
+* Angular 6 (<=0.3.2), Angular 8 (>=0.3.3)
 * requires node >= 8 && npm >= 5 for build
 
 ## Demo
