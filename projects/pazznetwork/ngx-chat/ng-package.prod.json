@@ -2,6 +2,18 @@
   "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../../dist/pazznetwork/ngx-chat",
   "lib": {
-    "entryFile": "src/public_api.ts"
+    "entryFile": "src/public_api.ts",
+    "umdModuleIds": {
+      "@xmpp/client-core": "@xmpp/client-core",
+      "@xmpp/events": "@xmpp/events",
+      "@xmpp/jid": "@xmpp/jid",
+      "@xmpp/plugins/bind": "@xmpp/plugins",
+      "@xmpp/plugins/iq-caller": "@xmpp/plugins",
+      "@xmpp/plugins/reconnect": "@xmpp/plugins",
+      "@xmpp/plugins/sasl-plain": "@xmpp/plugins",
+      "@xmpp/plugins/session-establishment": "@xmpp/plugins",
+      "@xmpp/plugins/websocket": "@xmpp/plugins",
+      "@xmpp/xml": "@xmpp/xml"
+    }
   }
 }

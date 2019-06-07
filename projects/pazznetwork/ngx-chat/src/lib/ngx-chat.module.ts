@@ -30,6 +30,7 @@ import {
     MessagePlugin,
     MessageStatePlugin,
     MessageUuidPlugin,
+    MucSubPlugin,
     MultiUserChatPlugin,
     PublishSubscribePlugin,
     PushPlugin,
@@ -38,7 +39,6 @@ import {
     ServiceDiscoveryPlugin,
     UnreadMessageCountPlugin
 } from './services/adapters/xmpp/plugins';
-import { MucSubPlugin } from './services/adapters/xmpp/plugins/muc-sub.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService, XmppClientToken } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { ChatBackgroundNotificationService } from './services/chat-background-notification.service';
