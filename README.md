@@ -21,18 +21,23 @@ This library provides an out-of-the-box usable XMPP chat component. It is custom
 Below you will find some instructions to getting started. [Have a look at the wiki for FAQ's and the API documentation.](https://github.com/pazznetwork/ngx-chat/wiki)
 
 ## Installation and usage
+
+This instructions require Angular 8.
+[If you are using Angular 6, follow this instructions instead](https://github.com/pazznetwork/ngx-chat/wiki/Angular-6-compatibility)
+
 First of all, install ngx-chat via npm:
 ```bash
-npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.3.0 @angular/cdk
+npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.3.0 @angular/cdk@~8.0.0
 ```
 
-After that, import it in your root module:
+After that, import ngx-chat in your root module:
 ```typescript
 @NgModule({
     ...
     imports: [
         ...,
-        NgxChatModule.forRoot()
+        NgxChatModule.forRoot(),
+        BrowserAnimationsModule, // alternatively NoopAnimationsModule 
     ],
     ...
 })
@@ -55,6 +60,14 @@ constructor(@Inject(ChatServiceToken) chatService: ChatService) {
         jid: 'someuser@ngx-chat.example',
     });
 }
+```
+
+Add the following to polyfills.ts:
+```
+/***************************************************************************************************
+ * APPLICATION IMPORTS
+ */
+(window as any).global = window;
 ```
 
 *Optional*: body padding when roster list is expanded
@@ -108,7 +121,7 @@ In the `src` folder you find the demo application.
 ## Releasing
 ```bash
 # increment version number in package.json
-VERSION=0.3.2 # change accordingly
+VERSION=0.3.3 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"

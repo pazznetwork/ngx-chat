@@ -1,3 +1,13 @@
+<a name="0.3.3"></a>
+## [0.3.3](https://github.com/pazznetwork/ngx-chat/compare/v0.3.2...v0.3.3) (2019-06-07)
+
+
+### Features
+
+* add queryAllRooms api to multi user chat plugin ([ab83ded](https://github.com/pazznetwork/ngx-chat/commit/ab83ded))
+
+
+
 <a name="0.3.2"></a>
 ## [0.3.2](https://github.com/pazznetwork/ngx-chat/compare/v0.3.1...v0.3.2) (2019-05-31)
 
