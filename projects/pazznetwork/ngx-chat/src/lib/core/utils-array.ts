@@ -79,3 +79,23 @@ export function findLastIndex<T>(arr: T[], predicate: (x: T) => boolean) {
 export function findLast<T>(arr: T[], predicate: (x: T) => boolean) {
     return arr[findLastIndex(arr, predicate)];
 }
+
+/**
+ * Return a new array, where all elements from the original array occur exactly once.
+ */
+export function removeDuplicates<T>(arr: T[], eq: (x: T, y: T) => boolean = (x: T, y: T) => x === y): T[] {
+    const results = [];
+    for (const arrElement of arr) {
+        let duplicateFound = false;
+        for (const resultElement of results) {
+            if (eq(arrElement, resultElement)) {
+                duplicateFound = true;
+                break;
+            }
+        }
+        if (!duplicateFound) {
+            results.push(arrElement);
+        }
+    }
+    return results;
+}

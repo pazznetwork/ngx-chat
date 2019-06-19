@@ -7,9 +7,11 @@
             </button>
         </div>
 
-        <ngx-chat-room-messages *ngIf="selectedRoom" [room]="selectedRoom"></ngx-chat-room-messages>
+        <ng-container *ngIf="selectedRoom">
+            <ngx-chat-room-messages [room]="selectedRoom"></ngx-chat-room-messages>
+            <ngx-chat-message-input [room]="selectedRoom"></ngx-chat-message-input>
+        </ng-container>
         <span *ngIf="(multiUserChatPlugin.rooms$ | async).length === 0">(no room joined yet)</span>
-        <ngx-chat-message-input [room]="selectedRoom"></ngx-chat-message-input>
 
         <hr/>
 
