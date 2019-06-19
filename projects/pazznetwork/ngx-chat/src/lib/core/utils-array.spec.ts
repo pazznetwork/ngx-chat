@@ -1,4 +1,4 @@
-import { findSortedIndex, findSortedInsertionIndexLast, insertSortedLast } from './utils-array';
+import { findSortedIndex, findSortedInsertionIndexLast, insertSortedLast, removeDuplicates } from './utils-array';
 
 describe('array utils', () => {
 
@@ -39,6 +39,39 @@ describe('array utils', () => {
             expect(findSortedIndex(100, [-50, 2, 100])).toEqual(2);
             expect(findSortedIndex(42, [-50, 2, 100])).toEqual(-1);
         });
+    });
+
+    describe('#removeDuplicates', () => {
+
+        it('should not remove non-duplicates', () => {
+            expect(removeDuplicates([1, 2, 3])).toEqual([1, 2, 3]);
+        });
+
+        it('should remove duplicates', () => {
+            expect(removeDuplicates([1, 2, 3, 1, 2, 3])).toEqual([1, 2, 3]);
+            expect(removeDuplicates([1, 1, 1, 1, 1, 1, 1, 1, 1])).toEqual([1]);
+            expect(removeDuplicates([3, 2, 1, 1, 1])).toEqual([3, 2, 1]);
+            expect(removeDuplicates([3, 1, 2, 3])).toEqual([3, 1, 2]);
+        });
+
+        it('should remove duplicates by custom equality function', () => {
+            expect(
+                removeDuplicates(
+                    [
+                        {a: 'test'},
+                        {a: 'test'},
+                        {a: 'test2'}
+                    ],
+                    (x, y) => x.a === y.a
+                )
+            ).toEqual(
+                [
+                    {a: 'test'},
+                    {a: 'test2'}
+                ]);
+
+        });
+
     });
 
 });
