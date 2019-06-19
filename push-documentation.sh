@@ -3,7 +3,7 @@ cd "$(dirname ${BASH_SOURCE[0]})"
 VERSION="$(git rev-parse --short HEAD)"
 MESSAGE="$(git show --no-patch --format=%s HEAD)"
 
-rm -rf dist
+rm -rf dist documentation
 npm run build -- --base-href /ngx-chat-ghpages/
 npm run documentation
 cp -r documentation dist/ngx-chat-xmpp-shell/

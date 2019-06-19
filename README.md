@@ -10,7 +10,8 @@ This library provides an out-of-the-box usable XMPP chat component. It is custom
 * supports multi user chat
 
 ## Compatibility
-* Angular 6 (<=0.3.2), Angular 8 (>=0.3.3)
+* Angular 8 (ngx-chat 0.4.x)
+* Angular 6 (ngx-chat 0.3.x)
 * requires node >= 8 && npm >= 5 for build
 
 ## Demo
@@ -121,7 +122,7 @@ In the `src` folder you find the demo application.
 ## Releasing
 ```bash
 # increment version number in package.json
-VERSION=0.3.3 # change accordingly
+VERSION=0.4.0 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"
