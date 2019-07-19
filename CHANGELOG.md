@@ -1,3 +1,23 @@
+<a name="0.4.1"></a>
+## [0.4.1](https://github.com/pazznetwork/ngx-chat/compare/v0.4.0...v0.4.1) (2019-07-19)
+
+
+### Bug Fixes
+
+* update has-roster body class when rosterState set from application ([d2b12e2](https://github.com/pazznetwork/ngx-chat/commit/d2b12e2))
+
+
+
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/pazznetwork/ngx-chat/compare/v0.3.3...v0.4.0) (2019-06-19)
+
+
+### Bug Fixes
+
+* room bookmarks now serialize correctly and allow more than one room ([b83ce24](https://github.com/pazznetwork/ngx-chat/commit/b83ce24))
+
+
+
 <a name="0.3.3"></a>
 ## [0.3.3](https://github.com/pazznetwork/ngx-chat/compare/v0.3.2...v0.3.3) (2019-06-07)
 
