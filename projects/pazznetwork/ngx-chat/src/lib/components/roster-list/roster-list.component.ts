@@ -37,7 +37,7 @@ import { ChatService, ChatServiceToken } from '../../services/chat-service';
 export class RosterListComponent implements OnInit {
 
     @Input()
-    rosterState: string;
+    rosterState: 'hidden' | 'shown';
 
     @Input()
     contacts: Observable<Contact[]>;

@@ -114,6 +114,9 @@ export class ChatComponent implements OnInit, OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         this.mergeAndSetTranslations();
+        if (changes.rosterState) {
+            this.onRosterStateChanged(changes.rosterState.currentValue);
+        }
     }
 
     private onChatStateChange(state: string) {
