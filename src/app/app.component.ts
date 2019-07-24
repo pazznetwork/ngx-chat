@@ -1,14 +1,11 @@
 import { Component, Inject } from '@angular/core';
 import { Client } from '@xmpp/client-core';
 import { jid } from '@xmpp/jid';
-import { Observable, of } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
     ChatBackgroundNotificationService,
     ChatListStateService,
     ChatService,
     ChatServiceToken,
-    Contact,
     ContactFactoryService,
     LogLevel,
     LogService,
@@ -30,7 +27,6 @@ export class AppComponent {
     public password: string;
     public jid: string;
     public otherJid: any;
-    public contacts$: Observable<Contact[]>;
     public multiUserChatPlugin: MultiUserChatPlugin;
     public unreadMessageCountPlugin: UnreadMessageCountPlugin;
     public registrationMessage: string;
@@ -48,7 +44,6 @@ export class AppComponent {
         this.password = contactData.password;
         this.jid = contactData.jid;
 
-        this.contacts$ = this.chatService.contactsSubscribed$.pipe(first(c => c.length > 0),);
         this.chatService.state$.subscribe((state) => this.stateChanged(state));
         this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
         this.unreadMessageCountPlugin = this.chatService.getPlugin(UnreadMessageCountPlugin);
@@ -97,17 +92,6 @@ export class AppComponent {
 
     onRemoveContact() {
         this.chatService.removeContact(this.otherJid);
-    }
-
-    onToggleContactList() {
-        if (this.contacts$ === this.chatService.contactsSubscribed$) {
-            this.contacts$ = of([
-                this.contactFactory.createContact('user@host', 'user1'),
-                this.contactFactory.createContact('user2@host', 'user2'),
-            ]);
-        } else {
-            this.contacts$ = this.chatService.contactsSubscribed$.pipe(first(c => c.length > 0));
-        }
     }
 
     onOpenChat() {

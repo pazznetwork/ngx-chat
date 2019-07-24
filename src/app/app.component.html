@@ -69,15 +69,14 @@
     <hr/>
 
     <button (click)="chatService.enableDebugging = !chatService.enableDebugging">Enable debugging</button>
-    <button (click)="onToggleContactList()">Toggle contact list</button>
 
 
     <div>
         <h2>Custom component for a chat session</h2>
-        <ng-container *ngIf="contacts$ | async as contacts; else messagesComponentInformation">
-            <ngx-chat-message-list [contact]="contacts[0]"
+        <ng-container *ngIf="this.chatService.state$.getValue() === 'online'; else messagesComponentInformation">
+            <ngx-chat-message-list [contact]="(this.chatService.contactsSubscribed$ | async)[0]"
                                    [showAvatars]="true"></ngx-chat-message-list>
-            <ngx-chat-message-input [contact]="contacts[0]"></ngx-chat-message-input>
+            <ngx-chat-message-input [contact]="(this.chatService.contactsSubscribed$ | async)[0]"></ngx-chat-message-input>
         </ng-container>
         <ng-template #messagesComponentInformation>You need to be logged in and have contacts to see this component</ng-template>
     </div>
@@ -99,4 +98,4 @@
 
 </div>
 
-<ngx-chat rosterState="shown" [contacts]="contacts$"></ngx-chat>
+<ngx-chat rosterState="shown"></ngx-chat>
