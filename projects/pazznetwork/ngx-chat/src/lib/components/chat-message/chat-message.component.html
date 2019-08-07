@@ -11,7 +11,7 @@
     <div class="chat-message-footer">
         <small title="{{nick}}" class="chat-message-name">
             {{nick}}
-            <ng-container [ngSwitch]="getMessageState()">
+            <ng-container *ngIf="message.direction === 'out'" [ngSwitch]="getMessageState()">
                 <ng-container *ngSwitchCase="MessageState.SENT">✓</ng-container>
                 <ng-container *ngSwitchCase="MessageState.RECIPIENT_RECEIVED">✓✓</ng-container>
                 <ng-container *ngSwitchCase="MessageState.RECIPIENT_SEEN"><span class="state--seen">✓✓</span></ng-container>
