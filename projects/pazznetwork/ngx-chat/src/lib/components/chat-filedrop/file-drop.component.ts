@@ -22,7 +22,7 @@ export class FileDropComponent implements OnInit {
 
     @HostListener('dragover', ['$event'])
     @HostListener('dragenter', ['$event'])
-    onDragOver(event: DragEvent) {
+    onDragOver(event: any) {
         event.preventDefault();
         event.stopPropagation();
         this.isDropTarget = true;
@@ -30,14 +30,14 @@ export class FileDropComponent implements OnInit {
 
     @HostListener('dragleave', ['$event'])
     @HostListener('dragexit', ['$event'])
-    onDragLeave(event: DragEvent) {
+    onDragLeave(event: any) {
         event.preventDefault();
         event.stopPropagation();
         this.isDropTarget = false;
     }
 
     @HostListener('drop', ['$event'])
-    async onDrop(event: DragEvent) {
+    async onDrop(event: any) {
         event.preventDefault();
         event.stopPropagation();
 
