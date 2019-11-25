@@ -4,7 +4,9 @@
         <img *ngIf="message.direction === 'in'" [src]="avatar"/>
         <img *ngIf="message.direction === 'out'" [src]="chatService.userAvatar$ | async"/>
     </div>
-    <span [ngxChatLinks]="message.body"></span>
+    <div class="chat-message-text" [ngClass]="{'chat-message-text--no-avatar':!showAvatars}">
+        <span [ngxChatLinks]="message.body"></span>
+    </div>
     <div class="chat-message-image-wrapper" *ngIf="imageLink">
         <img class="chat-message-image" [src]="imageLink"/>
     </div>
