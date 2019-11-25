@@ -2,13 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
-import { testLogService } from '../../../../test/logService';
-import { createXmppClientMock } from '../../../../test/xmppClientMock';
+import { testLogService } from '../../../../test/log-service';
+import { MockClientFactory } from '../../../../test/xmppClientMock';
 import { ChatServiceToken } from '../../../chat-service';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessagePlugin } from './message.plugin';
 
 describe('message plugin', () => {
@@ -17,23 +18,25 @@ describe('message plugin', () => {
     let chatConnectionService: XmppChatConnectionService;
 
     beforeEach(() => {
-        const xmppClientMock = createXmppClientMock();
+        const mockClientFactory = new MockClientFactory();
+        const xmppClientMock = mockClientFactory.clientInstance;
 
         const logService = testLogService();
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
+                {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 {provide: ChatServiceToken, useClass: XmppChatAdapter},
                 {provide: LogService, useValue: logService},
                 ContactFactoryService
             ]
         });
 
-        chatService = TestBed.get(ChatServiceToken);
         chatConnectionService = TestBed.get(XmppChatConnectionService);
-        chatService.addPlugins([new MessagePlugin(chatService, logService)]);
+        chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = new JID('me', 'example.com', 'something');
+        chatService = TestBed.get(ChatServiceToken);
+        chatService.addPlugins([new MessagePlugin(chatService, logService)]);
     });
 
     it('should emit events on receiving a message', async (done) => {

@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
-import { testLogService } from '../../../../test/logService';
-import { createXmppClientMock } from '../../../../test/xmppClientMock';
+import { testLogService } from '../../../../test/log-service';
+import { MockClientFactory } from '../../../../test/xmppClientMock';
+import { ChatServiceToken } from '../../../chat-service';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { PushPlugin } from './push.plugin';
 
 describe('push plugin', () => {
@@ -16,26 +18,24 @@ describe('push plugin', () => {
     let chatConnectionService;
 
     beforeEach(() => {
-        xmppClientMock = createXmppClientMock();
-
-        const chatAdapterMock: any = {
-            chatConnectionService: null // is set later
-        };
+        const mockClientFactory = new MockClientFactory();
+        xmppClientMock = mockClientFactory.clientInstance;
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
-                {provide: XmppChatAdapter, useValue: chatAdapterMock},
+                {provide: XmppClientFactoryService, useValue: mockClientFactory},
+                {provide: ChatServiceToken, useClass: XmppChatAdapter},
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService,
             ]
         });
 
-        chatAdapterMock.chatConnectionService = TestBed.get(XmppChatConnectionService);
-
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = parseJid('someone@example.com');
+
+        const chatAdapter = TestBed.get(ChatServiceToken) as XmppChatAdapter;
 
         const pushService = {
             jid: 'push.jabber.example.com',
@@ -45,7 +45,7 @@ describe('push plugin', () => {
         const serviceDiscoveryPluginMock: any = {
             findService: () => pushService
         };
-        pushPlugin = new PushPlugin(chatAdapterMock, serviceDiscoveryPluginMock);
+        pushPlugin = new PushPlugin(chatAdapter, serviceDiscoveryPluginMock);
     });
 
     it('should resolve if registration is successful', async () => {
@@ -56,12 +56,13 @@ describe('push plugin', () => {
                     chatConnectionService.onStanzaReceived(
                         xml('iq', {id: iqNode.attrs.id, type: 'result'})
                     );
+                    return;
                 }
             }
 
             throw new Error('unexpected packet');
         });
-        await pushPlugin.register('token');
+        await expectAsync(pushPlugin.register('token')).toBeResolved();
     });
 
     it('should throw if registration is rejected', async () => {
@@ -72,19 +73,14 @@ describe('push plugin', () => {
                     chatConnectionService.onStanzaReceived(
                         xml('iq', {id: iqNode.attrs.id, type: 'error'})
                     );
+                    return;
                 }
             }
 
             throw new Error('unexpected packet');
         });
 
-        try {
-            await pushPlugin.register('token');
-            fail('should have thrown');
-        } catch (e) {
-            // pass
-        }
-
+        await expectAsync(pushPlugin.register('token')).toBeRejected();
     });
 
     it('should be able to unregister', async () => {
@@ -95,13 +91,14 @@ describe('push plugin', () => {
                     chatConnectionService.onStanzaReceived(
                         xml('iq', {id: iqNode.attrs.id, type: 'result'})
                     );
+                    return;
                 }
             }
 
             throw new Error('unexpected packet');
         });
 
-        await pushPlugin.unregister('token');
+        await expectAsync(pushPlugin.unregister('token')).toBeResolved();
     });
 
 });

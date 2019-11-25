@@ -1,40 +1,45 @@
 import { TestBed } from '@angular/core/testing';
+import { Client } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { Stanza } from '../../../../core';
-import { testLogService } from '../../../../test/logService';
-import { createXmppClientMock } from '../../../../test/xmppClientMock';
+import { testLogService } from '../../../../test/log-service';
+import { MockClientFactory } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
+import jasmine = require('jasmine');
+import SpyObj = jasmine.SpyObj;
 
 describe('service discovery plugin', () => {
 
     let chatConnectionService: XmppChatConnectionService;
     let chatAdapter: XmppChatAdapter;
-    let xmppClientMock;
+    let xmppClientMock: SpyObj<Client>;
 
     beforeEach(() => {
-        xmppClientMock = createXmppClientMock();
-        Object.assign(xmppClientMock, {startOptions: {domain: 'jabber.example.com'}});
+        const mockClientFactory = new MockClientFactory();
+        xmppClientMock = mockClientFactory.clientInstance;
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
-                XmppChatConnectionService,
                 XmppChatAdapter,
+                XmppChatConnectionService,
+                {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
             ]
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
+        chatConnectionService.userJid = new JID('me', 'jabber.example.com', 'something');
+
         chatAdapter = TestBed.get(XmppChatAdapter);
         chatAdapter.addPlugins([new ServiceDiscoveryPlugin(chatAdapter)]);
-
-        chatConnectionService.userJid = new JID('me', 'jabber.example.com', 'something');
     });
 
     it('should discover the multi user chat service', async () => {
@@ -71,6 +76,7 @@ describe('service discovery plugin', () => {
             } else {
                 fail('unexpected stanza: ' + content.toString());
             }
+            return Promise.resolve();
         });
 
         // when

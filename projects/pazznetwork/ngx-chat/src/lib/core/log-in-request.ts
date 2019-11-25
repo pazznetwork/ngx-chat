@@ -1,6 +1,6 @@
 export interface LogInRequest {
-    uri: string;
+    service: string;
     domain: string;
-    jid: string;
+    username: string;
     password: string;
 }

@@ -47,9 +47,7 @@ export class PingPlugin extends AbstractXmppPlugin {
         } catch (e) {
             if (this.xmppChatAdapter.state$.getValue() === 'online'
                 && this.xmppChatAdapter.chatConnectionService.state$.getValue() === 'online') {
-                this.logService.error('... pong errored, it thinks it is online, scheduling reconnect!');
-                // TODO: state handling necessary! we have to prevent two reconnects at the same time!
-                this.xmppChatAdapter.reconnectSilently();
+                this.logService.error('... pong errored,  connection should be online, waiting for browser websocket timeout');
             }
         }
     }

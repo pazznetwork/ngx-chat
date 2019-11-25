@@ -4,15 +4,15 @@ import { x as xml } from '@xmpp/xml';
 import { first, take } from 'rxjs/operators';
 
 import { Contact, Direction, Stanza } from '../../../core';
-import { testLogService } from '../../../test/logService';
-import { createXmppClientMock } from '../../../test/xmppClientMock';
+import { testLogService } from '../../../test/log-service';
+import { MockClientFactory } from '../../../test/xmppClientMock';
 import { ChatServiceToken } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
-import { MessageUuidPlugin } from './plugins';
-import { MessagePlugin } from './plugins/message.plugin';
+import { MessagePlugin, MessageUuidPlugin } from './plugins';
 import { XmppChatAdapter } from './xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
+import { XmppChatConnectionService } from './xmpp-chat-connection.service';
+import { XmppClientFactoryService } from './xmpp-client-factory.service';
 
 describe('XmppChatAdapter', () => {
 
@@ -25,22 +25,24 @@ describe('XmppChatAdapter', () => {
     let contacts: Contact[];
 
     beforeEach(() => {
-        const xmppClientMock = createXmppClientMock();
+        const mockClientFactory = new MockClientFactory();
+        const xmppClientMock = mockClientFactory.clientInstance;
 
         const logService = testLogService();
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
+                {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 {provide: ChatServiceToken, useClass: XmppChatAdapter},
                 {provide: LogService, useValue: logService},
                 ContactFactoryService
             ]
         });
 
-        chatService = TestBed.get(ChatServiceToken);
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
         contactFactory = TestBed.get(ContactFactoryService);
+        chatService = TestBed.get(ChatServiceToken);
         chatService.addPlugins([new MessageUuidPlugin(), new MessagePlugin(chatService, logService)]);
 
         contact1 = contactFactory.createContact('test@example.com', 'jon doe');
@@ -98,8 +100,15 @@ describe('XmppChatAdapter', () => {
         });
 
         it('#messages$ should not emit contact on sending messages', () => {
-            chatService.message$.pipe(first()).subscribe(() => fail());
-            chatService.sendMessage(contact1.jidBare.toString(), 'send message text');
+            return new Promise((resolve) => {
+                let emitted = false;
+                chatService.message$.pipe(first()).subscribe(() => emitted = true);
+                chatService.sendMessage(contact1.jidBare.toString(), 'send message text');
+                setTimeout(() => {
+                    expect(emitted).toBeFalsy();
+                    resolve();
+                }, 500);
+            });
         });
 
         it('#messages$ in contact should emit message on received messages', (done) => {
@@ -145,10 +154,12 @@ describe('XmppChatAdapter', () => {
 
     describe('states', () => {
 
-        it('should clear contacts when logging out', () => {
+        it('should clear contacts when logging out', async () => {
             chatService.chatConnectionService.state$.next('online');
+            await chatService.state$.pipe(first(state => state === 'online')).toPromise();
             chatService.contacts$.next([contact1]);
             chatService.chatConnectionService.state$.next('disconnected');
+            await chatService.state$.pipe(first(state => state === 'disconnected')).toPromise();
             expect(chatService.contacts$.getValue()).toEqual([]);
         });
 

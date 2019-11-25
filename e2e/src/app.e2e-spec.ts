@@ -8,16 +8,11 @@ describe('ngx-chat', () => {
         page = new AppPage();
     });
 
-    it('should be able to log in and log out', () => {
-        page.navigateTo();
-
-        page.logInWithDefaultCredentials();
-
-        browser.wait(ExpectedConditions.presenceOf(element(by.css('.roster-list[data-ngx-chat-state="online"]'))), 5000);
-
-        page.logOut();
-
-        browser.wait(ExpectedConditions.not(ExpectedConditions.presenceOf(element(by.css('.roster-list')))), 5000);
-
+    it('should be able to log in and log out', async () => {
+        await page.navigateTo();
+        await page.logInWithDefaultCredentials();
+        await browser.wait(ExpectedConditions.presenceOf(element(by.css('.roster-list[data-ngx-chat-state="online"]'))), 5000);
+        await page.logOut();
+        await browser.wait(ExpectedConditions.not(ExpectedConditions.presenceOf(element(by.css('.roster-list')))), 5000);
     });
 });

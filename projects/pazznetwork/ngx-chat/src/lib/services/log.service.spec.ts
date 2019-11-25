@@ -17,10 +17,10 @@ describe('log service', () => {
         logService.info('info');
         logService.warn('warn');
         logService.error('error');
-        expect(writerSpy.log).toHaveBeenCalledWith(LogService.LOG_PREFIX, 'debug');
-        expect(writerSpy.info).toHaveBeenCalledWith(LogService.LOG_PREFIX, 'info');
-        expect(writerSpy.warn).toHaveBeenCalledWith(LogService.LOG_PREFIX, 'warn');
-        expect(writerSpy.error).toHaveBeenCalledWith(LogService.LOG_PREFIX, 'error');
+        expect(writerSpy.log).toHaveBeenCalledWith(logService.messagePrefix(), 'debug');
+        expect(writerSpy.info).toHaveBeenCalledWith(logService.messagePrefix(), 'info');
+        expect(writerSpy.warn).toHaveBeenCalledWith(logService.messagePrefix(), 'warn');
+        expect(writerSpy.error).toHaveBeenCalledWith(logService.messagePrefix(), 'error');
     });
 
     it('should not log debug messages on warn level', () => {
@@ -29,8 +29,8 @@ describe('log service', () => {
         logService.warn('warn');
         logService.error('error');
         expect(writerSpy.log).not.toHaveBeenCalled();
-        expect(writerSpy.warn).toHaveBeenCalledWith(LogService.LOG_PREFIX, 'warn');
-        expect(writerSpy.error).toHaveBeenCalledWith(LogService.LOG_PREFIX, 'error');
+        expect(writerSpy.warn).toHaveBeenCalledWith(logService.messagePrefix(), 'warn');
+        expect(writerSpy.error).toHaveBeenCalledWith(logService.messagePrefix(), 'error');
     });
 
     it('should not log debug or warn messages on error level', () => {
@@ -40,7 +40,7 @@ describe('log service', () => {
         logService.error('error');
         expect(writerSpy.log).not.toHaveBeenCalled();
         expect(writerSpy.warn).not.toHaveBeenCalled();
-        expect(writerSpy.error).toHaveBeenCalledWith(LogService.LOG_PREFIX, 'error');
+        expect(writerSpy.error).toHaveBeenCalledWith(logService.messagePrefix(), 'error');
     });
 
     it('should not log anything if logging is disabled', () => {

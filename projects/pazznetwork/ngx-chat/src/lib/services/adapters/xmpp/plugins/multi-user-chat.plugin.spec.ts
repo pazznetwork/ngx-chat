@@ -3,12 +3,13 @@ import { JID, jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
 import { Direction, Stanza } from '../../../../core';
-import { testLogService } from '../../../../test/logService';
-import { createXmppClientMock } from '../../../../test/xmppClientMock';
+import { testLogService } from '../../../../test/log-service';
+import { MockClientFactory } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageUuidPlugin } from './message-uuid.plugin';
 import { MultiUserChatPlugin } from './multi-user-chat.plugin';
 
@@ -29,20 +30,21 @@ describe('multi user chat plugin', () => {
     let logService: LogService;
 
     beforeEach(() => {
-        xmppClientMock = createXmppClientMock();
+        const mockClientFactory = new MockClientFactory();
+        xmppClientMock = mockClientFactory.clientInstance;
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
+                {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
             ]
         });
 
-        logService = TestBed.get(LogService);
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = new JID('me', 'example.com', 'something');
 
         chatAdapter = TestBed.get(XmppChatAdapter);
@@ -54,6 +56,7 @@ describe('multi user chat plugin', () => {
             findService: () => conferenceService
         };
 
+        logService = TestBed.get(LogService);
         chatAdapter.addPlugins([
             new MultiUserChatPlugin(chatAdapter, logService, serviceDiscoveryPluginMock),
             new MessageUuidPlugin()

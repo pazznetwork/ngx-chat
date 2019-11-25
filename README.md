@@ -38,7 +38,7 @@ After that, import ngx-chat in your root module:
     imports: [
         ...,
         NgxChatModule.forRoot(),
-        BrowserAnimationsModule, // alternatively NoopAnimationsModule 
+        BrowserAnimationsModule,; // alternatively NoopAnimationsModule 
     ],
     ...
 })
@@ -53,12 +53,12 @@ You are now ready to go. You will not see anything until you log in.
 Log in via `ngx-chat` wherever you want (e.g. in a component or a service)
  by injecting `ChatService` and calling `login`:
 ```typescript
-constructor(@Inject(ChatServiceToken) chatService: ChatService) {
+constructor(@Inject(ChatServiceToken); ChatService;) {
     chatService.logIn({
         domain: 'ngx-chat.example',
-        uri: 'wss://ngx-chat.example:5280/websocket',
+        service: 'wss://ngx-chat.example:5280/websocket',
         password: 'password',
-        jid: 'someuser@ngx-chat.example',
+        user: 'someuser',
     });
 }
 ```
@@ -105,10 +105,25 @@ A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-
 
 ## Development
 
-Pull requests are welcome!
-If you want to develop on ngx-chat, clone this repository.
-The Library can be found in the `projects/pazznetwork/ngx-chat` folder.
-In the `src` folder you find the demo application.
+**Pull requests are welcome!**
+
+The source code for ngx-chat can be found in the `projects/pazznetwork/ngx-chat` folder.
+The demo application is in the `src` folder in the project root.  
+**Important:**  Swap the import in src/app/ngx-chat-imports.ts to have live-reload while developing on ngx-chat.
+
+```bash
+# clone this repository
+git clone git@github.com:pazznetwork/ngx-chat.git
+cd ngx-chat
+
+# install dependencies
+npm install
+
+# will run the demo application on
+# http://localhost:4200
+ng serve
+```
+
 
 ### Build the plugin
 

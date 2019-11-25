@@ -1,18 +1,16 @@
 import { Component, Inject } from '@angular/core';
-import { Client } from '@xmpp/client-core';
-import { jid } from '@xmpp/jid';
 import {
     ChatBackgroundNotificationService,
     ChatListStateService,
     ChatService,
     ChatServiceToken,
     ContactFactoryService,
+    LogInRequest,
     LogLevel,
     LogService,
     MultiUserChatPlugin,
     RegistrationPlugin,
     UnreadMessageCountPlugin,
-    XmppClientToken,
 } from './ngx-chat-imports';
 
 @Component({
@@ -21,18 +19,16 @@ import {
     styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-
     public domain: string;
-    public uri: string;
+    public service: string;
     public password: string;
-    public jid: string;
+    public username: string;
     public otherJid: any;
     public multiUserChatPlugin: MultiUserChatPlugin;
     public unreadMessageCountPlugin: UnreadMessageCountPlugin;
     public registrationMessage: string;
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
-                @Inject(XmppClientToken) public client: Client,
                 private contactFactory: ContactFactoryService,
                 private logService: LogService,
                 private chatListStateService: ChatListStateService,
@@ -40,9 +36,9 @@ export class AppComponent {
         const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
         this.logService.logLevel = LogLevel.Debug;
         this.domain = contactData.domain;
-        this.uri = contactData.uri;
+        this.service = contactData.service;
         this.password = contactData.password;
-        this.jid = contactData.jid;
+        this.username = contactData.username;
 
         this.chatService.state$.subscribe((state) => this.stateChanged(state));
         this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
@@ -55,14 +51,13 @@ export class AppComponent {
     }
 
     onLogin() {
-        const logInRequest = {
+        const logInRequest: LogInRequest = {
             domain: this.domain,
-            uri: this.uri,
+            service: this.service,
             password: this.password,
-            jid: this.jid,
+            username: this.username,
         };
         localStorage.setItem('data', JSON.stringify(logInRequest));
-
         this.chatService.logIn(logInRequest);
     }
 
@@ -74,9 +69,9 @@ export class AppComponent {
         this.registrationMessage = 'registering ...';
         try {
             await this.chatService.getPlugin(RegistrationPlugin).register(
-                jid(this.jid).local,
+                this.username,
                 this.password,
-                this.uri,
+                this.service,
                 this.domain
             );
             this.registrationMessage = 'registration successful';

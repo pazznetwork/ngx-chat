@@ -1,3 +1,4 @@
+import { LogInRequest } from '@pazznetwork/ngx-chat/lib/core';
 import { browser } from 'protractor';
 
 it('should define configuration', () => {
@@ -6,9 +7,9 @@ it('should define configuration', () => {
     }
 });
 
-export const suiteConfig = {
-    jid: browser.params.xmppJid,
-    password: browser.params.xmppPassword,
+export const suiteConfig: LogInRequest = {
+    service: browser.params.xmppUri,
     domain: browser.params.xmppDomain,
-    uri: browser.params.xmppUri,
+    username: browser.params.xmppJid,
+    password: browser.params.xmppPassword,
 };

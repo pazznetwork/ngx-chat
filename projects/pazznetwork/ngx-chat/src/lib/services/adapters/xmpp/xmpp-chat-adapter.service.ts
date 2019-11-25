@@ -10,7 +10,7 @@ import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { MessageArchivePlugin, MessagePlugin, RosterPlugin } from './plugins';
-import { XmppChatConnectionService } from './xmpp-chat-connection.service';
+import { XmppChatConnectionService, XmppChatStates } from './xmpp-chat-connection.service';
 
 @Injectable()
 export class XmppChatAdapter implements ChatService {
@@ -49,29 +49,7 @@ export class XmppChatAdapter implements ChatService {
         chatConnectionService.state$
             .pipe(filter(nextState => nextState !== this.state$.getValue()))
             .subscribe((nextState) => {
-                if (nextState === 'online') {
-                    this.state$.next('connecting');
-                    Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
-                        .then(
-                            () => this.announceAvailability(),
-                            (e) => {
-                                this.logService.error('error while connecting', e);
-                                this.announceAvailability();
-                            }
-                        );
-                } else {
-                    if (nextState === 'disconnected') {
-                        this.contacts$.next([]);
-                        this.plugins.forEach(plugin => {
-                            try {
-                                plugin.onOffline();
-                            } catch (e) {
-                                this.logService.error('error while handling offline in ', plugin);
-                            }
-                        });
-                    }
-                    this.state$.next(nextState);
-                }
+                this.handleInternalStateChange(nextState);
             });
         this.chatConnectionService.stanzaUnknown$.subscribe((stanza) => this.onUnknownStanza(stanza));
 
@@ -80,6 +58,37 @@ export class XmppChatAdapter implements ChatService {
             // if the sending contact was in 'other', he still is in other now, but passes the 'messages.length > 0' predicate, so that
             // he should be seen now.
             this.contacts$.next(this.contacts$.getValue());
+        });
+    }
+
+    private handleInternalStateChange(internalState: XmppChatStates) {
+        if (internalState === 'online') {
+            this.state$.next('connecting');
+            Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
+                .then(
+                    () => this.announceAvailability(),
+                    (e) => {
+                        this.logService.error('error while connecting', e);
+                        this.announceAvailability();
+                    }
+                );
+        } else {
+            if (this.state$.getValue() === 'online') {
+                // clear data the first time we transition to a not-online state
+                this.onOffline();
+            }
+            this.state$.next('disconnected');
+        }
+    }
+
+    private onOffline() {
+        this.contacts$.next([]);
+        this.plugins.forEach(plugin => {
+            try {
+                plugin.onOffline();
+            } catch (e) {
+                this.logService.error('error while handling offline in ', plugin);
+            }
         });
     }
 
@@ -120,17 +129,15 @@ export class XmppChatAdapter implements ChatService {
         this.getPlugin(RosterPlugin).removeRosterContact(identifier);
     }
 
-    logIn(logInRequest: LogInRequest): void {
+    async logIn(logInRequest: LogInRequest) {
         this.lastLogInRequest = logInRequest;
         if (this.state$.getValue() === 'disconnected') {
-            this.chatConnectionService.logIn(logInRequest);
+            await this.chatConnectionService.logIn(logInRequest);
         }
     }
 
-    logOut(): void {
-        if (this.state$.getValue() !== 'disconnected') {
-            this.chatConnectionService.logOut();
-        }
+    logOut(): Promise<void> {
+        return this.chatConnectionService.logOut();
     }
 
     sendMessage(jid: string, body: string) {
@@ -177,7 +184,7 @@ export class XmppChatAdapter implements ChatService {
     }
 
     reconnect() {
-        this.logIn(this.lastLogInRequest);
+        return this.logIn(this.lastLogInRequest);
     }
 
 }

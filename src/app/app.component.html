@@ -15,17 +15,18 @@
             <small>(e.g. wss://jabber.example.com:5280/websocket)</small>
         </div>
         <div>
-            <input name="uri" [(ngModel)]="uri" class="form-control" type="text" placeholder="wss://jabber.example.com:5280/websocket"/>
+            <input name="service" [(ngModel)]="service" class="form-control" type="text"
+                   placeholder="wss://jabber.example.com:5280/websocket"/>
         </div>
     </div>
 
     <div class="form-group">
         <div>
-            JID
-            <small>(e.g. test@jabber.example.com)</small>
+            Username
+            <small>(e.g. test if test@jabber.example.com is your full JID)</small>
         </div>
         <div>
-            <input name="jid" [(ngModel)]="jid" class="form-control" type="text" placeholder="test@jabber.example.com"/>
+            <input name="username" [(ngModel)]="username" class="form-control" type="text" placeholder="test@jabber.example.com"/>
         </div>
     </div>
 
@@ -45,7 +46,7 @@
         <button name="reconnect" (click)="onReconnect()">Reconnect</button>
     </div>
 
-    <div>State: {{chatService.state$ | async}} (internal state: {{client.status}})</div>
+    <div>State: {{chatService.state$ | async}}</div>
 
     <div *ngIf="registrationMessage">
         <p>{{registrationMessage}}</p>

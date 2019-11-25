@@ -1,5 +1,6 @@
-declare module '@xmpp/client-core' {
+declare module '@xmpp/client' {
 
+    import { EventEmitter } from '@xmpp/events';
     import { Element } from 'ltx';
 
     export class Client {
@@ -9,8 +10,6 @@ declare module '@xmpp/client-core' {
         public reconnect: Reconnect;
 
         public iqCaller: IqCaller;
-
-        public startOptions: StartOptions;
 
         public plugins: any;
 
@@ -22,7 +21,7 @@ declare module '@xmpp/client-core' {
 
         public write(message: string): void;
 
-        public start(options: StartOptions): void;
+        public start(): Promise<void>;
 
         public stop(): void;
 
@@ -34,12 +33,18 @@ declare module '@xmpp/client-core' {
 
     }
 
-    export interface StartOptions {
-        uri: string;
+    export function client(clientConf: ClientConfiguration): Client;
+
+    export interface ClientConfiguration {
+        service: string;
         domain: string;
+        resource?: string;
+        username?: string;
+        password?: string;
+        credentials?: (auth: (config: { username: string; password: string; }) => Promise<void>, mechanism: any) => Promise<void>;
     }
 
-    export interface Reconnect {
+    export interface Reconnect extends EventEmitter {
 
         stop(): void;
 

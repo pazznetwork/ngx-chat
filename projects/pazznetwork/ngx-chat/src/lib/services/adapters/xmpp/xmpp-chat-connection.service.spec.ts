@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { testLogService } from '../../../test/logService';
+import { testLogService } from '../../../test/log-service';
 
-import { createXmppClientMock } from '../../../test/xmppClientMock';
+import { MockClientFactory } from '../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
-import { XmppChatConnectionService, XmppClientToken } from './xmpp-chat-connection.service';
+import { XmppChatConnectionService } from './xmpp-chat-connection.service';
+import { XmppClientFactoryService } from './xmpp-client-factory.service';
 
 describe('chat connection service', () => {
 
@@ -12,18 +13,20 @@ describe('chat connection service', () => {
     let xmppClientMock;
 
     beforeEach(() => {
-        xmppClientMock = xmppClientMock = createXmppClientMock();
+        const mockClientFactory = new MockClientFactory();
+        xmppClientMock = mockClientFactory.clientInstance;
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
+                {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
             ]
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
     });
 
     it('#getNextIqId() should generate new iq ids', () => {

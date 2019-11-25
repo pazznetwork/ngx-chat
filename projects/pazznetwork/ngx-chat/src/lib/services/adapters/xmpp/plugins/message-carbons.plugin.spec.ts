@@ -5,12 +5,13 @@ import { x as xml } from '@xmpp/xml';
 import { parse } from 'ltx';
 import { first } from 'rxjs/operators';
 import { Direction } from '../../../../core';
-import { testLogService } from '../../../../test/logService';
-import { createXmppClientMock } from '../../../../test/xmppClientMock';
+import { testLogService } from '../../../../test/log-service';
+import { MockClientFactory } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageCarbonsPlugin } from './message-carbons.plugin';
 
 describe('message carbons plugin', () => {
@@ -20,17 +21,21 @@ describe('message carbons plugin', () => {
     let messageCarbonsPlugin: MessageCarbonsPlugin;
 
     beforeEach(() => {
-        xmppClientMock = createXmppClientMock();
+        const mockClientFactory = new MockClientFactory();
+        xmppClientMock = mockClientFactory.clientInstance;
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
+                {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
             ]
         });
+
+        const chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
 
         xmppChatAdapter = TestBed.get(XmppChatAdapter);
         xmppChatAdapter.chatConnectionService.userJid = parseJid('romeo@montague.example/home');
@@ -95,14 +100,28 @@ describe('message carbons plugin', () => {
         }));
     });
 
-    it('should raise an event when receiving an incoming carbon copy', (done) => {
-        xmppChatAdapter.message$.pipe(first()).subscribe(done);
-        messageCarbonsPlugin.handleStanza(validIncomingCarbonMessage);
+    it('should raise an event when receiving an incoming carbon copy', () => {
+        return new Promise((resolve) => {
+            let emitted = false;
+            xmppChatAdapter.message$.pipe(first()).subscribe(() => emitted = true);
+            messageCarbonsPlugin.handleStanza(validIncomingCarbonMessage);
+            setTimeout(() => {
+                expect(emitted).toBeTruthy();
+                resolve();
+            }, 500);
+        });
     });
 
     it('should not raise an event when receiving a sent copy', () => {
-        xmppChatAdapter.message$.pipe(first()).subscribe(() => fail());
-        messageCarbonsPlugin.handleStanza(validSentCarbonMessage);
+        return new Promise((resolve) => {
+            let emitted = false;
+            xmppChatAdapter.message$.pipe(first()).subscribe(() => emitted = true);
+            messageCarbonsPlugin.handleStanza(validSentCarbonMessage);
+            setTimeout(() => {
+                expect(emitted).toBeFalsy();
+                resolve();
+            }, 500);
+        });
     });
 
 });

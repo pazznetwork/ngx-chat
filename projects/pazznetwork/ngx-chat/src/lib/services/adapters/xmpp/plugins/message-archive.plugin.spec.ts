@@ -1,23 +1,25 @@
 import { TestBed } from '@angular/core/testing';
+import { Client } from '@xmpp/client';
 import { jid as parseJid } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 
 import { Contact, Direction } from '../../../../core';
-import { testLogService } from '../../../../test/logService';
-import { createXmppClientMock } from '../../../../test/xmppClientMock';
+import { testLogService } from '../../../../test/log-service';
+import { MockClientFactory } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService, XmppClientToken } from '../xmpp-chat-connection.service';
+import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
+import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageArchivePlugin } from './message-archive.plugin';
-
+import SpyObj = jasmine.SpyObj;
 
 describe('message archive plugin', () => {
 
     let chatConnectionService: XmppChatConnectionService;
     let chatAdapter: XmppChatAdapter;
     let contactFactory: ContactFactoryService;
-    let xmppClientMock;
+    let xmppClientMock: SpyObj<Client>;
     let contact1: Contact;
     const userJid = parseJid('me@example.com/myresource');
 
@@ -31,12 +33,13 @@ describe('message archive plugin', () => {
                         xml('body', {}, 'message text')))));
 
     beforeEach(() => {
-        xmppClientMock = createXmppClientMock();
+        const mockClientFactory = new MockClientFactory();
+        xmppClientMock = mockClientFactory.clientInstance;
 
         TestBed.configureTestingModule({
             providers: [
-                {provide: XmppClientToken, useValue: xmppClientMock},
                 XmppChatConnectionService,
+                {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService
@@ -44,6 +47,8 @@ describe('message archive plugin', () => {
         });
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService.client = xmppClientMock;
+
         contactFactory = TestBed.get(ContactFactoryService);
         chatAdapter = TestBed.get(XmppChatAdapter);
         contact1 = contactFactory.createContact('someone@else.com', 'jon doe');

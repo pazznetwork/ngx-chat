@@ -1,13 +1,19 @@
-import { Inject, Injectable, InjectionToken, NgZone } from '@angular/core';
-import { Client } from '@xmpp/client-core';
+import { Injectable, InjectionToken, NgZone } from '@angular/core';
+import { Client } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
 import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IqResponseStanza, LogInRequest, Stanza } from '../../../core';
 import { LogService } from '../../log.service';
+import { XmppClientFactoryService } from './xmpp-client-factory.service';
 
+/**
+ * @deprecated will be removed
+ */
 export const XmppClientToken = new InjectionToken('pazznetworkNgxChatXmppClient');
+
+export type XmppChatStates = 'disconnected' | 'online' | 'reconnecting';
 
 /**
  * Implementation of the XMPP specification according to RFC 6121.
@@ -18,7 +24,7 @@ export const XmppClientToken = new InjectionToken('pazznetworkNgxChatXmppClient'
 @Injectable()
 export class XmppChatConnectionService {
 
-    public state$ = new BehaviorSubject<'disconnected' | 'online'>('disconnected');
+    public state$ = new BehaviorSubject<XmppChatStates>('disconnected');
     public stanzaUnknown$ = new Subject<Stanza>();
 
     /**
@@ -27,50 +33,11 @@ export class XmppChatConnectionService {
     public userJid: JID;
     private iqId = new Date().getTime();
     private iqStanzaResponseCallbacks: { [key: string]: ((arg: any) => void) } = {};
+    public client: Client;
 
-    constructor(@Inject(XmppClientToken) private client: Client,
-                private logService: LogService,
-                private ngZone: NgZone) {}
-
-    initialize(): void {
-        this.client.on('error', (err: any) => {
-            this.ngZone.run(() => {
-                this.logService.error('chat service error =>', err.toString(), err);
-                if (err.toString().indexOf('connection error ') >= 0) { // thrown by iOS when gone offline due to battery saving
-                    this.reconnectSilently();
-                } else {
-                    this.client.stop(); // e.g. kicked
-                }
-            });
-        });
-
-        this.client.on('status', (status: any, value: any) => {
-            this.ngZone.run(() => {
-                this.logService.info('status update =', status, value ? JSON.stringify(value) : '');
-                if (status === 'offline') {
-                    this.state$.next('disconnected');
-                }
-            });
-        });
-
-        this.client.on('online', (jid: JID) => {
-            return this.ngZone.run(() => {
-                return this.onOnline(jid);
-            });
-        });
-
-        this.client.on('stanza', (stanza: Stanza) => {
-            this.ngZone.run(() => {
-                this.onStanzaReceived(stanza);
-            });
-        });
-
-        this.client.plugins.reconnect.on('reconnected', () => {
-            this.ngZone.run(() => {
-                this.sendPresence();
-            });
-        });
-    }
+    constructor(private logService: LogService,
+                private ngZone: NgZone,
+                private xmppClientFactoryService: XmppClientFactoryService) {}
 
     public onOnline(jid: JID) {
         this.logService.info('online =', 'online as', jid.toString());
@@ -153,18 +120,55 @@ export class XmppChatConnectionService {
         return stanza.name === 'iq' && (stanzaType === 'result' || stanzaType === 'error');
     }
 
-    logIn(logInRequest: LogInRequest): void {
-        this.ngZone.runOutsideAngular(() => {
-            this.client.start({uri: logInRequest.uri, domain: logInRequest.domain});
-            this.client.handle('authenticate', (authenticate: any) => {
-                return authenticate(logInRequest.jid, logInRequest.password);
+    async logIn(logInRequest: LogInRequest) {
+        await this.ngZone.runOutsideAngular(async () => {
+            if (logInRequest.username.indexOf('@')) {
+                this.logService.warn('username should not contain domain, only local part, this can lead to errors!');
+            }
+
+            this.client = this.xmppClientFactoryService.client(logInRequest);
+
+            this.client.on('error', (err: any) => {
+                this.ngZone.run(() => {
+                    this.logService.error('chat service error =>', err.toString(), err);
+                });
             });
+
+            this.client.on('status', (status: any, value: any) => {
+                this.ngZone.run(() => {
+                    this.logService.info('status update =', status, value ? JSON.stringify(value) : '');
+                    if (status === 'offline') {
+                        this.state$.next('disconnected');
+                    }
+                });
+            });
+
+            this.client.on('online', (jid: JID) => {
+                return this.ngZone.run(() => {
+                    return this.onOnline(jid);
+                });
+            });
+
+            this.client.on('stanza', (stanza: Stanza) => {
+                this.ngZone.run(() => {
+                    this.onStanzaReceived(stanza);
+                });
+            });
+
+            this.client.on('disconnect', (stanza: Stanza) => {
+                this.ngZone.run(() => {
+                    this.state$.next('reconnecting');
+                });
+            });
+
+            await this.client.start();
         });
     }
 
     async logOut(): Promise<void> {
         // TODO: move this to a presence plugin in a handler
         this.logService.debug('logging out');
+        this.client.reconnect.stop();
         try {
             await this.send(xml('presence', {type: 'unavailable'}));
         } catch (e) {
@@ -181,6 +185,5 @@ export class XmppChatConnectionService {
     reconnectSilently() {
         this.logService.warn('hard reconnect...');
         this.state$.next('disconnected');
-        this.client.plugins.reconnect.reconnect();
     }
 }
