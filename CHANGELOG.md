@@ -1,3 +1,23 @@
+<a name="0.4.3"></a>
+## [0.4.3](https://github.com/pazznetwork/ngx-chat/compare/v0.4.2...v0.4.3) (2019-11-29)
+
+
+### Bug Fixes
+
+* drag error in safari ([ad00a2d](https://github.com/pazznetwork/ngx-chat/commit/ad00a2d))
+* drop file here stretched over all windows instead of the current ([cf7905a](https://github.com/pazznetwork/ngx-chat/commit/cf7905a))
+* no more infinite reconnect problems in firefox / safari ([98b0a3a](https://github.com/pazznetwork/ngx-chat/commit/98b0a3a))
+* safari line break ([e7b3c85](https://github.com/pazznetwork/ngx-chat/commit/e7b3c85))
+
+
+### BREAKING CHANGES
+
+* logIn():
+ - uri renamed to service
+ - jid renamed to username
+
+
+
 <a name="0.4.2"></a>
 ## [0.4.2](https://github.com/pazznetwork/ngx-chat/compare/v0.4.1...v0.4.2) (2019-08-07)
 
