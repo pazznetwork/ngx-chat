@@ -1,3 +1,13 @@
+<a name="0.4.4"></a>
+## [0.4.4](https://github.com/pazznetwork/ngx-chat/compare/v0.4.3...v0.4.4) (2019-11-29)
+
+
+### Bug Fixes
+
+* logOut should not raise an exception if user is not logged in ([23baee9](https://github.com/pazznetwork/ngx-chat/commit/23baee9))
+
+
+
 <a name="0.4.3"></a>
 ## [0.4.3](https://github.com/pazznetwork/ngx-chat/compare/v0.4.2...v0.4.3) (2019-11-29)
 
