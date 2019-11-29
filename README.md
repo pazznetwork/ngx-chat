@@ -58,7 +58,7 @@ constructor(@Inject(ChatServiceToken); ChatService;) {
         domain: 'ngx-chat.example',
         service: 'wss://ngx-chat.example:5280/websocket',
         password: 'password',
-        user: 'someuser',
+        username: 'someuser',
     });
 }
 ```
