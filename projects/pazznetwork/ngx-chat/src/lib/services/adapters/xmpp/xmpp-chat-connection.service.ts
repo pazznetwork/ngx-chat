@@ -168,13 +168,15 @@ export class XmppChatConnectionService {
     async logOut(): Promise<void> {
         // TODO: move this to a presence plugin in a handler
         this.logService.debug('logging out');
-        this.client.reconnect.stop();
-        try {
-            await this.send(xml('presence', {type: 'unavailable'}));
-        } catch (e) {
-            this.logService.error('error sending presence unavailable');
-        } finally {
-            this.client.stop();
+        if (this.client) {
+            this.client.reconnect.stop();
+            try {
+                await this.send(xml('presence', {type: 'unavailable'}));
+            } catch (e) {
+                this.logService.error('error sending presence unavailable');
+            } finally {
+                this.client.stop();
+            }
         }
     }
 
