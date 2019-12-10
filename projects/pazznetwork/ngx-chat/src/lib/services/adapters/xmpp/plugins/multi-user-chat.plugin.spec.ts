@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { xml } from '@xmpp/client';
 import { JID, jid as parseJid } from '@xmpp/jid';
-import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
 import { Direction, Stanza } from '../../../../core';
 import { testLogService } from '../../../../test/log-service';
@@ -18,7 +18,7 @@ const defaultRoomConfiguration = {
     public: false,
     membersOnly: true,
     nonAnonymous: true,
-    persistentRoom: false
+    persistentRoom: false,
 };
 
 describe('multi user chat plugin', () => {

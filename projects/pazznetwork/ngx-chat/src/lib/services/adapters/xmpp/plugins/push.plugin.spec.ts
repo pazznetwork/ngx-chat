@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { xml } from '@xmpp/client';
 import { jid as parseJid } from '@xmpp/jid';
-import { x as xml } from '@xmpp/xml';
 import { testLogService } from '../../../../test/log-service';
 import { MockClientFactory } from '../../../../test/xmppClientMock';
 import { ChatServiceToken } from '../../../chat-service';

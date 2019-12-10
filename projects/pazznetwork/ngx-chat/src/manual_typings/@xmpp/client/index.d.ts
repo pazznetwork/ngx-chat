@@ -35,6 +35,8 @@ declare module '@xmpp/client' {
 
     export function client(clientConf: ClientConfiguration): Client;
 
+    export function xml(name: string, attrs?: { [key: string]: string }, ...content: any[]): Element;
+
     export interface ClientConfiguration {
         service: string;
         domain: string;

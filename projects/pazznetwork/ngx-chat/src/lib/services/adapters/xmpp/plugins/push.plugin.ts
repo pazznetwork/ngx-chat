@@ -1,4 +1,4 @@
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
@@ -8,8 +8,10 @@ import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
  */
 export class PushPlugin extends AbstractXmppPlugin {
 
-    constructor(private xmppChatAdapter: XmppChatAdapter,
-                private serviceDiscoveryPlugin: ServiceDiscoveryPlugin) {
+    constructor(
+        private xmppChatAdapter: XmppChatAdapter,
+        private serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
+    ) {
         super();
     }
 

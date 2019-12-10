@@ -1,7 +1,7 @@
 import { NgZone } from '@angular/core';
-import { timeout } from '@xmpp/events';
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { filter } from 'rxjs/operators';
+import { timeout } from '../../../../core/utils-timeout';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
@@ -14,19 +14,21 @@ export class PingPlugin extends AbstractXmppPlugin {
     private timeoutHandle: any;
     private readonly pingInterval = 60_000;
 
-    constructor(private xmppChatAdapter: XmppChatAdapter,
-                private logService: LogService,
-                private ngZone: NgZone) {
+    constructor(
+        private xmppChatAdapter: XmppChatAdapter,
+        private logService: LogService,
+        private ngZone: NgZone,
+    ) {
         super();
 
         this.xmppChatAdapter.state$.pipe(
-            filter(newState => newState === 'online')
+            filter(newState => newState === 'online'),
         ).subscribe(() => {
             this.schedulePings();
         });
 
         this.xmppChatAdapter.state$.pipe(
-            filter(newState => newState === 'disconnected')
+            filter(newState => newState === 'disconnected'),
         ).subscribe(() => {
             this.unschedulePings();
         });

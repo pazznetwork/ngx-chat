@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { xml } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
-import { x as xml } from '@xmpp/xml';
 
 import { Contact, ContactSubscription, Presence, Stanza } from '../../../../core';
 import { testLogService } from '../../../../test/log-service';
@@ -11,7 +11,6 @@ import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { RosterPlugin } from './roster.plugin';
-
 
 describe('roster plugin', () => {
 

@@ -1,4 +1,4 @@
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { BehaviorSubject } from 'rxjs';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
@@ -11,8 +11,10 @@ export class MucSubPlugin extends AbstractXmppPlugin {
 
     private supportsMucSub = new BehaviorSubject<boolean | 'unknown'>('unknown');
 
-    constructor(private xmppChatAdapter: XmppChatAdapter,
-                private serviceDiscoveryPlugin: ServiceDiscoveryPlugin) {
+    constructor(
+        private xmppChatAdapter: XmppChatAdapter,
+        private serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
+    ) {
         super();
     }
 

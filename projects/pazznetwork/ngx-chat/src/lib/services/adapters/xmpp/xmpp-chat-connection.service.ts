@@ -1,7 +1,6 @@
 import { Injectable, InjectionToken, NgZone } from '@angular/core';
-import { Client } from '@xmpp/client';
+import { Client, xml } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
-import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IqResponseStanza, LogInRequest, Stanza } from '../../../core';

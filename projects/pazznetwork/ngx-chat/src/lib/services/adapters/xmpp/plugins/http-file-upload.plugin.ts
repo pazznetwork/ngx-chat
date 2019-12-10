@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { Service, ServiceDiscoveryPlugin } from './service-discovery.plugin';

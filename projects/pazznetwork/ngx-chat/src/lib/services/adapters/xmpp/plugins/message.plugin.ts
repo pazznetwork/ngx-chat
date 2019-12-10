@@ -1,4 +1,4 @@
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { Direction, Message, MessageWithBodyStanza, Stanza } from '../../../../core';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -10,8 +10,10 @@ export class MessageReceivedEvent {
 
 export class MessagePlugin extends AbstractXmppPlugin {
 
-    constructor(private xmppChatAdapter: XmppChatAdapter,
-                private logService: LogService) {
+    constructor(
+        private xmppChatAdapter: XmppChatAdapter,
+        private logService: LogService,
+    ) {
         super();
     }
 

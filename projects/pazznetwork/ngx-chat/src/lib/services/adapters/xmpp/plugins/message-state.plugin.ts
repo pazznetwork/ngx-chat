@@ -1,5 +1,5 @@
+import { xml } from '@xmpp/client';
 import { JID, jid as parseJid } from '@xmpp/jid';
-import { x as xml } from '@xmpp/xml';
 import { Element } from 'ltx';
 import { filter } from 'rxjs/operators';
 import { Direction, Message, MessageState, MessageWithBodyStanza, Stanza } from '../../../../core';

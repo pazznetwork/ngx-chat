@@ -1,13 +1,11 @@
 import { NgZone } from '@angular/core';
-import { Client, client } from '@xmpp/client';
-import { timeout } from '@xmpp/events';
-import { x as xml } from '@xmpp/xml';
+import { Client, client, xml } from '@xmpp/client';
 import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { getDomain } from '../../../../core/get-domain';
+import { timeout } from '../../../../core/utils-timeout';
 import { LogService } from '../../../log.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
-
 
 /**
  * xep-0077

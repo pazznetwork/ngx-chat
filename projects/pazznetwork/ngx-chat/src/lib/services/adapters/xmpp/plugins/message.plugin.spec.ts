@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { xml } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
-import { x as xml } from '@xmpp/xml';
 import { first } from 'rxjs/operators';
 import { testLogService } from '../../../../test/log-service';
 import { MockClientFactory } from '../../../../test/xmppClientMock';

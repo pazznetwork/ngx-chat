@@ -1,4 +1,4 @@
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
 import { IqResponseStanza } from '../../../../core';
 import { removeDuplicates } from '../../../../core/utils-array';
@@ -42,7 +42,7 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
         return {
             name: conferenceNode.attrs.name,
             jid: conferenceNode.attrs.jid,
-            autojoin: conferenceNode.attrs.autojoin === 'true'
+            autojoin: conferenceNode.attrs.autojoin === 'true',
         };
     }
 
@@ -52,8 +52,8 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
             STORAGE_BOOKMARKS,
             null,
             xml('storage', {xmlns: STORAGE_BOOKMARKS},
-                deduplicatedConferences.map(c => this.convertSavedConferenceToElement(c))
-            )
+                deduplicatedConferences.map(c => this.convertSavedConferenceToElement(c)),
+            ),
         );
     }
 

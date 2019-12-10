@@ -1,4 +1,4 @@
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';

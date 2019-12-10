@@ -1,4 +1,4 @@
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { debounceTime, delay, distinctUntilChanged, filter, map, share } from 'rxjs/operators';
@@ -54,7 +54,7 @@ class LastReadEntriesNodeBuilder extends AbstractStanzaBuilder {
 export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
 
     /**
-     * already debounced to prevent the issues described in {@link this.jidToUnreadCount$}.
+     * already debounced to prevent the issues described in {@link UnreadMessageCountPlugin.jidToUnreadCount$}.
      */
     public unreadMessageCountSum$: Observable<number>;
     /**

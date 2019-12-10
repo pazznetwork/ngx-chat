@@ -1,4 +1,4 @@
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';

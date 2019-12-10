@@ -1,5 +1,5 @@
+import { xml } from '@xmpp/client';
 import { jid as parseJid } from '@xmpp/jid';
-import { x as xml } from '@xmpp/xml';
 
 import { Direction, Stanza } from '../../../../core';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';

@@ -1,4 +1,4 @@
-import { x as xml } from '@xmpp/xml';
+import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
 
 import { Message, MessageWithBodyStanza } from '../../../../core';
