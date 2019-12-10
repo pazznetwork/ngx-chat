@@ -1,4 +1,5 @@
-import { JID, jid as parseJid } from '@xmpp/jid';
+import { jid as parseJid } from '@xmpp/client';
+import { JID } from '@xmpp/jid';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { LogService } from '../services/log.service';
 import { dummyAvatar } from './contact-avatar';

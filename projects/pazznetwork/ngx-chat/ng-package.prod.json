@@ -4,6 +4,7 @@
   "lib": {
     "entryFile": "src/public_api.ts",
     "umdModuleIds": {
+      "@xmpp/client": "@xmpp/client",
       "@xmpp/client-core": "@xmpp/client-core",
       "@xmpp/events": "@xmpp/events",
       "@xmpp/jid": "@xmpp/jid",

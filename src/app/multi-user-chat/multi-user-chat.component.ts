@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { jid as parseJid } from '@xmpp/jid';
+import { jid } from '@xmpp/client';
 import { ChatService, ChatServiceToken, MultiUserChatPlugin, Room, RoomSummary } from '../ngx-chat-imports';
 
 @Component({
@@ -22,7 +22,7 @@ export class MultiUserChatComponent implements OnInit {
     }
 
     async joinRoom(roomJid: string) {
-        const occupantJid = parseJid(roomJid);
+        const occupantJid = jid(roomJid);
         this.selectedRoom = await this.multiUserChatPlugin.joinRoom(occupantJid);
     }
 

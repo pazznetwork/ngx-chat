@@ -1,6 +1,7 @@
 declare module '@xmpp/client' {
 
     import { EventEmitter } from '@xmpp/events';
+    import { JID } from '@xmpp/jid';
     import { Element } from 'ltx';
 
     export class Client {
@@ -34,6 +35,10 @@ declare module '@xmpp/client' {
     }
 
     export function client(clientConf: ClientConfiguration): Client;
+
+    export function jid(fullJid: string): JID;
+    // tslint:disable-next-line:unified-signatures
+    export function jid(local: string, domain: string, resource?: string): JID;
 
     export function xml(name: string, attrs?: { [key: string]: string }, ...content: any[]): Element;
 

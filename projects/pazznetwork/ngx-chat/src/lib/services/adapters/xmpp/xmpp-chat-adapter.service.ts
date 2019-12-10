@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { jid as parseJid } from '@xmpp/jid';
+import { jid as parseJid } from '@xmpp/client';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { ChatActionContext } from '../../../components/chat-window/chat-window.component';

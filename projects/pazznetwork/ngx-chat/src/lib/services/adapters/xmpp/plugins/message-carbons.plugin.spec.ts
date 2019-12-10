@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Client, xml } from '@xmpp/client';
-import { jid as parseJid } from '@xmpp/jid';
+import { Client, jid as parseJid, xml } from '@xmpp/client';
 import { parse } from 'ltx';
 import { first } from 'rxjs/operators';
 import { Direction } from '../../../../core';

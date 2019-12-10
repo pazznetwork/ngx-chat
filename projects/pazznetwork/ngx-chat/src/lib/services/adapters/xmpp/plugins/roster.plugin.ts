@@ -1,5 +1,4 @@
-import { xml } from '@xmpp/client';
-import { jid as parseJid } from '@xmpp/jid';
+import { jid as parseJid, xml } from '@xmpp/client';
 import { Contact, ContactSubscription, Presence, PresenceStanza, Stanza } from '../../../../core';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';

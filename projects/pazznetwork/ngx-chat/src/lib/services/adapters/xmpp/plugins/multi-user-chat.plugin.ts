@@ -1,5 +1,5 @@
-import { xml } from '@xmpp/client';
-import { jid as parseJid, JID } from '@xmpp/jid';
+import { jid as parseJid, xml } from '@xmpp/client';
+import { JID } from '@xmpp/jid';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ContactMetadata, Direction, IqResponseStanza, Message, Stanza } from '../../../../core';
@@ -202,7 +202,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     async createRoom(request: RoomCreationOptions): Promise<Room> {
         const roomId = request.roomId;
         const service = await this.serviceDiscoveryPlugin.findService('conference', 'text');
-        const occupantJid = new JID(roomId, service.jid, request.nick);
+        const occupantJid = parseJid(roomId, service.jid, request.nick);
         const {presenceResponse, room} = await this.joinRoomInternal(occupantJid, request.name);
 
         const itemElement = presenceResponse.getChild('x').getChild('item');
@@ -268,7 +268,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     private async joinRoomInternal(roomJid: JID, name?: string) {
         const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
-        const occupantJid = new JID(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
+        const occupantJid = parseJid(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
         const roomJoinedPromise = new Promise<Stanza>(resolve => this.roomJoinPromises[occupantJid.toString()] = resolve);
         await this.xmppChatAdapter.chatConnectionService.send(
             xml('presence', {from: userJid.toString(), to: occupantJid.toString()},

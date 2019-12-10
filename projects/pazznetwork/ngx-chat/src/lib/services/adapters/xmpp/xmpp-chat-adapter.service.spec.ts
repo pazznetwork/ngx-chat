@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { xml } from '@xmpp/client';
-import { JID } from '@xmpp/jid';
+import { jid as parseJid, xml } from '@xmpp/client';
 import { first, take } from 'rxjs/operators';
 
 import { Contact, Direction, Stanza } from '../../../core';
@@ -49,7 +48,7 @@ describe('XmppChatAdapter', () => {
         contact2 = contactFactory.createContact('test2@example.com', 'jane dane');
         contacts = [contact1, contact2];
 
-        chatConnectionService.userJid = new JID('me', 'example.com', 'something');
+        chatConnectionService.userJid = parseJid('me', 'example.com', 'something');
     });
 
     describe('contact management', () => {

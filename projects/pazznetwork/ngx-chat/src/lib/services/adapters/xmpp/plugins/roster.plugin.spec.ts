@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { xml } from '@xmpp/client';
-import { JID } from '@xmpp/jid';
+import { jid as parseJid, xml } from '@xmpp/client';
 
 import { Contact, ContactSubscription, Presence, Stanza } from '../../../../core';
 import { testLogService } from '../../../../test/log-service';
@@ -41,7 +40,7 @@ describe('roster plugin', () => {
         logService = TestBed.get(LogService);
         chatAdapter.addPlugins([new RosterPlugin(chatAdapter, logService)]);
 
-        chatConnectionService.userJid = new JID('me', 'example.com', 'something');
+        chatConnectionService.userJid = parseJid('me', 'example.com', 'something');
     });
 
     describe('loading roster', () => {

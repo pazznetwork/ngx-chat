@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { xml } from '@xmpp/client';
-import { JID } from '@xmpp/jid';
+import { jid as parseJid, xml } from '@xmpp/client';
 import { first } from 'rxjs/operators';
 import { testLogService } from '../../../../test/log-service';
 import { MockClientFactory } from '../../../../test/xmppClientMock';
@@ -34,7 +33,7 @@ describe('message plugin', () => {
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
-        chatConnectionService.userJid = new JID('me', 'example.com', 'something');
+        chatConnectionService.userJid = parseJid('me', 'example.com', 'something');
         chatService = TestBed.get(ChatServiceToken);
         chatService.addPlugins([new MessagePlugin(chatService, logService)]);
     });

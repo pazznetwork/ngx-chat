@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { xml } from '@xmpp/client';
-import { JID, jid as parseJid } from '@xmpp/jid';
+import { jid as parseJid, xml } from '@xmpp/client';
 import { first } from 'rxjs/operators';
 import { Direction, Stanza } from '../../../../core';
 import { testLogService } from '../../../../test/log-service';
@@ -45,7 +44,7 @@ describe('multi user chat plugin', () => {
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
-        chatConnectionService.userJid = new JID('me', 'example.com', 'something');
+        chatConnectionService.userJid = parseJid('me', 'example.com', 'something');
 
         chatAdapter = TestBed.get(XmppChatAdapter);
 
@@ -256,7 +255,7 @@ describe('multi user chat plugin', () => {
                 );
             });
 
-            await multiUserChatPlugin.joinRoom(new JID('chatroom', 'conference.example.com'));
+            await multiUserChatPlugin.joinRoom(parseJid('chatroom', 'conference.example.com'));
 
             const rooms = multiUserChatPlugin.rooms$.getValue();
             expect(rooms.length).toEqual(1);

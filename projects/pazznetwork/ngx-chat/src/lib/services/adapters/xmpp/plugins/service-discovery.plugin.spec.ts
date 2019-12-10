@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Client, xml } from '@xmpp/client';
-import { JID } from '@xmpp/jid';
+import { Client, jid as parseJid, xml } from '@xmpp/client';
 import { Stanza } from '../../../../core';
 import { testLogService } from '../../../../test/log-service';
 import { MockClientFactory } from '../../../../test/xmppClientMock';
@@ -35,7 +34,7 @@ describe('service discovery plugin', () => {
 
         chatConnectionService = TestBed.get(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
-        chatConnectionService.userJid = new JID('me', 'jabber.example.com', 'something');
+        chatConnectionService.userJid = parseJid('me', 'jabber.example.com', 'something');
 
         chatAdapter = TestBed.get(XmppChatAdapter);
         chatAdapter.addPlugins([new ServiceDiscoveryPlugin(chatAdapter)]);
