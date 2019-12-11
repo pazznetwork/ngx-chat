@@ -13,16 +13,18 @@
         {{chatService.translations.noMessages}}
     </div>
     <div class="chat-message chat-message--in" *ngIf="contact.pendingIn$ | async">
-        <span>
-            {{chatService.translations.subscriptionRequestMessage}}
-        </span>
-        <ul class="chat-presence-subscription-actions">
-            <li>
-                <a (click)="acceptSubscriptionRequest($event)" href="#">{{chatService.translations.acceptSubscriptionRequest}}</a>
-            </li>
-            <li>
-                <a (click)="denySubscriptionRequest($event)" href="#">{{chatService.translations.denySubscriptionRequest}}</a>
-            </li>
-        </ul>
+        <div class="chat-message-text chat-message-text--no-avatar">
+            <span>
+                {{chatService.translations.subscriptionRequestMessage}}
+            </span>
+            <ul class="chat-presence-subscription-actions">
+                <li>
+                    <a (click)="acceptSubscriptionRequest($event)" href="#">{{chatService.translations.acceptSubscriptionRequest}}</a>
+                </li>
+                <li>
+                    <a (click)="denySubscriptionRequest($event)" href="#">{{chatService.translations.denySubscriptionRequest}}</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
