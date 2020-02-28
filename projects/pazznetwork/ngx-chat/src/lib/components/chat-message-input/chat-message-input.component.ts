@@ -19,7 +19,7 @@ export class ChatMessageInputComponent implements OnInit {
 
     public message = '';
 
-    @ViewChild('chatInput', {static: false})
+    @ViewChild('chatInput')
     chatInput: ElementRef;
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService) {

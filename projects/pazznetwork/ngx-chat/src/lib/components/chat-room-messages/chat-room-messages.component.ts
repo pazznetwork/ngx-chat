@@ -17,7 +17,7 @@ export class ChatRoomMessagesComponent implements OnInit, OnChanges, OnDestroy {
     @Input()
     room: Room;
 
-    @ViewChild('messageArea', {static: false})
+    @ViewChild('messageArea')
     chatMessageAreaElement: ElementRef<HTMLElement>;
 
     private messageSubscription: Subscription;

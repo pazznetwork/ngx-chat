@@ -19,7 +19,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
     private ngDestroy = new Subject<void>();
 
-    @ViewChild(ChatMessageInputComponent, {static: false})
+    @ViewChild(ChatMessageInputComponent)
     messageInput: ChatMessageInputComponent;
 
     constructor(

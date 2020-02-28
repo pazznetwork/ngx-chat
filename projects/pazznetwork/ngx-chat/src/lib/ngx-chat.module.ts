@@ -82,7 +82,7 @@ import { LogService } from './services/log.service';
 })
 export class NgxChatModule {
 
-    static forRoot(): ModuleWithProviders {
+    static forRoot(): ModuleWithProviders<NgxChatModule> {
 
         return {
             ngModule: NgxChatModule,
