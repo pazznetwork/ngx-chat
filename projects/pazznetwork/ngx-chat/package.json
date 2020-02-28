@@ -28,5 +28,6 @@
   "homepage": "https://github.com/pazznetwork/ngx-chat",
   "bugs": {
     "url": "https://github.com/pazznetwork/ngx-chat/issues"
-  }
+  },
+  "sideEffects": false
 }
