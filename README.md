@@ -10,9 +10,10 @@ This library provides an out-of-the-box usable XMPP chat component. It is custom
 * supports multi user chat
 
 ## Compatibility
+* Angular 9 (ngx-chat 0.9.x)
 * Angular 8 (ngx-chat 0.4.x)
 * Angular 6 (ngx-chat 0.3.x)
-* requires node >= 8 && npm >= 5 for build
+* requires node >= 10.13 && npm >= 5 for build
 
 ## Demo
 [Have a look at our demo (valid XMPP credentials required)](https://pazznetwork.github.io/ngx-chat-ghpages/) 
@@ -23,12 +24,12 @@ Below you will find some instructions to getting started. [Have a look at the wi
 
 ## Installation and usage
 
-This instructions require Angular 8.
+This instructions require Angular 9.
 [If you are using Angular 6, follow this instructions instead](https://github.com/pazznetwork/ngx-chat/wiki/Angular-6-compatibility)
 
-First of all, install ngx-chat via npm:
+First of all, install ngx-chat and its dependencies via npm:
 ```bash
-npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.3.0 @angular/cdk@~8.0.0
+npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.9.1-b1 @angular/cdk@~9.0.0
 ```
 
 After that, import ngx-chat in your root module:
