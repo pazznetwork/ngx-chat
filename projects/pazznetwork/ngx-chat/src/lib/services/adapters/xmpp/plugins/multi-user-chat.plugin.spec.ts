@@ -42,11 +42,11 @@ describe('multi user chat plugin', () => {
             ]
         });
 
-        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = parseJid('me', 'example.com', 'something');
 
-        chatAdapter = TestBed.get(XmppChatAdapter);
+        chatAdapter = TestBed.inject(XmppChatAdapter);
 
         const conferenceService = {
             jid: 'conference.jabber.example.com',
@@ -55,7 +55,7 @@ describe('multi user chat plugin', () => {
             findService: () => conferenceService
         };
 
-        logService = TestBed.get(LogService);
+        logService = TestBed.inject(LogService);
         chatAdapter.addPlugins([
             new MultiUserChatPlugin(chatAdapter, logService, serviceDiscoveryPluginMock),
             new MessageUuidPlugin()

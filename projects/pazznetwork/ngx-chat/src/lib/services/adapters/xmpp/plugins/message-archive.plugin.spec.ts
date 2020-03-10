@@ -44,11 +44,11 @@ describe('message archive plugin', () => {
             ]
         });
 
-        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
 
-        contactFactory = TestBed.get(ContactFactoryService);
-        chatAdapter = TestBed.get(XmppChatAdapter);
+        contactFactory = TestBed.inject(ContactFactoryService);
+        chatAdapter = TestBed.inject(XmppChatAdapter);
         contact1 = contactFactory.createContact('someone@else.com', 'jon doe');
     });
 

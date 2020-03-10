@@ -9,14 +9,12 @@ import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
-import jasmine = require('jasmine');
-import SpyObj = jasmine.SpyObj;
 
 describe('service discovery plugin', () => {
 
     let chatConnectionService: XmppChatConnectionService;
     let chatAdapter: XmppChatAdapter;
-    let xmppClientMock: SpyObj<Client>;
+    let xmppClientMock: jasmine.SpyObj<Client>;
 
     beforeEach(() => {
         const mockClientFactory = new MockClientFactory();
@@ -32,11 +30,11 @@ describe('service discovery plugin', () => {
             ]
         });
 
-        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = parseJid('me', 'jabber.example.com', 'something');
 
-        chatAdapter = TestBed.get(XmppChatAdapter);
+        chatAdapter = TestBed.inject(XmppChatAdapter);
         chatAdapter.addPlugins([new ServiceDiscoveryPlugin(chatAdapter)]);
     });
 

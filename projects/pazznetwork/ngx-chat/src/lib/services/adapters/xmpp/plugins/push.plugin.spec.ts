@@ -30,11 +30,11 @@ describe('push plugin', () => {
             ]
         });
 
-        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = parseJid('someone@example.com');
 
-        const chatAdapter = TestBed.get(ChatServiceToken) as XmppChatAdapter;
+        const chatAdapter = TestBed.inject(ChatServiceToken) as XmppChatAdapter;
 
         const pushService = {
             jid: 'push.jabber.example.com',

@@ -25,7 +25,7 @@ describe('chat connection service', () => {
             ]
         });
 
-        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
     });
 

@@ -32,10 +32,10 @@ describe('message carbons plugin', () => {
             ]
         });
 
-        const chatConnectionService = TestBed.get(XmppChatConnectionService);
+        const chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
 
-        xmppChatAdapter = TestBed.get(XmppChatAdapter);
+        xmppChatAdapter = TestBed.inject(XmppChatAdapter);
         xmppChatAdapter.chatConnectionService.userJid = parseJid('romeo@montague.example/home');
         messageCarbonsPlugin = new MessageCarbonsPlugin(xmppChatAdapter);
     });

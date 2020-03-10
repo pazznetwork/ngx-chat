@@ -31,10 +31,10 @@ describe('message plugin', () => {
             ]
         });
 
-        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = parseJid('me', 'example.com', 'something');
-        chatService = TestBed.get(ChatServiceToken);
+        chatService = TestBed.inject(ChatServiceToken) as XmppChatAdapter;
         chatService.addPlugins([new MessagePlugin(chatService, logService)]);
     });
 

@@ -33,11 +33,11 @@ describe('roster plugin', () => {
             ]
         });
 
-        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
-        contactFactory = TestBed.get(ContactFactoryService);
-        chatAdapter = TestBed.get(XmppChatAdapter);
-        logService = TestBed.get(LogService);
+        contactFactory = TestBed.inject(ContactFactoryService);
+        chatAdapter = TestBed.inject(XmppChatAdapter);
+        logService = TestBed.inject(LogService);
         chatAdapter.addPlugins([new RosterPlugin(chatAdapter, logService)]);
 
         chatConnectionService.userJid = parseJid('me', 'example.com', 'something');

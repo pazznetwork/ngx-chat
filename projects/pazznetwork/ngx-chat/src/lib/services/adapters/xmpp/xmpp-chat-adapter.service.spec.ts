@@ -38,10 +38,10 @@ describe('XmppChatAdapter', () => {
             ]
         });
 
-        chatConnectionService = TestBed.get(XmppChatConnectionService);
+        chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
-        contactFactory = TestBed.get(ContactFactoryService);
-        chatService = TestBed.get(ChatServiceToken);
+        contactFactory = TestBed.inject(ContactFactoryService);
+        chatService = TestBed.inject(ChatServiceToken) as XmppChatAdapter;
         chatService.addPlugins([new MessageUuidPlugin(), new MessagePlugin(chatService, logService)]);
 
         contact1 = contactFactory.createContact('test@example.com', 'jon doe');
