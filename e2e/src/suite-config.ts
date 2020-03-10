@@ -1,4 +1,4 @@
-import { LogInRequest } from '@pazznetwork/ngx-chat/lib/core';
+import { LogInRequest } from '@pazznetwork/ngx-chat';
 import { browser } from 'protractor';
 
 it('should define configuration', () => {
