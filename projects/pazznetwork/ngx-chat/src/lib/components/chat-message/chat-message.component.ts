@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Inject, Input, OnInit } from '@angular/core';
-import { Contact, Message, MessageState } from '../../core';
+import { Contact } from '../../core/contact';
+import { Message, MessageState } from '../../core/message';
 import { extractUrls } from '../../core/utils-links';
-import { MessageStatePlugin, StateDate } from '../../services/adapters/xmpp/plugins';
+import { MessageStatePlugin, StateDate } from '../../services/adapters/xmpp/plugins/message-state.plugin';
 import { XmppChatAdapter } from '../../services/adapters/xmpp/xmpp-chat-adapter.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 

@@ -22,7 +22,7 @@ function rebuildDefinitions(files) {
 
 function appendReferenceToIndexDefinition() {
     // add a reference to the newly built index.d.ts
-    const path = './dist/pazznetwork/ngx-chat/public_api.d.ts';
+    const path = './dist/pazznetwork/ngx-chat/public-api.d.ts';
     const content = fs.readFileSync(path);
     fs.writeFileSync(path, '/// <reference path="index.d.ts" />\n' + content);
     console.log("appended reference, done with build post processing");

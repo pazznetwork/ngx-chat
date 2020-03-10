@@ -1,8 +1,9 @@
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
-import { Contact, Presence } from '../../core';
-import { UnreadMessageCountPlugin } from '../../services/adapters/xmpp/plugins';
+import { Contact } from '../../core/contact';
+import { Presence } from '../../core/presence';
+import { UnreadMessageCountPlugin } from '../../services/adapters/xmpp/plugins/unread-message-count.plugin';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({

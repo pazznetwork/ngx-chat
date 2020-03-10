@@ -1,7 +1,10 @@
 import { InjectionToken } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ChatAction } from '../components/chat-window/chat-window.component';
-import { ChatPlugin, Contact, LogInRequest, Translations } from '../core';
+import { Contact } from '../core/contact';
+import { LogInRequest } from '../core/log-in-request';
+import { ChatPlugin } from '../core/plugin';
+import { Translations } from '../core/translations';
 
 export const ChatServiceToken = new InjectionToken('pazznetworkNgxChatService');
 

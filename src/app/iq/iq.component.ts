@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { ChatServiceToken, XmppChatAdapter } from '@pazznetwork/ngx-chat';
 import { parse, stringify } from 'ltx';
-import { ChatServiceToken, XmppChatAdapter } from '../ngx-chat-imports';
 
 @Component({
     selector: 'app-iq',

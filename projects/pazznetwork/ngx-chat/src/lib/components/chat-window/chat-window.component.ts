@@ -1,8 +1,8 @@
 import { Component, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { Direction } from '../../core';
-import { HttpFileUploadPlugin } from '../../services/adapters/xmpp/plugins';
+import { Direction } from '../../core/message';
+import { HttpFileUploadPlugin } from '../../services/adapters/xmpp/plugins/http-file-upload.plugin';
 import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';

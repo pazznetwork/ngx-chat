@@ -1,8 +1,8 @@
 import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
-
-import { Message, MessageWithBodyStanza } from '../../../../core';
 import { id } from '../../../../core/id-generator';
+import { Message } from '../../../../core/message';
+import { MessageWithBodyStanza } from '../../../../core/stanza';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 
 /**

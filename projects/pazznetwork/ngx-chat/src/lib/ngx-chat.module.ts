@@ -16,24 +16,22 @@ import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
 import { LinksDirective } from './directives/links.directive';
-import {
-    BookmarkPlugin,
-    HttpFileUploadPlugin,
-    MessageArchivePlugin,
-    MessageCarbonsPlugin,
-    MessagePlugin,
-    MessageStatePlugin,
-    MessageUuidPlugin,
-    MucSubPlugin,
-    MultiUserChatPlugin,
-    PingPlugin,
-    PublishSubscribePlugin,
-    PushPlugin,
-    RegistrationPlugin,
-    RosterPlugin,
-    ServiceDiscoveryPlugin,
-    UnreadMessageCountPlugin
-} from './services/adapters/xmpp/plugins';
+import { BookmarkPlugin } from './services/adapters/xmpp/plugins/bookmark.plugin';
+import { HttpFileUploadPlugin } from './services/adapters/xmpp/plugins/http-file-upload.plugin';
+import { MessageArchivePlugin } from './services/adapters/xmpp/plugins/message-archive.plugin';
+import { MessageCarbonsPlugin } from './services/adapters/xmpp/plugins/message-carbons.plugin';
+import { MessageStatePlugin } from './services/adapters/xmpp/plugins/message-state.plugin';
+import { MessageUuidPlugin } from './services/adapters/xmpp/plugins/message-uuid.plugin';
+import { MessagePlugin } from './services/adapters/xmpp/plugins/message.plugin';
+import { MucSubPlugin } from './services/adapters/xmpp/plugins/muc-sub.plugin';
+import { MultiUserChatPlugin } from './services/adapters/xmpp/plugins/multi-user-chat.plugin';
+import { PingPlugin } from './services/adapters/xmpp/plugins/ping.plugin';
+import { PublishSubscribePlugin } from './services/adapters/xmpp/plugins/publish-subscribe.plugin';
+import { PushPlugin } from './services/adapters/xmpp/plugins/push.plugin';
+import { RegistrationPlugin } from './services/adapters/xmpp/plugins/registration.plugin';
+import { RosterPlugin } from './services/adapters/xmpp/plugins/roster.plugin';
+import { ServiceDiscoveryPlugin } from './services/adapters/xmpp/plugins/service-discovery.plugin';
+import { UnreadMessageCountPlugin } from './services/adapters/xmpp/plugins/unread-message-count.plugin';
 import { XmppChatAdapter } from './services/adapters/xmpp/xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from './services/adapters/xmpp/xmpp-chat-connection.service';
 import { XmppClientFactoryService } from './services/adapters/xmpp/xmpp-client-factory.service';

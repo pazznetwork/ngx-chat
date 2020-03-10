@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Contact } from '../core';
+import { Contact } from '../core/contact';
 
 /**
  * Used to determine if a message component for a given contact is open.

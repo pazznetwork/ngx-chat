@@ -1,4 +1,5 @@
 import { xml } from '@xmpp/client';
+import { Element } from 'ltx';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
@@ -87,15 +88,17 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
     }
 
     private async discoverServices() {
-        const serviceListResponsePromise = this.chatAdapter.chatConnectionService.sendIq(
+        const serviceListResponsePromise = await this.chatAdapter.chatConnectionService.sendIq(
             new QueryStanzaBuilder(
                 ServiceDiscoveryPlugin.DISCO_ITEMS, this.chatAdapter.chatConnectionService.userJid.domain).toStanza()
         );
 
-        const serviceDomains = (await serviceListResponsePromise)
-            .getChild('query').getChildren('item').map(itemNode => itemNode.attrs.jid);
+        const serviceDomains = serviceListResponsePromise
+            .getChild('query')
+            .getChildren('item').map((itemNode: Element) => itemNode.attrs.jid);
 
-        const discoveredServices = await Promise.all(serviceDomains.map(serviceDomain => this.discoverServiceInformation(serviceDomain)));
+        const discoveredServices: Service[] = await Promise.all(
+            serviceDomains.map((serviceDomain: string) => this.discoverServiceInformation(serviceDomain)));
         this.services.push(...discoveredServices);
     }
 
@@ -105,9 +108,9 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
         );
 
         const queryNode = serviceInformationResponse.getChild('query');
-        const features = queryNode.getChildren('feature').map(featureNode => featureNode.attrs.var);
+        const features = queryNode.getChildren('feature').map((featureNode: Element) => featureNode.attrs.var);
         return {
-            identities: queryNode.getChildren('identity').map(identityNode => identityNode.attrs),
+            identities: queryNode.getChildren('identity').map((identityNode: Element) => identityNode.attrs),
             features,
             jid: serviceInformationResponse.attrs.from
         };

@@ -1,7 +1,7 @@
 import { Component, Inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Observable } from 'rxjs';
-
-import { Contact, Translations } from '../core';
+import { Contact } from '../core/contact';
+import { Translations } from '../core/translations';
 import { ChatService, ChatServiceToken } from '../services/chat-service';
 
 /**

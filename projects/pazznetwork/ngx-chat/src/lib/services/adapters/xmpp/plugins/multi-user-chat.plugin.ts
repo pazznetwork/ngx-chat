@@ -2,8 +2,10 @@ import { jid as parseJid, xml } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { ContactMetadata, Direction, IqResponseStanza, Message, Stanza } from '../../../../core';
+import { ContactMetadata } from '../../../../core/contact';
+import { Direction, Message } from '../../../../core/message';
 import { MessageStore } from '../../../../core/message-store';
+import { IqResponseStanza, Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -346,7 +348,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         let members: MemberlistItem[] = [];
         for (const memberQueryResponse of memberQueryResponses) {
             const membersFromQueryResponse = memberQueryResponse.getChild('query').getChildren('item')
-                .map(memberItem => ({
+                .map((memberItem: Element) => ({
                     jid: memberItem.attrs.jid,
                     nick: memberItem.attrs.nick,
                     affiliation: this.reverseMapAffiliation(memberItem.attrs.affiliation),

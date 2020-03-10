@@ -1,14 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { jid as parseJid, xml } from '@xmpp/client';
 import { first, take } from 'rxjs/operators';
+import { Contact } from '../../../core/contact';
+import { Direction } from '../../../core/message';
+import { Stanza } from '../../../core/stanza';
 
-import { Contact, Direction, Stanza } from '../../../core';
 import { testLogService } from '../../../test/log-service';
 import { MockClientFactory } from '../../../test/xmppClientMock';
 import { ChatServiceToken } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
-import { MessagePlugin, MessageUuidPlugin } from './plugins';
+import { MessageUuidPlugin } from './plugins/message-uuid.plugin';
+import { MessagePlugin } from './plugins/message.plugin';
 import { XmppChatAdapter } from './xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from './xmpp-chat-connection.service';
 import { XmppClientFactoryService } from './xmpp-client-factory.service';

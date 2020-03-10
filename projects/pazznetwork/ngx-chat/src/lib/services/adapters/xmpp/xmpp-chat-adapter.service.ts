@@ -3,13 +3,18 @@ import { jid as parseJid } from '@xmpp/client';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { ChatActionContext } from '../../../components/chat-window/chat-window.component';
-
-import { ChatPlugin, Contact, LogInRequest, Stanza, Translations } from '../../../core';
+import { Contact } from '../../../core/contact';
 import { dummyAvatar } from '../../../core/contact-avatar';
+import { LogInRequest } from '../../../core/log-in-request';
+import { ChatPlugin } from '../../../core/plugin';
+import { Stanza } from '../../../core/stanza';
+import { Translations } from '../../../core/translations';
 import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
-import { MessageArchivePlugin, MessagePlugin, RosterPlugin } from './plugins';
+import { MessageArchivePlugin } from './plugins/message-archive.plugin';
+import { MessagePlugin } from './plugins/message.plugin';
+import { RosterPlugin } from './plugins/roster.plugin';
 import { XmppChatConnectionService, XmppChatStates } from './xmpp-chat-connection.service';
 
 @Injectable()

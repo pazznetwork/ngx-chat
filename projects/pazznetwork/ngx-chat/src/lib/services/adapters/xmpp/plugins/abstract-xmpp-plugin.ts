@@ -1,6 +1,7 @@
 import { Element } from 'ltx';
-
-import { ChatPlugin, Message, MessageWithBodyStanza, Stanza } from '../../../../core';
+import { Message } from '../../../../core/message';
+import { ChatPlugin } from '../../../../core/plugin';
+import { MessageWithBodyStanza, Stanza } from '../../../../core/stanza';
 import { MessageReceivedEvent } from './message.plugin';
 
 export abstract class AbstractXmppPlugin implements ChatPlugin {

@@ -1,5 +1,5 @@
 import { Client } from '@xmpp/client';
-import { LogInRequest } from '../core';
+import { LogInRequest } from '../core/log-in-request';
 import { XmppClientFactoryService } from '../services/adapters/xmpp/xmpp-client-factory.service';
 import SpyObj = jasmine.SpyObj;
 

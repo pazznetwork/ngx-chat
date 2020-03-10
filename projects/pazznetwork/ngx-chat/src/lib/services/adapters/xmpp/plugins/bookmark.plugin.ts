@@ -1,6 +1,6 @@
 import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
-import { IqResponseStanza } from '../../../../core';
+import { IqResponseStanza } from '../../../../core/stanza';
 import { removeDuplicates } from '../../../../core/utils-array';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { PublishSubscribePlugin } from './publish-subscribe.plugin';

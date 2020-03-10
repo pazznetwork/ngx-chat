@@ -1,6 +1,7 @@
 import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
-import { Direction, Stanza } from '../../../../core';
+import { Direction } from '../../../../core/message';
+import { Stanza } from '../../../../core/stanza';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { MessageReceivedEvent } from './message.plugin';

@@ -2,7 +2,7 @@ import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { IqResponseStanza, Stanza } from '../../../../core';
+import { IqResponseStanza, Stanza } from '../../../../core/stanza';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';

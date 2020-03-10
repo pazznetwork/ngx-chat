@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { ChatService, ChatServiceToken, MultiUserChatPlugin, Room, RoomSummary } from '@pazznetwork/ngx-chat';
 import { jid } from '@xmpp/client';
-import { ChatService, ChatServiceToken, MultiUserChatPlugin, Room, RoomSummary } from '../ngx-chat-imports';
 
 @Component({
     selector: 'app-multi-user-chat',

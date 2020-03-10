@@ -1,7 +1,6 @@
 import { Component, ElementRef, Inject, Input, OnInit, ViewChild } from '@angular/core';
-
-import { Contact } from '../../core';
-import { MultiUserChatPlugin, Room } from '../../services/adapters/xmpp/plugins';
+import { Contact } from '../../core/contact';
+import { MultiUserChatPlugin, Room } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 @Component({

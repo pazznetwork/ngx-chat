@@ -1,8 +1,8 @@
 import { Component, ElementRef, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { JID } from '@xmpp/jid';
 import { Subscription } from 'rxjs';
-import { Contact } from '../../core';
-import { Room } from '../../services/adapters/xmpp/plugins';
+import { Contact } from '../../core/contact';
+import { Room } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 import { ContactFactoryService } from '../../services/contact-factory.service';
 

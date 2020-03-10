@@ -1,8 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-
-import { Contact } from '../core';
+import { Contact } from '../core/contact';
 import { ChatService, ChatServiceToken } from './chat-service';
 
 export class ChatWindowState {

@@ -1,7 +1,7 @@
 import { Component, ElementRef, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-
-import { Contact, Direction } from '../../core';
+import { Contact } from '../../core/contact';
+import { Direction } from '../../core/message';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatMessageListRegistryService } from '../../services/chat-message-list-registry.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';

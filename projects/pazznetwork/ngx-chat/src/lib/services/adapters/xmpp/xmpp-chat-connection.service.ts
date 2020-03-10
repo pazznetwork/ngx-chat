@@ -3,7 +3,8 @@ import { Client, xml } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { IqResponseStanza, LogInRequest, Stanza } from '../../../core';
+import { LogInRequest } from '../../../core/log-in-request';
+import { IqResponseStanza, Stanza } from '../../../core/stanza';
 import { LogService } from '../../log.service';
 import { XmppClientFactoryService } from './xmpp-client-factory.service';
 

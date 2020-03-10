@@ -1,6 +1,6 @@
 import { jid as parseJid, xml } from '@xmpp/client';
-
-import { Direction, Stanza } from '../../../../core';
+import { Direction } from '../../../../core/message';
+import { Stanza } from '../../../../core/stanza';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { MessageUuidPlugin } from './message-uuid.plugin';

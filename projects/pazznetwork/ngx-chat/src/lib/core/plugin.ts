@@ -1,5 +1,5 @@
 import { Element } from 'ltx';
-import { MessageReceivedEvent } from '../services/adapters/xmpp/plugins';
+import { MessageReceivedEvent } from '../services/adapters/xmpp/plugins/message.plugin';
 import { Message } from './message';
 import { MessageWithBodyStanza, Stanza } from './stanza';
 

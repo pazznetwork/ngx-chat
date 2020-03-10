@@ -11,7 +11,7 @@ import {
     MultiUserChatPlugin,
     RegistrationPlugin,
     UnreadMessageCountPlugin,
-} from './ngx-chat-imports';
+} from '@pazznetwork/ngx-chat';
 
 @Component({
     selector: 'app-root',

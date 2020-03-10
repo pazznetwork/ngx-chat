@@ -1,5 +1,6 @@
 import { xml } from '@xmpp/client';
-import { Direction, Message, MessageWithBodyStanza, Stanza } from '../../../../core';
+import { Direction, Message } from '../../../../core/message';
+import { MessageWithBodyStanza, Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';

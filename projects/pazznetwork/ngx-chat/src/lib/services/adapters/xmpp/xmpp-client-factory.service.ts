@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client, client } from '@xmpp/client';
-import { LogInRequest } from '../../../core';
+import { LogInRequest } from '../../../core/log-in-request';
 
 @Injectable()
 export class XmppClientFactoryService {

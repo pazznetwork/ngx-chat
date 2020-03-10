@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Client, jid as parseJid, xml } from '@xmpp/client';
-
-import { Contact, Direction } from '../../../../core';
+import { Contact } from '../../../../core/contact';
+import { Direction } from '../../../../core/message';
 import { testLogService } from '../../../../test/log-service';
 import { MockClientFactory } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
