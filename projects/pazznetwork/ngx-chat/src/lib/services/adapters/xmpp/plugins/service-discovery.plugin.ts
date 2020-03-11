@@ -51,9 +51,10 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
         super();
     }
 
-    onBeforeOnline() {
-        return Promise.all([this.discoverServerFeatures(), this.discoverServices()])
-            .then(() => this.servicesInitialized$.next(true));
+    async onBeforeOnline() {
+        const services = await this.discoverServices(this.chatAdapter.chatConnectionService.userJid.domain);
+        this.servicesInitialized$.next(true);
+        return services;
     }
 
     onOffline() {
@@ -83,22 +84,27 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
 
     }
 
-    private async discoverServerFeatures() {
-        this.services.push(await this.discoverServiceInformation(this.chatAdapter.chatConnectionService.userJid.domain));
-    }
-
-    private async discoverServices() {
-        const serviceListResponsePromise = await this.chatAdapter.chatConnectionService.sendIq(
+    private async discoverServices(mainDomain: string) {
+        const serviceListResponse = await this.chatAdapter.chatConnectionService.sendIq(
             new QueryStanzaBuilder(
                 ServiceDiscoveryPlugin.DISCO_ITEMS, this.chatAdapter.chatConnectionService.userJid.domain).toStanza()
         );
 
-        const serviceDomains = serviceListResponsePromise
+        const serviceDomains = serviceListResponse
             .getChild('query')
-            .getChildren('item').map((itemNode: Element) => itemNode.attrs.jid);
+            .getChildren('item')
+            .map((itemNode: Element) => itemNode.attrs.jid);
+        serviceDomains.push(mainDomain);
+
+        const distinctServiceDomains = Object.keys(
+            serviceDomains.reduce((previousValue, currentValue) => {
+                previousValue[currentValue] = true;
+                return previousValue;
+            }, {})
+        );
 
         const discoveredServices: Service[] = await Promise.all(
-            serviceDomains.map((serviceDomain: string) => this.discoverServiceInformation(serviceDomain)));
+            distinctServiceDomains.map((serviceDomain: string) => this.discoverServiceInformation(serviceDomain)));
         this.services.push(...discoveredServices);
     }
 

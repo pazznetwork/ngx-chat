@@ -39,6 +39,7 @@ describe('service discovery plugin', () => {
     });
 
     it('should discover the multi user chat service', async () => {
+        let infoCallCounter = 0;
         // given
         xmppClientMock.send.and.callFake((content) => {
             if (content.attrs.to === 'jabber.example.com'
@@ -47,11 +48,15 @@ describe('service discovery plugin', () => {
                 chatConnectionService.onStanzaReceived(
                     xml('iq', {type: 'result', id: content.attrs.id},
                         xml('query', {xmlns: 'http://jabber.org/protocol/disco#items'},
-                            xml('item', {jid: 'conference.jabber.example.com'})
+                            xml('item', {jid: 'conference.jabber.example.com'}),
+                            xml('item', {jid: 'conference.jabber.example.com'}),
+                            xml('item', {jid: 'conference.jabber.example.com'}),
+                            xml('item', {jid: 'conference.jabber.example.com'}),
                         )
                     ) as Stanza
                 );
             } else if (content.getChild('query') && content.getChild('query').attrs.xmlns === 'http://jabber.org/protocol/disco#info') {
+                infoCallCounter++;
                 if (content.attrs.to === 'conference.jabber.example.com') {
                     chatConnectionService.onStanzaReceived(
                         xml('iq', {type: 'result', id: content.attrs.id, from: content.attrs.to},
@@ -82,6 +87,7 @@ describe('service discovery plugin', () => {
 
         // then
         expect(service.jid).toEqual('conference.jabber.example.com');
+        expect(infoCallCounter).toEqual(2);
     });
 
 });
