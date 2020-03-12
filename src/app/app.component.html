@@ -74,7 +74,7 @@
 
     <div>
         <h2>Custom component for a chat session</h2>
-        <ng-container *ngIf="this.chatService.state$.getValue() === 'online'; else messagesComponentInformation">
+        <ng-container *ngIf="(this.chatService.state$ | async) === 'online' && (this.chatService.contactsSubscribed$ | async).length > 0; else messagesComponentInformation">
             <ngx-chat-message-list [contact]="(this.chatService.contactsSubscribed$ | async)[0]"
                                    [showAvatars]="true"></ngx-chat-message-list>
             <ngx-chat-message-input [contact]="(this.chatService.contactsSubscribed$ | async)[0]"></ngx-chat-message-input>
