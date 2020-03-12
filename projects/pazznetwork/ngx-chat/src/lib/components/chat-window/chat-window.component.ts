@@ -17,15 +17,19 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     @Input()
     public chatWindowState: ChatWindowState;
 
-    private ngDestroy = new Subject<void>();
-
     @ViewChild(ChatMessageInputComponent)
     messageInput: ChatMessageInputComponent;
+
+    httpFileUploadPlugin: HttpFileUploadPlugin;
+
+    private ngDestroy = new Subject<void>();
 
     constructor(
         @Inject(ChatServiceToken) public chatService: ChatService,
         private chatListService: ChatListStateService,
-    ) {}
+    ) {
+        this.httpFileUploadPlugin = this.chatService.getPlugin(HttpFileUploadPlugin);
+    }
 
     ngOnInit() {
         this.chatWindowState.contact.messages$
@@ -56,7 +60,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     }
 
     async uploadFile(file: File) {
-        const url = await this.chatService.getPlugin(HttpFileUploadPlugin).upload(file);
+        const url = await this.httpFileUploadPlugin.upload(file);
         this.chatService.sendMessage(this.chatWindowState.contact.jidBare.toString(), url);
     }
 

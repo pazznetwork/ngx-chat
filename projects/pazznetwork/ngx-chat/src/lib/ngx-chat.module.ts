@@ -139,7 +139,7 @@ export class NgxChatModule {
                 new RegistrationPlugin(logService, ngZone),
                 new MessageCarbonsPlugin(xmppChatAdapter),
                 unreadMessageCountPlugin,
-                new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter),
+                new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter, logService),
                 new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService),
                 new MucSubPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
             ]);

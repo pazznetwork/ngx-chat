@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { xml } from '@xmpp/client';
+import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { Service, ServiceDiscoveryPlugin } from './service-discovery.plugin';
@@ -9,23 +10,32 @@ import { Service, ServiceDiscoveryPlugin } from './service-discovery.plugin';
  */
 export class HttpFileUploadPlugin extends AbstractXmppPlugin {
 
+    fileUploadSupported: boolean;
     private uploadService: Promise<Service>;
 
     constructor(
         private httpClient: HttpClient,
         private serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
         private xmppChatAdapter: XmppChatAdapter,
+        private logService: LogService
     ) {
         super();
     }
 
     onBeforeOnline(): PromiseLike<any> {
         this.uploadService = this.serviceDiscoveryPlugin.findService('store', 'file');
+        this.uploadService.then(() => {
+            this.fileUploadSupported = true;
+        }, () => {
+            this.fileUploadSupported = false;
+            this.logService.info('http file upload not supported');
+        });
         return Promise.resolve();
     }
 
     onOffline() {
         this.uploadService = null;
+        this.fileUploadSupported = false;
     }
 
     async upload(file: File) {

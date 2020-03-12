@@ -13,6 +13,9 @@ export class FileDropComponent implements OnInit {
     @Input()
     dropMessage: string;
 
+    @Input()
+    enabled = true;
+
     isDropTarget = false;
 
     constructor() { }
@@ -23,9 +26,11 @@ export class FileDropComponent implements OnInit {
     @HostListener('dragover', ['$event'])
     @HostListener('dragenter', ['$event'])
     onDragOver(event: any) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.isDropTarget = true;
+        if (this.enabled) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.isDropTarget = true;
+        }
     }
 
     @HostListener('dragleave', ['$event'])
@@ -38,16 +43,18 @@ export class FileDropComponent implements OnInit {
 
     @HostListener('drop', ['$event'])
     async onDrop(event: any) {
-        event.preventDefault();
-        event.stopPropagation();
+        if (this.enabled) {
+            event.preventDefault();
+            event.stopPropagation();
 
-        this.isDropTarget = false;
+            this.isDropTarget = false;
 
-        // tslint:disable-next-line:prefer-for-of
-        for (let i = 0; i < event.dataTransfer.items.length; i++) {
-            const dataTransferItem = event.dataTransfer.items[i];
-            if (dataTransferItem.kind === 'file') {
-                this.fileUpload.emit(dataTransferItem.getAsFile());
+            // tslint:disable-next-line:prefer-for-of
+            for (let i = 0; i < event.dataTransfer.items.length; i++) {
+                const dataTransferItem = event.dataTransfer.items[i];
+                if (dataTransferItem.kind === 'file') {
+                    this.fileUpload.emit(dataTransferItem.getAsFile());
+                }
             }
         }
     }
