@@ -32,13 +32,13 @@ npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.9.2 @angular/cdk@~9.0.0
 ```
 
 After that, import ngx-chat in your root module:
-```typescript
+```
 @NgModule({
     ...
     imports: [
-        ...,
+        ...
         NgxChatModule.forRoot(),
-        BrowserAnimationsModule,; // alternatively NoopAnimationsModule 
+        BrowserAnimationsModule, // alternatively NoopAnimationsModule 
     ],
     ...
 })
@@ -52,8 +52,8 @@ Add the `ngx-chat`-component at the end of your root component template:
 You are now ready to go. You will not see anything until you log in.
 Log in via `ngx-chat` wherever you want (e.g. in a component or a service)
  by injecting `ChatService` and calling `login`:
-```typescript
-constructor(@Inject(ChatServiceToken); ChatService;) {
+```
+constructor(@Inject(ChatServiceToken) ChatService) {
     chatService.logIn({
         domain: 'ngx-chat.example',
         service: 'wss://ngx-chat.example:5280/websocket',
