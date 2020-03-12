@@ -1,3 +1,17 @@
+<a name="0.9.0"></a>
+# [0.9.0](https://github.com/pazznetwork/ngx-chat/compare/v0.4.7...v0.9.0) (2020-03-12)
+
+
+### Bug Fixes
+
+* check for local-only username did not correctly detect "@" ([d4289c9](https://github.com/pazznetwork/ngx-chat/commit/d4289c9)), closes [#27](https://github.com/pazznetwork/ngx-chat/issues/27)
+* disable file upload if not supported by xmpp server ([66a4cd5](https://github.com/pazznetwork/ngx-chat/commit/66a4cd5)), closes [#16](https://github.com/pazznetwork/ngx-chat/issues/16)
+* gracefully determine support for message archive management ([0214f77](https://github.com/pazznetwork/ngx-chat/commit/0214f77)), closes [#16](https://github.com/pazznetwork/ngx-chat/issues/16) [#27](https://github.com/pazznetwork/ngx-chat/issues/27)
+* handle non-unique jid in discoverServices ([8bcac07](https://github.com/pazznetwork/ngx-chat/commit/8bcac07)), closes [#25](https://github.com/pazznetwork/ngx-chat/issues/25)
+* sample app should not throw if user has no contacts ([eea771e](https://github.com/pazznetwork/ngx-chat/commit/eea771e)), closes [#16](https://github.com/pazznetwork/ngx-chat/issues/16)
+
+
+
 <a name="0.4.7"></a>
 ## [0.4.7](https://github.com/pazznetwork/ngx-chat/compare/v0.4.6...v0.4.7) (2019-12-12)
 

@@ -25,11 +25,10 @@ Below you will find some instructions to getting started. [Have a look at the wi
 ## Installation and usage
 
 This instructions require Angular 9.
-[If you are using Angular 6, follow this instructions instead](https://github.com/pazznetwork/ngx-chat/wiki/Angular-6-compatibility)
 
 First of all, install ngx-chat and its dependencies via npm:
 ```bash
-npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.9.1-b1 @angular/cdk@~9.0.0
+npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.9.2 @angular/cdk@~9.0.0
 ```
 
 After that, import ngx-chat in your root module:
@@ -138,7 +137,7 @@ ng serve
 ## Releasing
 ```bash
 # increment version number in package.json
-VERSION=0.4.7 # change accordingly
+VERSION=0.9.0 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"
