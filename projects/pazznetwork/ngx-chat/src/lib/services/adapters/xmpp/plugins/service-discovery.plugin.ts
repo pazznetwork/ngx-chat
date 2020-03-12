@@ -45,7 +45,8 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
     public static readonly DISCO_ITEMS = 'http://jabber.org/protocol/disco#items';
 
     private servicesInitialized$ = new BehaviorSubject(false);
-    private services: Service[] = [];
+    private hostedServices: Service[] = [];
+    private resourceCache: {[jid: string]: Service} = {};
 
     constructor(private chatAdapter: XmppChatAdapter) {
         super();
@@ -59,7 +60,29 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
 
     onOffline() {
         this.servicesInitialized$.next(false);
-        this.services = [];
+        this.hostedServices = [];
+        this.resourceCache = {};
+    }
+
+    supportsFeature(jid: string, feature: string): Promise<boolean> {
+
+        return new Promise((resolve, reject) => {
+
+            this.servicesInitialized$.pipe(first(value => !!value)).subscribe(async () => {
+                try {
+                    const service = this.resourceCache[jid] || await this.discoverServiceInformation(jid);
+                    if (!service) {
+                        reject(new Error('no service found for jid ' + jid));
+                    }
+                    const results = this.resourceCache[jid].features.filter(resource => resource.indexOf(feature) >= 0);
+                    resolve(results.length > 0);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+
+        });
+
     }
 
     findService(category: string, type: string): Promise<Service> {
@@ -67,7 +90,7 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
         return new Promise((resolve, reject) => {
 
             this.servicesInitialized$.pipe(first(value => !!value)).subscribe(() => {
-                const results = this.services.filter(service =>
+                const results = this.hostedServices.filter(service =>
                     service.identities.filter(identity => identity.category === category && identity.type === type).length > 0
                 );
 
@@ -105,7 +128,7 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
 
         const discoveredServices: Service[] = await Promise.all(
             distinctServiceDomains.map((serviceDomain: string) => this.discoverServiceInformation(serviceDomain)));
-        this.services.push(...discoveredServices);
+        this.hostedServices.push(...discoveredServices);
     }
 
     private async discoverServiceInformation(serviceDomain: string): Promise<Service> {
@@ -115,11 +138,13 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
 
         const queryNode = serviceInformationResponse.getChild('query');
         const features = queryNode.getChildren('feature').map((featureNode: Element) => featureNode.attrs.var);
-        return {
+        const serviceInformation = {
             identities: queryNode.getChildren('identity').map((identityNode: Element) => identityNode.attrs),
             features,
             jid: serviceInformationResponse.attrs.from
         };
+        this.resourceCache[serviceInformationResponse.attrs.from] = serviceInformation;
+        return serviceInformation;
     }
 
 }

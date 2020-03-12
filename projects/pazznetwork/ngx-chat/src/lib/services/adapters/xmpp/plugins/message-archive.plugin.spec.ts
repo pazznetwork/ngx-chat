@@ -53,7 +53,7 @@ describe('message archive plugin', () => {
     });
 
     it('should send a request, create contacts and add messages ', () => {
-        const messageArchivePlugin = new MessageArchivePlugin(chatAdapter);
+        const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, null, testLogService());
         chatAdapter.addPlugins([messageArchivePlugin]);
         chatConnectionService.onOnline(userJid);
 

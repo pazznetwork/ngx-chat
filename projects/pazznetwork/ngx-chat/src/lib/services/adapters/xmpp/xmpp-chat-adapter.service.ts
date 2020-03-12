@@ -98,6 +98,7 @@ export class XmppChatAdapter implements ChatService {
     }
 
     private announceAvailability() {
+        this.logService.info('announcing availability');
         this.chatConnectionService.sendPresence();
         this.state$.next('online');
     }

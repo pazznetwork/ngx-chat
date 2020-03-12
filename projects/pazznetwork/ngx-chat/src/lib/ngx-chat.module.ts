@@ -127,7 +127,7 @@ export class NgxChatModule {
 
             xmppChatAdapter.addPlugins([
                 new BookmarkPlugin(publishSubscribePlugin),
-                new MessageArchivePlugin(xmppChatAdapter),
+                new MessageArchivePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService),
                 new MessagePlugin(xmppChatAdapter, logService),
                 new MessageUuidPlugin(),
                 new MultiUserChatPlugin(xmppChatAdapter, logService, serviceDiscoveryPlugin),
