@@ -1,4 +1,4 @@
-import { Injectable, InjectionToken, NgZone } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Client, xml } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
 import { Element } from 'ltx';
@@ -7,11 +7,6 @@ import { LogInRequest } from '../../../core/log-in-request';
 import { IqResponseStanza, Stanza } from '../../../core/stanza';
 import { LogService } from '../../log.service';
 import { XmppClientFactoryService } from './xmpp-client-factory.service';
-
-/**
- * @deprecated will be removed
- */
-export const XmppClientToken = new InjectionToken('pazznetworkNgxChatXmppClient');
 
 export type XmppChatStates = 'disconnected' | 'online' | 'reconnecting';
 
