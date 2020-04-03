@@ -1,3 +1,13 @@
+<a name="0.9.1"></a>
+## [0.9.1](https://github.com/pazznetwork/ngx-chat/compare/v0.9.0...v0.9.1) (2020-04-03)
+
+
+### Bug Fixes
+
+* add most components, directives and services to public api ([5acf33d](https://github.com/pazznetwork/ngx-chat/commit/5acf33d)), closes [#29](https://github.com/pazznetwork/ngx-chat/issues/29)
+
+
+
 <a name="0.9.0"></a>
 # [0.9.0](https://github.com/pazznetwork/ngx-chat/compare/v0.4.7...v0.9.0) (2020-03-12)
 
