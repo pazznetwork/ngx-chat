@@ -109,7 +109,6 @@ A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-
 
 The source code for ngx-chat can be found in the `projects/pazznetwork/ngx-chat` folder.
 The demo application is in the `src` folder in the project root.  
-**Important:**  Swap the import in src/app/ngx-chat-imports.ts to have live-reload while developing on ngx-chat.
 
 ```bash
 # clone this repository
