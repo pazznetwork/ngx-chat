@@ -10,6 +10,8 @@ import { ChatMessageListComponent } from './components/chat-message-list/chat-me
 import { ChatMessageTextComponent } from './components/chat-message-text/chat-message-text.component';
 import { ChatMessageComponent } from './components/chat-message/chat-message.component';
 import { ChatRoomMessagesComponent } from './components/chat-room-messages/chat-room-messages.component';
+import { ChatVideoWindowComponent } from './components/chat-video-window/chat-video-window.component';
+import { ChatWindowFrameComponent } from './components/chat-window-frame/chat-window-frame.component';
 import { ChatWindowListComponent } from './components/chat-window-list/chat-window-list.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ChatComponent } from './components/chat.component';
@@ -64,6 +66,8 @@ import { LogService } from './services/log.service';
         RosterContactComponent,
         RosterListComponent,
         FileDropComponent,
+        ChatWindowFrameComponent,
+        ChatVideoWindowComponent,
     ],
     exports: [
         ChatComponent,

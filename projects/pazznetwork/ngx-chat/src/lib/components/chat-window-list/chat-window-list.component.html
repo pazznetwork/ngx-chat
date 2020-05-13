@@ -1,5 +1,12 @@
 <div class="chat-list" [@rosterVisibility]="rosterState">
-    <div *ngFor="let chatWindowState of (chatListService.openChats$ | async)">
-        <ngx-chat-window [chatWindowState]="chatWindowState"></ngx-chat-window>
-    </div>
+
+    <ngx-chat-video-window
+            *ngFor="let track of (chatListService.openTracks$ | async)"
+            [track]="track">
+    </ngx-chat-video-window>
+
+    <ngx-chat-window
+            *ngFor="let chatWindowState of (chatListService.openChats$ | async)"
+            [chatWindowState]="chatWindowState"></ngx-chat-window>
+
 </div>

@@ -1,29 +1,23 @@
-<div class="chat-window">
-    <ngx-chat-filedrop [enabled]="httpFileUploadPlugin.fileUploadSupported"
-                       (fileUpload)="uploadFile($event)"
-                       [dropMessage]="chatService.translations.dropMessage">
-        <div (click)="onClickHeader()" class="chat-contact-header" [title]="chatWindowState.contact.name">
-            <div class="chat-contact-avatar">
-                <img [src]="chatWindowState.contact.avatar"/>
-            </div>
-            <div class="chat-contact-name">
-                {{chatWindowState.contact.name}}
-            </div>
-            <div class="chat-close" (click)="onClickClose()">
-                &times;
-            </div>
-        </div>
-        <div *ngIf="!chatWindowState.isCollapsed" class="chat-content" (click)="onFocus()">
-            <ngx-chat-message-list [contact]="chatWindowState.contact" [showAvatars]="false"></ngx-chat-message-list>
-            <div class="chat-input-container">
-                <ngx-chat-message-input [contact]="chatWindowState.contact"></ngx-chat-message-input>
-                <div *ngFor="let action of chatService.chatActions"
-                     (click)="onActionClick(action)"
-                     class="chat-action"
-                     [ngClass]="action.cssClass"
-                     [innerHTML]="action.html">
-                </div>
+<ngx-chat-window-frame
+        [windowIcon]="chatWindowState.contact.avatar"
+        [windowTitle]="chatWindowState.contact.name"
+        (headerClick)="onClickHeader()"
+        (closeClick)="onClickClose()"
+        [fileDropEnabled]="httpFileUploadPlugin.fileUploadSupported"
+        (fileDrop)="uploadFile($event)"
+        [fileDropMessageKey]="chatService.translations.dropMessage">
+
+    <div *ngIf="!chatWindowState.isCollapsed" class="chat-content" (click)="onFocus()">
+        <ngx-chat-message-list [contact]="chatWindowState.contact" [showAvatars]="false"></ngx-chat-message-list>
+        <div class="chat-input-container">
+            <ngx-chat-message-input [contact]="chatWindowState.contact"></ngx-chat-message-input>
+            <div *ngFor="let action of chatService.chatActions"
+                 (click)="onActionClick(action)"
+                 class="chat-action"
+                 [ngClass]="action.cssClass"
+                 [innerHTML]="action.html">
             </div>
         </div>
-    </ngx-chat-filedrop>
-</div>
+    </div>
+
+</ngx-chat-window-frame>

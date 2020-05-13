@@ -1,0 +1,19 @@
+<div class="chat-window">
+    <div (click)="headerClick.emit()" class="chat-contact-header" [title]="windowTitle">
+        <div class="chat-contact-avatar" *ngIf="windowIcon">
+            <img [src]="windowIcon"/>
+        </div>
+        <div class="chat-contact-name">
+            {{windowTitle}}
+        </div>
+        <div *ngIf="closeClick.observers.length > 0" class="chat-close" (click)="closeClick.emit()">
+            &times;
+        </div>
+    </div>
+
+    <ngx-chat-filedrop [enabled]="fileDropEnabled"
+                       (fileUpload)="fileDrop.emit($event)"
+                       [dropMessage]="fileDropMessageKey">
+        <ng-content></ng-content>
+    </ngx-chat-filedrop>
+</div>

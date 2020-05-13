@@ -10,6 +10,10 @@ export class ChatWindowState {
     }
 }
 
+export interface AttachableTrack {
+    attach(elem: HTMLVideoElement): void;
+}
+
 /**
  * Used to open chat windows programmatically.
  */
@@ -17,6 +21,7 @@ export class ChatWindowState {
 export class ChatListStateService {
 
     public openChats$ = new BehaviorSubject<ChatWindowState[]>([]);
+    public openTracks$ = new BehaviorSubject<AttachableTrack[]>([]);
 
     constructor(@Inject(ChatServiceToken) private chatService: ChatService) {
         this.chatService.state$
@@ -54,6 +59,16 @@ export class ChatListStateService {
             copyWithoutContact.splice(index, 1);
             this.openChats$.next(copyWithoutContact);
         }
+    }
+
+    public openTrack(track: AttachableTrack) {
+        this.openTracks$.next(this.openTracks$.getValue().concat([track]));
+    }
+
+    public closeTrack(track: AttachableTrack) {
+        this.openTracks$.next(
+            this.openTracks$.getValue().filter(s => s !== track)
+        );
     }
 
     isChatWithContactOpen(contact: Contact): boolean {
