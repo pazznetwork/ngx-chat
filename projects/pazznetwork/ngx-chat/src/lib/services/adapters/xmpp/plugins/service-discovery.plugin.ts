@@ -53,9 +53,8 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
     }
 
     async onBeforeOnline() {
-        const services = await this.discoverServices(this.chatAdapter.chatConnectionService.userJid.domain);
+        await this.discoverServices(this.chatAdapter.chatConnectionService.userJid.domain);
         this.servicesInitialized$.next(true);
-        return services;
     }
 
     onOffline() {
@@ -64,7 +63,7 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
         this.resourceCache = {};
     }
 
-    supportsFeature(jid: string, feature: string): Promise<boolean> {
+    supportsFeature(jid: string, searchedFeature: string): Promise<boolean> {
 
         return new Promise((resolve, reject) => {
 
@@ -74,8 +73,7 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
                     if (!service) {
                         reject(new Error('no service found for jid ' + jid));
                     }
-                    const results = this.resourceCache[jid].features.filter(resource => resource.indexOf(feature) >= 0);
-                    resolve(results.length > 0);
+                    resolve(service.features.indexOf(searchedFeature) >= 0);
                 } catch (e) {
                     reject(e);
                 }
