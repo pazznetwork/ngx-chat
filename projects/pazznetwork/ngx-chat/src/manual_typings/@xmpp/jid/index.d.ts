@@ -12,6 +12,8 @@ declare module '@xmpp/jid' {
 
         equals(other: JID): boolean;
 
+        toString(): string;
+
     }
 
     export function jid(jid: string): JID;

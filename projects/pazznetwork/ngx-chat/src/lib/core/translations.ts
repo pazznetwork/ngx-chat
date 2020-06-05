@@ -14,4 +14,7 @@ export interface Translations {
     dateFormat: string;
     locale: string;
     dropMessage: string;
+    block: string;
+    blockAndReport: string;
+    dismiss: string;
 }

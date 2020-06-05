@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/client';
-import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { ChatActionContext } from '../../../components/chat-window/chat-window.component';
 import { Contact } from '../../../core/contact';
@@ -24,13 +24,28 @@ export class XmppChatAdapter implements ChatService {
     messageSent$: Subject<Contact> = new Subject();
 
     contacts$ = new BehaviorSubject<Contact[]>([]);
-    contactsSubscribed$: Observable<Contact[]> = this.contacts$.pipe(
+    blockedContactIds$ = new BehaviorSubject<string[]>([]);
+    blockedContacts$ = combineLatest([this.contacts$, this.blockedContactIds$])
+        .pipe(
+            map(
+                ([contacts, blockedJids]) =>
+                    contacts.filter(contact => blockedJids.indexOf(contact.jidBare.toString()) >= 0),
+            ),
+        );
+    notBlockedContacts$ = combineLatest([this.contacts$, this.blockedContactIds$])
+        .pipe(
+            map(
+                ([contacts, blockedJids]) =>
+                    contacts.filter(contact => blockedJids.indexOf(contact.jidBare.toString()) === -1),
+            ),
+        );
+    contactsSubscribed$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.isSubscribed())));
-    contactRequestsReceived$: Observable<Contact[]> = this.contacts$.pipe(
+    contactRequestsReceived$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.pendingIn$.getValue())));
-    contactRequestsSent$: Observable<Contact[]> = this.contacts$.pipe(
+    contactRequestsSent$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.pendingOut$.getValue())));
-    contactsUnaffiliated$: Observable<Contact[]> = this.contacts$.pipe(
+    contactsUnaffiliated$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.isUnaffiliated() && contact.messages.length > 0)));
     state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
     plugins: ChatPlugin[] = [];
@@ -47,9 +62,11 @@ export class XmppChatAdapter implements ChatService {
     }];
     private lastLogInRequest: LogInRequest;
 
-    constructor(public chatConnectionService: XmppChatConnectionService,
-                private logService: LogService,
-                private contactFactory: ContactFactoryService) {
+    constructor(
+        public chatConnectionService: XmppChatConnectionService,
+        private logService: LogService,
+        private contactFactory: ContactFactoryService,
+    ) {
         this.state$.subscribe((state) => this.logService.info('state changed to:', state));
         chatConnectionService.state$
             .pipe(filter(nextState => nextState !== this.state$.getValue()))
@@ -75,7 +92,7 @@ export class XmppChatAdapter implements ChatService {
                     (e) => {
                         this.logService.error('error while connecting', e);
                         this.announceAvailability();
-                    }
+                    },
                 );
         } else {
             if (this.state$.getValue() === 'online') {
@@ -103,7 +120,7 @@ export class XmppChatAdapter implements ChatService {
         this.state$.next('online');
     }
 
-    public addPlugins(plugins: ChatPlugin[]) {
+    addPlugins(plugins: ChatPlugin[]) {
         plugins.forEach(plugin => {
             this.plugins.push(plugin);
         });

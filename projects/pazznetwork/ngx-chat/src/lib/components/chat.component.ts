@@ -92,6 +92,9 @@ export class ChatComponent implements OnInit, OnChanges {
         dateFormat: 'EEEE, MM/dd/yyyy',
         locale: undefined,
         dropMessage: 'Drop your file to send it',
+        block: 'Block',
+        blockAndReport: 'Block & report',
+        dismiss: 'Dismiss',
     };
 
     constructor(@Inject(ChatServiceToken) private chatService: ChatService) {

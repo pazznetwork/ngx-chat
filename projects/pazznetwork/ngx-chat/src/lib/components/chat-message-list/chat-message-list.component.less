@@ -1,4 +1,4 @@
-@import "../../style";
+@import (reference) "../../style";
 @import "../chat-message/chat-message.component.less";
 
 .chat-messages {
@@ -18,10 +18,18 @@
   margin-bottom: 1em;
 }
 
-.chat-presence-subscription-actions {
+.chat-presence-subscription-actions,
+.deny-actions {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 1em 0 0 0;
+  a, a:visited {
+    color: @link;
+  }
+}
+
+.deny-actions {
+  margin-top: 1em;
 }
 
 .chat-messages-date-group {
@@ -30,4 +38,8 @@
   font-style: italic;
   margin: 0.5em 0;
   text-align: center;
+}
+
+.action-disabled {
+  color: @general-light;
 }

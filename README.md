@@ -123,7 +123,7 @@ npm install
 ng serve
 
 # build the library continuously
-ng build @pazznetwork/ngx-chat --watch
+    ng build @pazznetwork/ngx-chat --watch
 
 # (in another terminal) build the sample app continuously
 ng serve

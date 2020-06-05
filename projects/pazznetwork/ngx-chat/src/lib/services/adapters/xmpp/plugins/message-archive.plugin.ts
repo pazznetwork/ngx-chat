@@ -1,5 +1,6 @@
 import { jid as parseJid, xml } from '@xmpp/client';
-import { filter } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, filter } from 'rxjs/operators';
 import { Direction } from '../../../../core/message';
 import { Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
@@ -14,12 +15,15 @@ import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
  */
 export class MessageArchivePlugin extends AbstractXmppPlugin {
 
+    private mamMessageReceived$ = new Subject<void>();
+
     constructor(
         private chatService: XmppChatAdapter,
         private serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
         private logService: LogService,
     ) {
         super();
+
         this.chatService.state$
             .pipe(filter(state => state === 'online'))
             .subscribe(async () => {
@@ -27,6 +31,11 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
                     this.requestNewestMessages();
                 }
             });
+
+        // emit contacts to refresh contact list after receiving mam messages
+        this.mamMessageReceived$
+            .pipe(debounceTime(10))
+            .subscribe(() => this.chatService.contacts$.next(this.chatService.contacts$.getValue()));
     }
 
     private requestNewestMessages() {
@@ -111,6 +120,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
                 id: MessageUuidPlugin.extractIdFromStanza(messageElement),
                 delayed: true,
             });
+            this.mamMessageReceived$.next();
         }
     }
 }

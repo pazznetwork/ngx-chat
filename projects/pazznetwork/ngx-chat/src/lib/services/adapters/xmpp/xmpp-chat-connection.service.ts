@@ -30,9 +30,11 @@ export class XmppChatConnectionService {
     private iqStanzaResponseCallbacks: { [key: string]: ((arg: any) => void) } = {};
     public client: Client;
 
-    constructor(private logService: LogService,
-                private ngZone: NgZone,
-                private xmppClientFactoryService: XmppClientFactoryService) {}
+    constructor(
+        private logService: LogService,
+        private ngZone: NgZone,
+        private xmppClientFactoryService: XmppClientFactoryService,
+    ) {}
 
     public onOnline(jid: JID) {
         this.logService.info('online =', 'online as', jid.toString());
@@ -42,7 +44,7 @@ export class XmppChatConnectionService {
 
     public sendPresence() {
         this.send(
-            xml('presence')
+            xml('presence'),
         );
     }
 
@@ -66,7 +68,9 @@ export class XmppChatConnectionService {
             const {id} = request.attrs;
 
             if (!request.attrs.type) {
-                throw new Error('iq stanza without type: ' + request.toString());
+                const message = 'iq stanza without type: ' + request.toString();
+                this.logService.error(message);
+                throw new Error(message);
             }
 
             this.iqStanzaResponseCallbacks[id] = (response: IqResponseStanza) => {
@@ -87,7 +91,7 @@ export class XmppChatConnectionService {
 
     public sendIqAckResult(id: string) {
         this.send(
-            xml('iq', {from: this.userJid.toString(), id, type: 'result'})
+            xml('iq', {from: this.userJid.toString(), id, type: 'result'}),
         );
     }
 

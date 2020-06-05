@@ -18,6 +18,7 @@ import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
 import { LinksDirective } from './directives/links.directive';
+import { BlockPlugin } from './services/adapters/xmpp/plugins/block.plugin';
 import { BookmarkPlugin } from './services/adapters/xmpp/plugins/bookmark.plugin';
 import { HttpFileUploadPlugin } from './services/adapters/xmpp/plugins/http-file-upload.plugin';
 import { MessageArchivePlugin } from './services/adapters/xmpp/plugins/message-archive.plugin';
@@ -146,6 +147,7 @@ export class NgxChatModule {
                 new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter, logService),
                 new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService),
                 new MucSubPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
+                new BlockPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
             ]);
         };
         return initializer;

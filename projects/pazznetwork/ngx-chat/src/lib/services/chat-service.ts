@@ -30,10 +30,20 @@ export interface ChatService {
     state$: BehaviorSubject<'disconnected' | 'connecting' | 'online'>;
 
     /**
-     * A BehaviorSubject of all known contacts. Contains for example Contacts that sent you a message.
+     * A BehaviorSubject of all known contacts. Contains for example Contacts that sent you a message or blocked contacts.
      * This does not represent your roster list.
      */
     contacts$: BehaviorSubject<Contact[]>;
+
+    /**
+     * A list of contacts which the current user has blocked.
+     */
+    blockedContacts$: Observable<Contact[]>;
+
+    /**
+     * contacts$ without the blockedContacts$.
+     */
+    notBlockedContacts$: Observable<Contact[]>;
 
     /**
      * A list of contacts to which the current user has accepted subscriptions to.
