@@ -20,6 +20,7 @@ import { RosterListComponent } from './components/roster-list/roster-list.compon
 import { LinksDirective } from './directives/links.directive';
 import { BlockPlugin } from './services/adapters/xmpp/plugins/block.plugin';
 import { BookmarkPlugin } from './services/adapters/xmpp/plugins/bookmark.plugin';
+import { EntityTimePlugin } from './services/adapters/xmpp/plugins/entity-time.plugin';
 import { HttpFileUploadPlugin } from './services/adapters/xmpp/plugins/http-file-upload.plugin';
 import { MessageArchivePlugin } from './services/adapters/xmpp/plugins/message-archive.plugin';
 import { MessageCarbonsPlugin } from './services/adapters/xmpp/plugins/message-carbons.plugin';
@@ -99,22 +100,24 @@ export class NgxChatModule {
                 {
                     provide: ChatServiceToken,
                     deps: [XmppChatConnectionService, LogService, ContactFactoryService],
-                    useFactory: NgxChatModule.xmppChatAdapter
+                    useFactory: NgxChatModule.xmppChatAdapter,
                 },
                 {
                     provide: APP_INITIALIZER,
                     deps: [Injector],
                     useFactory: NgxChatModule.initializePlugins,
                     multi: true,
-                }
+                },
             ],
         };
 
     }
 
-    private static xmppChatAdapter(chatConnectionService: XmppChatConnectionService,
-                                   logService: LogService,
-                                   contactFactory: ContactFactoryService): XmppChatAdapter {
+    private static xmppChatAdapter(
+        chatConnectionService: XmppChatConnectionService,
+        logService: LogService,
+        contactFactory: ContactFactoryService,
+    ): XmppChatAdapter {
         return new XmppChatAdapter(chatConnectionService, logService, contactFactory);
     }
 
@@ -129,6 +132,7 @@ export class NgxChatModule {
             const chatMessageListRegistryService = injector.get(ChatMessageListRegistryService);
             const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
                 xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin);
+            const entityTimePlugin = new EntityTimePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService);
 
             xmppChatAdapter.addPlugins([
                 new BookmarkPlugin(publishSubscribePlugin),
@@ -145,9 +149,11 @@ export class NgxChatModule {
                 new MessageCarbonsPlugin(xmppChatAdapter),
                 unreadMessageCountPlugin,
                 new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter, logService),
-                new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService),
+                new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService,
+                    entityTimePlugin),
                 new MucSubPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
                 new BlockPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
+                entityTimePlugin,
             ]);
         };
         return initializer;
