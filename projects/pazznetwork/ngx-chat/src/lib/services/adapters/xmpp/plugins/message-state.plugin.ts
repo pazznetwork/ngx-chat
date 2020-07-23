@@ -8,6 +8,7 @@ import { ChatMessageListRegistryService } from '../../../chat-message-list-regis
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
+import { EntityTimePlugin } from './entity-time.plugin';
 import { MessageUuidPlugin } from './message-uuid.plugin';
 import { MessageReceivedEvent } from './message.plugin';
 import { PublishSubscribePlugin } from './publish-subscribe.plugin';
@@ -22,7 +23,6 @@ export interface JidToMessageStateDate {
     [jid: string]: StateDate;
 }
 
-const NGX_CHAT_MESSAGESENT = 'ngxchat:messagesent';
 const STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES = 'ngxchat:contactmessagestates';
 const wrapperNodeName = 'entries';
 const nodeName = 'contact-message-state';
@@ -39,6 +39,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         private xmppChatAdapter: XmppChatAdapter,
         private chatMessageListRegistry: ChatMessageListRegistryService,
         private logService: LogService,
+        private entityTimePlugin: EntityTimePlugin,
     ) {
         super();
 
@@ -47,9 +48,9 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
                 filter(() => xmppChatAdapter.state$.getValue() === 'online'),
             )
             .subscribe(contacts => {
-                contacts.forEach(contact => {
+                contacts.forEach(async contact => {
                     if (contact.mostRecentMessageReceived) {
-                        this.sendMessageStateNotification(
+                        await this.sendMessageStateNotification(
                             contact.jidBare,
                             contact.mostRecentMessageReceived.id,
                             MessageState.RECIPIENT_SEEN);
@@ -71,7 +72,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
     }
 
     private processPubSub(itemElement: Element[]) {
-        const results = {} as JidToMessageStateDate;
+        const results: JidToMessageStateDate = {};
         if (itemElement.length === 1) {
             for (const lastReadEntry of itemElement[0].getChild(wrapperNodeName).getChildren(nodeName)) {
                 const {lastRecipientReceived, lastRecipientSeen, lastSent, jid} = lastReadEntry.attrs;
@@ -93,9 +94,9 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
                 const stateDates = this.jidToMessageStateDate[jid];
                 wrapperNode.c(nodeName, {
                     jid,
-                    lastRecipientReceived: stateDates.lastRecipientReceived && stateDates.lastRecipientReceived.getTime(),
-                    lastRecipientSeen: stateDates.lastRecipientSeen && stateDates.lastRecipientSeen.getTime(),
-                    lastSent: stateDates.lastSent && stateDates.lastSent.getTime(),
+                    lastRecipientReceived: stateDates.lastRecipientReceived.getTime(),
+                    lastRecipientSeen: stateDates.lastRecipientSeen.getTime(),
+                    lastSent: stateDates.lastSent.getTime(),
                 });
             }
         }
@@ -120,8 +121,10 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
     async afterSendMessage(message: Message, messageStanza: Element) {
         const {type, to} = messageStanza.attrs;
         if (type === 'chat') {
-            await this.publishSubscribePlugin.privateNotify(NGX_CHAT_MESSAGESENT);
-            this.updateContactMessageState(parseJid(to).bare().toString(), MessageState.SENT, new Date());
+            this.updateContactMessageState(
+                parseJid(to).bare().toString(),
+                MessageState.SENT,
+                new Date(await this.entityTimePlugin.getNow()));
             delete message.state;
         }
     }
@@ -141,10 +144,10 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         const isChatWithContactOpen = this.chatMessageListRegistry.isChatOpen(this.xmppChatAdapter.getOrCreateContactById(from));
         const state = isChatWithContactOpen ? MessageState.RECIPIENT_SEEN : MessageState.RECIPIENT_RECEIVED;
         const messageId = MessageUuidPlugin.extractIdFromStanza(stanza);
-        this.sendMessageStateNotification(parseJid(from), messageId, state);
+        this.sendMessageStateNotification(parseJid(from), messageId, state).catch(e => this.logService.error('error sending state notification', e));
     }
 
-    private sendMessageStateNotification(recipient: JID, messageId: string, state: MessageState) {
+    private async sendMessageStateNotification(recipient: JID, messageId: string, state: MessageState) {
         const messageStateResponse = xml('message', {
                 to: recipient.bare().toString(),
                 from: this.xmppChatAdapter.chatConnectionService.userJid.toString(),
@@ -153,11 +156,11 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
             xml('message-state', {
                 xmlns: STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES,
                 messageId,
-                date: new Date().toISOString(),
+                date: new Date(await this.entityTimePlugin.getNow()).toISOString(),
                 state
             })
         );
-        this.xmppChatAdapter.chatConnectionService.send(messageStateResponse);
+        await this.xmppChatAdapter.chatConnectionService.send(messageStateResponse);
     }
 
     handleStanza(stanza: Stanza) {
@@ -198,9 +201,9 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
     public getContactMessageState(contactJid: string) {
         if (!this.jidToMessageStateDate[contactJid]) {
             this.jidToMessageStateDate[contactJid] = {
-                lastRecipientReceived: null,
-                lastRecipientSeen: null,
-                lastSent: null,
+                lastRecipientReceived: new Date(0),
+                lastRecipientSeen: new Date(0),
+                lastSent: new Date(0),
             };
         }
         return this.jidToMessageStateDate[contactJid];

@@ -132,8 +132,9 @@ export class NgxChatModule {
             const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(xmppChatAdapter);
             const publishSubscribePlugin = new PublishSubscribePlugin(xmppChatAdapter, serviceDiscoveryPlugin);
             const chatMessageListRegistryService = injector.get(ChatMessageListRegistryService);
+            const entityTimePlugin = new EntityTimePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService);
             const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
-                xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin);
+                xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin, entityTimePlugin);
 
             xmppChatAdapter.addPlugins([
                 new BookmarkPlugin(publishSubscribePlugin),
@@ -150,9 +151,11 @@ export class NgxChatModule {
                 new MessageCarbonsPlugin(xmppChatAdapter),
                 unreadMessageCountPlugin,
                 new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter, logService),
-                new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService),
+                new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService,
+                    entityTimePlugin),
                 new MucSubPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
                 new BlockPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
+                entityTimePlugin,
             ]);
         };
         return initializer;

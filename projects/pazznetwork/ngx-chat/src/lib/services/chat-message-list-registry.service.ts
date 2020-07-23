@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Contact } from '../core/contact';
 
 /**
@@ -11,6 +11,7 @@ import { Contact } from '../core/contact';
 export class ChatMessageListRegistryService {
 
     public openChats$ = new BehaviorSubject<Set<Contact>>(new Set());
+    public chatOpened$ = new Subject<Contact>();
     private contactToOpenMessageListCount = new Map<Contact, number>();
 
     constructor() {
@@ -21,10 +22,14 @@ export class ChatMessageListRegistryService {
     }
 
     incrementOpenWindowCount(contact: Contact) {
+        const wasWindowOpen = this.isChatOpen(contact);
         this.contactToOpenMessageListCount.set(contact, this.getOrDefault(contact, 0) + 1);
         const openWindowSet = this.openChats$.getValue();
         openWindowSet.add(contact);
         this.openChats$.next(openWindowSet);
+        if (!wasWindowOpen) {
+            this.chatOpened$.next(contact);
+        }
     }
 
     decrementOpenWindowCount(contact: Contact) {
