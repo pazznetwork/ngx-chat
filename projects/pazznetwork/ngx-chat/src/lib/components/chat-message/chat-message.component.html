@@ -1,8 +1,8 @@
 <div class="chat-message"
      [ngClass]="{'chat-message--in': message.direction === 'in', 'chat-message--out': message.direction === 'out'}">
     <div *ngIf="showAvatars" class="chat-message-avatar">
-        <img *ngIf="message.direction === 'in'" [src]="avatar"/>
-        <img *ngIf="message.direction === 'out'" [src]="chatService.userAvatar$ | async"/>
+        <ngx-chat-avatar *ngIf="message.direction === 'in'" [imageUrl]="avatar"></ngx-chat-avatar>
+        <ngx-chat-avatar *ngIf="message.direction === 'out'" [imageUrl]="chatService.userAvatar$ | async"></ngx-chat-avatar>
     </div>
     <div class="chat-message-text" [ngClass]="{'chat-message-text--no-avatar':!showAvatars}">
         <span [ngxChatLinks]="message.body"></span>

@@ -7,7 +7,45 @@
   font-family: "Helvetica", "Arial", serif
 }
 
-.chat-content {
+.chat-contact-avatar-wrapper {
+  // min-{width,height} is necessary in addition to {width,height} to force same values
+  // not specifying min-{width,height} leads to weird widths
+  min-width: 2em;
+  width: 2em;
+  min-height: 2em;
+  height: 2em;
+}
+
+.header-middle {
+  flex-grow: 1;
+  flex-shrink: 1;
+  padding: 0 0.5em;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.chat-contact-name-wrapper,
+.chat-contact-status-wrapper {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+}
+
+.has-click-handler:hover {
+  text-decoration: underline;
+}
+
+.chat-contact-status {
+  color: @general-light;
+}
+
+.window-content {
   text-align: left;
   padding: 0;
   min-height: 5em;

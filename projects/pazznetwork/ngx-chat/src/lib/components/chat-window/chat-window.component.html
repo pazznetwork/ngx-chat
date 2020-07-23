@@ -1,23 +1,51 @@
 <ngx-chat-window-frame
-        [windowIcon]="chatWindowState.contact.avatar"
-        [windowTitle]="chatWindowState.contact.name"
         (headerClick)="onClickHeader()"
-        (closeClick)="onClickClose()"
-        [fileDropEnabled]="httpFileUploadPlugin.fileUploadSupported"
-        (fileDrop)="uploadFile($event)"
-        [fileDropMessageKey]="chatService.translations.dropMessage">
+        (closeClick)="onClickClose()">
 
-    <div *ngIf="!chatWindowState.isCollapsed" class="chat-content" (click)="onFocus()">
-        <ngx-chat-message-list [contact]="chatWindowState.contact" [showAvatars]="false"></ngx-chat-message-list>
-        <div class="chat-input-container">
-            <ngx-chat-message-input [contact]="chatWindowState.contact"></ngx-chat-message-input>
-            <div *ngFor="let action of chatService.chatActions"
-                 (click)="onActionClick(action)"
-                 class="chat-action"
-                 [ngClass]="action.cssClass"
-                 [innerHTML]="action.html">
+    <ng-container class="window-header-content">
+        <div class="chat-contact-avatar-wrapper" *ngIf="chatWindowState.contact.avatar" (click)="onContactClick($event)">
+            <ngx-chat-avatar [imageUrl]="chatWindowState.contact.avatar"></ngx-chat-avatar>
+        </div>
+
+        <div class="header-middle">
+
+            <div class="chat-contact-name-wrapper"
+                 [title]="chatWindowState.contact.name">
+                <span class="chat-contact-name-wrapper"
+                      [ngClass]="{'has-click-handler': !chatWindowState.isCollapsed && !!this.contactClickHandler}"
+                      (click)="onContactClick($event)">
+                    {{chatWindowState.contact.name}}
+                </span>
+            </div>
+
+            <div class="chat-contact-status-wrapper" *ngIf="!chatWindowState.isCollapsed">
+                <span class="chat-contact-status">
+                    {{chatService.translations.presence[chatWindowState.contact.presence$ | async]}}
+                </span>
+            </div>
+
+        </div>
+    </ng-container>
+
+    <ngx-chat-filedrop
+            *ngIf="!chatWindowState.isCollapsed"
+            class="window-content"
+            [enabled]="httpFileUploadPlugin.fileUploadSupported"
+            (fileUpload)="uploadFile($event)"
+            [dropMessage]="chatService.translations.dropMessage">
+        <div (click)="onFocus()">
+            <ngx-chat-message-list [contact]="chatWindowState.contact" [showAvatars]="false"></ngx-chat-message-list>
+            <div class="chat-input-container">
+                <ngx-chat-message-input [contact]="chatWindowState.contact"></ngx-chat-message-input>
+                <div *ngFor="let action of chatService.chatActions"
+                     (click)="onActionClick(action)"
+                     class="chat-action"
+                     [ngClass]="action.cssClass"
+                     [innerHTML]="action.html">
+                </div>
             </div>
         </div>
-    </div>
+    </ngx-chat-filedrop>
+
 
 </ngx-chat-window-frame>

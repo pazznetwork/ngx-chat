@@ -1,6 +1,7 @@
 import { Component, Inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Contact } from '../core/contact';
+import { Presence } from '../core/presence';
 import { Translations } from '../core/translations';
 import { ChatService, ChatServiceToken } from '../services/chat-service';
 
@@ -95,6 +96,11 @@ export class ChatComponent implements OnInit, OnChanges {
         block: 'Block',
         blockAndReport: 'Block & report',
         dismiss: 'Dismiss',
+        presence: {
+            [Presence.away]: 'Away',
+            [Presence.present]: 'Online',
+            [Presence.unavailable]: 'Offline',
+        }
     };
 
     constructor(@Inject(ChatServiceToken) private chatService: ChatService) {
@@ -112,7 +118,14 @@ export class ChatComponent implements OnInit, OnChanges {
     }
 
     private mergeAndSetTranslations() {
-        this.chatService.translations = {...this.defaultTranslations, ...this.translations};
+        this.chatService.translations = {
+            ...this.defaultTranslations,
+            ...this.translations,
+            presence: {
+                ...this.defaultTranslations.presence,
+                ...this.translations?.presence,
+            }
+        };
     }
 
     ngOnChanges(changes: SimpleChanges): void {

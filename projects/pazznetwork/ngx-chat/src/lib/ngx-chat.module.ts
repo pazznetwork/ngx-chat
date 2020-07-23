@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, Injector, ModuleWithProviders, NgModule, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ChatAvatarComponent } from './components/chat-avatar/chat-avatar.component';
 import { FileDropComponent } from './components/chat-filedrop/file-drop.component';
 import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
@@ -20,6 +21,7 @@ import { RosterListComponent } from './components/roster-list/roster-list.compon
 import { LinksDirective } from './directives/links.directive';
 import { BlockPlugin } from './services/adapters/xmpp/plugins/block.plugin';
 import { BookmarkPlugin } from './services/adapters/xmpp/plugins/bookmark.plugin';
+import { EntityTimePlugin } from './services/adapters/xmpp/plugins/entity-time.plugin';
 import { HttpFileUploadPlugin } from './services/adapters/xmpp/plugins/http-file-upload.plugin';
 import { MessageArchivePlugin } from './services/adapters/xmpp/plugins/message-archive.plugin';
 import { MessageCarbonsPlugin } from './services/adapters/xmpp/plugins/message-carbons.plugin';
@@ -69,6 +71,7 @@ import { LogService } from './services/log.service';
         FileDropComponent,
         ChatWindowFrameComponent,
         ChatVideoWindowComponent,
+        ChatAvatarComponent,
     ],
     exports: [
         ChatComponent,
@@ -99,22 +102,24 @@ export class NgxChatModule {
                 {
                     provide: ChatServiceToken,
                     deps: [XmppChatConnectionService, LogService, ContactFactoryService],
-                    useFactory: NgxChatModule.xmppChatAdapter
+                    useFactory: NgxChatModule.xmppChatAdapter,
                 },
                 {
                     provide: APP_INITIALIZER,
                     deps: [Injector],
                     useFactory: NgxChatModule.initializePlugins,
                     multi: true,
-                }
+                },
             ],
         };
 
     }
 
-    private static xmppChatAdapter(chatConnectionService: XmppChatConnectionService,
-                                   logService: LogService,
-                                   contactFactory: ContactFactoryService): XmppChatAdapter {
+    private static xmppChatAdapter(
+        chatConnectionService: XmppChatConnectionService,
+        logService: LogService,
+        contactFactory: ContactFactoryService,
+    ): XmppChatAdapter {
         return new XmppChatAdapter(chatConnectionService, logService, contactFactory);
     }
 

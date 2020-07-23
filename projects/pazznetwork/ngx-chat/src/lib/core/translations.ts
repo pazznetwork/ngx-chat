@@ -1,3 +1,5 @@
+import { Presence } from './presence';
+
 export interface Translations {
     chat: string;
     contacts: string;
@@ -17,4 +19,7 @@ export interface Translations {
     block: string;
     blockAndReport: string;
     dismiss: string;
+    presence: {
+        [P in Presence]: string;
+    };
 }
