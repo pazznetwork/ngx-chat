@@ -24,6 +24,8 @@ export class XmppChatAdapter implements ChatService {
     messageSent$: Subject<Contact> = new Subject();
 
     contacts$ = new BehaviorSubject<Contact[]>([]);
+    contactCreated$ = new Subject<Contact>();
+
     blockedContactIds$ = new BehaviorSubject<string[]>([]);
     blockedContacts$ = combineLatest([this.contacts$, this.blockedContactIds$])
         .pipe(
@@ -140,6 +142,7 @@ export class XmppChatAdapter implements ChatService {
         if (!contact) {
             contact = this.contactFactory.createContact(parseJid(jidPlain).bare().toString(), name);
             this.contacts$.next([contact, ...this.contacts$.getValue()]);
+            this.contactCreated$.next(contact);
         }
         return contact;
     }

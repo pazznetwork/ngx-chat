@@ -132,7 +132,7 @@ export class NgxChatModule {
             const chatMessageListRegistryService = injector.get(ChatMessageListRegistryService);
             const entityTimePlugin = new EntityTimePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService);
             const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
-                xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin);
+                xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin, entityTimePlugin);
 
             xmppChatAdapter.addPlugins([
                 new BookmarkPlugin(publishSubscribePlugin),
