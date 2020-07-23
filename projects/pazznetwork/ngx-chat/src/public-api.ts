@@ -46,6 +46,7 @@ export * from './lib/services/adapters/xmpp/xmpp-chat-adapter.service';
 export * from './lib/services/adapters/xmpp/xmpp-chat-connection.service';
 export * from './lib/services/adapters/xmpp/xmpp-client-factory.service';
 export * from './lib/services/chat-background-notification.service';
+export * from './lib/services/chat-contact-click-handler';
 export * from './lib/services/chat-list-state.service';
 export * from './lib/services/chat-message-list-registry.service';
 export * from './lib/services/chat-service';
