@@ -1,3 +1,13 @@
+<a name="0.9.4"></a>
+## [0.9.4](https://github.com/pazznetwork/ngx-chat/compare/v0.9.3...v0.9.4) (2020-07-23)
+
+
+### Bug Fixes
+
+* add missing public api entry for chat-contact-click-handler ([e72773e](https://github.com/pazznetwork/ngx-chat/commit/e72773e))
+
+
+
 <a name="0.9.3"></a>
 ## [0.9.3](https://github.com/pazznetwork/ngx-chat/compare/v0.9.2...v0.9.3) (2020-07-23)
 
