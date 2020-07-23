@@ -130,9 +130,9 @@ export class NgxChatModule {
             const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(xmppChatAdapter);
             const publishSubscribePlugin = new PublishSubscribePlugin(xmppChatAdapter, serviceDiscoveryPlugin);
             const chatMessageListRegistryService = injector.get(ChatMessageListRegistryService);
+            const entityTimePlugin = new EntityTimePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService);
             const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
                 xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin);
-            const entityTimePlugin = new EntityTimePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService);
 
             xmppChatAdapter.addPlugins([
                 new BookmarkPlugin(publishSubscribePlugin),

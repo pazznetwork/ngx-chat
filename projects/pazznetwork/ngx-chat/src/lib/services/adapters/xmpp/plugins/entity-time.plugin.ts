@@ -1,6 +1,6 @@
 import { xml } from '@xmpp/client';
 import { BehaviorSubject, of } from 'rxjs';
-import { catchError, first, map, timeout } from 'rxjs/operators';
+import { catchError, first, flatMap, map, timeout } from 'rxjs/operators';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
@@ -49,12 +49,15 @@ export class EntityTimePlugin extends AbstractXmppPlugin {
         this.serverTime$.next(null);
     }
 
+    /**
+     * Returns a non-client-specific timestamp if server supports XEP-0202. Fallback to local timestamp in case of missing support.
+     */
     async getNow(): Promise<number> {
+        const calculateNowViaServerTime$ = this.serverTime$.pipe(map(reference => this.calculateNow(reference)), first());
         return await this.serverSupportsTime$.pipe(
             timeout(5000),
-            first(support => support === true),
-            map(() => this.serverTime$.getValue()),
-            map(reference => this.calculateNow(reference)),
+            first(supportsServerTime => supportsServerTime !== 'unknown'),
+            flatMap(supportsServerTime => supportsServerTime ? calculateNowViaServerTime$ : of(Date.now())),
             catchError(() => of(Date.now())),
         ).toPromise();
     }

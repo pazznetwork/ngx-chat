@@ -39,7 +39,7 @@ export class MessagePlugin extends AbstractXmppPlugin {
         const message = {
             body: messageStanza.getChildText('body'),
             direction: Direction.in,
-            datetime: new Date(),
+            datetime: new Date(), // TODO: replace with entity time plugin
             delayed: !!messageStanza.getChild('delay')
         };
 
@@ -60,7 +60,7 @@ export class MessagePlugin extends AbstractXmppPlugin {
         const message: Message = {
             direction: Direction.out,
             body,
-            datetime: new Date(),
+            datetime: new Date(), // TODO: replace with entity time plugin
             delayed: false
         };
         this.xmppChatAdapter.plugins.forEach(plugin => plugin.beforeSendMessage(messageStanza, message));

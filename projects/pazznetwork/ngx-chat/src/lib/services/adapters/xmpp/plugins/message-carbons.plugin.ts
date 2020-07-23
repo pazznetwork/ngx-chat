@@ -42,7 +42,7 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
         const message = {
             body: messageElement.getChildText('body'),
             direction,
-            datetime: new Date(),
+            datetime: new Date(), // TODO: replace with entity time plugin
             delayed: false,
         };
 

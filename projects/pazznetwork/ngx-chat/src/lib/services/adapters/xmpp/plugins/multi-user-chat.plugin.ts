@@ -441,7 +441,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         if (delay && delay.attrs.stamp) {
             datetime = new Date(delay.attrs.stamp);
         } else {
-            datetime = new Date();
+            datetime = new Date(); // TODO: replace with entity time plugin
         }
 
         const from = parseJid(stanza.attrs.from);
