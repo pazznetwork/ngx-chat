@@ -1,3 +1,37 @@
+<a name="0.9.3"></a>
+## [0.9.3](https://github.com/pazznetwork/ngx-chat/compare/v0.9.2...v0.9.3) (2020-07-23)
+
+
+### Bug Fixes
+
+*  Unread message counter is not set correctly after reconnect ([a9c2bed](https://github.com/pazznetwork/ngx-chat/commit/a9c2bed)), closes [#36](https://github.com/pazznetwork/ngx-chat/issues/36)
+* do not stretch / crush avatar images, respect original aspect ratio ([78a5e14](https://github.com/pazznetwork/ngx-chat/commit/78a5e14)), closes [#24](https://github.com/pazznetwork/ngx-chat/issues/24)
+* further improvements regarding entity-time.plugin.ts ([46ec375](https://github.com/pazznetwork/ngx-chat/commit/46ec375)), closes [#35](https://github.com/pazznetwork/ngx-chat/issues/35)
+* improve synchronization of message read state time handling ([43572f7](https://github.com/pazznetwork/ngx-chat/commit/43572f7)), closes [#35](https://github.com/pazznetwork/ngx-chat/issues/35)
+
+
+### Features
+
+* implement contact click handler for message list component ([6fdcb4d](https://github.com/pazznetwork/ngx-chat/commit/6fdcb4d))
+
+
+
+<a name="0.9.2"></a>
+## [0.9.2](https://github.com/pazznetwork/ngx-chat/compare/v0.9.1...v0.9.2) (2020-06-11)
+
+
+### Bug Fixes
+
+* supportsFeature incorrectly looked up features in services ([5c71b39](https://github.com/pazznetwork/ngx-chat/commit/5c71b39)), closes [#31](https://github.com/pazznetwork/ngx-chat/issues/31)
+
+
+### Features
+
+* implement XEP-0191 blocking command ([27d8363](https://github.com/pazznetwork/ngx-chat/commit/27d8363))
+* video tracks ([e702c00](https://github.com/pazznetwork/ngx-chat/commit/e702c00))
+
+
+
 <a name="0.9.1"></a>
 ## [0.9.1](https://github.com/pazznetwork/ngx-chat/compare/v0.9.0...v0.9.1) (2020-04-03)
 
