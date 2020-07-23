@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
 import { Contact } from '../../core/contact';
 import { Message, MessageState } from '../../core/message';
 import { extractUrls } from '../../core/utils-links';
 import { MessageStatePlugin, StateDate } from '../../services/adapters/xmpp/plugins/message-state.plugin';
 import { XmppChatAdapter } from '../../services/adapters/xmpp/xmpp-chat-adapter.service';
+import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../services/chat-contact-click-handler';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
 export const MAX_IMAGE_SIZE = 250 * 1024;
@@ -40,6 +41,7 @@ export class ChatMessageComponent implements OnInit {
     constructor(
         @Inject(ChatServiceToken) public chatService: ChatService,
         private httpClient: HttpClient,
+        @Inject(CONTACT_CLICK_HANDLER_TOKEN) @Optional() public contactClickHandler: ChatContactClickHandler,
     ) {
         this.messageStatePlugin = this.chatService.getPlugin(MessageStatePlugin);
     }
@@ -83,6 +85,12 @@ export class ChatMessageComponent implements OnInit {
             return MessageState.RECIPIENT_RECEIVED;
         } else if (date <= states.lastSent) {
             return MessageState.SENT;
+        }
+    }
+
+    onContactClick() {
+        if (this.contactClickHandler) {
+            this.contactClickHandler.onClickContact(this.contact);
         }
     }
 }
