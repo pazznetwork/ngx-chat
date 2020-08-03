@@ -11,8 +11,7 @@
 
             <div class="chat-contact-name-wrapper"
                  [title]="chatWindowState.contact.name">
-                <span class="chat-contact-name-wrapper"
-                      [ngClass]="{'has-click-handler': !chatWindowState.isCollapsed && !!this.contactClickHandler}"
+                <span [ngClass]="{'has-click-handler': !chatWindowState.isCollapsed && !!this.contactClickHandler}"
                       (click)="onContactClick($event)">
                     {{chatWindowState.contact.name}}
                 </span>
