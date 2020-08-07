@@ -1,3 +1,13 @@
+<a name="0.9.5"></a>
+## [0.9.5](https://github.com/pazznetwork/ngx-chat/compare/v0.9.4...v0.9.5) (2020-08-07)
+
+
+### Bug Fixes
+
+* remove invalid class for new chat header user name ([7a84991](https://github.com/pazznetwork/ngx-chat/commit/7a84991))
+
+
+
 <a name="0.9.4"></a>
 ## [0.9.4](https://github.com/pazznetwork/ngx-chat/compare/v0.9.3...v0.9.4) (2020-07-23)
 
