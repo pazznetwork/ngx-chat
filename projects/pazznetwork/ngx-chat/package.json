@@ -1,16 +1,17 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "0.9.5",
+  "version": "0.10.0",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "^9.0.0",
-    "@angular/core": "^9.0.0",
-    "@angular/cdk": "^9.0.0",
+    "@angular/common": "^10.0.0",
+    "@angular/core": "^10.0.0",
+    "@angular/cdk": "^10.0.0",
     "@types/ltx": "^2.6.3",
     "@xmpp/client": "^0.9.0"
   },
   "devDependencies": {},
-  "dependencies": {},
+  "dependencies": {
+  },
   "keywords": [
     "ngx-chat",
     "xmpp",
