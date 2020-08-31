@@ -1,3 +1,8 @@
+<a name="0.10.1"></a>
+## [0.10.1](https://github.com/pazznetwork/ngx-chat/compare/v0.10.0...v0.10.1) (2020-08-31)
+
+
+
 <a name="0.10.0"></a>
 # [0.10.0](https://github.com/pazznetwork/ngx-chat/compare/v0.9.5...v0.10.0) (2020-08-07)
 
