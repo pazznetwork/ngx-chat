@@ -1,7 +1,7 @@
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { APP_INITIALIZER, Injector, ModuleWithProviders, NgModule, NgZone } from '@angular/core';
+import { ModuleWithProviders, NgModule, NgZone } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChatAvatarComponent } from './components/chat-avatar/chat-avatar.component';
 import { FileDropComponent } from './components/chat-filedrop/file-drop.component';
@@ -81,10 +81,6 @@ import { LogService } from './services/log.service';
         FileDropComponent,
         LinksDirective,
     ],
-    entryComponents: [
-        ChatMessageLinkComponent,
-        ChatMessageTextComponent,
-    ],
 })
 export class NgxChatModule {
 
@@ -93,22 +89,24 @@ export class NgxChatModule {
         return {
             ngModule: NgxChatModule,
             providers: [
-                ChatListStateService,
-                LogService,
-                ContactFactoryService,
                 ChatBackgroundNotificationService,
+                ChatListStateService,
+                ChatMessageListRegistryService,
+                ContactFactoryService,
+                LogService,
                 XmppChatConnectionService,
                 XmppClientFactoryService,
                 {
                     provide: ChatServiceToken,
-                    deps: [XmppChatConnectionService, LogService, ContactFactoryService],
+                    deps: [
+                        XmppChatConnectionService,
+                        ChatMessageListRegistryService,
+                        ContactFactoryService,
+                        HttpClient,
+                        LogService,
+                        NgZone,
+                    ],
                     useFactory: NgxChatModule.xmppChatAdapter,
-                },
-                {
-                    provide: APP_INITIALIZER,
-                    deps: [Injector],
-                    useFactory: NgxChatModule.initializePlugins,
-                    multi: true,
                 },
             ],
         };
@@ -117,48 +115,43 @@ export class NgxChatModule {
 
     private static xmppChatAdapter(
         chatConnectionService: XmppChatConnectionService,
-        logService: LogService,
+        chatMessageListRegistryService: ChatMessageListRegistryService,
         contactFactory: ContactFactoryService,
+        httpClient: HttpClient,
+        logService: LogService,
+        ngZone: NgZone,
     ): XmppChatAdapter {
-        return new XmppChatAdapter(chatConnectionService, logService, contactFactory);
-    }
+        const xmppChatAdapter = new XmppChatAdapter(chatConnectionService, logService, contactFactory);
 
-    private static initializePlugins(injector: Injector) {
-        // noinspection UnnecessaryLocalVariableJS
-        const initializer = function() { // tslint:disable-line:only-arrow-functions
-            const logService = injector.get(LogService);
-            const ngZone = injector.get(NgZone);
-            const xmppChatAdapter = injector.get(ChatServiceToken) as XmppChatAdapter;
-            const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(xmppChatAdapter);
-            const publishSubscribePlugin = new PublishSubscribePlugin(xmppChatAdapter, serviceDiscoveryPlugin);
-            const chatMessageListRegistryService = injector.get(ChatMessageListRegistryService);
-            const entityTimePlugin = new EntityTimePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService);
-            const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
-                xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin, entityTimePlugin);
+        const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(xmppChatAdapter);
+        const publishSubscribePlugin = new PublishSubscribePlugin(xmppChatAdapter, serviceDiscoveryPlugin);
+        const entityTimePlugin = new EntityTimePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService);
+        const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
+            xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin, entityTimePlugin);
 
-            xmppChatAdapter.addPlugins([
-                new BookmarkPlugin(publishSubscribePlugin),
-                new MessageArchivePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService),
-                new MessagePlugin(xmppChatAdapter, logService),
-                new MessageUuidPlugin(),
-                new MultiUserChatPlugin(xmppChatAdapter, logService, serviceDiscoveryPlugin),
-                publishSubscribePlugin,
-                new RosterPlugin(xmppChatAdapter, logService),
-                serviceDiscoveryPlugin,
-                new PushPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
-                new PingPlugin(xmppChatAdapter, logService, ngZone),
-                new RegistrationPlugin(logService, ngZone),
-                new MessageCarbonsPlugin(xmppChatAdapter),
-                unreadMessageCountPlugin,
-                new HttpFileUploadPlugin(injector.get(HttpClient), serviceDiscoveryPlugin, xmppChatAdapter, logService),
-                new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService,
-                    entityTimePlugin),
-                new MucSubPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
-                new BlockPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
-                entityTimePlugin,
-            ]);
-        };
-        return initializer;
+        xmppChatAdapter.addPlugins([
+            new BookmarkPlugin(publishSubscribePlugin),
+            new MessageArchivePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService),
+            new MessagePlugin(xmppChatAdapter, logService),
+            new MessageUuidPlugin(),
+            new MultiUserChatPlugin(xmppChatAdapter, logService, serviceDiscoveryPlugin),
+            publishSubscribePlugin,
+            new RosterPlugin(xmppChatAdapter, logService),
+            serviceDiscoveryPlugin,
+            new PushPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
+            new PingPlugin(xmppChatAdapter, logService, ngZone),
+            new RegistrationPlugin(logService, ngZone),
+            new MessageCarbonsPlugin(xmppChatAdapter),
+            unreadMessageCountPlugin,
+            new HttpFileUploadPlugin(httpClient, serviceDiscoveryPlugin, xmppChatAdapter, logService),
+            new MessageStatePlugin(publishSubscribePlugin, xmppChatAdapter, chatMessageListRegistryService, logService,
+                entityTimePlugin),
+            new MucSubPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
+            new BlockPlugin(xmppChatAdapter, serviceDiscoveryPlugin),
+            entityTimePlugin,
+        ]);
+
+        return xmppChatAdapter;
     }
 
 }

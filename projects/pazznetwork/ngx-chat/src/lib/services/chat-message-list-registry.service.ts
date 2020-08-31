@@ -5,9 +5,7 @@ import { Contact } from '../core/contact';
 /**
  * Used to determine if a message component for a given contact is open.
  */
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable()
 export class ChatMessageListRegistryService {
 
     public openChats$ = new BehaviorSubject<Set<Contact>>(new Set());
