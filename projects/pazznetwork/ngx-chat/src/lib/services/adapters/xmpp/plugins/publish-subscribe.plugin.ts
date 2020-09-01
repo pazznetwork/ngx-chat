@@ -35,7 +35,7 @@ class PublishStanzaBuilder extends AbstractStanzaBuilder {
 
         // necessary as a 'event-only' publish is currently broken in ejabberd, see
         // https://github.com/processone/ejabberd/issues/2799
-        const data = this.publishOptions.data || xml('data');
+        const data = this.publishOptions.data || xml('data');
 
         return xml('iq', {type: 'set'},
             xml('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'},
