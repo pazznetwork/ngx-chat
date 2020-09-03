@@ -75,7 +75,7 @@ export class ChatComponent implements OnInit, OnChanges {
     contactsUnaffiliated$?: Observable<Contact[]>;
 
     /**
-     * If supplied, userAvatar$ contains an Obervable<string>, which is used as the src attribute of the img for the current user.
+     * If supplied, userAvatar$ contains an Observable<string>, which is used as the src attribute of the img for the current user.
      */
     @Input()
     public userAvatar$?: Observable<string>;

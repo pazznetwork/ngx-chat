@@ -119,16 +119,13 @@ cd ngx-chat
 # install dependencies
 npm install
 
+# build the library continuously
+ng build @pazznetwork/ngx-chat --watch
+
+# (in another terminal) build the sample app continuously
 # will run the demo application on
 # http://localhost:4200
 ng serve
-
-# build the library continuously
-    ng build @pazznetwork/ngx-chat --watch
-
-# (in another terminal) build the sample app continuously
-ng serve
-
 ```
 
 
