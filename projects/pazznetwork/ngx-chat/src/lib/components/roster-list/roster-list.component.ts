@@ -53,7 +53,7 @@ export class RosterListComponent implements OnInit {
     hasNoContacts$: Observable<boolean>;
 
     @Output()
-    rosterStateChanged: EventEmitter<string> = new EventEmitter<string>();
+    rosterStateChanged = new EventEmitter<'hidden' | 'shown'>();
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
                 private chatListService: ChatListStateService) {

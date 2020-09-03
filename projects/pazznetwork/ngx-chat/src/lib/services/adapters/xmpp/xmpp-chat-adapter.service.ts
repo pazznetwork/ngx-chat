@@ -9,6 +9,7 @@ import { LogInRequest } from '../../../core/log-in-request';
 import { ChatPlugin } from '../../../core/plugin';
 import { Stanza } from '../../../core/stanza';
 import { Translations } from '../../../core/translations';
+import { defaultTranslations } from '../../../core/translations-default';
 import { ChatService } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
@@ -53,7 +54,8 @@ export class XmppChatAdapter implements ChatService {
     plugins: ChatPlugin[] = [];
     enableDebugging = false;
     userAvatar$ = new BehaviorSubject(dummyAvatar);
-    translations: Translations;
+    translations: Translations = defaultTranslations();
+
     chatActions = [{
         id: 'sendMessage',
         cssClass: 'chat-window-send',
@@ -62,6 +64,7 @@ export class XmppChatAdapter implements ChatService {
             chatActionContext.chatWindow.sendMessage();
         },
     }];
+
     private lastLogInRequest: LogInRequest;
 
     constructor(

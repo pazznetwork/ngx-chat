@@ -8,6 +8,7 @@ import { FileDropComponent } from './components/chat-filedrop/file-drop.componen
 import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
 import { ChatMessageLinkComponent } from './components/chat-message-link/chat-message-link.component';
 import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
+import { ChatMessageSimpleComponent } from './components/chat-message-simple/chat-message-simple.component';
 import { ChatMessageTextComponent } from './components/chat-message-text/chat-message-text.component';
 import { ChatMessageComponent } from './components/chat-message/chat-message.component';
 import { ChatRoomMessagesComponent } from './components/chat-room-messages/chat-room-messages.component';
@@ -61,6 +62,7 @@ import { LogService } from './services/log.service';
         ChatMessageInputComponent,
         ChatMessageLinkComponent,
         ChatMessageListComponent,
+        ChatMessageSimpleComponent,
         ChatMessageTextComponent,
         ChatRoomMessagesComponent,
         ChatWindowComponent,
@@ -77,6 +79,7 @@ import { LogService } from './services/log.service';
         ChatComponent,
         ChatMessageInputComponent,
         ChatMessageListComponent,
+        ChatMessageSimpleComponent,
         ChatRoomMessagesComponent,
         FileDropComponent,
         LinksDirective,

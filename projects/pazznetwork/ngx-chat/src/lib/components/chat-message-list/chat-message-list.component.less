@@ -2,12 +2,29 @@
 @import "../chat-message/chat-message.component.less";
 
 .chat-messages {
+  display: flex;
+  flex-direction: column;
+
   min-height: 10em;
   max-height: 20em;
   overflow-y: scroll;
 
   overflow-wrap: break-word;
   hyphens: none;
+}
+
+.chat-messages-date-group {
+  clear: both;
+  font-size: 0.7em;
+  font-style: italic;
+  margin: 0.5em 0;
+  text-align: center;
+}
+
+ngx-chat-message,
+ngx-chat-message-simple {
+  max-width: 76%;
+  align-self: flex-start;
 }
 
 .chat-messages-empty {
@@ -30,14 +47,6 @@
 
 .deny-actions {
   margin-top: 1em;
-}
-
-.chat-messages-date-group {
-  clear: both;
-  font-size: 0.7em;
-  font-style: italic;
-  margin: 0.5em 0;
-  text-align: center;
 }
 
 .action-disabled {

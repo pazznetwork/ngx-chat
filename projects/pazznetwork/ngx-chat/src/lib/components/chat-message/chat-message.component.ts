@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
 import { Contact } from '../../core/contact';
-import { Message, MessageState } from '../../core/message';
+import { Direction, Message, MessageState } from '../../core/message';
 import { extractUrls } from '../../core/utils-links';
 import { MessageStatePlugin, StateDate } from '../../services/adapters/xmpp/plugins/message-state.plugin';
 import { XmppChatAdapter } from '../../services/adapters/xmpp/xmpp-chat-adapter.service';
@@ -34,9 +34,9 @@ export class ChatMessageComponent implements OnInit {
 
     imageLink: string;
 
-    MessageState = MessageState;
+    Direction = Direction;
 
-    private messageStatePlugin: MessageStatePlugin;
+    private readonly messageStatePlugin: MessageStatePlugin;
 
     constructor(
         @Inject(ChatServiceToken) public chatService: ChatService,
@@ -91,6 +91,16 @@ export class ChatMessageComponent implements OnInit {
     onContactClick() {
         if (this.contactClickHandler) {
             this.contactClickHandler.onClickContact(this.contact);
+        }
+    }
+
+    getAvatar() {
+        if (this.showAvatars) {
+            if (this.message.direction === Direction.in) {
+                return this.avatar;
+            } else {
+                return this.chatService.userAvatar$.getValue();
+            }
         }
     }
 }

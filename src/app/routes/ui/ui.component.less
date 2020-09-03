@@ -1,0 +1,24 @@
+.chat-message-list-wrapper {
+  border: 1px solid #e3e3e3;
+}
+
+.example {
+  margin-bottom: 2em;
+}
+
+.simple-message-list {
+  display: flex;
+  flex-direction: column;
+
+  ngx-chat-message-simple {
+    max-width: 76%;
+
+    &.chat-message--in {
+      align-self: flex-start;
+    }
+
+    &.chat-message--out {
+      align-self: flex-end;
+    }
+  }
+}

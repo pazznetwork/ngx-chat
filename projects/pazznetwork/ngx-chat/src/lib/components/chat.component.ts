@@ -1,8 +1,8 @@
 import { Component, Inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Contact } from '../core/contact';
-import { Presence } from '../core/presence';
 import { Translations } from '../core/translations';
+import { defaultTranslations } from '../core/translations-default';
 import { ChatService, ChatServiceToken } from '../services/chat-service';
 
 /**
@@ -25,7 +25,7 @@ import { ChatService, ChatServiceToken } from '../services/chat-service';
 @Component({
     selector: 'ngx-chat',
     templateUrl: './chat.component.html',
-    styleUrls: ['./chat.component.less']
+    styleUrls: ['./chat.component.less'],
 })
 export class ChatComponent implements OnInit, OnChanges {
 
@@ -33,41 +33,52 @@ export class ChatComponent implements OnInit, OnChanges {
      * If supplied, translations contain an object with the structure of the Translations interface.
      */
     @Input()
-    public translations: Partial<Translations> = {
-    };
+    public set translations(translations: Partial<Translations>) {
+        const defaultTranslation = defaultTranslations();
+        if (translations) {
+            this.chatService.translations = {
+                ...defaultTranslation,
+                ...translations,
+                presence: {
+                    ...defaultTranslation.presence,
+                    ...translations.presence,
+                },
+            };
+        }
+    }
 
     /**
      * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your roster list.
      */
     @Input()
-    public contacts: undefined | Observable<Contact[]>;
+    public contacts?: Observable<Contact[]>;
 
     /**
      * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your incoming contact
      * requests list.
      */
     @Input()
-    contactRequestsReceived$: undefined | Observable<Contact[]>;
+    contactRequestsReceived$?: Observable<Contact[]>;
 
     /**
      * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your outgoing contact
      * requests list.
      */
     @Input()
-    contactRequestsSent$: undefined | Observable<Contact[]>;
+    contactRequestsSent$?: Observable<Contact[]>;
 
     /**
      * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your unaffiliated contact
      * list.
      */
     @Input()
-    contactsUnaffiliated$: undefined | Observable<Contact[]>;
+    contactsUnaffiliated$?: Observable<Contact[]>;
 
     /**
      * If supplied, userAvatar$ contains an Obervable<string>, which is used as the src attribute of the img for the current user.
      */
     @Input()
-    public userAvatar$: undefined | Observable<string>;
+    public userAvatar$?: Observable<string>;
 
     /**
      * 'shown' shows roster list, 'hidden' hides it.
@@ -77,33 +88,9 @@ export class ChatComponent implements OnInit, OnChanges {
 
     showChatComponent = false;
 
-    private defaultTranslations: Translations = {
-        chat: 'Chat',
-        contacts: 'Contacts',
-        contactRequestIn: 'Incoming contact requests',
-        contactRequestOut: 'Outgoing contact requests',
-        contactsUnaffiliated: 'Unknown',
-        noContacts: 'No contacts yet.',
-        noMessages: 'No messages yet.',
-        placeholder: 'Enter your message!',
-        subscriptionRequestMessage: 'I want to add you as a contact.',
-        acceptSubscriptionRequest: 'Accept',
-        denySubscriptionRequest: 'Deny',
-        timeFormat: 'shortTime',
-        dateFormat: 'EEEE, MM/dd/yyyy',
-        locale: undefined,
-        dropMessage: 'Drop your file to send it',
-        block: 'Block',
-        blockAndReport: 'Block & report',
-        dismiss: 'Dismiss',
-        presence: {
-            [Presence.away]: 'Away',
-            [Presence.present]: 'Online',
-            [Presence.unavailable]: 'Offline',
-        }
-    };
-
-    constructor(@Inject(ChatServiceToken) private chatService: ChatService) {
+    constructor(
+        @Inject(ChatServiceToken) private chatService: ChatService,
+    ) {
     }
 
     ngOnInit() {
@@ -113,23 +100,9 @@ export class ChatComponent implements OnInit, OnChanges {
         if (this.userAvatar$) {
             this.userAvatar$.subscribe(avatar => this.chatService.userAvatar$.next(avatar));
         }
-
-        this.mergeAndSetTranslations();
-    }
-
-    private mergeAndSetTranslations() {
-        this.chatService.translations = {
-            ...this.defaultTranslations,
-            ...this.translations,
-            presence: {
-                ...this.defaultTranslations.presence,
-                ...this.translations?.presence,
-            }
-        };
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        this.mergeAndSetTranslations();
         if (changes.rosterState) {
             this.onRosterStateChanged(changes.rosterState.currentValue);
         }

@@ -21,7 +21,7 @@ body.has-roster {
 
 .container {
     margin: 0 auto;
-    max-width: 30em;
+    max-width: 700px;
 }
 
 .container, .container button, .container .form-control {

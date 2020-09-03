@@ -127,4 +127,9 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
         $event.preventDefault();
         this.subscriptionAction = SubscriptionAction.NO_PENDING_REQUEST;
     }
+
+    subscriptionActionShown() {
+        return this.subscriptionAction === SubscriptionAction.PENDING_REQUEST
+            || (this.blockPlugin.supportsBlock$.getValue() === true && this.subscriptionAction === SubscriptionAction.SHOW_BLOCK_ACTIONS);
+    }
 }
