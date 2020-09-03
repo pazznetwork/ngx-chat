@@ -17,7 +17,7 @@ export class AppPage {
     }
 
     async logInWithDefaultCredentials() {
-        return this.logIn(suiteConfig);
+        return await this.logIn(suiteConfig);
     }
 
     async logIn(logInRequest: LogInRequest) {
