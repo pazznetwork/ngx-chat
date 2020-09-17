@@ -54,7 +54,7 @@ You are now ready to go. You will not see anything until you log in.
 Log in via `ngx-chat` wherever you want (e.g. in a component or a service)
  by injecting `ChatService` and calling `login`:
 ```
-constructor(@Inject(ChatServiceToken) ChatService) {
+constructor(@Inject(ChatServiceToken) chatService: ChatService) {
     chatService.logIn({
         domain: 'ngx-chat.example',
         service: 'wss://ngx-chat.example:5280/websocket',
