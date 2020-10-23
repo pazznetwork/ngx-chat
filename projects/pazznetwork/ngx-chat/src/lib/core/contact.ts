@@ -45,6 +45,10 @@ export class Contact {
         return this.messageStore.dateMessageGroups;
     }
 
+    get oldestMessage() {
+        return this.messageStore.messages[0];
+    }
+
     get mostRecentMessage() {
         return this.messageStore.messages[this.messageStore.messages.length - 1];
     }

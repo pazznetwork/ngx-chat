@@ -31,6 +31,9 @@ export class ChatMessageSimpleComponent {
     imageLink: string;
 
     @Input()
+    showImagePlaceholder: boolean;
+
+    @Input()
     messageState: MessageState;
 
     @Input()

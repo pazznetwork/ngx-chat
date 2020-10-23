@@ -32,8 +32,8 @@ export class ChatMessageComponent implements OnInit {
     @Input()
     contact: Contact;
 
+    showImagePlaceholder = true;
     imageLink: string;
-
     Direction = Direction;
 
     private readonly messageStatePlugin: MessageStatePlugin;
@@ -50,21 +50,36 @@ export class ChatMessageComponent implements OnInit {
         this.tryFindImageLink();
     }
 
-    private async tryFindImageLink() {
+    private tryFindImageLink() {
         if (this.chatService instanceof XmppChatAdapter) {
-            for (const url of extractUrls(this.message.body)) {
-                try {
-                    const headRequest = await this.httpClient.head(url, {observe: 'response'}).toPromise();
-                    const contentType = headRequest.headers.get('Content-Type');
-                    const isImage = contentType && contentType.startsWith('image');
-                    const contentLength = headRequest.headers.get('Content-Length');
-                    if (isImage && parseInt(contentLength, 10) < MAX_IMAGE_SIZE) {
-                        this.imageLink = url;
-                        break;
-                    }
-                } catch (e) {
-                }
+            const candidateUrls = extractUrls(this.message.body);
+
+            if (candidateUrls.length === 0) {
+                this.showImagePlaceholder = false;
+                return;
             }
+
+            this.tryFindEmbedImageUrls(candidateUrls).then();
+        }
+    }
+
+    private async tryFindEmbedImageUrls(candidateUrls: RegExpMatchArray) {
+        for (const url of candidateUrls) {
+            try {
+                const headRequest = await this.httpClient.head(url, {observe: 'response'}).toPromise();
+                const contentType = headRequest.headers.get('Content-Type');
+                const isImage = contentType && contentType.startsWith('image');
+                const contentLength = headRequest.headers.get('Content-Length');
+                if (isImage && parseInt(contentLength, 10) < MAX_IMAGE_SIZE) {
+                    this.imageLink = url;
+                    break;
+                }
+            } catch (e) {
+            }
+        }
+
+        if (!this.imageLink) {
+            this.showImagePlaceholder = false;
         }
     }
 

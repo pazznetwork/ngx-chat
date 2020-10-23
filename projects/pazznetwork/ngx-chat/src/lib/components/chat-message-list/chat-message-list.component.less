@@ -1,6 +1,28 @@
 @import (reference) "../../style";
 @import "../chat-message/chat-message.component.less";
 
+@keyframes message-in {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes message-out {
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
 .chat-messages {
   display: flex;
   flex-direction: column;
@@ -14,7 +36,6 @@
 }
 
 .chat-messages-date-group {
-  clear: both;
   font-size: 0.7em;
   font-style: italic;
   margin: 0.5em 0;
@@ -25,6 +46,16 @@ ngx-chat-message,
 ngx-chat-message-simple {
   max-width: 76%;
   align-self: flex-start;
+  animation-duration: 1500ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+
+  &.chat-message--in {
+    animation-name: message-in;
+  }
+
+  &.chat-message--out {
+    animation-name: message-out;
+  }
 }
 
 .chat-messages-empty {
@@ -40,6 +71,7 @@ ngx-chat-message-simple {
   list-style: none;
   padding: 0;
   margin: 1em 0 0 0;
+
   a, a:visited {
     color: @link;
   }
@@ -51,4 +83,14 @@ ngx-chat-message-simple {
 
 .action-disabled {
   color: @general-light;
+}
+
+.chat-messages-start {
+  height: 5px;
+  margin-top: 5px;
+}
+
+.chat-messages-end {
+  height: 5px;
+  margin-bottom: 5px;
 }
