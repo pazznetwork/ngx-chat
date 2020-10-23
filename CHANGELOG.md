@@ -1,3 +1,13 @@
+<a name="0.10.4"></a>
+## [0.10.4](https://github.com/pazznetwork/ngx-chat/compare/v0.10.3...v0.10.4) (2020-10-23)
+
+
+### Bug Fixes
+
+* improve scroll to bottom behavior ([3134025](https://github.com/pazznetwork/ngx-chat/commit/3134025))
+
+
+
 <a name="0.10.3"></a>
 ## [0.10.3](https://github.com/pazznetwork/ngx-chat/compare/v0.10.2...v0.10.3) (2020-10-23)
 
