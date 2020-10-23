@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Inject, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Contact } from '../../core/contact';
 import { MultiUserChatPlugin, Room } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
@@ -15,6 +15,9 @@ export class ChatMessageInputComponent implements OnInit {
 
     @Input()
     public room: Room;
+
+    @Output()
+    public messageSent = new EventEmitter<void>();
 
     public message = '';
 
@@ -36,6 +39,7 @@ export class ChatMessageInputComponent implements OnInit {
             }
             this.message = '';
         }
+        this.messageSent.emit();
         return false;
     }
 

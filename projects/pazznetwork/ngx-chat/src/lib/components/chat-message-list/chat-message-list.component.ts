@@ -59,6 +59,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
 
     private ngDestroy = new Subject<void>();
     private isAtBottom = true;
+    private bottomLeftAt = 0;
     private oldestVisibleMessageBeforeLoading: Message = null;
 
     constructor(
@@ -91,24 +92,25 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
 
     async ngAfterViewInit() {
         this.chatMessageViewChildrenList.changes
-            .pipe(filter(() => !!this.oldestVisibleMessageBeforeLoading))
             .subscribe(() => {
-                this.scrollToMessage(this.oldestVisibleMessageBeforeLoading);
+                if (this.oldestVisibleMessageBeforeLoading) {
+                    this.scrollToMessage(this.oldestVisibleMessageBeforeLoading);
+                }
                 this.oldestVisibleMessageBeforeLoading = null;
             });
 
         this.contact.messages$
-            .pipe(takeUntil(this.ngDestroy), debounceTime(10))
-            .subscribe(() => {
-                if (this.isAtBottom) {
-                    this.scheduleScrollToLastMessage();
-                }
-            });
+            .pipe(
+                takeUntil(this.ngDestroy),
+                debounceTime(10),
+                filter(() => this.isNearBottom())
+            )
+            .subscribe((message) => this.scheduleScrollToLastMessage());
 
         if (this.contact.messages.length < 10) {
             await this.loadMessages(); // in case insufficient old messages are displayed
         }
-        this.scrollToLastMessage();
+        this.scheduleScrollToLastMessage();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -147,7 +149,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         }
     }
 
-    private scheduleScrollToLastMessage() {
+    scheduleScrollToLastMessage() {
         setTimeout(() => this.scrollToLastMessage(), 0);
     }
 
@@ -190,7 +192,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
     }
 
     async loadOlderMessagesBeforeViewport() {
-        if (this.isLoadingHistory()) {
+        if (this.isLoadingHistory() || this.isNearBottom()) {
             return;
         }
 
@@ -214,6 +216,17 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
 
     onBottom(event: IntersectionObserverEntry) {
         this.isAtBottom = event.isIntersecting;
+
+        if (event.isIntersecting) {
+            this.isAtBottom = true;
+        } else {
+            this.isAtBottom = false;
+            this.bottomLeftAt = Date.now();
+        }
+    }
+
+    private isNearBottom() {
+        return this.isAtBottom || Date.now() - this.bottomLeftAt < 1000;
     }
 
     private isLoadingHistory(): boolean {

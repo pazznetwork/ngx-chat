@@ -8,6 +8,7 @@ import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../serv
 import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';
+import { ChatMessageListComponent } from '../chat-message-list/chat-message-list.component';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -21,6 +22,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
     @ViewChild(ChatMessageInputComponent)
     messageInput: ChatMessageInputComponent;
+
+    @ViewChild(ChatMessageListComponent)
+    messageList: ChatMessageListComponent;
 
     httpFileUploadPlugin: HttpFileUploadPlugin;
 
@@ -62,6 +66,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
     sendMessage() {
         this.messageInput.onSendMessage();
+    }
+
+    afterSendMessage() {
+        this.messageList.scheduleScrollToLastMessage();
     }
 
     async uploadFile(file: File) {

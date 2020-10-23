@@ -35,7 +35,7 @@
         <div (click)="onFocus()">
             <ngx-chat-message-list [contact]="chatWindowState.contact" [showAvatars]="false"></ngx-chat-message-list>
             <div class="chat-input-container">
-                <ngx-chat-message-input [contact]="chatWindowState.contact"></ngx-chat-message-input>
+                <ngx-chat-message-input [contact]="chatWindowState.contact" (messageSent)="afterSendMessage()"></ngx-chat-message-input>
                 <div *ngFor="let action of chatService.chatActions"
                      (click)="onActionClick(action)"
                      class="chat-action"
