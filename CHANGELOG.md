@@ -1,3 +1,13 @@
+<a name="0.10.3"></a>
+## [0.10.3](https://github.com/pazznetwork/ngx-chat/compare/v0.10.2...v0.10.3) (2020-10-23)
+
+
+### Features
+
+* lazy load older messages when reaching top of chat window ([d6fdbc2](https://github.com/pazznetwork/ngx-chat/commit/d6fdbc2))
+
+
+
 <a name="0.10.2"></a>
 ## [0.10.2](https://github.com/pazznetwork/ngx-chat/compare/v0.10.1...v0.10.2) (2020-09-03)
 
