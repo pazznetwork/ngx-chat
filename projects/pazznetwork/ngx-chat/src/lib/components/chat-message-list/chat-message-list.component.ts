@@ -1,13 +1,30 @@
-import { Component, ElementRef, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, SimpleChanges, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    Inject,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Optional,
+    QueryList,
+    SimpleChanges,
+    ViewChild,
+    ViewChildren,
+} from '@angular/core';
 import { Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import { Contact } from '../../core/contact';
-import { Direction } from '../../core/message';
+import { Direction, Message } from '../../core/message';
 import { BlockPlugin } from '../../services/adapters/xmpp/plugins/block.plugin';
+import { MessageArchivePlugin } from '../../services/adapters/xmpp/plugins/message-archive.plugin';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatMessageListRegistryService } from '../../services/chat-message-list-registry.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 import { REPORT_USER_INJECTION_TOKEN, ReportUserService } from '../../services/report-user-service';
+import { ChatMessageComponent } from '../chat-message/chat-message.component';
 
 enum SubscriptionAction {
     PENDING_REQUEST,
@@ -20,7 +37,7 @@ enum SubscriptionAction {
     templateUrl: './chat-message-list.component.html',
     styleUrls: ['./chat-message-list.component.less'],
 })
-export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
+export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
 
     @Input()
     contact: Contact;
@@ -31,37 +48,67 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('messageArea')
     chatMessageAreaElement: ElementRef<HTMLElement>;
 
+    @ViewChildren(ChatMessageComponent)
+    chatMessageViewChildrenList: QueryList<ChatMessageComponent>;
+
     Direction = Direction;
     SubscriptionAction = SubscriptionAction;
     blockPlugin: BlockPlugin;
     subscriptionAction = SubscriptionAction.NO_PENDING_REQUEST;
+    onTop$ = new Subject<IntersectionObserverEntry>();
 
     private ngDestroy = new Subject<void>();
+    private isAtBottom = true;
+    private oldestVisibleMessageBeforeLoading: Message = null;
 
     constructor(
         public chatListService: ChatListStateService,
         @Inject(ChatServiceToken) public chatService: ChatService,
         private chatMessageListRegistry: ChatMessageListRegistryService,
         @Optional() @Inject(REPORT_USER_INJECTION_TOKEN) public reportUserService: ReportUserService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {
         this.blockPlugin = this.chatService.getPlugin(BlockPlugin);
     }
 
-    ngOnInit() {
-        this.contact.messages$
-            .pipe(takeUntil(this.ngDestroy))
-            .subscribe(() => this.scheduleScrollToLastMessage());
+    async ngOnInit() {
+
+        this.onTop$
+            .pipe(filter(event => event.isIntersecting), debounceTime(1000))
+            .subscribe(() => this.loadOlderMessagesBeforeViewport());
 
         this.contact.pendingIn$
             .pipe(
                 filter(pendingIn => pendingIn === true),
                 takeUntil(this.ngDestroy),
             ).subscribe(() => {
-                this.subscriptionAction = SubscriptionAction.PENDING_REQUEST;
-                this.scheduleScrollToLastMessage();
-            });
+            this.subscriptionAction = SubscriptionAction.PENDING_REQUEST;
+            this.scheduleScrollToLastMessage();
+        });
 
         this.chatMessageListRegistry.incrementOpenWindowCount(this.contact);
+    }
+
+    async ngAfterViewInit() {
+        this.chatMessageViewChildrenList.changes
+            .pipe(filter(() => !!this.oldestVisibleMessageBeforeLoading))
+            .subscribe(() => {
+                this.scrollToMessage(this.oldestVisibleMessageBeforeLoading);
+                this.oldestVisibleMessageBeforeLoading = null;
+            });
+
+        this.contact.messages$
+            .pipe(takeUntil(this.ngDestroy), debounceTime(10))
+            .subscribe(() => {
+                if (this.isAtBottom) {
+                    this.scheduleScrollToLastMessage();
+                }
+            });
+
+        if (this.contact.messages.length < 10) {
+            await this.loadMessages(); // in case insufficient old messages are displayed
+        }
+        this.scrollToLastMessage();
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -107,6 +154,15 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
     private scrollToLastMessage() {
         if (this.chatMessageAreaElement) {
             this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
+            this.isAtBottom = true; // in some browsers the intersection observer does not emit when scrolling programmatically
+        }
+    }
+
+    private scrollToMessage(message: Message) {
+        if (this.chatMessageAreaElement) {
+            const htmlIdAttribute = 'message-' + message.id;
+            const messageElement = document.getElementById(htmlIdAttribute);
+            messageElement.scrollIntoView(false);
         }
     }
 
@@ -132,4 +188,36 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges {
         return this.subscriptionAction === SubscriptionAction.PENDING_REQUEST
             || (this.blockPlugin.supportsBlock$.getValue() === true && this.subscriptionAction === SubscriptionAction.SHOW_BLOCK_ACTIONS);
     }
+
+    async loadOlderMessagesBeforeViewport() {
+        if (this.isLoadingHistory()) {
+            return;
+        }
+
+        try {
+            this.oldestVisibleMessageBeforeLoading = this.contact.oldestMessage;
+            await this.loadMessages();
+        } catch (e) {
+            this.oldestVisibleMessageBeforeLoading = null;
+        }
+    }
+
+    private async loadMessages() {
+        try {
+            // improve performance when loading lots of old messages
+            this.changeDetectorRef.detach();
+            await this.chatService.getPlugin(MessageArchivePlugin).loadMostRecentUnloadedMessages(this.contact);
+        } finally {
+            this.changeDetectorRef.reattach();
+        }
+    }
+
+    onBottom(event: IntersectionObserverEntry) {
+        this.isAtBottom = event.isIntersecting;
+    }
+
+    private isLoadingHistory(): boolean {
+        return !!this.oldestVisibleMessageBeforeLoading;
+    }
+
 }

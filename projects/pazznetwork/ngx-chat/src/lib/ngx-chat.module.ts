@@ -19,6 +19,7 @@ import { ChatWindowComponent } from './components/chat-window/chat-window.compon
 import { ChatComponent } from './components/chat.component';
 import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
+import { IntersectionObserverDirective } from './directives/intersection-observer.directive';
 import { LinksDirective } from './directives/links.directive';
 import { BlockPlugin } from './services/adapters/xmpp/plugins/block.plugin';
 import { BookmarkPlugin } from './services/adapters/xmpp/plugins/bookmark.plugin';
@@ -68,6 +69,7 @@ import { LogService } from './services/log.service';
         ChatWindowComponent,
         ChatWindowListComponent,
         LinksDirective,
+        IntersectionObserverDirective,
         RosterContactComponent,
         RosterListComponent,
         FileDropComponent,

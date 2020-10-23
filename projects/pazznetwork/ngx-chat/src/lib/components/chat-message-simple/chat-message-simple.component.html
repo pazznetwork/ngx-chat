@@ -11,8 +11,12 @@
             <ng-content></ng-content>
         </div>
     </div>
-    <div class="chat-message-image-wrapper" *ngIf="imageLink">
-        <img class="chat-message-image" [src]="imageLink" />
+    <div class="chat-message-image-wrapper"
+         [class.chat-message-image-wrapper--placeholder]="showImagePlaceholder"
+         *ngIf="imageLink || showImagePlaceholder">
+        <img class="chat-message-image"
+             (load)="showImagePlaceholder = false"
+             [src]="imageLink"/>
     </div>
     <div class="chat-message-footer" *ngIf="!footerHidden">
         <small title="{{nick}}" class="chat-message-name">

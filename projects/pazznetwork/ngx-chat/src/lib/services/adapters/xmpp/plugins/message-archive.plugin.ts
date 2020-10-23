@@ -1,6 +1,7 @@
 import { jid as parseJid, xml } from '@xmpp/client';
 import { Subject } from 'rxjs';
 import { debounceTime, filter } from 'rxjs/operators';
+import { Contact } from '../../../../core/contact';
 import { Direction } from '../../../../core/message';
 import { Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
@@ -40,7 +41,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
 
     private requestNewestMessages() {
         this.chatService.chatConnectionService.sendIq(
-            xml('iq', {type: 'set', to: this.chatService.chatConnectionService.userJid.bare().toString()},
+            xml('iq', {type: 'set'},
                 xml('query', {xmlns: 'urn:xmpp:mam:2'},
                     xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
                         xml('max', {}, 250),
@@ -49,6 +50,31 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
                 ),
             ),
         );
+    }
+
+    async loadMostRecentUnloadedMessages(contact: Contact) {
+        const request =
+            xml('iq', {type: 'set'},
+                xml('query', {xmlns: 'urn:xmpp:mam:2'},
+                    xml('x', {xmlns: 'jabber:x:data', type: 'submit'},
+                        xml('field', {var: 'FORM_TYPE', type: 'hidden'},
+                            xml('value', {}, 'urn:xmpp:mam:2'),
+                        ),
+                        xml('field', {var: 'with'},
+                            xml('value', {}, contact.jidBare),
+                        ),
+                        contact.oldestMessage ? xml('field', {var: 'end'},
+                            xml('value', {}, contact.oldestMessage.datetime.toISOString()),
+                        ) : undefined,
+                    ),
+                    xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
+                        xml('max', {}, 100),
+                        xml('before'),
+                    ),
+                ),
+            );
+
+        await this.chatService.chatConnectionService.sendIq(request);
     }
 
     async loadAllMessages() {
