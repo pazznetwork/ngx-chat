@@ -1,3 +1,13 @@
+<a name="0.10.5"></a>
+## [0.10.5](https://github.com/pazznetwork/ngx-chat/compare/v0.10.4...v0.10.5) (2020-11-26)
+
+
+### Bug Fixes
+
+* word breaking in chat messages ([07a8e66](https://github.com/pazznetwork/ngx-chat/commit/07a8e66))
+
+
+
 <a name="0.10.4"></a>
 ## [0.10.4](https://github.com/pazznetwork/ngx-chat/compare/v0.10.3...v0.10.4) (2020-10-23)
 
