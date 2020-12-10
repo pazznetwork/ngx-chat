@@ -4,7 +4,7 @@ import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ContactMetadata } from '../../../../core/contact';
 import { Direction, Message } from '../../../../core/message';
-import { MessageStore } from '../../../../core/message-store';
+import { DateMessagesGroup, MessageStore } from '../../../../core/message-store';
 import { IqResponseStanza, Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
@@ -64,6 +64,10 @@ export class Room {
         this.messageStore.addMessage(message);
     }
 
+    get dateMessagesGroups(): DateMessagesGroup[] {
+        return this.messageStore.dateMessageGroups;
+    }
+    
 }
 
 class RoomMessageStanzaBuilder extends AbstractStanzaBuilder {
