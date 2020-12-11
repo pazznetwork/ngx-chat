@@ -141,7 +141,7 @@ ng serve
 ## Releasing
 ```bash
 # increment version number in package.json
-VERSION=0.10.5 # change accordingly
+VERSION=0.10.6 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"

@@ -1,3 +1,18 @@
+<a name="0.10.6"></a>
+## [0.10.6](https://github.com/pazznetwork/ngx-chat/compare/v0.10.5...v0.10.6) (2020-12-11)
+
+
+### Bug Fixes
+
+* styling of multi user chat message list (width, insert animations, date groups) ([11587ca](https://github.com/pazznetwork/ngx-chat/commit/11587ca))
+
+
+### Features
+
+* get date message groups for muc ([e56547b](https://github.com/pazznetwork/ngx-chat/commit/e56547b))
+
+
+
 <a name="0.10.5"></a>
 ## [0.10.5](https://github.com/pazznetwork/ngx-chat/compare/v0.10.4...v0.10.5) (2020-11-26)
 
