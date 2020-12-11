@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Contact, Direction, dummyAvatar, MessageState } from '@pazznetwork/ngx-chat';
+import { Contact, Direction, dummyAvatar, MessageState, Room } from '@pazznetwork/ngx-chat';
+import { jid as parseJid } from '@xmpp/client';
+import { JID } from '@xmpp/jid';
 
 @Component({
     selector: 'app-ui',
@@ -12,11 +14,16 @@ export class UiComponent implements OnInit {
     Direction = Direction;
     MessageState = MessageState;
     dummyAvatar = dummyAvatar;
+    room: Room;
+    private myJid: JID = parseJid('me@example.com');
+    private otherContactJid: JID = parseJid('other@example.com');
 
     constructor() { }
 
     ngOnInit(): void {
-        this.contact = new Contact('test@example.com', 'chat partner name');
+        this.contact = new Contact(this.otherContactJid.toString(), 'chat partner name');
+        this.room = new Room(this.myJid, null);
+
         this.add({
             body: 'This is an incoming example message',
             datetime: new Date('2019-12-22T14:00:00'),
@@ -84,11 +91,17 @@ export class UiComponent implements OnInit {
         });
     }
 
-    private add(message: {body: string, datetime: Date, direction: Direction}) {
+    private add(message: { body: string, datetime: Date, direction: Direction }) {
         this.contact.addMessage({
             ...message,
             delayed: false,
-            id: null
+            id: null,
+        });
+
+        this.room.addMessage({
+            ...message,
+            delayed: false,
+            from: message.direction === Direction.in ? this.otherContactJid : this.myJid,
         });
     }
 

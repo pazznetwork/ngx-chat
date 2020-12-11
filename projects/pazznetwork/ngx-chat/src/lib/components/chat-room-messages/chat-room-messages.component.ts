@@ -2,6 +2,7 @@ import { Component, ElementRef, Inject, Input, OnChanges, OnDestroy, OnInit, Sim
 import { JID } from '@xmpp/jid';
 import { Subscription } from 'rxjs';
 import { Contact } from '../../core/contact';
+import { Direction } from '../../core/message';
 import { Room } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 import { ContactFactoryService } from '../../services/contact-factory.service';
@@ -19,6 +20,8 @@ export class ChatRoomMessagesComponent implements OnInit, OnChanges, OnDestroy {
 
     @ViewChild('messageArea')
     chatMessageAreaElement: ElementRef<HTMLElement>;
+
+    Direction = Direction;
 
     private messageSubscription: Subscription;
 

@@ -1,9 +1,28 @@
 .chat-messages {
+  display: flex;
+  flex-direction: column;
   overflow-y: scroll;
+}
+
+.chat-messages-date-group {
+  font-size: 0.7em;
+  font-style: italic;
+  margin: 0.5em 0;
+  text-align: center;
 }
 
 ngx-chat-message,
 ngx-chat-message-simple {
   max-width: 76%;
   align-self: flex-start;
+  animation-duration: 1500ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+
+  &.chat-message--in {
+    animation-name: ngx-chat-message-in;
+  }
+
+  &.chat-message--out {
+    animation-name: ngx-chat-message-out;
+  }
 }

@@ -64,10 +64,10 @@ export class Room {
         this.messageStore.addMessage(message);
     }
 
-    get dateMessagesGroups(): DateMessagesGroup[] {
+    get dateMessagesGroups(): DateMessagesGroup<RoomMessage>[] {
         return this.messageStore.dateMessageGroups;
     }
-    
+
 }
 
 class RoomMessageStanzaBuilder extends AbstractStanzaBuilder {

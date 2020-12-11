@@ -41,7 +41,7 @@ export class Contact {
         return this.messageStore.messages;
     }
 
-    get dateMessagesGroups(): DateMessagesGroup[] {
+    get dateMessagesGroups(): DateMessagesGroup<Message>[] {
         return this.messageStore.dateMessageGroups;
     }
 

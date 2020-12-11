@@ -1,28 +1,6 @@
 @import (reference) "../../style";
 @import "../chat-message/chat-message.component.less";
 
-@keyframes message-in {
-  from {
-    transform: translateX(50px);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-
-@keyframes message-out {
-  from {
-    transform: translateX(-50px);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-
 .chat-messages {
   display: flex;
   flex-direction: column;
@@ -47,11 +25,11 @@ ngx-chat-message-simple {
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 
   &.chat-message--in {
-    animation-name: message-in;
+    animation-name: ngx-chat-message-in;
   }
 
   &.chat-message--out {
-    animation-name: message-out;
+    animation-name: ngx-chat-message-out;
   }
 }
 

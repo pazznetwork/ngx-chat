@@ -4,17 +4,17 @@ import { Message } from './message';
 import { findSortedIndex, findSortedInsertionIndexLast, insertSortedLast } from './utils-array';
 import { extractDateStringFromDate } from './utils-date';
 
-export interface DateMessagesGroup {
+export interface DateMessagesGroup<T extends Message> {
     /** is equal to the date where one message on that date was received */
     date: Date;
-    messages: Message[];
+    messages: T[];
 }
 
 export class MessageStore<T extends Message> {
 
     public messages$: Subject<T>;
     public messages: T[] = [];
-    public dateMessageGroups: DateMessagesGroup[] = [];
+    public dateMessageGroups: DateMessagesGroup<T>[] = [];
     public messageIdToMessage: { [key: string]: T } = {};
 
     constructor(private logService: LogService) {

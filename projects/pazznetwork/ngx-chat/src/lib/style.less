@@ -9,3 +9,25 @@
 @success: #69ca48;
 @warning: #ffbe00;
 @danger: #ff5940;
+
+@keyframes ngx-chat-message-in {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes ngx-chat-message-out {
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
