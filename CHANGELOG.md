@@ -1,3 +1,21 @@
+<a name="0.11.0"></a>
+# [0.11.0](https://github.com/pazznetwork/ngx-chat/compare/v0.10.6...v0.11.0) (2021-03-11)
+
+
+### Bug Fixes
+
+* remove misleading linting rules ([dbb73bc](https://github.com/pazznetwork/ngx-chat/commit/dbb73bc))
+* typings for angular 11 compatibility ([912e8ed](https://github.com/pazznetwork/ngx-chat/commit/912e8ed))
+* unit tests should execute again ([ac9bf97](https://github.com/pazznetwork/ngx-chat/commit/ac9bf97))
+
+
+### Features
+
+* update [@angular](https://github.com/angular)/cdk to 11 ([9342f2c](https://github.com/pazznetwork/ngx-chat/commit/9342f2c))
+* update core dependencies to angular 11 ([0fd486e](https://github.com/pazznetwork/ngx-chat/commit/0fd486e))
+
+
+
 <a name="0.10.6"></a>
 ## [0.10.6](https://github.com/pazznetwork/ngx-chat/compare/v0.10.5...v0.10.6) (2020-12-11)
 
