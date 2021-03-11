@@ -8,8 +8,8 @@ import { UiComponent } from './routes/ui/ui.component';
         RouterModule.forRoot([
             {path: '', component: IndexComponent},
             {path: 'ui', component: UiComponent},
-            {path: '**', redirectTo: '/'}
-        ]),
+            {path: '**', redirectTo: '/'},
+        ], {relativeLinkResolution: 'legacy'}),
     ],
     exports: [
         RouterModule,
