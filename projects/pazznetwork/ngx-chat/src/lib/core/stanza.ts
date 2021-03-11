@@ -2,7 +2,7 @@ import { Element } from 'ltx';
 
 export interface Stanza extends Element {
     attrs: {
-        [key: string]: string;
+        [key: string]: string | undefined;
     };
     children: Stanza[];
     name: string;

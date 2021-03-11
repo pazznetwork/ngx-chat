@@ -16,10 +16,10 @@ export class SendStanzaComponent implements OnInit {
     ngOnInit() {
     }
 
-    sendStanza() {
+    async sendStanza() {
         const request = parse(this.stanza);
         if (request) {
-            return this.chatService.chatConnectionService.send(request);
+            await this.chatService.chatConnectionService.send(request);
         }
     }
 

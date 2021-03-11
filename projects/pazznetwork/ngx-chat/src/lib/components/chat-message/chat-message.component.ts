@@ -83,7 +83,7 @@ export class ChatMessageComponent implements OnInit {
         }
     }
 
-    getMessageState() {
+    getMessageState(): MessageState | undefined {
         if (this.message.state) {
             return this.message.state;
         } else if (this.messageStatePlugin && this.contact) {
@@ -91,9 +91,10 @@ export class ChatMessageComponent implements OnInit {
             const states = this.messageStatePlugin.getContactMessageState(this.contact.jidBare.toString());
             return this.getStateForDate(date, states);
         }
+        return undefined;
     }
 
-    private getStateForDate(date: Date, states: StateDate) {
+    private getStateForDate(date: Date, states: StateDate): MessageState | undefined {
         if (date <= states.lastRecipientSeen) {
             return MessageState.RECIPIENT_SEEN;
         } else if (date <= states.lastRecipientReceived) {
@@ -101,6 +102,7 @@ export class ChatMessageComponent implements OnInit {
         } else if (date <= states.lastSent) {
             return MessageState.SENT;
         }
+        return undefined;
     }
 
     onContactClick() {
@@ -109,7 +111,7 @@ export class ChatMessageComponent implements OnInit {
         }
     }
 
-    getAvatar() {
+    getAvatar(): string | undefined {
         if (this.showAvatars) {
             if (this.message.direction === Direction.in) {
                 return this.avatar;
@@ -117,5 +119,6 @@ export class ChatMessageComponent implements OnInit {
                 return this.chatService.userAvatar$.getValue();
             }
         }
+        return undefined;
     }
 }

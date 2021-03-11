@@ -71,7 +71,7 @@ export class RegistrationPlugin extends AbstractXmppPlugin {
         });
     }
 
-    private connect(username: string, password: string, service: string, domain?: string) {
+    private connect(username: string, password: string, service: string, domain?: string): Promise<void> {
         return new Promise(resolveConnectionEstablished => {
             this.client = client({
                 domain: domain || getDomain(service),
