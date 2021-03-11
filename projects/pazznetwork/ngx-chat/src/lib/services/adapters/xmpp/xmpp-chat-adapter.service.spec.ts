@@ -102,7 +102,7 @@ describe('XmppChatAdapter', () => {
         });
 
         it('#messages$ should not emit contact on sending messages', () => {
-            return new Promise((resolve) => {
+            return new Promise<void>((resolve) => {
                 let emitted = false;
                 chatService.message$.pipe(first()).subscribe(() => emitted = true);
                 chatService.sendMessage(contact1.jidBare.toString(), 'send message text');

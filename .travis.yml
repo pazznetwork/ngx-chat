@@ -18,4 +18,4 @@ script:
   - webdriver-manager update --chrome --versions.chrome 78.0.3904.105
   - ng e2e
 
-after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+after_script: "cat ./coverage/ngx-chat/lcov.info | ./node_modules/coveralls/bin/coveralls.js"

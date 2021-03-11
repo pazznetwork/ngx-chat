@@ -99,7 +99,7 @@ describe('message carbons plugin', () => {
     });
 
     it('should raise an event when receiving an incoming carbon copy', () => {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
             let emitted = false;
             xmppChatAdapter.message$.pipe(first()).subscribe(() => emitted = true);
             messageCarbonsPlugin.handleStanza(validIncomingCarbonMessage);
@@ -111,7 +111,7 @@ describe('message carbons plugin', () => {
     });
 
     it('should not raise an event when receiving a sent copy', () => {
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
             let emitted = false;
             xmppChatAdapter.message$.pipe(first()).subscribe(() => emitted = true);
             messageCarbonsPlugin.handleStanza(validSentCarbonMessage);
