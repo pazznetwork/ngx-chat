@@ -1,6 +1,6 @@
 import { xml } from '@xmpp/client';
 import { BehaviorSubject, of } from 'rxjs';
-import { catchError, first, flatMap, map, timeout } from 'rxjs/operators';
+import { catchError, first, mergeMap, map, timeout } from 'rxjs/operators';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
@@ -57,7 +57,7 @@ export class EntityTimePlugin extends AbstractXmppPlugin {
         return await this.serverSupportsTime$.pipe(
             timeout(5000),
             first(supportsServerTime => supportsServerTime !== 'unknown'),
-            flatMap(supportsServerTime => supportsServerTime ? calculateNowViaServerTime$ : of(Date.now())),
+            mergeMap(supportsServerTime => supportsServerTime ? calculateNowViaServerTime$ : of(Date.now())),
             catchError(() => of(Date.now())),
         ).toPromise();
     }
