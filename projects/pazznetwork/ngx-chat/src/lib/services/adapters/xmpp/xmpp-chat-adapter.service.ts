@@ -10,7 +10,7 @@ import { ChatPlugin } from '../../../core/plugin';
 import { Stanza } from '../../../core/stanza';
 import { Translations } from '../../../core/translations';
 import { defaultTranslations } from '../../../core/translations-default';
-import { ChatService } from '../../chat-service';
+import { ChatService, ConnectionStates } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { MessageArchivePlugin } from './plugins/message-archive.plugin';
@@ -50,7 +50,7 @@ export class XmppChatAdapter implements ChatService {
         map(contacts => contacts.filter(contact => contact.pendingOut$.getValue())));
     contactsUnaffiliated$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.isUnaffiliated() && contact.messages.length > 0)));
-    state$ = new BehaviorSubject<'disconnected' | 'connecting' | 'online'>('disconnected');
+    state$ = new BehaviorSubject<ConnectionStates>('disconnected');
     plugins: ChatPlugin[] = [];
     enableDebugging = false;
     userAvatar$ = new BehaviorSubject(dummyAvatar);
