@@ -1,11 +1,10 @@
 import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { debounceTime, delay, distinctUntilChanged, filter, first, map, mergeMap, share, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { debounceTime, delay, distinctUntilChanged, map, share } from 'rxjs/operators';
 import { Contact } from '../../../../core/contact';
 import { Direction } from '../../../../core/message';
 import { findSortedInsertionIndexLast } from '../../../../core/utils-array';
-import { extractValues, sum } from '../../../../core/utils-object';
 import { ChatMessageListRegistryService } from '../../../chat-message-list-registry.service';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -65,6 +64,7 @@ export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
      */
     public jidToUnreadCount$: BehaviorSubject<JidToNumber> = new BehaviorSubject({});
     private jidToLastReadDate: JidToDate = {};
+    private contactIdToMessageSubscription = new Map<string, Subscription>();
 
     constructor(
         private chatService: XmppChatAdapter,
@@ -76,33 +76,39 @@ export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
 
         this.chatMessageListRegistry.chatOpened$
             .pipe(
-                filter(() => this.chatService.state$.getValue() !== 'disconnected'),
                 delay(0), // prevent 'Expression has changed after it was checked'
             )
             .subscribe(contact => this.checkForUnreadCountChange(contact));
 
         this.chatService.contactCreated$
-            .pipe(
-                filter(() => this.chatService.state$.getValue() !== 'disconnected'),
-                mergeMap(contact =>
-                    contact.messages$.pipe(
-                        debounceTime(1000), // performance optimization, ignore lots of message archive loading
-                        map(() => contact),
-                        takeUntil(this.chatService.state$.pipe(first(state => state === 'disconnected'))),
-                    ),
-                ),
-            )
-            .subscribe(contact => this.checkForUnreadCountChange(contact));
+            .subscribe(contact => {
+                const jid = contact.jidBare.toString();
+                if (!this.contactIdToMessageSubscription.has(jid)) {
+                    this.contactIdToMessageSubscription.set(jid,
+                        contact.messages$
+                            .pipe(debounceTime(20))
+                            .subscribe(() => this.checkForUnreadCountChange(contact)),
+                    );
+                }
+            });
 
         this.publishSubscribePlugin.publish$
             .subscribe((event) => this.handlePubSubEvent(event));
 
-        this.unreadMessageCountSum$ = this.jidToUnreadCount$.pipe(
-            map(jidToCount => sum(extractValues(jidToCount))),
-            debounceTime(500),
-            distinctUntilChanged(),
-            share(),
-        );
+        this.unreadMessageCountSum$ = combineLatest([this.jidToUnreadCount$, this.chatService.notBlockedContacts$])
+            .pipe(
+                debounceTime(20),
+                map(([jidToUnreadCount, notBlockedContacts]) => {
+                    let sum = 0;
+                    for (const contact of notBlockedContacts) {
+                        const unreadMessageCount = jidToUnreadCount[contact.jidBare.toString()] ?? 0;
+                        sum += unreadMessageCount;
+                    }
+                    return sum;
+                }),
+                distinctUntilChanged(),
+                share(),
+            );
     }
 
     private async checkForUnreadCountChange(contact: Contact) {
@@ -122,6 +128,10 @@ export class UnreadMessageCountPlugin extends AbstractXmppPlugin {
     }
 
     onOffline() {
+        for (const subscription of this.contactIdToMessageSubscription.values()) {
+            subscription.unsubscribe();
+        }
+        this.contactIdToMessageSubscription.clear();
         this.jidToUnreadCount$.next({});
     }
 

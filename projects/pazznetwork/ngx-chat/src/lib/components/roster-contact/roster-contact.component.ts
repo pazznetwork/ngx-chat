@@ -30,7 +30,7 @@ export class RosterContactComponent implements OnInit, OnDestroy {
             .pipe(
                 map(jidToUnreadCount => jidToUnreadCount[this.contact.jidBare.toString()] || 0),
                 distinctUntilChanged(),
-                debounceTime(500),
+                debounceTime(20),
                 takeUntil(this.ngDestroy),
             ).subscribe(unreadCount => this.unreadCount = unreadCount);
     }
