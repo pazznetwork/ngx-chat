@@ -1,3 +1,13 @@
+<a name="0.11.1"></a>
+## [0.11.1](https://github.com/pazznetwork/ngx-chat/compare/v0.11.0...v0.11.1) (2021-03-25)
+
+
+### Bug Fixes
+
+* unread message count calculation fixed ([446978a](https://github.com/pazznetwork/ngx-chat/commit/446978a))
+
+
+
 <a name="0.11.0"></a>
 # [0.11.0](https://github.com/pazznetwork/ngx-chat/compare/v0.10.6...v0.11.0) (2021-03-11)
 
