@@ -8,6 +8,9 @@ import { Translations } from '../core/translations';
 
 export const ChatServiceToken = new InjectionToken('pazznetworkNgxChatService');
 
+
+export type ConnectionStates = 'disconnected' | 'connecting' | 'online';
+
 /**
  * ChatService is your main API for using ngx-chat. Can be injected in your services like in the following example:
  *
@@ -27,7 +30,7 @@ export interface ChatService {
      * Plugins may now initialize, for example load the contact list or request archived messages. When all plugins have completed the
      * initialization, the new state will be 'online'.
      */
-    state$: BehaviorSubject<'disconnected' | 'connecting' | 'online'>;
+    state$: BehaviorSubject<ConnectionStates>;
 
     /**
      * A BehaviorSubject of all known contacts. Contains for example Contacts that sent you a message or blocked contacts.
