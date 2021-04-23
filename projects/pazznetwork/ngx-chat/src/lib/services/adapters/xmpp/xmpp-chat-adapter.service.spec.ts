@@ -105,7 +105,7 @@ describe('XmppChatAdapter', () => {
             return new Promise<void>((resolve) => {
                 let emitted = false;
                 chatService.message$.pipe(first()).subscribe(() => emitted = true);
-                chatService.sendMessage(contact1.jidBare.toString(), 'send message text');
+                chatService.sendMessage(contact1, 'send message text');
                 setTimeout(() => {
                     expect(emitted).toBeFalsy();
                     resolve();
@@ -125,12 +125,12 @@ describe('XmppChatAdapter', () => {
         });
 
         it('#messages$ in contact should emit on sending messages', (done) => {
-            chatService.getOrCreateContactById(contact1.jidBare.toString()).messages$.pipe(first()).subscribe(message => {
+            contact1.messages$.pipe(first()).subscribe(message => {
                 expect(message.direction).toEqual(Direction.out);
                 expect(message.body).toEqual('send message text');
                 done();
             });
-            chatService.sendMessage(contact1.jidBare.toString(), 'send message text');
+            chatService.sendMessage(contact1, 'send message text');
         });
 
         it('#messages$ should emit a message with the same id a second time, the message in the contact should only exist once', (done) => {

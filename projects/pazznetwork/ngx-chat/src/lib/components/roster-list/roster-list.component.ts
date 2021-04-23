@@ -3,6 +3,8 @@ import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Contact } from '../../core/contact';
+import { Recipient } from '../../core/recipient';
+import { MultiUserChatPlugin } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 
@@ -55,8 +57,11 @@ export class RosterListComponent implements OnInit {
     @Output()
     rosterStateChanged = new EventEmitter<'hidden' | 'shown'>();
 
+    multiUserChatPlugin: MultiUserChatPlugin;
+
     constructor(@Inject(ChatServiceToken) public chatService: ChatService,
                 private chatListService: ChatListStateService) {
+        this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
     }
 
     ngOnInit() {
@@ -82,8 +87,8 @@ export class RosterListComponent implements OnInit {
         );
     }
 
-    onClickContact(contact: Contact) {
-        this.chatListService.openChat(contact);
+    onClickRecipient(recipient: Recipient) {
+        this.chatListService.openChat(recipient);
     }
 
     toggleVisibility() {

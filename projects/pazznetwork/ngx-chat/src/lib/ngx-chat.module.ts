@@ -17,8 +17,8 @@ import { ChatWindowFrameComponent } from './components/chat-window-frame/chat-wi
 import { ChatWindowListComponent } from './components/chat-window-list/chat-window-list.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ChatComponent } from './components/chat.component';
-import { RosterContactComponent } from './components/roster-contact/roster-contact.component';
 import { RosterListComponent } from './components/roster-list/roster-list.component';
+import { RosterRecipientComponent } from './components/roster-recipient/roster-recipient.component';
 import { IntersectionObserverDirective } from './directives/intersection-observer.directive';
 import { LinksDirective } from './directives/links.directive';
 import { BlockPlugin } from './services/adapters/xmpp/plugins/block.plugin';
@@ -70,12 +70,12 @@ import { LogService } from './services/log.service';
         ChatWindowListComponent,
         LinksDirective,
         IntersectionObserverDirective,
-        RosterContactComponent,
         RosterListComponent,
         FileDropComponent,
         ChatWindowFrameComponent,
         ChatVideoWindowComponent,
         ChatAvatarComponent,
+        RosterRecipientComponent,
     ],
     exports: [
         ChatComponent,
@@ -131,15 +131,16 @@ export class NgxChatModule {
         const serviceDiscoveryPlugin = new ServiceDiscoveryPlugin(xmppChatAdapter);
         const publishSubscribePlugin = new PublishSubscribePlugin(xmppChatAdapter, serviceDiscoveryPlugin);
         const entityTimePlugin = new EntityTimePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService);
+        const multiUserChatPlugin = new MultiUserChatPlugin(xmppChatAdapter, logService, serviceDiscoveryPlugin);
         const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
-            xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin, entityTimePlugin);
+            xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin, entityTimePlugin, multiUserChatPlugin);
 
         xmppChatAdapter.addPlugins([
             new BookmarkPlugin(publishSubscribePlugin),
             new MessageArchivePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService),
             new MessagePlugin(xmppChatAdapter, logService),
             new MessageUuidPlugin(),
-            new MultiUserChatPlugin(xmppChatAdapter, logService, serviceDiscoveryPlugin),
+            multiUserChatPlugin,
             publishSubscribePlugin,
             new RosterPlugin(xmppChatAdapter, logService),
             serviceDiscoveryPlugin,

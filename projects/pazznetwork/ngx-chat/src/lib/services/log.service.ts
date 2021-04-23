@@ -35,7 +35,7 @@ export class LogService {
 
     public debug(...messages: any[]) {
         if (this.logLevel >= LogLevel.Debug) {
-            this.writer.log(this.messagePrefix(), ...messages);
+            this.writer.debug(this.messagePrefix(), ...messages);
         }
     }
 

@@ -5,6 +5,6 @@ export const REPORT_USER_INJECTION_TOKEN = new InjectionToken('ReportUserService
 
 export interface ReportUserService {
 
-    reportUser(user: Contact);
+    reportUser(user: Contact): void;
 
 }

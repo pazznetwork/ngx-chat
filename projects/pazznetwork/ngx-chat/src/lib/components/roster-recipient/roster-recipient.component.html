@@ -1,0 +1,21 @@
+<div class="roster-recipient" [title]="recipient.name">
+
+    <div class="roster-recipient-avatar">
+        <ngx-chat-avatar [imageUrl]="recipient.avatar"></ngx-chat-avatar>
+    </div>
+
+    <div class="roster-recipient-name">
+        {{recipient.name}}
+    </div>
+
+    <div class="roster-recipient-status">
+        <div class="unread-message-badge" *ngIf="(unreadCount$ | async) > 0">{{unreadCount$ | async}}</div>
+        <ng-container *ngIf="presence$ | async as presence">
+            <div *ngIf="presence !== Presence.unavailable"
+                 class="roster-presence"
+                 [ngClass]="'roster-presence--' + presence">●
+            </div>
+        </ng-container>
+    </div>
+
+</div>

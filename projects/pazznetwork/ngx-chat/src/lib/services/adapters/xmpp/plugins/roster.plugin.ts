@@ -20,6 +20,9 @@ export class RosterPlugin extends AbstractXmppPlugin {
     }
 
     handleStanza(stanza: Stanza) {
+        if (this.isCapabilitiesStanza(stanza)) {
+            return false;
+        }
         if (this.isRosterPushStanza(stanza)) {
             return this.handleRosterPushStanza(stanza);
         } else if (this.isPresenceStanza(stanza)) {
@@ -32,6 +35,15 @@ export class RosterPlugin extends AbstractXmppPlugin {
         return stanza.name === 'iq'
             && stanza.attrs.type === 'set'
             && stanza.getChild('query', 'jabber:iq:roster');
+    }
+
+    private isPresenceStanza(stanza: Stanza): stanza is PresenceStanza {
+        return stanza.name === 'presence' && !stanza.getChild('x', 'http://jabber.org/protocol/muc#user');
+    }
+
+    private isCapabilitiesStanza(stanza: Stanza) {
+        const child = stanza.getChild('c', 'http://jabber.org/protocol/caps');
+        return !!child;
     }
 
     private handleRosterPushStanza(stanza: Stanza) {
@@ -78,10 +90,6 @@ export class RosterPlugin extends AbstractXmppPlugin {
         }
 
         return handled;
-    }
-
-    private isPresenceStanza(stanza: Stanza): stanza is PresenceStanza {
-        return stanza.name === 'presence' && !stanza.getChild('x', 'http://jabber.org/protocol/muc#user');
     }
 
     private handlePresenceStanza(stanza: PresenceStanza) {

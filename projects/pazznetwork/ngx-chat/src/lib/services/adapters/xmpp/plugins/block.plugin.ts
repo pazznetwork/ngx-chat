@@ -40,7 +40,7 @@ export class BlockPlugin extends AbstractXmppPlugin {
 
     onOffline() {
         this.supportsBlock$.next('unknown');
-        this.xmppChatAdapter.blockedContactIds$.next([]);
+        this.xmppChatAdapter.blockedContactIds$.next(new Set<string>());
     }
 
     blockJid(jid: string) {
@@ -69,7 +69,7 @@ export class BlockPlugin extends AbstractXmppPlugin {
             .getChildren('item')
             .map(e => e.attrs.jid);
 
-        this.xmppChatAdapter.blockedContactIds$.next(blockedJids);
+        this.xmppChatAdapter.blockedContactIds$.next(new Set<string>(blockedJids));
     }
 
     handleStanza(stanza: Stanza): boolean {
@@ -79,21 +79,21 @@ export class BlockPlugin extends AbstractXmppPlugin {
             const unblockPush = stanza.getChild('unblock', 'urn:xmpp:blocking');
             const blockList = this.xmppChatAdapter.blockedContactIds$.getValue();
             if (blockPush) {
-                const jidsToBlock = blockPush.getChildren('item')
-                    .map(e => e.attrs.jid)
-                    .filter(jidToBlock => blockList.indexOf(jidToBlock) === -1);
-                this.xmppChatAdapter.blockedContactIds$.next(blockList.concat(jidsToBlock));
+                blockPush.getChildren('item')
+                    .map(e => e.attrs.jid as string)
+                    .forEach(jid => blockList.add(jid));
+                this.xmppChatAdapter.blockedContactIds$.next(blockList);
                 return true;
             } else if (unblockPush) {
-                const jidsToUnblock = unblockPush.getChildren('item').map(e => e.attrs.jid);
+                const jidsToUnblock = unblockPush.getChildren('item').map(e => e.attrs.jid as string);
                 if (jidsToUnblock.length === 0) {
                     // unblock everyone
-                    this.xmppChatAdapter.blockedContactIds$.next([]);
+                    blockList.clear();
                 } else {
                     // unblock individually
-                    const newBlockList = blockList.filter(blockedJid => jidsToUnblock.indexOf(blockedJid) === -1);
-                    this.xmppChatAdapter.blockedContactIds$.next(newBlockList);
+                    jidsToUnblock.forEach(jid => blockList.delete(jid));
                 }
+                this.xmppChatAdapter.blockedContactIds$.next(blockList);
                 return true;
             }
         }

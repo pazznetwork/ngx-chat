@@ -1,4 +1,5 @@
 import { xml } from '@xmpp/client';
+import { Contact } from '../../../../core/contact';
 import { Direction, Message } from '../../../../core/message';
 import { MessageWithBodyStanza, Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
@@ -30,17 +31,17 @@ export class MessagePlugin extends AbstractXmppPlugin {
         return stanza.name === 'message'
             && stanza.attrs.type !== 'groupchat'
             && stanza.attrs.type !== 'error'
-            && !!stanza.getChildText('body');
+            && !!stanza.getChildText('body')?.trim();
     }
 
     private handleMessageStanza(messageStanza: MessageWithBodyStanza) {
         this.logService.debug('message received <=', messageStanza.getChildText('body'));
 
         const message = {
-            body: messageStanza.getChildText('body'),
+            body: messageStanza.getChildText('body').trim(),
             direction: Direction.in,
             datetime: new Date(), // TODO: replace with entity time plugin
-            delayed: !!messageStanza.getChild('delay')
+            delayed: !!messageStanza.getChild('delay'),
         };
 
         const messageReceivedEvent = new MessageReceivedEvent();
@@ -52,19 +53,22 @@ export class MessagePlugin extends AbstractXmppPlugin {
         }
     }
 
-    sendMessage(jid: string, body: string) {
-        const messageStanza = xml('message', {to: jid, from: this.xmppChatAdapter.chatConnectionService.userJid.toString(), type: 'chat'},
-            xml('body', {}, body)
+    sendMessage(contact: Contact, body: string) {
+        const messageStanza = xml('message', {
+                to: contact.jidBare.toString(),
+                from: this.xmppChatAdapter.chatConnectionService.userJid.toString(),
+                type: 'chat',
+            },
+            xml('body', {}, body),
         );
 
         const message: Message = {
             direction: Direction.out,
             body,
             datetime: new Date(), // TODO: replace with entity time plugin
-            delayed: false
+            delayed: false,
         };
         this.xmppChatAdapter.plugins.forEach(plugin => plugin.beforeSendMessage(messageStanza, message));
-        const contact = this.xmppChatAdapter.getOrCreateContactById(jid);
         contact.addMessage(message);
         // TODO: on rejection mark message that it was not sent successfully
         this.xmppChatAdapter.chatConnectionService.send(messageStanza).then(() => {

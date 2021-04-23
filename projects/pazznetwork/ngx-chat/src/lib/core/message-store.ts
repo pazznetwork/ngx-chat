@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
 import { LogService } from '../services/log.service';
-import { Message } from './message';
-import { findSortedIndex, findSortedInsertionIndexLast, insertSortedLast } from './utils-array';
+import { Direction, Message } from './message';
+import { findLast, findSortedIndex, findSortedInsertionIndexLast, insertSortedLast } from './utils-array';
 import { extractDateStringFromDate } from './utils-date';
 
 export interface DateMessagesGroup<T extends Message> {
@@ -33,6 +33,22 @@ export class MessageStore<T extends Message> {
         this.messageIdToMessage[message.id] = message;
         this.messages$.next(message);
         return true;
+    }
+
+    get oldestMessage() {
+        return this.messages[0];
+    }
+
+    get mostRecentMessage() {
+        return this.messages[this.messages.length - 1];
+    }
+
+    get mostRecentMessageReceived() {
+        return findLast(this.messages, msg => msg.direction === Direction.in);
+    }
+
+    get mostRecentMessageSent() {
+        return findLast(this.messages, msg => msg.direction === Direction.out);
     }
 
     private addToDateMessageGroups(message: T) {

@@ -40,7 +40,7 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
         const direction = receivedOrSent.is('received') ? Direction.in : Direction.out;
 
         const message = {
-            body: messageElement.getChildText('body'),
+            body: messageElement.getChildText('body').trim(),
             direction,
             datetime: new Date(), // TODO: replace with entity time plugin
             delayed: false,

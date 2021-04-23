@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Contact, Direction, dummyAvatar, MessageState, Room } from '@pazznetwork/ngx-chat';
+import { Contact, Direction, dummyAvatarContact, MessageState, Room } from '@pazznetwork/ngx-chat';
 import { jid as parseJid } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
 
@@ -13,7 +13,7 @@ export class UiComponent implements OnInit {
     contact: Contact;
     Direction = Direction;
     MessageState = MessageState;
-    dummyAvatar = dummyAvatar;
+    dummyAvatarContact = dummyAvatarContact;
     room: Room;
     private myJid: JID = parseJid('me@example.com');
     private otherContactJid: JID = parseJid('other@example.com');

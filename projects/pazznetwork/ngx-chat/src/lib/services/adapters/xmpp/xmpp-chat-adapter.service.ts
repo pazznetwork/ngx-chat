@@ -4,9 +4,10 @@ import { BehaviorSubject, combineLatest, merge, Observable, Subject } from 'rxjs
 import { filter, map } from 'rxjs/operators';
 import { ChatActionContext } from '../../../components/chat-window/chat-window.component';
 import { Contact } from '../../../core/contact';
-import { dummyAvatar } from '../../../core/contact-avatar';
+import { dummyAvatarContact } from '../../../core/contact-avatar';
 import { LogInRequest } from '../../../core/log-in-request';
 import { ChatPlugin } from '../../../core/plugin';
+import { Recipient } from '../../../core/recipient';
 import { Stanza } from '../../../core/stanza';
 import { Translations } from '../../../core/translations';
 import { defaultTranslations } from '../../../core/translations-default';
@@ -15,45 +16,46 @@ import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { MessageArchivePlugin } from './plugins/message-archive.plugin';
 import { MessagePlugin } from './plugins/message.plugin';
+import { MultiUserChatPlugin } from './plugins/multi-user-chat.plugin';
 import { RosterPlugin } from './plugins/roster.plugin';
 import { XmppChatConnectionService, XmppChatStates } from './xmpp-chat-connection.service';
 
 @Injectable()
 export class XmppChatAdapter implements ChatService {
 
-    message$ = new Subject<Contact>();
-    messageSent$: Subject<Contact> = new Subject();
+    readonly message$ = new Subject<Contact>();
+    readonly messageSent$: Subject<Contact> = new Subject();
 
-    contacts$ = new BehaviorSubject<Contact[]>([]);
-    contactCreated$ = new Subject<Contact>();
+    readonly contacts$ = new BehaviorSubject<Contact[]>([]);
+    readonly contactCreated$ = new Subject<Contact>();
 
-    blockedContactIds$ = new BehaviorSubject<string[]>([]);
-    blockedContacts$ = combineLatest([this.contacts$, this.blockedContactIds$])
+    readonly blockedContactIds$ = new BehaviorSubject<Set<string>>(new Set<string>());
+    readonly blockedContacts$ = combineLatest([this.contacts$, this.blockedContactIds$])
         .pipe(
             map(
                 ([contacts, blockedJids]) =>
-                    contacts.filter(contact => blockedJids.indexOf(contact.jidBare.toString()) >= 0),
+                    contacts.filter(contact => blockedJids.has(contact.jidBare.toString())),
             ),
         );
-    notBlockedContacts$ = combineLatest([this.contacts$, this.blockedContactIds$])
+    readonly notBlockedContacts$ = combineLatest([this.contacts$, this.blockedContactIds$])
         .pipe(
             map(
                 ([contacts, blockedJids]) =>
-                    contacts.filter(contact => blockedJids.indexOf(contact.jidBare.toString()) === -1),
+                    contacts.filter(contact => !blockedJids.has(contact.jidBare.toString())),
             ),
         );
-    contactsSubscribed$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
+    readonly contactsSubscribed$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.isSubscribed())));
-    contactRequestsReceived$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
+    readonly contactRequestsReceived$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.pendingIn$.getValue())));
-    contactRequestsSent$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
+    readonly contactRequestsSent$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.pendingOut$.getValue())));
-    contactsUnaffiliated$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
+    readonly contactsUnaffiliated$: Observable<Contact[]> = this.notBlockedContacts$.pipe(
         map(contacts => contacts.filter(contact => contact.isUnaffiliated() && contact.messages.length > 0)));
-    state$ = new BehaviorSubject<ConnectionStates>('disconnected');
-    plugins: ChatPlugin[] = [];
+    readonly state$ = new BehaviorSubject<ConnectionStates>('disconnected');
+    readonly plugins: ChatPlugin[] = [];
     enableDebugging = false;
-    userAvatar$ = new BehaviorSubject(dummyAvatar);
+    readonly userAvatar$ = new BehaviorSubject(dummyAvatarContact);
     translations: Translations = defaultTranslations();
 
     chatActions = [{
@@ -169,9 +171,22 @@ export class XmppChatAdapter implements ChatService {
         return this.chatConnectionService.logOut();
     }
 
-    sendMessage(jid: string, body: string) {
-        this.getPlugin(MessagePlugin).sendMessage(jid, body);
-        this.messageSent$.next(this.getOrCreateContactById(jid));
+    async sendMessage(recipient: Recipient, body: string) {
+        const trimmedBody = body.trim();
+        if (trimmedBody.length === 0) {
+            return;
+        }
+        switch (recipient.recipientType) {
+            case 'room':
+                await this.getPlugin(MultiUserChatPlugin).sendMessage(recipient, trimmedBody);
+                break;
+            case 'contact':
+                this.getPlugin(MessagePlugin).sendMessage(recipient, trimmedBody);
+                this.messageSent$.next(recipient);
+                break;
+            default:
+                throw new Error('invalid recipient type: ' + (recipient as any)?.recipientType);
+        }
     }
 
     loadCompleteHistory() {

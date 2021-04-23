@@ -1,10 +1,10 @@
 import { InjectionToken } from '@angular/core';
-import { Contact } from '../core/contact';
+import { Recipient } from '../core/recipient';
 
 export const CONTACT_CLICK_HANDLER_TOKEN = new InjectionToken('ChatContactClickHandler');
 
 export interface ChatContactClickHandler {
 
-    onClickContact(contact: Contact);
+    onClick(contact: Recipient): void;
 
 }

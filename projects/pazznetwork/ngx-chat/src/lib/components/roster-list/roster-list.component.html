@@ -9,15 +9,30 @@
         {{ chatService.translations.chat }}
     </div>
 
+    <ng-container *ngIf="(multiUserChatPlugin.rooms$ | async) as rooms">
+        <ng-container *ngIf="rooms.length > 0">
+            <div class="roster-group-header">{{chatService.translations.rooms}}</div>
+
+            <div class="contact-list-wrapper">
+                <ngx-chat-roster-recipient
+                        *ngFor="let room of rooms"
+                        [recipient]="room"
+                        (click)="onClickRecipient(room)">
+                </ngx-chat-roster-recipient>
+            </div>
+        </ng-container>
+    </ng-container>
+
     <ng-container *ngIf="(contacts | async).length > 0">
         <div class="roster-group-header">{{chatService.translations.contacts}}</div>
 
         <div class="contact-list-wrapper">
 
-            <ngx-chat-roster-contact *ngFor="let contact of (contacts | async)"
-                                     [contact]="contact"
-                                     (click)="onClickContact(contact)">
-            </ngx-chat-roster-contact>
+            <ngx-chat-roster-recipient
+                    *ngFor="let contact of (contacts | async)"
+                    [recipient]="contact"
+                    (click)="onClickRecipient(contact)">
+            </ngx-chat-roster-recipient>
 
         </div>
     </ng-container>
@@ -26,10 +41,11 @@
         <div class="roster-group-header">{{chatService.translations.contactRequestIn}}</div>
         <div class="contact-list-wrapper">
 
-            <ngx-chat-roster-contact *ngFor="let contact of (contactRequestsReceived$ | async)"
-                                     [contact]="contact"
-                                     (click)="onClickContact(contact)">
-            </ngx-chat-roster-contact>
+            <ngx-chat-roster-recipient
+                    *ngFor="let contact of (contactRequestsReceived$ | async)"
+                    [recipient]="contact"
+                    (click)="onClickRecipient(contact)">
+            </ngx-chat-roster-recipient>
 
         </div>
     </ng-container>
@@ -38,10 +54,11 @@
         <div class="roster-group-header">{{chatService.translations.contactRequestOut}}</div>
         <div class="contact-list-wrapper">
 
-            <ngx-chat-roster-contact *ngFor="let contact of (contactRequestsSent$ | async)"
-                                     [contact]="contact"
-                                     (click)="onClickContact(contact)">
-            </ngx-chat-roster-contact>
+            <ngx-chat-roster-recipient
+                    *ngFor="let contact of (contactRequestsSent$ | async)"
+                    [recipient]="contact"
+                    (click)="onClickRecipient(contact)">
+            </ngx-chat-roster-recipient>
 
         </div>
     </ng-container>
@@ -51,10 +68,11 @@
         <div class="contact-list-wrapper">
 
             <ng-container *ngFor="let contact of (contactsUnaffiliated$ | async)">
-                <ngx-chat-roster-contact *ngIf="contact.messages.length > 0"
-                                         [contact]="contact"
-                                         (click)="onClickContact(contact)">
-                </ngx-chat-roster-contact>
+                <ngx-chat-roster-recipient
+                        *ngIf="contact.messages.length > 0"
+                        [recipient]="contact"
+                        (click)="onClickRecipient(contact)">
+                </ngx-chat-roster-recipient>
             </ng-container>
 
         </div>

@@ -130,8 +130,8 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         const isAddressedToMe = this.chatService.chatConnectionService.userJid.bare()
             .equals(parseJid(messageElement.attrs.to).bare());
 
-        const messageBody = messageElement.getChildText('body');
-        if (messageBody && messageBody.trim()) {
+        const messageBody = messageElement.getChildText('body')?.trim();
+        if (messageBody) {
             const contactJid = isAddressedToMe ? messageElement.attrs.from : messageElement.attrs.to;
             const contact = this.chatService.getOrCreateContactById(contactJid);
             const datetime = new Date(

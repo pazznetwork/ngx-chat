@@ -1,7 +1,14 @@
+@import (reference) "../../style";
+
 .chat-messages {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+
+  :host-context(.ngx-chat-room-messages--scrollable) & {
+    max-height: 20em;
+    min-height: 10em;
+  }
 }
 
 .chat-messages-date-group {
@@ -9,6 +16,14 @@
   font-style: italic;
   margin: 0.5em 0;
   text-align: center;
+}
+
+.chat-messages-empty {
+  text-align: center;
+  font-size: 1.5em;
+  color: @general-light;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 ngx-chat-message,

@@ -77,7 +77,7 @@
         <ng-container *ngIf="(this.chatService.state$ | async) === 'online' && (this.chatService.contactsSubscribed$ | async).length > 0; else messagesComponentInformation">
             <ngx-chat-message-list [contact]="(this.chatService.contactsSubscribed$ | async)[0]"
                                    [showAvatars]="true"></ngx-chat-message-list>
-            <ngx-chat-message-input [contact]="(this.chatService.contactsSubscribed$ | async)[0]"></ngx-chat-message-input>
+            <ngx-chat-message-input [recipient]="(this.chatService.contactsSubscribed$ | async)[0]"></ngx-chat-message-input>
         </ng-container>
         <ng-template #messagesComponentInformation>You need to be logged in and have contacts to see this component</ng-template>
     </div>
@@ -94,7 +94,7 @@
     <div>
         <h2>Unread messages count:</h2>
         Sum unread messages: {{unreadMessageCountPlugin.unreadMessageCountSum$ | async}}
-        <pre>{{unreadMessageCountPlugin.jidToUnreadCount$ | async | json}}</pre>
+        <pre>{{unreadMessageCountPlugin.jidToUnreadCount$ | async | keyvalue | json}}</pre>
     </div>
 
     <a routerLink="/ui">Show mock chats</a>

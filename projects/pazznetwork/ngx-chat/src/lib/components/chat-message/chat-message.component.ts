@@ -32,8 +32,12 @@ export class ChatMessageComponent implements OnInit {
     @Input()
     contact: Contact;
 
+    @Input()
+    showMessageReadState = true;
+
     showImagePlaceholder = true;
     imageLink: string;
+
     Direction = Direction;
 
     private readonly messageStatePlugin: MessageStatePlugin;
@@ -84,12 +88,14 @@ export class ChatMessageComponent implements OnInit {
     }
 
     getMessageState(): MessageState | undefined {
-        if (this.message.state) {
-            return this.message.state;
-        } else if (this.messageStatePlugin && this.contact) {
-            const date = this.message.datetime;
-            const states = this.messageStatePlugin.getContactMessageState(this.contact.jidBare.toString());
-            return this.getStateForDate(date, states);
+        if (this.showMessageReadState) {
+            if (this.message.state) {
+                return this.message.state;
+            } else if (this.messageStatePlugin && this.contact) {
+                const date = this.message.datetime;
+                const states = this.messageStatePlugin.getContactMessageState(this.contact.jidBare.toString());
+                return this.getStateForDate(date, states);
+            }
         }
         return undefined;
     }
@@ -107,7 +113,7 @@ export class ChatMessageComponent implements OnInit {
 
     onContactClick() {
         if (this.contactClickHandler) {
-            this.contactClickHandler.onClickContact(this.contact);
+            this.contactClickHandler.onClick(this.contact);
         }
     }
 

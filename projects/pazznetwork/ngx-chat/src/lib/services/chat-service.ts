@@ -4,6 +4,7 @@ import { ChatAction } from '../components/chat-window/chat-window.component';
 import { Contact } from '../core/contact';
 import { LogInRequest } from '../core/log-in-request';
 import { ChatPlugin } from '../core/plugin';
+import { Recipient } from '../core/recipient';
 import { Translations } from '../core/translations';
 
 export const ChatServiceToken = new InjectionToken('pazznetworkNgxChatService');
@@ -137,10 +138,10 @@ export interface ChatService {
 
     /**
      * Sends a given message to a given contact.
-     * @param id The id of the contact to which the message shall be sent.
+     * @param recipient The recipient to which the message shall be sent.
      * @param body The message content.
      */
-    sendMessage(id: string, body: string): void;
+    sendMessage(recipient: Recipient, body: string): void;
 
     /**
      * Requests all archived messages for all contacts from the server.

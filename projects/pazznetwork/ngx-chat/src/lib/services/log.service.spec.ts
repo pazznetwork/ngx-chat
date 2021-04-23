@@ -6,7 +6,7 @@ describe('log service', () => {
     let logService: LogService;
 
     beforeEach(() => {
-        writerSpy = jasmine.createSpyObj('Console', ['error', 'warn', 'info', 'log']);
+        writerSpy = jasmine.createSpyObj('Console', ['error', 'warn', 'info', 'debug']);
         logService = new LogService();
         logService.writer = writerSpy;
     });
@@ -17,7 +17,7 @@ describe('log service', () => {
         logService.info('info');
         logService.warn('warn');
         logService.error('error');
-        expect(writerSpy.log).toHaveBeenCalledWith(logService.messagePrefix(), 'debug');
+        expect(writerSpy.debug).toHaveBeenCalledWith(logService.messagePrefix(), 'debug');
         expect(writerSpy.info).toHaveBeenCalledWith(logService.messagePrefix(), 'info');
         expect(writerSpy.warn).toHaveBeenCalledWith(logService.messagePrefix(), 'warn');
         expect(writerSpy.error).toHaveBeenCalledWith(logService.messagePrefix(), 'error');
@@ -28,7 +28,7 @@ describe('log service', () => {
         logService.debug('debug');
         logService.warn('warn');
         logService.error('error');
-        expect(writerSpy.log).not.toHaveBeenCalled();
+        expect(writerSpy.debug).not.toHaveBeenCalled();
         expect(writerSpy.warn).toHaveBeenCalledWith(logService.messagePrefix(), 'warn');
         expect(writerSpy.error).toHaveBeenCalledWith(logService.messagePrefix(), 'error');
     });
@@ -38,7 +38,7 @@ describe('log service', () => {
         logService.debug('debug');
         logService.warn('warn');
         logService.error('error');
-        expect(writerSpy.log).not.toHaveBeenCalled();
+        expect(writerSpy.debug).not.toHaveBeenCalled();
         expect(writerSpy.warn).not.toHaveBeenCalled();
         expect(writerSpy.error).toHaveBeenCalledWith(logService.messagePrefix(), 'error');
     });
@@ -48,7 +48,7 @@ describe('log service', () => {
         logService.debug('debug');
         logService.warn('warn');
         logService.error('error');
-        expect(writerSpy.log).not.toHaveBeenCalled();
+        expect(writerSpy.debug).not.toHaveBeenCalled();
         expect(writerSpy.warn).not.toHaveBeenCalled();
         expect(writerSpy.error).not.toHaveBeenCalled();
     });

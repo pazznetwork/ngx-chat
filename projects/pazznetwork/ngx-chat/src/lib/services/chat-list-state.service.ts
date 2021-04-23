@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Contact } from '../core/contact';
+import { Recipient } from '../core/recipient';
 import { ChatService, ChatServiceToken } from './chat-service';
 
 export class ChatWindowState {
-    constructor(public contact: Contact,
+    constructor(public recipient: Recipient,
                 public isCollapsed: boolean) {
     }
 }
@@ -37,23 +37,23 @@ export class ChatListStateService {
         });
     }
 
-    private openChatCollapsed(contact: Contact) {
-        if (!this.isChatWithContactOpen(contact)) {
+    private openChatCollapsed(recipient: Recipient) {
+        if (!this.isChatWithRecipientOpen(recipient)) {
             const openChats = this.openChats$.getValue();
-            const chatWindow = new ChatWindowState(contact, true);
+            const chatWindow = new ChatWindowState(recipient, true);
             const copyWithNewContact = [chatWindow].concat(openChats);
             this.openChats$.next(copyWithNewContact);
         }
     }
 
-    public openChat(contact: Contact) {
-        this.openChatCollapsed(contact);
-        this.findChatWindowStateByContact(contact).isCollapsed = false;
+    public openChat(recipient: Recipient) {
+        this.openChatCollapsed(recipient);
+        this.findChatWindowStateByRecipient(recipient).isCollapsed = false;
     }
 
-    public closeChat(contactToClose: Contact) {
+    public closeChat(recipient: Recipient) {
         const openChats = this.openChats$.getValue();
-        const index = this.findChatWindowStateIndexByContact(contactToClose);
+        const index = this.findChatWindowStateIndexByRecipient(recipient);
         if (index >= 0) {
             const copyWithoutContact = openChats.slice();
             copyWithoutContact.splice(index, 1);
@@ -71,17 +71,16 @@ export class ChatListStateService {
         );
     }
 
-    isChatWithContactOpen(contact: Contact): boolean {
-        return this.findChatWindowStateIndexByContact(contact) >= 0;
+    isChatWithRecipientOpen(recipient: Recipient): boolean {
+        return this.findChatWindowStateByRecipient(recipient) !== undefined;
     }
 
-    private findChatWindowStateIndexByContact(contact: Contact): number {
+    private findChatWindowStateIndexByRecipient(recipient: Recipient): number {
         return this.openChats$.getValue()
-            .findIndex((chatWindowState) => chatWindowState.contact.equalsBareJid(contact));
+            .findIndex((chatWindowState) => chatWindowState.recipient.equalsBareJid(recipient));
     }
 
-    private findChatWindowStateByContact(contact: Contact): ChatWindowState {
-        return this.openChats$.getValue()
-            .find((chatWindowState) => chatWindowState.contact.equalsBareJid(contact));
+    private findChatWindowStateByRecipient(recipient: Recipient): ChatWindowState | undefined {
+        return this.openChats$.getValue().find(chat => chat.recipient.equalsBareJid(recipient));
     }
 }

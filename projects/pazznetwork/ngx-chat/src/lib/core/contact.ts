@@ -2,12 +2,12 @@ import { jid as parseJid } from '@xmpp/client';
 import { JID } from '@xmpp/jid';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { LogService } from '../services/log.service';
-import { dummyAvatar } from './contact-avatar';
-import { Direction, Message } from './message';
+import { dummyAvatarContact } from './contact-avatar';
+import { Message } from './message';
 import { DateMessagesGroup, MessageStore } from './message-store';
 import { Presence } from './presence';
+import { isJid, Recipient } from './recipient';
 import { ContactSubscription } from './subscription';
-import { findLast } from './utils-array';
 
 export interface ContactMetadata {
     [key: string]: any;
@@ -19,7 +19,8 @@ export interface JidToPresence {
 
 export class Contact {
 
-    public avatar = dummyAvatar;
+    readonly recipientType = 'contact';
+    public avatar = dummyAvatarContact;
     public metadata: ContactMetadata = {};
 
     /** use {@link jidBare}, jid resource is only set for chat room contacts */
@@ -46,19 +47,19 @@ export class Contact {
     }
 
     get oldestMessage() {
-        return this.messageStore.messages[0];
+        return this.messageStore.oldestMessage;
     }
 
     get mostRecentMessage() {
-        return this.messageStore.messages[this.messageStore.messages.length - 1];
+        return this.messageStore.mostRecentMessage;
     }
 
     get mostRecentMessageReceived() {
-        return findLast(this.messageStore.messages, msg => msg.direction === Direction.in);
+        return this.messageStore.mostRecentMessageReceived;
     }
 
     get mostRecentMessageSent() {
-        return findLast(this.messageStore.messages, msg => msg.direction === Direction.out);
+        return this.messageStore.mostRecentMessageSent;
     }
 
     /**
@@ -81,9 +82,12 @@ export class Contact {
         this.messageStore.addMessage(message);
     }
 
-    public equalsBareJid(other: Contact | JID) {
-        const otherJid = other instanceof Contact ? other.jidBare : other.bare();
-        return this.jidBare.equals(otherJid);
+    public equalsBareJid(other: Recipient | JID): boolean {
+        if (other instanceof Contact || isJid(other)) {
+            const otherJid = other instanceof Contact ? other.jidBare : other.bare();
+            return this.jidBare.equals(otherJid);
+        }
+        return false;
     }
 
     isSubscribed() {
