@@ -1,3 +1,27 @@
+<a name="0.11.2"></a>
+## [0.11.2](https://github.com/pazznetwork/ngx-chat/compare/v0.11.1...v0.11.2) (2021-04-30)
+
+
+### Features
+
+* rooms in roster list ([41a8e64](https://github.com/pazznetwork/ngx-chat/commit/41a8e64))
+
+
+### BREAKING CHANGES
+
+* currently joined rooms are now seen in the roster list
+* introduced Recipient. Contact and Room are Recipients, they get discriminated by the recipientType property
+* ChatMessageInputComponent gets a recipient instead of a contact or a room, you only have to change the input parameter to recipient
+* ChatService
+  * sendMessage expects a Recipient instead of a JID, will now also send messages to Rooms, no need to send via MessagePlugin or MultiUserChatPlugin
+  * ChatService.blockedContactIds$, xmppChatAdapter.blockedContactIds$ is now a Set
+* Received messages get trimmed of leading or trailing whitespaces and newlines
+* MultiUserChatPlugin.join will reject if you already joined that room
+* UnreadMessageCountPlugin jidToUnreadCount$ changed to Map<string, number>
+* ChatListStateService.isChatWithContactOpen -> isChatWithRecipientOpen
+
+
+
 <a name="0.11.1"></a>
 ## [0.11.1](https://github.com/pazznetwork/ngx-chat/compare/v0.11.0...v0.11.1) (2021-03-25)
 
