@@ -1,3 +1,13 @@
+<a name="0.11.3"></a>
+## [0.11.3](https://github.com/pazznetwork/ngx-chat/compare/v0.11.2...v0.11.3) (2021-05-17)
+
+
+### Features
+
+* allow specification of mucsub event nodes ([2937e58](https://github.com/pazznetwork/ngx-chat/commit/2937e58))
+
+
+
 <a name="0.11.2"></a>
 ## [0.11.2](https://github.com/pazznetwork/ngx-chat/compare/v0.11.1...v0.11.2) (2021-04-30)
 
