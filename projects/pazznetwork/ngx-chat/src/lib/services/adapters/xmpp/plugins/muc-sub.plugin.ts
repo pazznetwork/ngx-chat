@@ -37,11 +37,13 @@ export class MucSubPlugin extends AbstractXmppPlugin {
         this.supportsMucSub.next('unknown');
     }
 
-    subscribeRoom(roomJid: string) {
+    subscribeRoom(roomJid: string, nodes: string[] = []) {
         const nick = this.xmppChatAdapter.chatConnectionService.userJid.local;
         this.xmppChatAdapter.chatConnectionService.sendIq(
             xml('iq', {type: 'set', to: roomJid},
-                xml('subscribe', {xmlns: 'urn:xmpp:mucsub:0', nick})
+                xml('subscribe', {xmlns: 'urn:xmpp:mucsub:0', nick},
+                    nodes.map(node => xml('event', {node}))
+                )
             )
         );
     }
