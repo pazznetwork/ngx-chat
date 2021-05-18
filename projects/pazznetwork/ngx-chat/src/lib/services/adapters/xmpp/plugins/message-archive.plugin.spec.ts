@@ -26,7 +26,7 @@ describe('message archive plugin', () => {
             xml('result', {xmlns: 'urn:xmpp:mam:2'},
                 xml('forwarded', {},
                     xml('delay', {stamp: '2018-07-18T08:47:44.233057Z'}),
-                    xml('message', {to: userJid.toString(), from: 'someone@else.com/resource'},
+                    xml('message', {to: userJid.toString(), from: 'someone@else.com/resource', type: 'chat'},
                         xml('origin-id', {id: 'id'}),
                         xml('body', {}, 'message text')))));
 
@@ -53,7 +53,7 @@ describe('message archive plugin', () => {
     });
 
     it('should send a request, create contacts and add messages ', () => {
-        const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, null, testLogService());
+        const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, null, null, testLogService());
         chatAdapter.addPlugins([messageArchivePlugin]);
         chatConnectionService.onOnline(userJid);
 

@@ -2,28 +2,31 @@
 
     <div class="chat-messages-start" (ngxChatIntersectionObserver)="onTop$.next($event)"></div>
 
-    <ng-container *ngFor="let dateMessagesGroup of contact.dateMessagesGroups">
+    <ng-container *ngFor="let dateMessagesGroup of recipient.dateMessagesGroups">
         <div class="chat-messages-date-group">{{dateMessagesGroup.date | date:chatService.translations.dateFormat:undefined:chatService.translations.locale}}</div>
-        <ngx-chat-message *ngFor="let message of dateMessagesGroup.messages"
-                          [id]="'message-' + message.id"
-                          [class.chat-message--in]="message.direction === Direction.in"
-                          [class.chat-message--out]="message.direction === Direction.out"
-                          [avatar]="contact.avatar"
-                          [contact]="contact"
-                          [message]="message"
-                          [nick]="message.direction === Direction.in ? contact.name : ''"
-                          [showAvatars]="showAvatars">
+        <ngx-chat-message
+                *ngFor="let message of dateMessagesGroup.messages"
+                [id]="'message-' + message.id"
+                [class.chat-message--in]="message.direction === Direction.in"
+                [class.chat-message--out]="message.direction === Direction.out"
+                [contact]="getOrCreateContactWithFullJid(message)"
+                [nick]="message.direction === Direction.in ? getOrCreateContactWithFullJid(message).name : ''"
+                [avatar]="getOrCreateContactWithFullJid(message).avatar"
+                [message]="message"
+                [showAvatars]="showAvatars">
         </ngx-chat-message>
     </ng-container>
 
-    <div class="chat-messages-empty" *ngIf="contact.messages.length === 0">
+    <div class="chat-messages-empty" *ngIf="recipient.messages.length === 0">
         {{chatService.translations.noMessages}}
     </div>
 
-    <ngx-chat-message-simple [direction]="Direction.in"
-                             [avatar]="showAvatars ? contact.avatar : undefined"
-                             [footerHidden]="true"
-                             *ngIf="subscriptionActionShown()">
+    <ngx-chat-message-simple
+            [direction]="Direction.in"
+            [avatar]="showAvatars ? recipient.avatar : undefined"
+            [footerHidden]="true"
+            *ngIf="subscriptionActionShown()"
+    >
         <span>
             {{chatService.translations.subscriptionRequestMessage}}
         </span>
@@ -50,7 +53,8 @@
                 >{{chatService.translations.denySubscriptionRequest}}</a>
             </li>
         </ul>
-        <ul class="deny-actions" *ngIf="(blockPlugin.supportsBlock$ | async) === true && subscriptionAction === SubscriptionAction.SHOW_BLOCK_ACTIONS">
+        <ul class="deny-actions"
+            *ngIf="(blockPlugin.supportsBlock$ | async) === true && subscriptionAction === SubscriptionAction.SHOW_BLOCK_ACTIONS">
             <li>
                 <a (click)="blockContact($event)" href="#">{{chatService.translations.block}}</a>
             </li>
@@ -58,7 +62,7 @@
                 <a (click)="blockContactAndReport($event)" href="#">{{chatService.translations.blockAndReport}}</a>
             </li>
             <li>
-                <a (click)="dismissOptions($event)" href="#">{{chatService.translations.dismiss}}</a>
+                <a (click)="dismissBlockOptions($event)" href="#">{{chatService.translations.dismiss}}</a>
             </li>
         </ul>
     </ngx-chat-message-simple>

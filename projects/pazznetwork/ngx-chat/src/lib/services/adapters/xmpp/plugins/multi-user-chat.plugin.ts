@@ -473,33 +473,33 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return stanza.name === 'message' && stanza.attrs.type === 'groupchat' && !!stanza.getChildText('body')?.trim();
     }
 
-    private handleRoomMessageStanza(stanza: Stanza) {
+    handleRoomMessageStanza(messageStanza: Stanza, archiveDelayElement?: Stanza) {
         let datetime;
-        const delay = stanza.getChild('delay');
+        const delay = archiveDelayElement ?? messageStanza.getChild('delay');
         if (delay && delay.attrs.stamp) {
             datetime = new Date(delay.attrs.stamp);
         } else {
             datetime = new Date(); // TODO: replace with entity time plugin
         }
 
-        const from = parseJid(stanza.attrs.from);
+        const from = parseJid(messageStanza.attrs.from);
         const room = this.getRoomByJid(from.bare());
         if (!room) {
             throw new Error('received stanza for non-existent room: ' + from.bare().toString());
         }
 
-        const message = {
-            body: stanza.getChildText('body').trim(),
+        const message: RoomMessage = {
+            body: messageStanza.getChildText('body').trim(),
             datetime,
-            id: stanza.attrs.id,
+            id: messageStanza.attrs.id,
             from,
             direction: from.equals(room.occupantJid) ? Direction.out : Direction.in,
-            delayed: !!stanza.getChild('delay'),
+            delayed: !!delay,
         };
 
         const messageReceivedEvent = new MessageReceivedEvent();
         for (const plugin of this.xmppChatAdapter.plugins) {
-            plugin.afterReceiveMessage(message, stanza, messageReceivedEvent);
+            plugin.afterReceiveMessage(message, messageStanza, messageReceivedEvent);
         }
         if (!messageReceivedEvent.discard) {
             room.addMessage(message);

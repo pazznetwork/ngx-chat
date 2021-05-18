@@ -10,7 +10,6 @@ import { ChatListStateService, ChatWindowState } from '../../services/chat-list-
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
 import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';
 import { ChatMessageListComponent } from '../chat-message-list/chat-message-list.component';
-import { ChatRoomMessagesComponent } from '../chat-room-messages/chat-room-messages.component';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -25,13 +24,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     @ViewChild(ChatMessageInputComponent)
     messageInput: ChatMessageInputComponent;
 
-    // deduplicate in #62
     @ViewChild(ChatMessageListComponent)
     contactMessageList: ChatMessageListComponent;
-
-    // deduplicate in #62
-    @ViewChild(ChatRoomMessagesComponent)
-    roomMessageList: ChatRoomMessagesComponent;
 
     httpFileUploadPlugin: HttpFileUploadPlugin;
 
@@ -77,12 +71,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     }
 
     afterSendMessage() {
-        if (this.contactMessageList) { // TODO: remove if after #62
-            this.contactMessageList.scheduleScrollToLastMessage();
-        }
-        if (this.roomMessageList) {
-            this.roomMessageList.scheduleScrollToLastMessage();
-        }
+        this.contactMessageList.scheduleScrollToLastMessage();
     }
 
     async uploadFile(file: File) {

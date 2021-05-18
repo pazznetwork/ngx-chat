@@ -8,8 +8,7 @@
         </div>
 
         <ng-container *ngIf="selectedRoom">
-            <ngx-chat-room-messages class="ngx-chat-room-messages--scrollable"
-                                    [room]="selectedRoom"></ngx-chat-room-messages>
+            <ngx-chat-message-list [recipient]="selectedRoom"></ngx-chat-message-list>
             <ngx-chat-message-input [recipient]="selectedRoom"></ngx-chat-message-input>
         </ng-container>
         <span *ngIf="(multiUserChatPlugin.rooms$ | async).length === 0">(no room joined yet)</span>
