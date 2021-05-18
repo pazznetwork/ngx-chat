@@ -1,3 +1,23 @@
+<a name="0.11.4"></a>
+## [0.11.4](https://github.com/pazznetwork/ngx-chat/compare/v0.11.3...v0.11.4) (2021-05-18)
+
+
+### Bug Fixes
+
+* sending a message via enter does not leave a newline behind ([97d67d8](https://github.com/pazznetwork/ngx-chat/commit/97d67d8))
+
+
+### Features
+
+* [#62](https://github.com/pazznetwork/ngx-chat/issues/62) lazy load old chat room messages ([4c9e822](https://github.com/pazznetwork/ngx-chat/commit/4c9e822))
+
+
+### BREAKING CHANGES
+
+* replace ChatRoomMessagesComponent with ChatMessageListComponent. The contact property of ChatMessageListComponent has renamed the contact property to recipient. The usage is the same!
+
+
+
 <a name="0.11.3"></a>
 ## [0.11.3](https://github.com/pazznetwork/ngx-chat/compare/v0.11.2...v0.11.3) (2021-05-17)
 
