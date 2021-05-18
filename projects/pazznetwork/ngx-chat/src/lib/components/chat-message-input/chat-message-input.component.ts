@@ -26,11 +26,13 @@ export class ChatMessageInputComponent implements OnInit {
     ngOnInit() {
     }
 
-    async onSendMessage() {
+    onSendMessage($event?: KeyboardEvent) {
+        if ($event) {
+            $event.preventDefault();
+        }
         this.chatService.sendMessage(this.recipient, this.message);
         this.message = '';
         this.messageSent.emit();
-        return false;
     }
 
     focus() {

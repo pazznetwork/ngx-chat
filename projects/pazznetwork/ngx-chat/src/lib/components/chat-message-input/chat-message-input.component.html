@@ -1,7 +1,7 @@
 <textarea class="chat-input"
           #chatInput
           [(ngModel)]="message"
-          (keydown.enter)="onSendMessage()"
+          (keydown.enter)="onSendMessage($event)"
           cdkTextareaAutosize
           cdkAutosizeMinRows="1"
           cdkAutosizeMaxRows="5"
