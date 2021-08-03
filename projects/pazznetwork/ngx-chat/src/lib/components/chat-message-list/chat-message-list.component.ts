@@ -14,15 +14,17 @@ import {
     ViewChild,
     ViewChildren,
 } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
-import { Contact } from '../../core/contact';
 import { Direction, Message } from '../../core/message';
+import { Recipient } from '../../core/recipient';
 import { BlockPlugin } from '../../services/adapters/xmpp/plugins/block.plugin';
 import { MessageArchivePlugin } from '../../services/adapters/xmpp/plugins/message-archive.plugin';
+import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatMessageListRegistryService } from '../../services/chat-message-list-registry.service';
 import { ChatService, ChatServiceToken } from '../../services/chat-service';
+import { ContactFactoryService } from '../../services/contact-factory.service';
 import { REPORT_USER_INJECTION_TOKEN, ReportUserService } from '../../services/report-user-service';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
 
@@ -40,7 +42,7 @@ enum SubscriptionAction {
 export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
 
     @Input()
-    contact: Contact;
+    recipient: Recipient;
 
     @Input()
     showAvatars: boolean;
@@ -68,6 +70,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         private chatMessageListRegistry: ChatMessageListRegistryService,
         @Optional() @Inject(REPORT_USER_INJECTION_TOKEN) public reportUserService: ReportUserService,
         private changeDetectorRef: ChangeDetectorRef,
+        private contactFactory: ContactFactoryService,
     ) {
         this.blockPlugin = this.chatService.getPlugin(BlockPlugin);
     }
@@ -78,16 +81,19 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
             .pipe(filter(event => event.isIntersecting), debounceTime(1000))
             .subscribe(() => this.loadOlderMessagesBeforeViewport());
 
-        this.contact.pendingIn$
-            .pipe(
-                filter(pendingIn => pendingIn === true),
-                takeUntil(this.ngDestroy),
-            ).subscribe(() => {
-            this.subscriptionAction = SubscriptionAction.PENDING_REQUEST;
-            this.scheduleScrollToLastMessage();
-        });
+        if (this.recipient.recipientType === 'contact') {
+            this.recipient.pendingIn$
+                .pipe(
+                    filter(pendingIn => pendingIn === true),
+                    takeUntil(this.ngDestroy),
+                )
+                .subscribe(() => {
+                    this.subscriptionAction = SubscriptionAction.PENDING_REQUEST;
+                    this.scheduleScrollToLastMessage();
+                });
+        }
 
-        this.chatMessageListRegistry.incrementOpenWindowCount(this.contact);
+        this.chatMessageListRegistry.incrementOpenWindowCount(this.recipient);
     }
 
     async ngAfterViewInit() {
@@ -99,15 +105,16 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
                 this.oldestVisibleMessageBeforeLoading = null;
             });
 
-        this.contact.messages$
+        const messages$: Observable<Message> = this.recipient.messages$;
+        messages$
             .pipe(
-                takeUntil(this.ngDestroy),
                 debounceTime(10),
-                filter(() => this.isNearBottom())
+                filter(() => this.isNearBottom()),
+                takeUntil(this.ngDestroy),
             )
             .subscribe((message) => this.scheduleScrollToLastMessage());
 
-        if (this.contact.messages.length < 10) {
+        if (this.recipient.messages.length < 10) {
             await this.loadMessages(); // in case insufficient old messages are displayed
         }
         this.scheduleScrollToLastMessage();
@@ -128,13 +135,13 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
 
     ngOnDestroy(): void {
         this.ngDestroy.next();
-        this.chatMessageListRegistry.decrementOpenWindowCount(this.contact);
+        this.chatMessageListRegistry.decrementOpenWindowCount(this.recipient);
     }
 
     acceptSubscriptionRequest(event: Event) {
         event.preventDefault();
         if (this.subscriptionAction === SubscriptionAction.PENDING_REQUEST) {
-            this.chatService.addContact(this.contact.jidBare.toString());
+            this.chatService.addContact(this.recipient.jidBare.toString());
             this.subscriptionAction = SubscriptionAction.NO_PENDING_REQUEST;
             this.scheduleScrollToLastMessage();
         }
@@ -143,7 +150,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
     denySubscriptionRequest(event: Event) {
         event.preventDefault();
         if (this.subscriptionAction === SubscriptionAction.PENDING_REQUEST) {
-            this.chatService.removeContact((this.contact.jidBare.toString()));
+            this.chatService.removeContact(this.recipient.jidBare.toString());
             this.subscriptionAction = SubscriptionAction.SHOW_BLOCK_ACTIONS;
             this.scheduleScrollToLastMessage();
         }
@@ -170,23 +177,29 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
 
     blockContact($event: MouseEvent) {
         $event.preventDefault();
-        this.blockPlugin.blockJid(this.contact.jidBare.toString());
-        this.chatListService.closeChat(this.contact);
+        this.blockPlugin.blockJid(this.recipient.jidBare.toString());
+        this.chatListService.closeChat(this.recipient);
         this.subscriptionAction = SubscriptionAction.NO_PENDING_REQUEST;
     }
 
     blockContactAndReport($event: MouseEvent) {
+        if (this.recipient.recipientType !== 'contact') {
+            return;
+        }
         $event.preventDefault();
-        this.reportUserService.reportUser(this.contact);
+        this.reportUserService.reportUser(this.recipient);
         this.blockContact($event);
     }
 
-    dismissOptions($event: MouseEvent) {
+    dismissBlockOptions($event: MouseEvent) {
         $event.preventDefault();
         this.subscriptionAction = SubscriptionAction.NO_PENDING_REQUEST;
     }
 
     subscriptionActionShown() {
+        if (this.recipient.recipientType !== 'contact') {
+            return false;
+        }
         return this.subscriptionAction === SubscriptionAction.PENDING_REQUEST
             || (this.blockPlugin.supportsBlock$.getValue() === true && this.subscriptionAction === SubscriptionAction.SHOW_BLOCK_ACTIONS);
     }
@@ -197,7 +210,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         }
 
         try {
-            this.oldestVisibleMessageBeforeLoading = this.contact.oldestMessage;
+            this.oldestVisibleMessageBeforeLoading = this.recipient.oldestMessage;
             await this.loadMessages();
         } catch (e) {
             this.oldestVisibleMessageBeforeLoading = null;
@@ -208,7 +221,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         try {
             // improve performance when loading lots of old messages
             this.changeDetectorRef.detach();
-            await this.chatService.getPlugin(MessageArchivePlugin).loadMostRecentUnloadedMessages(this.contact);
+            await this.chatService.getPlugin(MessageArchivePlugin).loadMostRecentUnloadedMessages(this.recipient);
         } finally {
             this.changeDetectorRef.reattach();
         }
@@ -233,4 +246,23 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         return !!this.oldestVisibleMessageBeforeLoading;
     }
 
+    getOrCreateContactWithFullJid(message: Message | RoomMessage): Recipient {
+        if (this.recipient.recipientType === 'contact') {
+            // this is not a multi user chat, just use recipient as contact
+            return this.recipient;
+        }
+
+        const roomMessage = message as RoomMessage;
+
+        let matchingContact = this.chatService.contacts$.getValue().find(
+            contact => contact.jidFull.equals(roomMessage.from),
+        );
+
+        if (!matchingContact) {
+            matchingContact = this.contactFactory.createContact(roomMessage.from.toString(), roomMessage.from.resource);
+            this.chatService.contacts$.next([matchingContact].concat(this.chatService.contacts$.getValue()));
+        }
+
+        return matchingContact;
+    }
 }

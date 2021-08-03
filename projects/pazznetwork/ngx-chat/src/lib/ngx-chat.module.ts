@@ -11,7 +11,6 @@ import { ChatMessageListComponent } from './components/chat-message-list/chat-me
 import { ChatMessageSimpleComponent } from './components/chat-message-simple/chat-message-simple.component';
 import { ChatMessageTextComponent } from './components/chat-message-text/chat-message-text.component';
 import { ChatMessageComponent } from './components/chat-message/chat-message.component';
-import { ChatRoomMessagesComponent } from './components/chat-room-messages/chat-room-messages.component';
 import { ChatVideoWindowComponent } from './components/chat-video-window/chat-video-window.component';
 import { ChatWindowFrameComponent } from './components/chat-window-frame/chat-window-frame.component';
 import { ChatWindowListComponent } from './components/chat-window-list/chat-window-list.component';
@@ -65,7 +64,6 @@ import { LogService } from './services/log.service';
         ChatMessageListComponent,
         ChatMessageSimpleComponent,
         ChatMessageTextComponent,
-        ChatRoomMessagesComponent,
         ChatWindowComponent,
         ChatWindowListComponent,
         LinksDirective,
@@ -82,7 +80,6 @@ import { LogService } from './services/log.service';
         ChatMessageInputComponent,
         ChatMessageListComponent,
         ChatMessageSimpleComponent,
-        ChatRoomMessagesComponent,
         FileDropComponent,
         LinksDirective,
     ],
@@ -137,7 +134,7 @@ export class NgxChatModule {
 
         xmppChatAdapter.addPlugins([
             new BookmarkPlugin(publishSubscribePlugin),
-            new MessageArchivePlugin(xmppChatAdapter, serviceDiscoveryPlugin, logService),
+            new MessageArchivePlugin(xmppChatAdapter, serviceDiscoveryPlugin, multiUserChatPlugin, logService),
             new MessagePlugin(xmppChatAdapter, logService),
             new MessageUuidPlugin(),
             multiUserChatPlugin,

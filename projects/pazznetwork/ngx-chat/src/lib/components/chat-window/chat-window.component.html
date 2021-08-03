@@ -39,14 +39,8 @@
             [dropMessage]="chatService.translations.dropMessage">
         <div (click)="onFocus()">
             <ngx-chat-message-list
-                    *ngIf="chatWindowState.recipient.recipientType === 'contact'"
-                    [contact]="chatWindowState.recipient"
+                    [recipient]="chatWindowState.recipient"
                     [showAvatars]="false"></ngx-chat-message-list>
-            <ngx-chat-room-messages
-                    *ngIf="chatWindowState.recipient.recipientType === 'room'"
-                    [showAvatars]="false"
-                    class="ngx-chat-room-messages--scrollable"
-                    [room]="chatWindowState.recipient"></ngx-chat-room-messages>
             <div class="chat-input-container">
                 <ngx-chat-message-input
                         [recipient]="chatWindowState.recipient"

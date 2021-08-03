@@ -7,7 +7,6 @@ export * from './lib/components/chat-message-input/chat-message-input.component'
 export * from './lib/components/chat-message-list/chat-message-list.component';
 export * from './lib/components/chat-message-simple/chat-message-simple.component';
 export * from './lib/components/chat-message/chat-message.component';
-export * from './lib/components/chat-room-messages/chat-room-messages.component';
 export * from './lib/components/chat-window/chat-window.component';
 export * from './lib/components/chat.component';
 export * from './lib/core/contact';
