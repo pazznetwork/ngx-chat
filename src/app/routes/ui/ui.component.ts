@@ -95,12 +95,14 @@ export class UiComponent implements OnInit {
         this.contact.addMessage({
             ...message,
             delayed: false,
+            fromArchive: false,
             id: null,
         });
 
         this.room.addMessage({
             ...message,
             delayed: false,
+            fromArchive: false,
             from: message.direction === Direction.in ? this.otherContactJid : this.myJid,
         });
     }

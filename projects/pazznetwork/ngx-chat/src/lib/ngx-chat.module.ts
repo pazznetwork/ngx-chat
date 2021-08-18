@@ -131,11 +131,12 @@ export class NgxChatModule {
         const multiUserChatPlugin = new MultiUserChatPlugin(xmppChatAdapter, logService, serviceDiscoveryPlugin);
         const unreadMessageCountPlugin = new UnreadMessageCountPlugin(
             xmppChatAdapter, chatMessageListRegistryService, publishSubscribePlugin, entityTimePlugin, multiUserChatPlugin);
+        const messagePlugin = new MessagePlugin(xmppChatAdapter, logService);
 
         xmppChatAdapter.addPlugins([
             new BookmarkPlugin(publishSubscribePlugin),
-            new MessageArchivePlugin(xmppChatAdapter, serviceDiscoveryPlugin, multiUserChatPlugin, logService),
-            new MessagePlugin(xmppChatAdapter, logService),
+            new MessageArchivePlugin(xmppChatAdapter, serviceDiscoveryPlugin, multiUserChatPlugin, logService, messagePlugin),
+            messagePlugin,
             new MessageUuidPlugin(),
             multiUserChatPlugin,
             publishSubscribePlugin,

@@ -1,4 +1,4 @@
-import { xml } from '@xmpp/client';
+import { jid as parseJid, xml } from '@xmpp/client';
 import { Contact } from '../../../../core/contact';
 import { Direction, Message } from '../../../../core/message';
 import { MessageWithBodyStanza, Stanza } from '../../../../core/stanza';
@@ -13,15 +13,15 @@ export class MessageReceivedEvent {
 export class MessagePlugin extends AbstractXmppPlugin {
 
     constructor(
-        private xmppChatAdapter: XmppChatAdapter,
-        private logService: LogService,
+        private readonly xmppChatAdapter: XmppChatAdapter,
+        private readonly logService: LogService,
     ) {
         super();
     }
 
-    handleStanza(stanza: Stanza) {
+    handleStanza(stanza: Stanza, archiveDelayElement?: Stanza) {
         if (this.isMessageStanza(stanza)) {
-            this.handleMessageStanza(stanza);
+            this.handleMessageStanza(stanza, archiveDelayElement);
             return true;
         }
         return false;
@@ -34,21 +34,42 @@ export class MessagePlugin extends AbstractXmppPlugin {
             && !!stanza.getChildText('body')?.trim();
     }
 
-    private handleMessageStanza(messageStanza: MessageWithBodyStanza) {
-        this.logService.debug('message received <=', messageStanza.getChildText('body'));
+    private handleMessageStanza(messageStanza: MessageWithBodyStanza, archiveDelayElement?: Stanza) {
+        const isAddressedToMe = this.xmppChatAdapter.chatConnectionService.userJid.bare()
+            .equals(parseJid(messageStanza.attrs.to).bare());
+        const messageDirection = isAddressedToMe ? Direction.in : Direction.out;
+
+        const messageFromArchive = archiveDelayElement != null;
+
+        const delay = archiveDelayElement ?? messageStanza.getChild('delay');
+        const datetime = delay && delay.attrs.stamp
+            ? new Date(delay.attrs.stamp)
+            : new Date() /* TODO: replace with entity time plugin */;
+
+        if (messageDirection === Direction.in && !messageFromArchive) {
+            this.logService.debug('message received <=', messageStanza.getChildText('body'));
+        }
 
         const message = {
             body: messageStanza.getChildText('body').trim(),
-            direction: Direction.in,
-            datetime: new Date(), // TODO: replace with entity time plugin
-            delayed: !!messageStanza.getChild('delay'),
+            direction: messageDirection,
+            datetime,
+            delayed: !!delay,
+            fromArchive: messageFromArchive
         };
 
         const messageReceivedEvent = new MessageReceivedEvent();
         this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageStanza, messageReceivedEvent));
-        if (!messageReceivedEvent.discard) {
-            const contact = this.xmppChatAdapter.getOrCreateContactById(messageStanza.attrs.from);
-            contact.addMessage(message);
+
+        if (messageReceivedEvent.discard) {
+            return;
+        }
+
+        const contactJid = isAddressedToMe ? messageStanza.attrs.from : messageStanza.attrs.to;
+        const contact = this.xmppChatAdapter.getOrCreateContactById(contactJid);
+        contact.addMessage(message);
+
+        if (messageDirection === Direction.in && !messageFromArchive) {
             this.xmppChatAdapter.message$.next(contact);
         }
     }
@@ -67,6 +88,7 @@ export class MessagePlugin extends AbstractXmppPlugin {
             body,
             datetime: new Date(), // TODO: replace with entity time plugin
             delayed: false,
+            fromArchive: false,
         };
         this.xmppChatAdapter.plugins.forEach(plugin => plugin.beforeSendMessage(messageStanza, message));
         contact.addMessage(message);
