@@ -112,7 +112,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
                 filter(() => this.isNearBottom()),
                 takeUntil(this.ngDestroy),
             )
-            .subscribe((message) => this.scheduleScrollToLastMessage());
+            .subscribe((_) => this.scheduleScrollToLastMessage());
 
         if (this.recipient.messages.length < 10) {
             await this.loadMessages(); // in case insufficient old messages are displayed

@@ -28,7 +28,8 @@ describe('contact', () => {
             body: '',
             direction: Direction.in,
             id: '1',
-            delayed: false
+            delayed: false,
+            fromArchive: false,
         };
         contact.addMessage(message);
         contact.addMessage(message);
@@ -41,7 +42,8 @@ describe('contact', () => {
             datetime: new Date(),
             body: '',
             direction: Direction.in,
-            delayed: false
+            delayed: false,
+            fromArchive: false,
         };
         contact.addMessage(message);
         contact.addMessage(message);
@@ -85,7 +87,8 @@ describe('contact', () => {
             datetime: new Date(new Date(date)),
             body: '',
             direction: Direction.in,
-            delayed: false
+            delayed: false,
+            fromArchive: false,
         };
     }
 

@@ -97,7 +97,7 @@ describe('XmppChatAdapter', () => {
                 done();
             });
             chatConnectionService.onStanzaReceived(
-                xml('message', {from: contact1.jidBare.toString()},
+                xml('message', {from: contact1.jidBare.toString(), to: chatConnectionService.userJid.toString()},
                     xml('body', {}, 'message text')) as Stanza);
         });
 
@@ -120,7 +120,7 @@ describe('XmppChatAdapter', () => {
                 done();
             });
             chatConnectionService.onStanzaReceived(
-                xml('message', {from: contact1.jidBare.toString()},
+                xml('message', {from: contact1.jidBare.toString(), to: chatConnectionService.userJid.toString()},
                     xml('body', {}, 'message text')) as Stanza);
         });
 
@@ -145,7 +145,10 @@ describe('XmppChatAdapter', () => {
                     done();
                 }
             });
-            const sampleMessageStanzaWithId = xml('message', {from: contact1.jidBare.toString()},
+            const sampleMessageStanzaWithId = xml('message', {
+                    from: contact1.jidBare.toString(),
+                    to: chatConnectionService.userJid.toString()
+                },
                 xml('origin-id', {id: 'id'}),
                 xml('body', {}, 'message text')) as Stanza;
             chatConnectionService.onStanzaReceived(sampleMessageStanzaWithId);

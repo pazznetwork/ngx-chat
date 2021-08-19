@@ -1,7 +1,7 @@
 import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
 import { Direction } from '../../../../core/message';
-import { Stanza } from '../../../../core/stanza';
+import { IqResponseStanza, Stanza } from '../../../../core/stanza';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { MessageReceivedEvent } from './message.plugin';
@@ -11,19 +11,19 @@ import { MessageReceivedEvent } from './message.plugin';
  */
 export class MessageCarbonsPlugin extends AbstractXmppPlugin {
 
-    constructor(private xmppChatAdapter: XmppChatAdapter) {
+    constructor(private readonly xmppChatAdapter: XmppChatAdapter) {
         super();
     }
 
-    onBeforeOnline(): PromiseLike<any> {
-        return this.xmppChatAdapter.chatConnectionService.sendIq(
+    async onBeforeOnline(): Promise<IqResponseStanza> {
+        return await this.xmppChatAdapter.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
                 xml('enable', {xmlns: 'urn:xmpp:carbons:2'})
             )
         );
     }
 
-    handleStanza(stanza: Stanza) {
+    handleStanza(stanza: Stanza): boolean {
         const receivedOrSentElement = stanza.getChildByAttr('xmlns', 'urn:xmpp:carbons:2');
         const forwarded = receivedOrSentElement && receivedOrSentElement.getChild('forwarded', 'urn:xmpp:forward:0');
         const messageElement = forwarded && forwarded.getChild('message', 'jabber:client');
@@ -36,7 +36,7 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
         return false;
     }
 
-    private handleCarbonMessageStanza(messageElement: Element, receivedOrSent: Element) {
+    private handleCarbonMessageStanza(messageElement: Element, receivedOrSent: Element): boolean {
         const direction = receivedOrSent.is('received') ? Direction.in : Direction.out;
 
         const message = {
@@ -44,6 +44,7 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
             direction,
             datetime: new Date(), // TODO: replace with entity time plugin
             delayed: false,
+            fromArchive: false,
         };
 
         const messageReceivedEvent = new MessageReceivedEvent();

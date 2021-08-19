@@ -23,6 +23,7 @@ export interface Message {
     datetime: Date;
     id?: string;
     delayed: boolean;
+    fromArchive: boolean;
     /**
      * if no explicit state is set for the message, use implicit contact message states instead.
      */

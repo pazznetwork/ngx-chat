@@ -1,15 +1,17 @@
-import { jid as parseJid, xml } from '@xmpp/client';
+import { xml } from '@xmpp/client';
+import { Element } from 'ltx';
 import { Subject } from 'rxjs';
 import { debounceTime, filter } from 'rxjs/operators';
-import { Direction } from '../../../../core/message';
 import { Recipient } from '../../../../core/recipient';
-import { Stanza } from '../../../../core/stanza';
+import { IqResponseStanza, Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
-import { MessageUuidPlugin } from './message-uuid.plugin';
 import { MultiUserChatPlugin } from './multi-user-chat.plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
+import { PUBSUB_EVENT_XMLNS } from './publish-subscribe.plugin';
+import { MessagePlugin } from './message.plugin';
+import { MUC_SUB_EVENT_TYPE } from './muc-sub.plugin';
 
 /**
  * https://xmpp.org/extensions/xep-0313.html
@@ -17,13 +19,14 @@ import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
  */
 export class MessageArchivePlugin extends AbstractXmppPlugin {
 
-    private mamMessageReceived$ = new Subject<void>();
+    private readonly mamMessageReceived$ = new Subject<void>();
 
     constructor(
-        private chatService: XmppChatAdapter,
-        private serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
-        private multiUserChatPlugin: MultiUserChatPlugin,
-        private logService: LogService,
+        private readonly chatService: XmppChatAdapter,
+        private readonly serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
+        private readonly multiUserChatPlugin: MultiUserChatPlugin,
+        private readonly logService: LogService,
+        private readonly messagePlugin: MessagePlugin,
     ) {
         super();
 
@@ -31,7 +34,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
             .pipe(filter(state => state === 'online'))
             .subscribe(async () => {
                 if (await this.supportsMessageArchiveManagement()) {
-                    this.requestNewestMessages();
+                    await this.requestNewestMessages();
                 }
             });
 
@@ -41,8 +44,8 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
             .subscribe(() => this.chatService.contacts$.next(this.chatService.contacts$.getValue()));
     }
 
-    private requestNewestMessages() {
-        this.chatService.chatConnectionService.sendIq(
+    private async requestNewestMessages(): Promise<void> {
+        await this.chatService.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
                 xml('query', {xmlns: 'urn:xmpp:mam:2'},
                     xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
@@ -54,7 +57,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         );
     }
 
-    async loadMostRecentUnloadedMessages(recipient: Recipient) {
+    async loadMostRecentUnloadedMessages(recipient: Recipient): Promise<void> {
         // for user-to-user chats no to-attribute is necessary, in case of multi-user-chats it has to be set to the bare room jid
         const to = recipient.recipientType === 'room' ? recipient.roomJid.toString() : undefined;
 
@@ -86,7 +89,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         await this.chatService.chatConnectionService.sendIq(request);
     }
 
-    async loadAllMessages() {
+    async loadAllMessages(): Promise<void> {
         if (!(await this.supportsMessageArchiveManagement())) {
             throw new Error('message archive management not suppported');
         }
@@ -112,7 +115,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         }
     }
 
-    private async supportsMessageArchiveManagement() {
+    private async supportsMessageArchiveManagement(): Promise<boolean> {
         const supportsMessageArchiveManagement = await this.serviceDiscoveryPlugin.supportsFeature(
             this.chatService.chatConnectionService.userJid.bare().toString(), 'urn:xmpp:mam:2');
         if (!supportsMessageArchiveManagement) {
@@ -121,7 +124,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         return supportsMessageArchiveManagement;
     }
 
-    handleStanza(stanza: Stanza) {
+    handleStanza(stanza: Stanza): boolean {
         if (this.isMamMessageStanza(stanza)) {
             this.handleMamMessageStanza(stanza);
             return true;
@@ -129,45 +132,48 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         return false;
     }
 
-    private isMamMessageStanza(stanza: Stanza) {
+    private isMamMessageStanza(stanza: Stanza): boolean {
         const result = stanza.getChild('result');
-        return stanza.name === 'message' && result && result.attrs.xmlns === 'urn:xmpp:mam:2';
+        return stanza.name === 'message' && result?.attrs.xmlns === 'urn:xmpp:mam:2';
     }
 
-    private handleMamMessageStanza(stanza: Stanza) {
+    private handleMamMessageStanza(stanza: Stanza): void {
         const forwardedElement = stanza.getChild('result').getChild('forwarded');
         const messageElement = forwardedElement.getChild('message');
+        const delayElement = forwardedElement.getChild('delay');
 
+        const eventElement = messageElement.getChild('event', PUBSUB_EVENT_XMLNS);
+        if (messageElement.getAttr('type') == null && eventElement != null) {
+            this.handlePubSubEvent(eventElement, delayElement);
+        } else {
+            this.handleArchivedMessage(messageElement, delayElement);
+        }
+    }
+
+    private handleArchivedMessage(messageElement: Stanza, delayEl: Element): void {
         const type = messageElement.getAttr('type');
         if (type === 'chat') {
-            // TODO: messagePlugin.handleMessage should be refactored so that it can
-            //  handle messageElement like multiUserChatPlugin.handleRoomMessageStanza
-            //  after refactoring just delegate to messagePlugin.handleMessage(messageElement, forwardedElement.getChild('delay')
-            const isAddressedToMe = this.chatService.chatConnectionService.userJid.bare()
-                .equals(parseJid(messageElement.attrs.to).bare());
-
-            const messageBody = messageElement.getChildText('body')?.trim();
-            if (messageBody) {
-                const contactJid = isAddressedToMe ? messageElement.attrs.from : messageElement.attrs.to;
-                const contact = this.chatService.getOrCreateContactById(contactJid);
-                const datetime = new Date(
-                    forwardedElement.getChild('delay').attrs.stamp,
-                );
-                const direction = isAddressedToMe ? Direction.in : Direction.out;
-
-                contact.addMessage({
-                    direction,
-                    datetime,
-                    body: messageBody,
-                    id: MessageUuidPlugin.extractIdFromStanza(messageElement),
-                    delayed: true,
-                });
+            const messageHandled = this.messagePlugin.handleStanza(messageElement, delayEl);
+            if (messageHandled) {
                 this.mamMessageReceived$.next();
             }
         } else if (type === 'groupchat') {
-            this.multiUserChatPlugin.handleRoomMessageStanza(messageElement, forwardedElement.getChild('delay'));
+            this.multiUserChatPlugin.handleRoomMessageStanza(messageElement, delayEl);
         } else {
-            throw new Error('unknown archived message type: ' + type);
+            throw new Error(`unknown archived message type: ${type}`);
         }
+    }
+
+    private handlePubSubEvent(eventElement: Element, delayElement: Element): void {
+        const itemsElement = eventElement.getChild('items');
+        const itemsNode = itemsElement?.attrs.node;
+
+        if (itemsNode !== MUC_SUB_EVENT_TYPE.messages) {
+            this.logService.warn(`Handling of MUC/Sub message types other than ${MUC_SUB_EVENT_TYPE.messages} isn't implemented yet!`);
+            return;
+        }
+
+        const itemElements = itemsElement.getChildren('item');
+        itemElements.forEach((itemEl) => this.handleArchivedMessage(itemEl.getChild('message'), delayElement));
     }
 }

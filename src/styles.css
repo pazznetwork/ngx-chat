@@ -19,6 +19,14 @@ body.has-roster {
     padding: 0.5em 0;
 }
 
+.ng-valid[required], .ng-valid.required  {
+    border-left: 5px solid #42A948; /* green */
+}
+
+.ng-invalid:not(form)  {
+    border-left: 5px solid #a94442; /* red */
+}
+
 .container {
     margin: 0 auto;
     max-width: 700px;

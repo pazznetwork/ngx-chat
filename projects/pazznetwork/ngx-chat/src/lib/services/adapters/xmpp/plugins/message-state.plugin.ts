@@ -32,14 +32,14 @@ const nodeName = 'contact-message-state';
  */
 export class MessageStatePlugin extends AbstractXmppPlugin {
 
-    private jidToMessageStateDate: JidToMessageStateDate = {};
+    private jidToMessageStateDate: JidToMessageStateDate = Object.create(null);
 
     constructor(
-        private publishSubscribePlugin: PublishSubscribePlugin,
-        private xmppChatAdapter: XmppChatAdapter,
-        private chatMessageListRegistry: ChatMessageListRegistryService,
-        private logService: LogService,
-        private entityTimePlugin: EntityTimePlugin,
+        private readonly publishSubscribePlugin: PublishSubscribePlugin,
+        private readonly xmppChatAdapter: XmppChatAdapter,
+        private readonly chatMessageListRegistry: ChatMessageListRegistryService,
+        private readonly logService: LogService,
+        private readonly entityTimePlugin: EntityTimePlugin,
     ) {
         super();
 
@@ -72,7 +72,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
     }
 
     private processPubSub(itemElement: Element[]) {
-        const results: JidToMessageStateDate = {};
+        const results: JidToMessageStateDate = Object.create(null);
         if (itemElement.length === 1) {
             for (const lastReadEntry of itemElement[0].getChild(wrapperNodeName).getChildren(nodeName)) {
                 const {lastRecipientReceived, lastRecipientSeen, lastSent, jid} = lastReadEntry.attrs;
@@ -89,17 +89,16 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
     private async persistContactMessageStates() {
         const wrapperNode = xml(wrapperNodeName);
 
-        for (const jid in this.jidToMessageStateDate) {
-            if (this.jidToMessageStateDate.hasOwnProperty(jid)) {
-                const stateDates = this.jidToMessageStateDate[jid];
+        Object
+            .entries(this.jidToMessageStateDate)
+            .forEach(([jid, stateDates]) => {
                 wrapperNode.c(nodeName, {
                     jid,
                     lastRecipientReceived: stateDates.lastRecipientReceived.getTime(),
                     lastRecipientSeen: stateDates.lastRecipientSeen.getTime(),
                     lastSent: stateDates.lastSent.getTime(),
                 });
-            }
-        }
+            });
 
         await this.publishSubscribePlugin.storePrivatePayloadPersistent(
             STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES,
@@ -108,7 +107,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
     }
 
     onOffline() {
-        this.jidToMessageStateDate = {};
+        this.jidToMessageStateDate = Object.create(null);
     }
 
     beforeSendMessage(messageStanza: Element, message: Message): void {
@@ -134,7 +133,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         if (messageStateElement) {
             // we received a message state or a message via carbon from another resource, discard it
             messageReceivedEvent.discard = true;
-        } else if (messageReceived.direction === Direction.in && stanza.attrs.type !== 'groupchat') {
+        } else if (messageReceived.direction === Direction.in && !messageReceived.fromArchive && stanza.attrs.type !== 'groupchat') {
             this.acknowledgeReceivedMessage(stanza);
         }
     }

@@ -19,7 +19,7 @@ interface PublishOptions {
 
 class PublishStanzaBuilder extends AbstractStanzaBuilder {
 
-    private publishOptions: PublishOptions = {
+    private readonly publishOptions: PublishOptions = {
         persistItems: false,
     };
 
@@ -63,7 +63,7 @@ class PublishStanzaBuilder extends AbstractStanzaBuilder {
 
 class RetrieveDataStanzaBuilder extends AbstractStanzaBuilder {
 
-    constructor(private node: string) {
+    constructor(private readonly node: string) {
         super();
     }
 
@@ -83,10 +83,11 @@ class RetrieveDataStanzaBuilder extends AbstractStanzaBuilder {
  */
 export class PublishSubscribePlugin extends AbstractXmppPlugin {
 
-    publish$ = new Subject<Stanza>();
-    private supportsPrivatePublish = new BehaviorSubject<boolean | 'unknown'>('unknown');
+    readonly publish$ = new Subject<Stanza>();
+    private readonly supportsPrivatePublish = new BehaviorSubject<boolean | 'unknown'>('unknown');
 
-    constructor(private xmppChatAdapter: XmppChatAdapter, private serviceDiscoveryPlugin: ServiceDiscoveryPlugin) {
+    constructor(private readonly xmppChatAdapter: XmppChatAdapter,
+                private readonly serviceDiscoveryPlugin: ServiceDiscoveryPlugin) {
         super();
     }
 

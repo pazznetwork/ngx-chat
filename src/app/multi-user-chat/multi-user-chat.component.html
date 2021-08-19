@@ -19,13 +19,78 @@
         <input [(ngModel)]="roomJid" class="form-control" type="text" placeholder="room"/>
 
         <button (click)="joinRoom(roomJid)">Join room</button>
+        <button (click)="subscribeWithMucSub(roomJid)">subscribe with MUC/Sub</button>
+        <button (click)="unsubscribeFromMucSub(roomJid)">unsubscribe from MUC/Sub</button>
+        <button (click)="getSubscriptions()">get MUC/Sub subscriptions</button>
+
+        <ul>
+            <li *ngFor="let subscription of mucSubSubscriptions | keyvalue">
+                {{subscription.key}}:
+                <ul>
+                    <li *ngFor="let subscribedNode of subscription.value">
+                        {{subscribedNode}}
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <hr/>
+
         <button (click)="queryAllRooms()">List all rooms</button>
 
         <div *ngFor="let room of allRooms">
             {{room.name}}: {{room.jid}}
             <button (click)="joinRoom(room.jid)">join</button>
+            <button (click)="subscribeWithMucSub(room.jid)">subscribe with MUC/Sub</button>
+            <button (click)="unsubscribeFromMucSub(room.jid)">unsubscribe from MUC/Sub</button>
+            <button (click)="destroyRoom(room.jid)">destroy</button>
         </div>
+
+        <hr/>
+
+        <button *ngIf="newRoom == null" (click)="createNewRoom()">Create new room</button>
+
+        <form (submit)="createRoomOnServer()" *ngIf="newRoom != null">
+            <div class="form-group">
+                <input name="roomId" [(ngModel)]="newRoom.roomId" class="form-control" type="text" placeholder="Room id"
+                       required="required"
+                       #roomId="ngModel"/>
+                <div [hidden]="roomId.valid || roomId.pristine"
+                     class="alert alert-danger">
+                    Room id is required
+                </div>
+            </div>
+            <label>
+                <input name="membersOnly" [(ngModel)]="newRoom.membersOnly" type="checkbox"/>
+                members only
+            </label>
+            <br>
+            <label>
+                <input name="nonAnonymous" [(ngModel)]="newRoom.nonAnonymous" type="checkbox"/>
+                non-anonymous
+            </label>
+            <br>
+            <label>
+                <input name="persistentRoom" [(ngModel)]="newRoom.persistentRoom" type="checkbox"/>
+                persistent
+            </label>
+            <br>
+            <label>
+                <input name="public" [(ngModel)]="newRoom.public" type="checkbox"/>
+                public
+            </label>
+            <br>
+            <label>
+                <input name="allowSubscription" [(ngModel)]="newRoom.allowSubscription" type="checkbox"/>
+                allow subscription
+            </label>
+            <br>
+            <button type="submit">Create room</button>
+            <button (click)="cancelRoomCreation()">Cancel room creation</button>
+        </form>
     </div>
+
+    <hr/>
 
     <ng-template #offline>
         <span *ngIf="(chatService.state$ | async) !== 'online'">You need to be online.</span>
