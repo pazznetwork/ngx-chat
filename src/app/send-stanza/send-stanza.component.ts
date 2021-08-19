@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { ChatServiceToken, XmppChatAdapter } from '@pazznetwork/ngx-chat';
 import { parse } from 'ltx';
 
@@ -7,14 +7,11 @@ import { parse } from 'ltx';
     templateUrl: './send-stanza.component.html',
     styleUrls: ['./send-stanza.component.css']
 })
-export class SendStanzaComponent implements OnInit {
+export class SendStanzaComponent {
 
     stanza: string;
 
     constructor(@Inject(ChatServiceToken) public chatService: XmppChatAdapter) { }
-
-    ngOnInit() {
-    }
 
     async sendStanza() {
         const request = parse(this.stanza);

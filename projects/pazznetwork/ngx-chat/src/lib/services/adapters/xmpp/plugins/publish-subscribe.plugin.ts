@@ -78,7 +78,7 @@ class RetrieveDataStanzaBuilder extends AbstractStanzaBuilder {
 }
 
 /**
- * XEP-0060 Publish Subscribe
+ * XEP-0060 Publish Subscribe https://xmpp.org/extensions/xep-0060.html
  * XEP-0223 Persistent Storage of Private Data via PubSub
  */
 export class PublishSubscribePlugin extends AbstractXmppPlugin {
