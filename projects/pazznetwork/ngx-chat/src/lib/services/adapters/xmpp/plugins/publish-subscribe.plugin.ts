@@ -7,6 +7,7 @@ import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
+import { IqResponseError } from '../iq-response.error';
 
 export const PUBSUB_EVENT_XMLNS = 'http://jabber.org/protocol/pubsub#event';
 
@@ -78,8 +79,8 @@ class RetrieveDataStanzaBuilder extends AbstractStanzaBuilder {
 }
 
 /**
- * XEP-0060 Publish Subscribe
- * XEP-0223 Persistent Storage of Private Data via PubSub
+ * XEP-0060 Publish Subscribe (https://xmpp.org/extensions/xep-0060.html)
+ * XEP-0223 Persistent Storage of Private Data via PubSub (https://xmpp.org/extensions/xep-0223.html)
  */
 export class PublishSubscribePlugin extends AbstractXmppPlugin {
 
@@ -99,13 +100,13 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
         this.supportsPrivatePublish.next('unknown');
     }
 
-    storePrivatePayloadPersistent(node: string, id: string, data: Element): Promise<IqResponseStanza> {
+    storePrivatePayloadPersistent(node: string, id: string, data: Element): Promise<IqResponseStanza<'result'>> {
         return new Promise((resolve, reject) => {
             this.supportsPrivatePublish
                 .pipe(filter(support => support !== 'unknown'))
                 .subscribe((support: boolean) => {
                     if (!support) {
-                        reject('does not support private publish subscribe');
+                        reject(new Error('does not support private publish subscribe'));
                     } else {
                         resolve(this.xmppChatAdapter.chatConnectionService.sendIq(
                             new PublishStanzaBuilder({node, id, data, persistItems: true}).toStanza()
@@ -121,7 +122,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
                 .pipe(filter(support => support !== 'unknown'))
                 .subscribe((support: boolean) => {
                     if (!support) {
-                        reject('does not support private publish subscribe');
+                        reject(new Error('does not support private publish subscribe'));
                     } else {
                         resolve(this.xmppChatAdapter.chatConnectionService.sendIq(
                             new PublishStanzaBuilder({node, id, data, persistItems: false}).toStanza()
@@ -146,8 +147,13 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
                 new RetrieveDataStanzaBuilder(node).toStanza()
             );
             return iqResponseStanza.getChild('pubsub').getChild('items').getChildren('item');
-        } catch (e) {
-            return [];
+        } catch (e: unknown) {
+            if (e instanceof IqResponseError &&
+                (e.errorCondition === 'item-not-found' || e.errorCode === 404)) {
+                return [];
+            }
+
+            throw e;
         }
     }
 
@@ -155,7 +161,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
         let isSupported: boolean;
         try {
             const service = await this.serviceDiscoveryPlugin.findService('pubsub', 'pep');
-            isSupported = service.features.indexOf('http://jabber.org/protocol/pubsub#publish-options') > -1;
+            isSupported = service.features.includes('http://jabber.org/protocol/pubsub#publish-options');
         } catch (e) {
             isSupported = false;
         }

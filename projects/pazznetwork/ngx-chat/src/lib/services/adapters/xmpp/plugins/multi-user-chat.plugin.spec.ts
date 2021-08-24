@@ -12,6 +12,7 @@ import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageUuidPlugin } from './message-uuid.plugin';
 import { MultiUserChatPlugin } from './multi-user-chat.plugin';
+import { IqResponseError } from '../iq-response.error';
 
 const defaultRoomConfiguration = {
     roomId: 'roomId',
@@ -173,7 +174,7 @@ describe('multi user chat plugin', () => {
                     chatConnectionService.onStanzaReceived(
                         xml('iq', {from: content.attrs.to, to: content.attrs.from, type: 'error', id: content.attrs.id},
                             xml('error', {type: 'modify'},
-                                xml('not-acceptable', {xmlns: 'urn:ietf:params:ml:ns:xmpp-stanzas'})
+                                xml('not-acceptable', {xmlns: IqResponseError.ERROR_ELEMENT_NS})
                             )
                         )
                     );
@@ -185,8 +186,10 @@ describe('multi user chat plugin', () => {
             try {
                 await multiUserChatPlugin.createRoom(defaultRoomConfiguration);
                 fail('should be rejected');
-            } catch (e) {
-                expect(e.message).toContain('room configuration rejected');
+            } catch (e: unknown) {
+                expect(e instanceof IqResponseError).toBeTrue();
+                expect((e as IqResponseError).errorType).toBe('modify');
+                expect((e as IqResponseError).errorCondition).toBe('not-acceptable');
             }
 
         });

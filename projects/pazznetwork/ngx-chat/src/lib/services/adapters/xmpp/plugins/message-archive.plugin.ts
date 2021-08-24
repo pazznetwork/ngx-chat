@@ -3,7 +3,7 @@ import { Element } from 'ltx';
 import { Subject } from 'rxjs';
 import { debounceTime, filter } from 'rxjs/operators';
 import { Recipient } from '../../../../core/recipient';
-import { IqResponseStanza, Stanza } from '../../../../core/stanza';
+import { Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
@@ -158,7 +158,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
                 this.mamMessageReceived$.next();
             }
         } else if (type === 'groupchat') {
-            this.multiUserChatPlugin.handleRoomMessageStanza(messageElement, delayEl);
+            this.multiUserChatPlugin.handleStanza(messageElement, delayEl);
         } else {
             throw new Error(`unknown archived message type: ${type}`);
         }

@@ -7,6 +7,7 @@ import { LogInRequest } from '../../../core/log-in-request';
 import { IqResponseStanza, Stanza } from '../../../core/stanza';
 import { LogService } from '../../log.service';
 import { XmppClientFactoryService } from './xmpp-client-factory.service';
+import { IqResponseError } from './iq-response.error';
 
 export type XmppChatStates = 'disconnected' | 'online' | 'reconnecting';
 
@@ -19,45 +20,41 @@ export type XmppChatStates = 'disconnected' | 'online' | 'reconnecting';
 @Injectable()
 export class XmppChatConnectionService {
 
-    public state$ = new BehaviorSubject<XmppChatStates>('disconnected');
-    public stanzaUnknown$ = new Subject<Stanza>();
+    public readonly state$ = new BehaviorSubject<XmppChatStates>('disconnected');
+    public readonly stanzaUnknown$ = new Subject<Stanza>();
 
     /**
      * User JID with resouce, not bare.
      */
-    public userJid: JID;
+    public userJid?: JID;
     private iqId = new Date().getTime();
-    private iqStanzaResponseCallbacks: { [key: string]: ((arg: any) => void) } = {};
-    public client: Client;
+    private readonly iqStanzaResponseHandlers = new Map<string, (stanza: IqResponseStanza) => void>();
+    public client?: Client;
 
     constructor(
-        private logService: LogService,
-        private ngZone: NgZone,
-        private xmppClientFactoryService: XmppClientFactoryService,
+        private readonly logService: LogService,
+        private readonly ngZone: NgZone,
+        private readonly xmppClientFactoryService: XmppClientFactoryService,
     ) {}
 
-    public onOnline(jid: JID) {
+    public onOnline(jid: JID): void {
         this.logService.info('online =', 'online as', jid.toString());
         this.userJid = jid;
         this.state$.next('online');
     }
 
-    public sendPresence() {
-        this.send(
+    public async sendPresence(): Promise<void> {
+        await this.send(
             xml('presence'),
         );
     }
 
-    public send(content: any): PromiseLike<void> {
+    public async send(content: any): Promise<void> {
         this.logService.debug('>>>', content);
-        try {
-            return this.client.send(content);
-        } catch (e) {
-            return Promise.reject(e);
-        }
+        await this.client.send(content);
     }
 
-    public sendIq(request: Element): Promise<IqResponseStanza> {
+    public sendIq(request: Element): Promise<IqResponseStanza<'result'>> {
         return new Promise((resolve, reject) => {
 
             request.attrs = {
@@ -73,37 +70,37 @@ export class XmppChatConnectionService {
                 throw new Error(message);
             }
 
-            this.iqStanzaResponseCallbacks[id] = (response: IqResponseStanza) => {
+            this.iqStanzaResponseHandlers.set(id, (response: IqResponseStanza) => {
                 if (response.attrs.type === 'result') {
-                    resolve(response);
+                    resolve(response as IqResponseStanza<'result'>);
                 } else {
-                    reject(response);
+                    const errorResponse = response as IqResponseStanza<'error'>;
+                    reject(new IqResponseError(errorResponse));
                 }
-            };
+            });
 
-            this.send(request).then(() => {}, (e) => {
+            this.send(request).catch((e: unknown) => {
                 this.logService.error('error sending iq', e);
-                delete this.iqStanzaResponseCallbacks[id];
+                this.iqStanzaResponseHandlers.delete(id);
                 reject(e);
             });
         });
     }
 
-    public sendIqAckResult(id: string) {
-        this.send(
+    public async sendIqAckResult(id: string): Promise<void> {
+        await this.send(
             xml('iq', {from: this.userJid.toString(), id, type: 'result'}),
         );
     }
 
-    public onStanzaReceived(stanza: Stanza) {
-
+    public onStanzaReceived(stanza: Stanza): void {
         let handled = false;
         if (this.isIqStanzaResponse(stanza)) {
-            const iqResponseCallback = this.iqStanzaResponseCallbacks[stanza.attrs.id];
-            if (iqResponseCallback) {
-                this.logService.debug('<<<', stanza.toString(), 'handled by callback', iqResponseCallback);
-                delete this.iqStanzaResponseCallbacks[stanza.attrs.id];
-                iqResponseCallback(stanza);
+            const handleIqStanzaResponse = this.iqStanzaResponseHandlers.get(stanza.attrs.id);
+            if (handleIqStanzaResponse) {
+                this.logService.debug('<<<', stanza.toString(), 'handled by callback', handleIqStanzaResponse);
+                this.iqStanzaResponseHandlers.delete(stanza.attrs.id);
+                handleIqStanzaResponse(stanza);
                 handled = true;
             }
         }
@@ -111,7 +108,6 @@ export class XmppChatConnectionService {
         if (!handled) {
             this.stanzaUnknown$.next(stanza);
         }
-
     }
 
     private isIqStanzaResponse(stanza: Stanza): stanza is IqResponseStanza {
@@ -119,7 +115,7 @@ export class XmppChatConnectionService {
         return stanza.name === 'iq' && (stanzaType === 'result' || stanzaType === 'error');
     }
 
-    async logIn(logInRequest: LogInRequest) {
+    async logIn(logInRequest: LogInRequest): Promise<void> {
         await this.ngZone.runOutsideAngular(async () => {
             if (logInRequest.username.indexOf('@') >= 0) {
                 this.logService.warn('username should not contain domain, only local part, this can lead to errors!');
@@ -154,7 +150,7 @@ export class XmppChatConnectionService {
                 });
             });
 
-            this.client.on('disconnect', (stanza: Stanza) => {
+            this.client.on('disconnect', () => {
                 this.ngZone.run(() => {
                     this.state$.next('reconnecting');
                 });
@@ -179,11 +175,11 @@ export class XmppChatConnectionService {
         }
     }
 
-    getNextIqId() {
-        return '' + this.iqId++;
+    getNextIqId(): string {
+        return String(this.iqId++);
     }
 
-    reconnectSilently() {
+    reconnectSilently(): void {
         this.logService.warn('hard reconnect...');
         this.state$.next('disconnected');
     }

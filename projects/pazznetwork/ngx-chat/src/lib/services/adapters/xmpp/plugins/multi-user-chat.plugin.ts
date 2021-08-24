@@ -200,7 +200,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     readonly rooms$ = new BehaviorSubject<Room[]>([]);
     readonly message$ = new Subject<Room>();
-    private roomJoinPromiseHandlers: { [roomAndJid: string]: (stanza: Stanza) => void } = Object.create(null);
+    private readonly roomJoinResponseHandlers = new Map<string, (stanza: Stanza) => void>();
 
     constructor(
         private readonly xmppChatAdapter: XmppChatAdapter,
@@ -211,15 +211,15 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     }
 
     onOffline(): void {
-        this.roomJoinPromiseHandlers = Object.create(null);
+        this.roomJoinResponseHandlers.clear();
         this.rooms$.next([]);
     }
 
-    handleStanza(stanza: Stanza): boolean {
+    handleStanza(stanza: Stanza, archiveDelayElement?: Stanza): boolean {
         if (this.isRoomPresenceStanza(stanza)) {
             return this.handleRoomPresenceStanza(stanza);
         } else if (this.isRoomMessageStanza(stanza)) {
-            return this.handleRoomMessageStanza(stanza);
+            return this.handleRoomMessageStanza(stanza, archiveDelayElement);
         }
         return false;
     }
@@ -232,9 +232,9 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     }
 
     private handleRoomPresenceStanza(stanza: Stanza): boolean {
-        const handleStanza = this.roomJoinPromiseHandlers[stanza.attrs.from];
+        const handleStanza = this.roomJoinResponseHandlers.get(stanza.attrs.from);
         if (handleStanza) {
-            delete this.roomJoinPromiseHandlers[stanza.attrs.from];
+            this.roomJoinResponseHandlers.delete(stanza.attrs.from);
             handleStanza(stanza);
             return true;
         }
@@ -266,10 +266,11 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             throw new Error('room not configurable');
         }
 
-        const configurationKeyValuePair = {
-            ...this.extractDefaultConfiguration(configurationListElement.getChildren('field')),
-            ...this.extractRoomCreationRequestConfiguration(request),
-        };
+        const roomConfigurationOptions =
+            this.applyRoomCreationRequestOptions(
+                this.extractDefaultConfiguration(configurationListElement.getChildren('field')),
+                request
+            );
 
         try {
             await this.xmppChatAdapter.chatConnectionService.sendIq(
@@ -279,26 +280,28 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
                             xml('field', {var: 'FORM_TYPE'},
                                 xml('value', {}, 'http://jabber.org/protocol/muc#roomconfig'),
                             ),
-                            ...this.convertConfiguration(configurationKeyValuePair),
+                            ...this.configurationToElements(roomConfigurationOptions),
                         ),
                     ),
                 ),
             );
             return room;
-        } catch (e) {
-            throw new Error('room configuration rejected: ' + e.toString());
+        } catch (e: unknown) {
+            this.logService.error('room configuration rejected', e);
+            throw e;
         }
     }
 
-    async destroyRoom(roomJid: JID): Promise<IqResponseStanza> {
-        const roomDestroyedResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
-            xml('iq', {type: 'set', to: roomJid.toString()},
-                xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'},
-                    xml('destroy'))));
-
-        const child = roomDestroyedResponse.getChild('error');
-        if (child) {
-            throw new Error('error destroying room:' + child.attrs.type);
+    async destroyRoom(roomJid: JID): Promise<IqResponseStanza<'result'>> {
+        let roomDestroyedResponse: IqResponseStanza<'result'>;
+        try {
+            roomDestroyedResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
+                xml('iq', {type: 'set', to: roomJid.toString()},
+                    xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'},
+                        xml('destroy'))));
+        } catch (e: unknown) {
+            this.logService.error('error destroying room');
+            throw e;
         }
 
         // TODO: refactor so that we instead listen to the presence destroy stanza
@@ -317,12 +320,21 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         }
         const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
         const occupantJid = parseJid(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
-        const roomJoinedPromise = new Promise<Stanza>(resolve => this.roomJoinPromiseHandlers[occupantJid.toString()] = resolve);
-        await this.xmppChatAdapter.chatConnectionService.send(
-            xml('presence', {from: userJid.toString(), to: occupantJid.toString()},
-                xml('x', {xmlns: 'http://jabber.org/protocol/muc'}),
-            ),
+        const roomJoinedPromise = new Promise<Stanza>(
+            resolve => this.roomJoinResponseHandlers.set(occupantJid.toString(), resolve)
         );
+
+        try {
+            await this.xmppChatAdapter.chatConnectionService.send(
+                xml('presence', {from: userJid.toString(), to: occupantJid.toString()},
+                    xml('x', {xmlns: 'http://jabber.org/protocol/muc'}),
+                ),
+            );
+        } catch (e: unknown) {
+            this.logService.error('error sending presence stanza to join a room', e);
+            this.roomJoinResponseHandlers.delete(occupantJid.toString());
+            throw e;
+        }
 
         const presenceResponse = await roomJoinedPromise;
         if (presenceResponse.getChild('error')) {
@@ -347,36 +359,44 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
         const result = [];
 
-        let roomResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
+        let roomQueryResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
             xml('iq', {type: 'get', to: conferenceServer.jid.toString()},
                 xml('query', {xmlns: ServiceDiscoveryPlugin.DISCO_ITEMS}),
             ),
         );
-        result.push(...this.convertRoomQueryResponse(roomResponse));
+        result.push(...this.extractRoomSummariesFromResponse(roomQueryResponse));
 
 
-        const fin = roomResponse.getChild('fin');
-        while (fin && fin.attrs.complete !== 'true') {
-            const lastReceivedRoom = fin.getChild('set').getChildText('last');
-            roomResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
+        let resultSet = this.extractResultSetFromResponse(roomQueryResponse);
+        while (resultSet && resultSet.getChild('last')) {
+            const lastReceivedRoom = resultSet.getChildText('last');
+            roomQueryResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
                 xml('iq', {type: 'get', to: conferenceServer.jid.toString()},
-                    xml('query', {xmlns: 'urn:xmpp:mam:2'},
-                        xml('set', {xmlns: ServiceDiscoveryPlugin.DISCO_ITEMS},
+                    xml('query', {xmlns: ServiceDiscoveryPlugin.DISCO_ITEMS},
+                        xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
                             xml('max', {}, 250),
                             xml('after', {}, lastReceivedRoom),
                         ),
                     ),
                 ),
             );
-            result.push(...this.convertRoomQueryResponse(roomResponse));
+            result.push(...this.extractRoomSummariesFromResponse(roomQueryResponse));
+            resultSet = this.extractResultSetFromResponse(roomQueryResponse);
         }
         return result;
     }
 
-    private convertRoomQueryResponse(iq: IqResponseStanza): RoomSummary[] {
-        const queryElement = iq.getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS);
-        const roomElements = queryElement && queryElement.getChildren('item');
-        return roomElements.map(room => room.attrs);
+    private extractRoomSummariesFromResponse(iq: IqResponseStanza): RoomSummary[] {
+        return iq
+            .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
+            ?.getChildren('item')
+            ?.map(room => room.attrs) || [];
+    }
+
+    private extractResultSetFromResponse(iq: IqResponseStanza): Stanza {
+        return iq
+            .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
+            ?.getChild('set', 'http://jabber.org/protocol/rsm');
     }
 
     async queryMemberList(room: Room): Promise<MemberlistItem[]> {
@@ -436,53 +456,51 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return await this.xmppChatAdapter.chatConnectionService.send(roomMessageStanza);
     }
 
-    private convertConfiguration(configurationKeyValuePair: { [key: string]: string[] }): Element[] {
-        const configurationFields: Element[] = [];
-        for (const configurationKey in configurationKeyValuePair) {
-            if (configurationKeyValuePair.hasOwnProperty(configurationKey)) {
-                const configurationValues = configurationKeyValuePair[configurationKey].map(value => xml('value', {}, value));
-                configurationFields.push(
-                    xml('field', {var: configurationKey}, ...configurationValues),
-                );
-            }
-        }
-        return configurationFields;
+    private configurationToElements(configurationOptions: Map<string, string[]>): Element[] {
+        return [...configurationOptions.entries()]
+            .map(([configurationKey, configurationValues]) =>
+                xml('field', {var: configurationKey},
+                    ...configurationValues.map(value => xml('value', {}, value))));
     }
 
-    private extractDefaultConfiguration(fields: Element[]): Record<string, string[]> {
-        const configuration: Record<string, string[]> = {};
-        for (const field of fields) {
-            configuration[field.attrs.var] = field.getChildren('value').map(value => value.getText());
-        }
-        return configuration;
+    private extractDefaultConfiguration(fields: Element[]): Map<string, string[]> {
+        const entries = fields
+            .filter(field => field.attrs.type !== 'hidden')
+            .map((field) => ([
+                field.attrs.var as string,
+                field.getChildren('value').map(value => value.getText())
+            ] as const));
+
+        return new Map(entries);
     }
 
-    private extractRoomCreationRequestConfiguration(request: RoomCreationOptions): Record<string, string[]> {
-        const configuration: Record<string, string[]> = {};
-        configuration['muc#roomconfig_whois'] = [request.nonAnonymous ? 'anyone' : 'moderators'];
-        configuration['muc#roomconfig_publicroom'] = [request.public ? '1' : '0'];
-        configuration['muc#roomconfig_membersonly'] = [request.membersOnly ? '1' : '0'];
-        configuration['muc#roomconfig_persistentroom'] = [request.persistentRoom ? '1' : '0'];
+    private applyRoomCreationRequestOptions(
+        defaultOptions: ReadonlyMap<string, string[]>,
+        request: RoomCreationOptions
+    ): Map<string, string[]> {
+        const options = new Map(defaultOptions);
+        options
+            .set('muc#roomconfig_whois', [request.nonAnonymous ? 'anyone' : 'moderators'])
+            .set('muc#roomconfig_publicroom', [request.public ? '1' : '0'])
+            .set('muc#roomconfig_membersonly', [request.membersOnly ? '1' : '0'])
+            .set('muc#roomconfig_persistentroom', [request.persistentRoom ? '1' : '0']);
 
         if (request.allowSubscription !== undefined) {
-            configuration.allow_subscription = [request.allowSubscription === true ? '1' : '0'];
+            options.set('allow_subscription', [request.allowSubscription === true ? '1' : '0']);
         }
 
-        return configuration;
+        return options;
     }
 
     private isRoomMessageStanza(stanza: Stanza): boolean {
         return stanza.name === 'message' && stanza.attrs.type === 'groupchat' && !!stanza.getChildText('body')?.trim();
     }
 
-    handleRoomMessageStanza(messageStanza: Stanza, archiveDelayElement?: Stanza): boolean {
-        let datetime;
-        const delay = archiveDelayElement ?? messageStanza.getChild('delay');
-        if (delay && delay.attrs.stamp) {
-            datetime = new Date(delay.attrs.stamp);
-        } else {
-            datetime = new Date(); // TODO: replace with entity time plugin
-        }
+    private handleRoomMessageStanza(messageStanza: Stanza, archiveDelayElement?: Stanza): boolean {
+        const delayElement = archiveDelayElement ?? messageStanza.getChild('delay');
+        const datetime = delayElement?.attrs.stamp
+            ? new Date(delayElement.attrs.stamp)
+            : new Date() /* TODO: replace with entity time plugin */;
 
         const from = parseJid(messageStanza.attrs.from);
         const room = this.getRoomByJid(from.bare());
@@ -503,7 +521,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             id: messageStanza.attrs.id,
             from,
             direction: from.equals(room.occupantJid) ? Direction.out : Direction.in,
-            delayed: !!delay,
+            delayed: !!delayElement,
             fromArchive: archiveDelayElement != null
         };
 

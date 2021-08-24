@@ -20,14 +20,14 @@ import {
 })
 export class IndexComponent {
 
-    public domain: string;
-    public service: string;
-    public password: string;
-    public username: string;
-    public otherJid: any;
-    public multiUserChatPlugin: MultiUserChatPlugin;
-    public unreadMessageCountPlugin: UnreadMessageCountPlugin;
-    public registrationMessage: string;
+    public domain?: string;
+    public service?: string;
+    public password?: string;
+    public username?: string;
+    public otherJid?: string;
+    public readonly multiUserChatPlugin: MultiUserChatPlugin;
+    public readonly unreadMessageCountPlugin: UnreadMessageCountPlugin;
+    public registrationMessage?: string;
 
     constructor(
         @Inject(ChatServiceToken) public chatService: ChatService,
@@ -36,7 +36,12 @@ export class IndexComponent {
         private chatListStateService: ChatListStateService,
         chatBackgroundNotificationService: ChatBackgroundNotificationService,
     ) {
-        const contactData: any = JSON.parse(localStorage.getItem('data')) || {};
+        const contactData: {
+            domain?: string;
+            service?: string;
+            password?: string;
+            username?: string;
+        } = JSON.parse(localStorage.getItem('data')) || {};
         this.logService.logLevel = LogLevel.Debug;
         this.domain = contactData.domain;
         this.service = contactData.service;

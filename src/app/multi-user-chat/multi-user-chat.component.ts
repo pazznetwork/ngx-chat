@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import {
     ChatService,
     ChatServiceToken,
@@ -16,7 +16,7 @@ import { jid } from '@xmpp/client';
     templateUrl: './multi-user-chat.component.html',
     styleUrls: ['./multi-user-chat.component.css']
 })
-export class MultiUserChatComponent implements OnInit {
+export class MultiUserChatComponent {
 
     multiUserChatPlugin: MultiUserChatPlugin;
     mucSubPlugin: MucSubPlugin;
@@ -24,14 +24,11 @@ export class MultiUserChatComponent implements OnInit {
     selectedRoom: Room;
     allRooms: RoomSummary[] = [];
     newRoom?: RoomCreationOptions;
-    mucSubSubscriptions: Map<string, string[]> = new Map();
+    mucSubSubscriptions = new Map<string, string[]>();
 
     constructor(@Inject(ChatServiceToken) public chatService: ChatService) {
         this.multiUserChatPlugin = chatService.getPlugin(MultiUserChatPlugin);
         this.mucSubPlugin = chatService.getPlugin(MucSubPlugin);
-    }
-
-    ngOnInit() {
     }
 
     async joinRoom(roomJid: string) {
