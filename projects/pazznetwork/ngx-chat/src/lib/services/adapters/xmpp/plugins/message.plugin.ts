@@ -41,9 +41,9 @@ export class MessagePlugin extends AbstractXmppPlugin {
 
         const messageFromArchive = archiveDelayElement != null;
 
-        const delay = archiveDelayElement ?? messageStanza.getChild('delay');
-        const datetime = delay && delay.attrs.stamp
-            ? new Date(delay.attrs.stamp)
+        const delayElement = archiveDelayElement ?? messageStanza.getChild('delay');
+        const datetime = delayElement?.attrs.stamp
+            ? new Date(delayElement.attrs.stamp)
             : new Date() /* TODO: replace with entity time plugin */;
 
         if (messageDirection === Direction.in && !messageFromArchive) {
@@ -54,7 +54,7 @@ export class MessagePlugin extends AbstractXmppPlugin {
             body: messageStanza.getChildText('body').trim(),
             direction: messageDirection,
             datetime,
-            delayed: !!delay,
+            delayed: !!delayElement,
             fromArchive: messageFromArchive
         };
 

@@ -7,15 +7,15 @@ import { Stanza } from '../../../../core/stanza';
 
 export const MUC_SUB_FEATURE_ID = 'urn:xmpp:mucsub:0';
 
-export const MUC_SUB_EVENT_TYPE = Object.freeze({
-    presence: 'urn:xmpp:mucsub:nodes:presence',
-    messages: 'urn:xmpp:mucsub:nodes:messages',
-    affiliations: 'urn:xmpp:mucsub:nodes:affiliations',
-    subscribers: 'urn:xmpp:mucsub:nodes:subscribers',
-    config: 'urn:xmpp:mucsub:nodes:config',
-    subject: 'urn:xmpp:mucsub:nodes:subject',
-    system: 'urn:xmpp:mucsub:nodes:system'
-} as const);
+export enum MUC_SUB_EVENT_TYPE {
+    presence = 'urn:xmpp:mucsub:nodes:presence',
+    messages = 'urn:xmpp:mucsub:nodes:messages',
+    affiliations = 'urn:xmpp:mucsub:nodes:affiliations',
+    subscribers = 'urn:xmpp:mucsub:nodes:subscribers',
+    config = 'urn:xmpp:mucsub:nodes:config',
+    subject = 'urn:xmpp:mucsub:nodes:subject',
+    system = 'urn:xmpp:mucsub:nodes:system',
+}
 
 /**
  * support for https://docs.ejabberd.im/developer/xmpp-clients-bots/extensions/muc-sub/

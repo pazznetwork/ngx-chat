@@ -14,15 +14,15 @@ export class HttpFileUploadPlugin extends AbstractXmppPlugin {
     private uploadService: Promise<Service>;
 
     constructor(
-        private httpClient: HttpClient,
-        private serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
-        private xmppChatAdapter: XmppChatAdapter,
-        private logService: LogService
+        private readonly httpClient: HttpClient,
+        private readonly serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
+        private readonly xmppChatAdapter: XmppChatAdapter,
+        private readonly logService: LogService
     ) {
         super();
     }
 
-    onBeforeOnline(): PromiseLike<any> {
+    onBeforeOnline(): Promise<void> {
         this.uploadService = this.serviceDiscoveryPlugin.findService('store', 'file');
         this.uploadService.then(() => {
             this.fileUploadSupported = true;
@@ -33,19 +33,19 @@ export class HttpFileUploadPlugin extends AbstractXmppPlugin {
         return Promise.resolve();
     }
 
-    onOffline() {
+    onOffline(): void {
         this.uploadService = null;
         this.fileUploadSupported = false;
     }
 
-    async upload(file: File) {
+    async upload(file: File): Promise<string> {
         await this.uploadService;
         const {name, size, type} = file;
         const slotUrl = await this.requestSlot(name, size.toString(), type);
-        return this.uploadToSlot(slotUrl, file);
+        return await this.uploadToSlot(slotUrl, file);
     }
 
-    private async requestSlot(filename: string, size: string, contentType: string) {
+    private async requestSlot(filename: string, size: string, contentType: string): Promise<string | undefined> {
         const to = (await this.uploadService).jid;
         const slotResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
             xml('iq', {to, type: 'get'},

@@ -8,10 +8,10 @@ export interface Stanza extends Element {
     name: string;
 }
 
-export interface IqResponseStanza extends Stanza {
+export interface IqResponseStanza<ResponseType extends 'result' | 'error' = 'result' | 'error'> extends Stanza {
     attrs: {
         id: string;
-        type: 'result' | 'error';
+        type: ResponseType;
         from?: string;
         to?: string;
     };

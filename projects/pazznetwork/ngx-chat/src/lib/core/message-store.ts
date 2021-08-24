@@ -12,17 +12,17 @@ export interface DateMessagesGroup<T extends Message> {
 
 export class MessageStore<T extends Message> {
 
-    public messages$: Subject<T>;
-    public messages: T[] = [];
-    public dateMessageGroups: DateMessagesGroup<T>[] = [];
-    public messageIdToMessage: { [key: string]: T } = {};
+    public readonly messages$: Subject<T>;
+    public readonly messages: T[] = [];
+    public readonly dateMessageGroups: DateMessagesGroup<T>[] = [];
+    public readonly messageIdToMessage = new Map<string, T>();
 
-    constructor(private logService: LogService) {
+    constructor(private readonly logService: LogService) {
         this.messages$ = new Subject<T>();
     }
 
-    addMessage(message: T) {
-        if (message.id && this.messageIdToMessage[message.id]) {
+    addMessage(message: T): boolean {
+        if (message.id && this.messageIdToMessage.has(message.id)) {
             if (this.logService) {
                 this.logService.warn(`message with id ${message.id} already exists`);
             }
@@ -30,28 +30,28 @@ export class MessageStore<T extends Message> {
         }
         insertSortedLast(message, this.messages, m => m.datetime);
         this.addToDateMessageGroups(message);
-        this.messageIdToMessage[message.id] = message;
+        this.messageIdToMessage.set(message.id, message);
         this.messages$.next(message);
         return true;
     }
 
-    get oldestMessage() {
+    get oldestMessage(): T | undefined {
         return this.messages[0];
     }
 
-    get mostRecentMessage() {
+    get mostRecentMessage(): T | undefined {
         return this.messages[this.messages.length - 1];
     }
 
-    get mostRecentMessageReceived() {
+    get mostRecentMessageReceived(): T | undefined {
         return findLast(this.messages, msg => msg.direction === Direction.in);
     }
 
-    get mostRecentMessageSent() {
+    get mostRecentMessageSent(): T | undefined {
         return findLast(this.messages, msg => msg.direction === Direction.out);
     }
 
-    private addToDateMessageGroups(message: T) {
+    private addToDateMessageGroups(message: T): void {
         const dateString = extractDateStringFromDate(message.datetime);
         const groupIndex = findSortedIndex(dateString, this.dateMessageGroups, group => extractDateStringFromDate(group.date));
         if (groupIndex !== -1) {

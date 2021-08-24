@@ -13,9 +13,7 @@ export interface ContactMetadata {
     [key: string]: any;
 }
 
-export interface JidToPresence {
-    [jid: string]: Presence;
-}
+export type JidToPresence = Map<string, Presence>;
 
 export class Contact {
 
@@ -24,15 +22,15 @@ export class Contact {
     public metadata: ContactMetadata = {};
 
     /** use {@link jidBare}, jid resource is only set for chat room contacts */
-    public jidFull: JID;
-    public jidBare: JID;
-    public presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
-    public subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
-    public pendingOut$ = new BehaviorSubject(false);
-    public pendingIn$ = new BehaviorSubject(false);
-    public resources$ = new BehaviorSubject<JidToPresence>({});
+    public readonly jidFull: JID;
+    public readonly jidBare: JID;
+    public readonly presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
+    public readonly subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
+    public readonly pendingOut$ = new BehaviorSubject(false);
+    public readonly pendingIn$ = new BehaviorSubject(false);
+    public readonly resources$ = new BehaviorSubject<JidToPresence>(new Map());
 
-    private messageStore: MessageStore<Message>;
+    private readonly messageStore: MessageStore<Message>;
 
     get messages$(): Subject<Message> {
         return this.messageStore.messages$;
@@ -46,19 +44,19 @@ export class Contact {
         return this.messageStore.dateMessageGroups;
     }
 
-    get oldestMessage() {
+    get oldestMessage(): Message | undefined {
         return this.messageStore.oldestMessage;
     }
 
-    get mostRecentMessage() {
+    get mostRecentMessage(): Message | undefined {
         return this.messageStore.mostRecentMessage;
     }
 
-    get mostRecentMessageReceived() {
+    get mostRecentMessageReceived(): Message | undefined {
         return this.messageStore.mostRecentMessageReceived;
     }
 
-    get mostRecentMessageSent() {
+    get mostRecentMessageSent(): Message | undefined {
         return this.messageStore.mostRecentMessageSent;
     }
 
@@ -78,7 +76,7 @@ export class Contact {
         this.messageStore = new MessageStore(logService);
     }
 
-    addMessage(message: Message) {
+    addMessage(message: Message): void {
         this.messageStore.addMessage(message);
     }
 
@@ -90,38 +88,39 @@ export class Contact {
         return false;
     }
 
-    isSubscribed() {
+    isSubscribed(): boolean {
         const subscription = this.subscription$.getValue();
         return subscription === ContactSubscription.both || subscription === ContactSubscription.to;
     }
 
-    isUnaffiliated() {
+    isUnaffiliated(): boolean {
         return !this.isSubscribed() && !this.pendingIn$.getValue() && !this.pendingOut$.getValue();
     }
 
-    updateResourcePresence(jid: string, presence: Presence) {
+    updateResourcePresence(jid: string, presence: Presence): void {
         const resources = this.resources$.getValue();
-        resources[jid] = presence;
-        this.presence$.next(this.reducePresences(resources));
+        resources.set(jid, presence);
+        this.presence$.next(this.determineOverallPresence(resources));
         this.resources$.next(resources);
     }
 
-    getMessageById(id: string) {
-        return this.messageStore.messageIdToMessage[id];
+    getMessageById(id: string): Message | null {
+        return this.messageStore.messageIdToMessage.get(id);
     }
 
-    private reducePresences(jidToPresence: JidToPresence): Presence {
+    private determineOverallPresence(jidToPresence: JidToPresence): Presence {
         let result = Presence.unavailable;
-        for (const jid in jidToPresence) {
-            if (jidToPresence.hasOwnProperty(jid)) {
-                const presence = jidToPresence[jid];
-                if (presence === Presence.present) {
-                    return presence;
-                } else if (presence === Presence.away) {
-                    result = Presence.away;
-                }
+
+        [...jidToPresence.values()].some((presence) => {
+            if (presence === Presence.present) {
+                result = presence;
+                return true;
+            } else if (presence === Presence.away) {
+                result = Presence.away;
             }
-        }
+            return false;
+        });
+
         return result;
     }
 

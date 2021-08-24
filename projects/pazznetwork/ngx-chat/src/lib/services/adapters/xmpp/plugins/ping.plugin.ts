@@ -5,9 +5,10 @@ import { timeout } from '../../../../core/utils-timeout';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
+import { IqResponseStanza } from '../../../../core/stanza';
 
 /**
- * xep-0199
+ * XEP-0199 XMPP Ping (https://xmpp.org/extensions/xep-0199.html)
  */
 export class PingPlugin extends AbstractXmppPlugin {
 
@@ -15,38 +16,34 @@ export class PingPlugin extends AbstractXmppPlugin {
     private readonly pingInterval = 60_000;
 
     constructor(
-        private xmppChatAdapter: XmppChatAdapter,
-        private logService: LogService,
-        private ngZone: NgZone,
+        private readonly xmppChatAdapter: XmppChatAdapter,
+        private readonly logService: LogService,
+        private readonly ngZone: NgZone,
     ) {
         super();
 
         this.xmppChatAdapter.state$.pipe(
             filter(newState => newState === 'online'),
-        ).subscribe(() => {
-            this.schedulePings();
-        });
+        ).subscribe(() => this.schedulePings());
 
         this.xmppChatAdapter.state$.pipe(
             filter(newState => newState === 'disconnected'),
-        ).subscribe(() => {
-            this.unschedulePings();
-        });
+        ).subscribe(() => this.unschedulePings());
     }
 
-    private schedulePings() {
+    private schedulePings(): void {
         this.unschedulePings();
         this.ngZone.runOutsideAngular(() => {
             this.timeoutHandle = window.setInterval(() => this.ping(), this.pingInterval);
         });
     }
 
-    private async ping() {
+    private async ping(): Promise<void> {
         this.logService.debug('ping...');
         try {
             await timeout(this.sendPing(), 10_000);
             this.logService.debug('... pong');
-        } catch (e) {
+        } catch {
             if (this.xmppChatAdapter.state$.getValue() === 'online'
                 && this.xmppChatAdapter.chatConnectionService.state$.getValue() === 'online') {
                 this.logService.error('... pong errored,  connection should be online, waiting for browser websocket timeout');
@@ -54,19 +51,15 @@ export class PingPlugin extends AbstractXmppPlugin {
         }
     }
 
-    private sendPing() {
-        try {
-            return this.xmppChatAdapter.chatConnectionService.sendIq(
-                xml('iq', {type: 'get'},
-                    xml('ping', {xmlns: 'urn:xmpp:ping'})
-                )
-            );
-        } catch (e) {
-            return Promise.reject(e);
-        }
+    private async sendPing(): Promise<IqResponseStanza<'result'>> {
+        return await this.xmppChatAdapter.chatConnectionService.sendIq(
+            xml('iq', {type: 'get'},
+                xml('ping', {xmlns: 'urn:xmpp:ping'})
+            )
+        );
     }
 
-    private unschedulePings() {
+    private unschedulePings(): void {
         window.clearInterval(this.timeoutHandle);
     }
 

@@ -7,7 +7,7 @@ export const toString: (elem: any) => string = elem => elem.toString();
  * @param list the list in which the element should be inserted
  * @param keyExtractor an optional element mapper, defaults to toString
  */
-export function insertSortedLast<U>(elemToInsert: U, list: U[], keyExtractor: (a: U) => any = toString) {
+export function insertSortedLast<U>(elemToInsert: U, list: U[], keyExtractor: (a: U) => any = toString): void {
     list.splice(findSortedInsertionIndexLast(keyExtractor(elemToInsert), list, keyExtractor), 0, elemToInsert);
 }
 
@@ -17,7 +17,7 @@ export function insertSortedLast<U>(elemToInsert: U, list: U[], keyExtractor: (a
  * @param haystack the pre sorted list
  * @param keyExtractor an optional needle mapper, defaults to toString
  */
-export function findSortedInsertionIndexLast<U, V>(needle: U, haystack: V[], keyExtractor: (a: V) => any = toString) {
+export function findSortedInsertionIndexLast<U, V>(needle: U, haystack: V[], keyExtractor: (a: V) => any = toString): number {
     let low = 0;
     let high = haystack.length;
 
@@ -39,7 +39,7 @@ export function findSortedInsertionIndexLast<U, V>(needle: U, haystack: V[], key
 /**
  * Find the index of an element in a sorted list. If list contains no matching element, return -1.
  */
-export function findSortedIndex<U, V>(needle: U, haystack: V[], keyExtractor: (a: V) => any = toString) {
+export function findSortedIndex<U, V>(needle: U, haystack: V[], keyExtractor: (a: V) => any = toString): number {
     let low = 0;
     let high = haystack.length;
 
@@ -64,7 +64,7 @@ export function findSortedIndex<U, V>(needle: U, haystack: V[], keyExtractor: (a
 /**
  * Like {@link Array.prototype.findIndex} but finds the last index instead.
  */
-export function findLastIndex<T>(arr: T[], predicate: (x: T) => boolean) {
+export function findLastIndex<T>(arr: T[], predicate: (x: T) => boolean): number {
     for (let i = arr.length - 1; i >= 0; i--) {
         if (predicate(arr[i])) {
             return i;
@@ -76,7 +76,7 @@ export function findLastIndex<T>(arr: T[], predicate: (x: T) => boolean) {
 /**
  * Like {@link Array.prototype.find} but finds the last matching element instead.
  */
-export function findLast<T>(arr: T[], predicate: (x: T) => boolean) {
+export function findLast<T>(arr: T[], predicate: (x: T) => boolean): T | undefined {
     return arr[findLastIndex(arr, predicate)];
 }
 
