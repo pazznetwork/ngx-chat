@@ -1,6 +1,6 @@
 import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
-import { IqResponseStanza } from '../../../../core/stanza';
+import { IqResponseStanza, Stanza } from '../../../../core/stanza';
 import { removeDuplicates } from '../../../../core/utils-array';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { PublishSubscribePlugin } from './publish-subscribe.plugin';
@@ -14,17 +14,17 @@ export interface SavedConference {
 export const STORAGE_BOOKMARKS = 'storage:bookmarks';
 
 /**
- * XEP-0048
+ * XEP-0048 Bookmarks (https://xmpp.org/extensions/xep-0048.html)
  */
 export class BookmarkPlugin extends AbstractXmppPlugin {
 
-    private pendingAddConference: Promise<IqResponseStanza>;
+    private pendingAddConference: Promise<IqResponseStanza<'result'>> | null = null;
 
-    constructor(private publishSubscribePlugin: PublishSubscribePlugin) {
+    constructor(private readonly publishSubscribePlugin: PublishSubscribePlugin) {
         super();
     }
 
-    onOffline() {
+    onOffline(): void {
         this.pendingAddConference = null;
     }
 
@@ -46,7 +46,7 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
         };
     }
 
-    saveConferences(conferences: SavedConference[]): Promise<IqResponseStanza> {
+    saveConferences(conferences: SavedConference[]): Promise<IqResponseStanza<'result'>> {
         const deduplicatedConferences = removeDuplicates(conferences, (x, y) => x.jid === y.jid);
         return this.publishSubscribePlugin.storePrivatePayloadPersistent(
             STORAGE_BOOKMARKS,
@@ -57,36 +57,30 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
         );
     }
 
-    async addConference(conferenceToSave: SavedConference): Promise<IqResponseStanza> {
-
+    async addConference(conferenceToSave: SavedConference): Promise<IqResponseStanza<'result'>> {
         while (this.pendingAddConference) {
             try {
                 await this.pendingAddConference; // serialize the writes, so that in case of multiple conference adds all get added
             } catch {}
         }
 
-        return this.pendingAddConference = new Promise(async (resolve, reject) => {
-            const savedConferences = await this.retrieveMultiUserChatRooms();
-            const conferences = [...savedConferences, conferenceToSave];
+        this.pendingAddConference = this.addConferenceInternal(conferenceToSave);
 
-            let response: IqResponseStanza;
-            try {
-                response = await this.saveConferences(conferences);
-            } finally {
-                this.pendingAddConference = null;
-            }
-
-            if (response) {
-                resolve(response);
-            } else {
-                reject();
-            }
-        });
-
+        try {
+            return await this.pendingAddConference;
+        } finally {
+            this.pendingAddConference = null;
+        }
     }
 
-    private convertSavedConferenceToElement(savedConference: SavedConference) {
-        const {name, autojoin, jid} = savedConference;
+    private async addConferenceInternal(conferenceToSave: SavedConference): Promise<IqResponseStanza<'result'>> {
+        const savedConferences = await this.retrieveMultiUserChatRooms();
+        const conferences = [...savedConferences, conferenceToSave];
+
+        return await this.saveConferences(conferences);
+    }
+
+    private convertSavedConferenceToElement({name, autojoin, jid}: SavedConference): Stanza {
         return xml('conference', {name, jid, autojoin: autojoin.toString()});
     }
 

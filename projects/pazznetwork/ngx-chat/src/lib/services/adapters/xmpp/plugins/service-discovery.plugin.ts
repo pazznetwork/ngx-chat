@@ -13,11 +13,11 @@ class QueryStanzaBuilder extends AbstractStanzaBuilder {
     }
 
     toStanza() {
-        const attrs: { [key: string]: string } = {type: 'get'};
-        if (this.to) {
-            attrs.to = this.to;
-        }
-        return xml('iq', attrs,
+        return xml('iq',
+            {
+                type: 'get',
+                ...(this.to ? {to: this.to} : {})
+            },
             xml('query', {xmlns: this.xmlns})
         );
     }
@@ -44,23 +44,23 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
     public static readonly DISCO_INFO = 'http://jabber.org/protocol/disco#info';
     public static readonly DISCO_ITEMS = 'http://jabber.org/protocol/disco#items';
 
-    private servicesInitialized$ = new BehaviorSubject(false);
+    private readonly servicesInitialized$ = new BehaviorSubject(false);
     private hostedServices: Service[] = [];
-    private resourceCache: {[jid: string]: Service} = {};
+    private readonly resourceCache = new Map<string, Service>();
 
-    constructor(private chatAdapter: XmppChatAdapter) {
+    constructor(private readonly chatAdapter: XmppChatAdapter) {
         super();
     }
 
-    async onBeforeOnline() {
+    async onBeforeOnline(): Promise<void> {
         await this.discoverServices(this.chatAdapter.chatConnectionService.userJid.domain);
         this.servicesInitialized$.next(true);
     }
 
-    onOffline() {
+    onOffline(): void {
         this.servicesInitialized$.next(false);
         this.hostedServices = [];
-        this.resourceCache = {};
+        this.resourceCache.clear();
     }
 
     supportsFeature(jid: string, searchedFeature: string): Promise<boolean> {
@@ -69,11 +69,11 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
 
             this.servicesInitialized$.pipe(first(value => !!value)).subscribe(async () => {
                 try {
-                    const service = this.resourceCache[jid] || await this.discoverServiceInformation(jid);
+                    const service = this.resourceCache.get(jid) || await this.discoverServiceInformation(jid);
                     if (!service) {
                         reject(new Error('no service found for jid ' + jid));
                     }
-                    resolve(service.features.indexOf(searchedFeature) >= 0);
+                    resolve(service.features.includes(searchedFeature));
                 } catch (e) {
                     reject(e);
                 }
@@ -93,9 +93,9 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
                 );
 
                 if (results.length === 0) {
-                    reject(`no service matching category ${category} and type ${type} found!`);
+                    reject(new Error(`no service matching category ${category} and type ${type} found!`));
                 } else if (results.length > 1) {
-                    reject(`multiple services matching category ${category} and type ${type} found! ${JSON.stringify(results)}`);
+                    reject(new Error(`multiple services matching category ${category} and type ${type} found! ${JSON.stringify(results)}`));
                 } else {
                     return resolve(results[0]);
                 }
@@ -105,27 +105,24 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
 
     }
 
-    private async discoverServices(mainDomain: string) {
+    private async discoverServices(mainDomain: string): Promise<void> {
         const serviceListResponse = await this.chatAdapter.chatConnectionService.sendIq(
             new QueryStanzaBuilder(
                 ServiceDiscoveryPlugin.DISCO_ITEMS, this.chatAdapter.chatConnectionService.userJid.domain).toStanza()
         );
 
-        const serviceDomains = serviceListResponse
-            .getChild('query')
-            .getChildren('item')
-            .map((itemNode: Element) => itemNode.attrs.jid);
-        serviceDomains.push(mainDomain);
-
-        const distinctServiceDomains = Object.keys(
-            serviceDomains.reduce((previousValue, currentValue) => {
-                previousValue[currentValue] = true;
-                return previousValue;
-            }, {})
+        const serviceDomains = new Set(
+            serviceListResponse
+                .getChild('query')
+                .getChildren('item')
+                .map((itemNode: Element) => itemNode.attrs.jid as string)
         );
+        serviceDomains.add(mainDomain);
 
         const discoveredServices: Service[] = await Promise.all(
-            distinctServiceDomains.map((serviceDomain: string) => this.discoverServiceInformation(serviceDomain)));
+            [...serviceDomains.keys()]
+                .map((serviceDomain) => this.discoverServiceInformation(serviceDomain))
+        );
         this.hostedServices.push(...discoveredServices);
     }
 
@@ -141,7 +138,7 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
             features,
             jid: serviceInformationResponse.attrs.from
         };
-        this.resourceCache[serviceInformationResponse.attrs.from] = serviceInformation;
+        this.resourceCache.set(serviceInformationResponse.attrs.from, serviceInformation);
         return serviceInformation;
     }
 
