@@ -2,7 +2,6 @@ import { Component, Inject, Input, OnDestroy, OnInit, Optional, ViewChild } from
 import { Observable, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Direction, Message } from '../../core/message';
-import { Presence } from '../../core/presence';
 import { HttpFileUploadPlugin } from '../../services/adapters/xmpp/plugins/http-file-upload.plugin';
 import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../services/chat-contact-click-handler';
@@ -22,21 +21,19 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     public chatWindowState: ChatWindowState;
 
     @ViewChild(ChatMessageInputComponent)
-    messageInput: ChatMessageInputComponent;
+    private readonly messageInput: ChatMessageInputComponent;
 
     @ViewChild(ChatMessageListComponent)
-    contactMessageList: ChatMessageListComponent;
+    private readonly contactMessageList: ChatMessageListComponent;
 
-    httpFileUploadPlugin: HttpFileUploadPlugin;
+    readonly httpFileUploadPlugin: HttpFileUploadPlugin;
 
-    Presence = Presence;
-
-    private ngDestroy = new Subject<void>();
+    private readonly ngDestroy = new Subject<void>();
 
     constructor(
-        @Inject(ChatServiceToken) public chatService: ChatService,
-        private chatListService: ChatListStateService,
-        @Inject(CONTACT_CLICK_HANDLER_TOKEN) @Optional() public contactClickHandler: ChatContactClickHandler,
+        @Inject(ChatServiceToken) readonly chatService: ChatService,
+        private readonly chatListService: ChatListStateService,
+        @Inject(CONTACT_CLICK_HANDLER_TOKEN) @Optional() readonly contactClickHandler: ChatContactClickHandler,
     ) {
         this.httpFileUploadPlugin = this.chatService.getPlugin(HttpFileUploadPlugin);
     }
