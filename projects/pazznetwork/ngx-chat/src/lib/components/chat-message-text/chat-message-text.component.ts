@@ -1,20 +1,16 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'ngx-chat-message-text',
-  template: `<span *ngFor="let line of lines; last as isLast">{{line}}<br *ngIf="!isLast"/></span>`
+    selector: 'ngx-chat-message-text',
+    template: `{{text}}`,
+    styles: [
+        `
+            :host {
+                white-space: pre-wrap;
+            }
+        `
+    ]
 })
-export class ChatMessageTextComponent implements OnInit {
-
-  @Input() text: string;
-  lines: string[];
-
-  constructor() { }
-
-  ngOnInit() {
-    if (this.text) {
-      this.lines = this.text.split('\n');
-    }
-  }
-
+export class ChatMessageTextComponent {
+    @Input() text: string;
 }

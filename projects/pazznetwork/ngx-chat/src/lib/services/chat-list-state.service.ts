@@ -5,7 +5,7 @@ import { Recipient } from '../core/recipient';
 import { ChatService, ChatServiceToken } from './chat-service';
 
 export class ChatWindowState {
-    constructor(public recipient: Recipient,
+    constructor(readonly recipient: Recipient,
                 public isCollapsed: boolean) {
     }
 }

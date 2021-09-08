@@ -8,42 +8,53 @@ import { extractUrls } from '../core/utils-links';
 })
 export class LinksDirective implements OnChanges {
 
-    // tslint:disable-next-line:no-input-rename
-    @Input('ngxChatLinks') ngxChatLinks: string;
+    @Input() ngxChatLinks: string;
 
-    constructor(private resolver: ComponentFactoryResolver,
-                private viewContainerRef: ViewContainerRef) {
+    constructor(private readonly resolver: ComponentFactoryResolver,
+                private readonly viewContainerRef: ViewContainerRef) {
     }
 
-    private transform() {
-        const message: string = this.ngxChatLinks;
+    ngOnChanges(): void {
+        this.transform();
+    }
 
-        if (message) {
-            const links = extractUrls(message);
+    private transform(): void {
+        const message = this.ngxChatLinks;
 
-            const chatMessageTextFactory = this.resolver.resolveComponentFactory(ChatMessageTextComponent);
-            const chatMessageLinkFactory = this.resolver.resolveComponentFactory(ChatMessageLinkComponent);
+        if (!message) {
+            return;
+        }
 
-            let lastIndex = 0;
-            for (const link of links) {
-                const currentIndex = message.indexOf(link, lastIndex);
+        const links = extractUrls(message);
 
-                const textBeforeLink = this.viewContainerRef.createComponent(chatMessageTextFactory);
-                textBeforeLink.instance.text = message.substring(lastIndex, currentIndex);
+        const chatMessageTextFactory = this.resolver.resolveComponentFactory(ChatMessageTextComponent);
+        const chatMessageLinkFactory = this.resolver.resolveComponentFactory(ChatMessageLinkComponent);
 
-                const linkRef = this.viewContainerRef.createComponent(chatMessageLinkFactory);
-                linkRef.instance.link = link;
-                linkRef.instance.text = this.shorten(link);
+        let lastIndex = 0;
+        for (const link of links) {
+            const currentIndex = message.indexOf(link, lastIndex);
 
-                lastIndex = currentIndex + link.length;
+            const textBeforeLink = message.substring(lastIndex, currentIndex);
+            if (textBeforeLink) {
+                const textBeforeLinkComponent = this.viewContainerRef.createComponent(chatMessageTextFactory);
+                textBeforeLinkComponent.instance.text = textBeforeLink;
             }
 
-            const textAfterLastLinkSpan = this.viewContainerRef.createComponent(chatMessageTextFactory);
-            textAfterLastLinkSpan.instance.text = message.substring(lastIndex);
+            const linkRef = this.viewContainerRef.createComponent(chatMessageLinkFactory);
+            linkRef.instance.link = link;
+            linkRef.instance.text = this.shorten(link);
+
+            lastIndex = currentIndex + link.length;
+        }
+
+        const textAfterLastLink = message.substring(lastIndex);
+        if (textAfterLastLink) {
+            const textAfterLastLinkComponent = this.viewContainerRef.createComponent(chatMessageTextFactory);
+            textAfterLastLinkComponent.instance.text = textAfterLastLink;
         }
     }
 
-    private shorten(url: string) {
+    private shorten(url: string): string {
         const parser = document.createElement('a');
         parser.href = url;
 
@@ -53,10 +64,6 @@ export class LinksDirective implements OnChanges {
         }
 
         return parser.protocol + '//' + parser.host + shortenedPathname;
-    }
-
-    ngOnChanges(): void {
-        this.transform();
     }
 
 }
