@@ -55,13 +55,16 @@
   overflow: hidden;
   height: auto;
   margin: 0 @msg-full-spacing;
+  display: flex;
+  justify-content: center;
 
   &.chat-message-image-wrapper--placeholder {
     height: 150px;
   }
 
   img {
-    width: 100%;
+    object-fit: contain;
+    min-width: 0;
   }
 }
 
