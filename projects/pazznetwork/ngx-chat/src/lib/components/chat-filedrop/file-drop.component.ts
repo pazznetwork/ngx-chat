@@ -1,14 +1,14 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 
 @Component({
     selector: 'ngx-chat-filedrop',
     templateUrl: './file-drop.component.html',
-    styleUrls: ['./file-drop.component.less']
+    styleUrls: ['./file-drop.component.less'],
 })
-export class FileDropComponent implements OnInit {
+export class FileDropComponent {
 
     @Output()
-    public fileUpload = new EventEmitter<File>();
+    readonly fileUpload = new EventEmitter<File>();
 
     @Input()
     dropMessage: string;
@@ -17,11 +17,6 @@ export class FileDropComponent implements OnInit {
     enabled = true;
 
     isDropTarget = false;
-
-    constructor() { }
-
-    ngOnInit() {
-    }
 
     @HostListener('dragover', ['$event'])
     @HostListener('dragenter', ['$event'])

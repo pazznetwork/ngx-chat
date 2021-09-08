@@ -63,7 +63,7 @@ export class ChatMessageComponent implements OnInit {
                 return;
             }
 
-            this.tryFindEmbedImageUrls(candidateUrls).then();
+            void this.tryFindEmbedImageUrls(candidateUrls);
         }
     }
 
