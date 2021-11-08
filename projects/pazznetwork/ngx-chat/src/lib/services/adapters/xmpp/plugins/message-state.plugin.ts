@@ -27,6 +27,8 @@ const nodeName = 'contact-message-state';
 
 /**
  * Plugin using PubSub to persist message read states.
+ * Custom not part of the XMPP Specification
+ * Standardized implementation specification would be https://xmpp.org/extensions/xep-0184.html
  */
 export class MessageStatePlugin extends AbstractXmppPlugin {
 

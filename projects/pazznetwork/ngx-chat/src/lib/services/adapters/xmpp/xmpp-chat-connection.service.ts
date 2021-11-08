@@ -24,7 +24,7 @@ export class XmppChatConnectionService {
     public readonly stanzaUnknown$ = new Subject<Stanza>();
 
     /**
-     * User JID with resouce, not bare.
+     * User JID with resource, not bare.
      */
     public userJid?: JID;
     private iqId = new Date().getTime();

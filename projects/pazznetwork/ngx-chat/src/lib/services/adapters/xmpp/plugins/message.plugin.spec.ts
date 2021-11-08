@@ -3,7 +3,7 @@ import { jid as parseJid, xml } from '@xmpp/client';
 import { first, isEmpty, timeoutWith } from 'rxjs/operators';
 import { testLogService } from '../../../../test/log-service';
 import { MockClientFactory } from '../../../../test/xmppClientMock';
-import { ChatServiceToken } from '../../../chat-service';
+import { CHAT_SERVICE_TOKEN } from '../../../chat-service';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -30,7 +30,7 @@ describe('message plugin', () => {
             providers: [
                 XmppChatConnectionService,
                 {provide: XmppClientFactoryService, useValue: mockClientFactory},
-                {provide: ChatServiceToken, useClass: XmppChatAdapter},
+                {provide: CHAT_SERVICE_TOKEN, useClass: XmppChatAdapter},
                 {provide: LogService, useValue: logService},
                 ContactFactoryService
             ]
@@ -39,7 +39,7 @@ describe('message plugin', () => {
         chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = parseJid('me', 'example.com', 'something');
-        chatAdapter = TestBed.inject(ChatServiceToken) as XmppChatAdapter;
+        chatAdapter = TestBed.inject(CHAT_SERVICE_TOKEN) as XmppChatAdapter;
         messagePlugin = new MessagePlugin(chatAdapter, logService);
         dummyPlugin = new (class DummyPlugin extends AbstractXmppPlugin {
         })();

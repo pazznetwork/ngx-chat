@@ -7,7 +7,7 @@ import { Stanza } from '../../../core/stanza';
 
 import { testLogService } from '../../../test/log-service';
 import { MockClientFactory } from '../../../test/xmppClientMock';
-import { ChatServiceToken } from '../../chat-service';
+import { CHAT_SERVICE_TOKEN } from '../../chat-service';
 import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { MessageUuidPlugin } from './plugins/message-uuid.plugin';
@@ -35,7 +35,7 @@ describe('XmppChatAdapter', () => {
             providers: [
                 XmppChatConnectionService,
                 {provide: XmppClientFactoryService, useValue: mockClientFactory},
-                {provide: ChatServiceToken, useClass: XmppChatAdapter},
+                {provide: CHAT_SERVICE_TOKEN, useClass: XmppChatAdapter},
                 {provide: LogService, useValue: logService},
                 ContactFactoryService
             ]
@@ -44,7 +44,7 @@ describe('XmppChatAdapter', () => {
         chatConnectionService = TestBed.inject(XmppChatConnectionService);
         chatConnectionService.client = xmppClientMock;
         contactFactory = TestBed.inject(ContactFactoryService);
-        chatService = TestBed.inject(ChatServiceToken) as XmppChatAdapter;
+        chatService = TestBed.inject(CHAT_SERVICE_TOKEN) as XmppChatAdapter;
         chatService.addPlugins([new MessageUuidPlugin(), new MessagePlugin(chatService, logService)]);
 
         contact1 = contactFactory.createContact('test@example.com', 'jon doe');

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Contact } from '../core/contact';
 import { Translations } from '../core/translations';
 import { defaultTranslations } from '../core/translations-default';
-import { ChatService, ChatServiceToken } from '../services/chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from '../services/chat-service';
 
 /**
  * The main UI component. Should be instantiated near the root of your application.
@@ -89,7 +89,7 @@ export class ChatComponent implements OnInit, OnChanges {
     showChatComponent = false;
 
     constructor(
-        @Inject(ChatServiceToken) private chatService: ChatService,
+        @Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService,
     ) {
     }
 

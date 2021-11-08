@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { jid as parseJid, xml } from '@xmpp/client';
 import { testLogService } from '../../../../test/log-service';
 import { MockClientFactory } from '../../../../test/xmppClientMock';
-import { ChatServiceToken } from '../../../chat-service';
+import { CHAT_SERVICE_TOKEN } from '../../../chat-service';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
@@ -24,7 +24,7 @@ describe('push plugin', () => {
             providers: [
                 XmppChatConnectionService,
                 {provide: XmppClientFactoryService, useValue: mockClientFactory},
-                {provide: ChatServiceToken, useClass: XmppChatAdapter},
+                {provide: CHAT_SERVICE_TOKEN, useClass: XmppChatAdapter},
                 {provide: LogService, useValue: testLogService()},
                 ContactFactoryService,
             ]
@@ -34,7 +34,7 @@ describe('push plugin', () => {
         chatConnectionService.client = xmppClientMock;
         chatConnectionService.userJid = parseJid('someone@example.com');
 
-        const chatAdapter = TestBed.inject(ChatServiceToken) as XmppChatAdapter;
+        const chatAdapter = TestBed.inject(CHAT_SERVICE_TOKEN) as XmppChatAdapter;
 
         const pushService = {
             jid: 'push.jabber.example.com',

@@ -2,19 +2,19 @@ import { Inject, Injectable } from '@angular/core';
 import { JID } from '@xmpp/jid';
 import { Contact } from '../core/contact';
 import { MultiUserChatPlugin, Room } from './adapters/xmpp/plugins/multi-user-chat.plugin';
-import { ChatService, ChatServiceToken } from './chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from './chat-service';
 
 @Injectable()
 export class ChatBackgroundNotificationService {
 
     private enabled = false;
 
-    constructor(@Inject(ChatServiceToken) protected chatService: ChatService) {
+    constructor(@Inject(CHAT_SERVICE_TOKEN) protected chatService: ChatService) {
         chatService.message$.subscribe((msg) => {
             this.receivedDirectMessage(msg);
         });
-        chatService.getPlugin(MultiUserChatPlugin).message$.subscribe(room => {
-            this.receivedGroupMessage(room);
+        chatService.getPlugin(MultiUserChatPlugin).message$.subscribe(async room => {
+            await this.receivedGroupMessage(room);
         });
     }
 
@@ -48,7 +48,7 @@ export class ChatBackgroundNotificationService {
         if (this.shouldDisplayNotification()) {
             const message = room.mostRecentMessage.body;
             const sender = room.mostRecentMessage.from;
-            const options = await this.customizeGroupMessage(sender, message, room);
+            const options = await this.customizeGroupMessage(sender, message);
             const notification = new Notification(room.name, options);
             notification.addEventListener('click', () => {
                 window.focus();
@@ -57,7 +57,7 @@ export class ChatBackgroundNotificationService {
         }
     }
 
-    protected async customizeGroupMessage(sender: JID, message: string, room: Room) {
+    protected async customizeGroupMessage(sender: JID, message: string) {
         return {body: `${sender}: ${message}`};
     }
 

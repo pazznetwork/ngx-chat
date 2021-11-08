@@ -7,7 +7,12 @@ import { ChatPlugin } from '../core/plugin';
 import { Recipient } from '../core/recipient';
 import { Translations } from '../core/translations';
 
-export const ChatServiceToken = new InjectionToken('pazznetworkNgxChatService');
+/**
+ * The chat service token gives you access to the main chat api and is implemented by default with an XMPP adapter,
+ * you can always reuse the api and ui with a new service implementing the ChatService interface and providing the
+ * said implementation with the token
+ */
+export const CHAT_SERVICE_TOKEN = new InjectionToken<ChatService>('ngxChatService');
 
 
 export type ConnectionStates = 'disconnected' | 'connecting' | 'online';
@@ -16,7 +21,7 @@ export type ConnectionStates = 'disconnected' | 'connecting' | 'online';
  * ChatService is your main API for using ngx-chat. Can be injected in your services like in the following example:
  *
  * ```
- * constructor(@Inject(ChatServiceToken) chatService: ChatService)
+ * constructor(@Inject(CHAT_SERVICE_TOKEN) chatService: ChatService)
  * ```
  */
 export interface ChatService {

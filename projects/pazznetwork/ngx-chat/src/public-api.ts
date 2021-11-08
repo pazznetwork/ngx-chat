@@ -54,7 +54,7 @@ export * from './lib/services/chat-service';
 export * from './lib/services/contact-factory.service';
 export * from './lib/services/log.service';
 export * from './lib/services/report-user-service';
-export { LinkOpener, LinkOpenerToken } from './lib/components/chat-message-link/chat-message-link.component';
+export { LinkOpener, LINK_OPENER_TOKEN } from './lib/components/chat-message-link/chat-message-link.component';
 export { selectFile } from './lib/core/utils-file';
 export { jid as parseJid } from '@xmpp/client';
 export { JID } from '@xmpp/jid';

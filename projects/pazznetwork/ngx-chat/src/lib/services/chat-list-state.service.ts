@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Recipient } from '../core/recipient';
-import { ChatService, ChatServiceToken } from './chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from './chat-service';
 
 export class ChatWindowState {
     constructor(readonly recipient: Recipient,
@@ -23,7 +23,7 @@ export class ChatListStateService {
     public openChats$ = new BehaviorSubject<ChatWindowState[]>([]);
     public openTracks$ = new BehaviorSubject<AttachableTrack[]>([]);
 
-    constructor(@Inject(ChatServiceToken) private chatService: ChatService) {
+    constructor(@Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService) {
         this.chatService.state$
             .pipe(filter(newState => newState === 'disconnected'))
             .subscribe(() => {

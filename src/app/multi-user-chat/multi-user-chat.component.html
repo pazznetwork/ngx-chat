@@ -34,6 +34,27 @@
             </li>
         </ul>
 
+        <br>
+        <div>Current MUC subscriptions to room: {{roomJid}}</div>
+        <ul>
+            <li *ngFor="let subscription of mucSubRoomSubscriptions | keyvalue">
+                {{subscription.key}}:
+                <ul>
+                    <li *ngFor="let subscribedNode of subscription.value">
+                        {{subscribedNode}}
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <br>
+        <div>Members of room: {{roomJid}}</div>
+        <ul>
+            <li *ngFor="let member of roomMemberList">
+                {{member.jid}}
+            </li>
+        </ul>
+
+
         <hr/>
 
         <button (click)="queryAllRooms()">List all rooms</button>

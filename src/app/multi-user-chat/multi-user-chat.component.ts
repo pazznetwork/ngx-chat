@@ -2,12 +2,13 @@ import { Component, Inject } from '@angular/core';
 import {
     ChatService,
     ChatServiceToken,
+    MemberlistItem,
+    MUC_SUB_EVENT_TYPE,
+    MucSubPlugin,
     MultiUserChatPlugin,
     Room,
     RoomSummary,
     RoomCreationOptions,
-    MucSubPlugin,
-    MUC_SUB_EVENT_TYPE,
 } from '@pazznetwork/ngx-chat';
 import { jid } from '@xmpp/client';
 
@@ -23,6 +24,7 @@ export class MultiUserChatComponent {
     roomJid: string;
     selectedRoom: Room;
     allRooms: RoomSummary[] = [];
+    roomMemberList: MemberlistItem[] = [];
     newRoom?: RoomCreationOptions;
     mucSubSubscriptions = new Map<string, string[]>();
 
@@ -46,6 +48,11 @@ export class MultiUserChatComponent {
 
     async getSubscriptions() {
         this.mucSubSubscriptions = await this.mucSubPlugin.retrieveSubscriptions();
+    }
+
+    async queryMemberList(roomJid: string) {
+        const fullRoomJid = new Room(jid(roomJid), null).toString();
+        this.roomMemberList = await this.multiUserChatPlugin.queryMemberList(fullRoomJid);
     }
 
     async destroyRoom(roomJid: string) {

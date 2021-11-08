@@ -182,16 +182,14 @@ describe('multi user chat plugin', () => {
                     fail('unexpected stanza: ' + content.toString());
                 }
             });
-
             try {
-                await multiUserChatPlugin.createRoom(defaultRoomConfiguration);
+                expect(multiUserChatPlugin.createRoom(defaultRoomConfiguration)).toThrowMatching((e) => {
+                    expect((e as IqResponseError).errorType).toBe('modify');
+                    expect((e as IqResponseError).errorCondition).toBe('not-acceptable');
+                    return expect(e instanceof IqResponseError).toBeTrue();
+                });
                 fail('should be rejected');
-            } catch (e: unknown) {
-                expect(e instanceof IqResponseError).toBeTrue();
-                expect((e as IqResponseError).errorType).toBe('modify');
-                expect((e as IqResponseError).errorCondition).toBe('not-acceptable');
-            }
-
+            } catch (e) {}
         });
 
 
