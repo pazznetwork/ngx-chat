@@ -44,7 +44,7 @@ import { XmppClientFactoryService } from './services/adapters/xmpp/xmpp-client-f
 import { ChatBackgroundNotificationService } from './services/chat-background-notification.service';
 import { ChatListStateService } from './services/chat-list-state.service';
 import { ChatMessageListRegistryService } from './services/chat-message-list-registry.service';
-import { ChatServiceToken } from './services/chat-service';
+import { CHAT_SERVICE_TOKEN } from './services/chat-service';
 import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
 
@@ -99,7 +99,7 @@ export class NgxChatModule {
                 XmppChatConnectionService,
                 XmppClientFactoryService,
                 {
-                    provide: ChatServiceToken,
+                    provide: CHAT_SERVICE_TOKEN,
                     deps: [
                         XmppChatConnectionService,
                         ChatMessageListRegistryService,

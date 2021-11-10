@@ -6,7 +6,7 @@ import { Contact } from '../../core/contact';
 import { Recipient } from '../../core/recipient';
 import { MultiUserChatPlugin } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatListStateService } from '../../services/chat-list-state.service';
-import { ChatService, ChatServiceToken } from '../../services/chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-roster-list',
@@ -59,7 +59,7 @@ export class RosterListComponent implements OnInit {
 
     multiUserChatPlugin: MultiUserChatPlugin;
 
-    constructor(@Inject(ChatServiceToken) public chatService: ChatService,
+    constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
                 private chatListService: ChatListStateService) {
         this.multiUserChatPlugin = this.chatService.getPlugin(MultiUserChatPlugin);
     }

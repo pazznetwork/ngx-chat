@@ -1,9 +1,9 @@
 import { Component, Inject } from '@angular/core';
 import {
+    CHAT_SERVICE_TOKEN,
     ChatBackgroundNotificationService,
     ChatListStateService,
     ChatService,
-    ChatServiceToken,
     ContactFactoryService,
     LogInRequest,
     LogLevel,
@@ -20,17 +20,17 @@ import {
 })
 export class IndexComponent {
 
-    public domain?: string;
-    public service?: string;
-    public password?: string;
-    public username?: string;
-    public otherJid?: string;
-    public readonly multiUserChatPlugin: MultiUserChatPlugin;
-    public readonly unreadMessageCountPlugin: UnreadMessageCountPlugin;
-    public registrationMessage?: string;
+    domain?: string;
+    service?: string;
+    password?: string;
+    username?: string;
+    otherJid?: string;
+    readonly multiUserChatPlugin: MultiUserChatPlugin;
+    readonly unreadMessageCountPlugin: UnreadMessageCountPlugin;
+    registrationMessage?: string;
 
     constructor(
-        @Inject(ChatServiceToken) public chatService: ChatService,
+        @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
         private contactFactory: ContactFactoryService,
         private logService: LogService,
         private chatListStateService: ChatListStateService,

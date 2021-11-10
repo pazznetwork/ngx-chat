@@ -6,7 +6,7 @@ import { HttpFileUploadPlugin } from '../../services/adapters/xmpp/plugins/http-
 import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../services/chat-contact-click-handler';
 import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
-import { ChatService, ChatServiceToken } from '../../services/chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';
 import { ChatMessageListComponent } from '../chat-message-list/chat-message-list.component';
 
@@ -31,7 +31,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     private readonly ngDestroy = new Subject<void>();
 
     constructor(
-        @Inject(ChatServiceToken) readonly chatService: ChatService,
+        @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
         private readonly chatListService: ChatListStateService,
         @Inject(CONTACT_CLICK_HANDLER_TOKEN) @Optional() readonly contactClickHandler: ChatContactClickHandler,
     ) {

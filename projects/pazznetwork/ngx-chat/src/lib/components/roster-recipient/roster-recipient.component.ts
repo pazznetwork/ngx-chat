@@ -4,7 +4,7 @@ import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Presence } from '../../core/presence';
 import { Recipient } from '../../core/recipient';
 import { UnreadMessageCountPlugin } from '../../services/adapters/xmpp/plugins/unread-message-count.plugin';
-import { ChatService, ChatServiceToken } from '../../services/chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-roster-recipient',
@@ -22,7 +22,7 @@ export class RosterRecipientComponent implements OnInit {
     Presence = Presence;
 
     constructor(
-        @Inject(ChatServiceToken) private chatService: ChatService,
+        @Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService,
     ) {}
 
     ngOnInit() {

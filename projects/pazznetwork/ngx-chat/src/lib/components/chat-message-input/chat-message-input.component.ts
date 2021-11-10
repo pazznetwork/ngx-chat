@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, Inject, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Recipient } from '../../core/recipient';
-import { ChatService, ChatServiceToken } from '../../services/chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-message-input',
@@ -20,7 +20,7 @@ export class ChatMessageInputComponent implements OnInit {
     @ViewChild('chatInput')
     chatInput: ElementRef;
 
-    constructor(@Inject(ChatServiceToken) public chatService: ChatService) {
+    constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {
     }
 
     ngOnInit() {

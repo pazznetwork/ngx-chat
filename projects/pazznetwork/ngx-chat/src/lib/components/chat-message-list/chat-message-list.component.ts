@@ -23,7 +23,7 @@ import { MessageArchivePlugin } from '../../services/adapters/xmpp/plugins/messa
 import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatMessageListRegistryService } from '../../services/chat-message-list-registry.service';
-import { ChatService, ChatServiceToken } from '../../services/chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ContactFactoryService } from '../../services/contact-factory.service';
 import { REPORT_USER_INJECTION_TOKEN, ReportUserService } from '../../services/report-user-service';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
@@ -66,7 +66,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
 
     constructor(
         public chatListService: ChatListStateService,
-        @Inject(ChatServiceToken) public chatService: ChatService,
+        @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
         private chatMessageListRegistry: ChatMessageListRegistryService,
         @Optional() @Inject(REPORT_USER_INJECTION_TOKEN) public reportUserService: ReportUserService,
         private changeDetectorRef: ChangeDetectorRef,

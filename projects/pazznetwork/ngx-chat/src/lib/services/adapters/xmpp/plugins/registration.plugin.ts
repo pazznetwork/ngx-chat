@@ -8,7 +8,9 @@ import { LogService } from '../../../log.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 
 /**
- * xep-0077
+ * XEP-0077: In-Band Registration
+ * see: https://xmpp.org/extensions/xep-0077.html
+ * Handles registration over the XMPP chat instead of relaying on a admin user account management
  */
 export class RegistrationPlugin extends AbstractXmppPlugin {
 

@@ -10,6 +10,10 @@ export class MessageReceivedEvent {
     discard = false;
 }
 
+/**
+ * Part of the XMPP Core Specification
+ * see: https://datatracker.ietf.org/doc/rfc6120/
+ */
 export class MessagePlugin extends AbstractXmppPlugin {
 
     constructor(

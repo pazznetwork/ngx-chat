@@ -1,5 +1,5 @@
 import { PlatformLocation } from '@angular/common';
-import { Component, Inject, InjectionToken, OnInit, Optional } from '@angular/core';
+import { Component, Inject, InjectionToken, Optional } from '@angular/core';
 import { Router } from '@angular/router';
 
 export interface LinkOpener {
@@ -9,24 +9,21 @@ export interface LinkOpener {
 /**
  * You can provide your own implementation for {@link LinkOpener} to override link opening e.g. when using Cordova.
  */
-export const LinkOpenerToken = new InjectionToken<LinkOpener>('pazznetworkNgxChatLinkOpener');
+export const LINK_OPENER_TOKEN = new InjectionToken<LinkOpener>('ngxChatLinkOpener');
 
 @Component({
     selector: 'ngx-chat-message-link',
     templateUrl: './chat-message-link.component.html',
     styleUrls: ['./chat-message-link.component.less']
 })
-export class ChatMessageLinkComponent implements OnInit {
+export class ChatMessageLinkComponent {
 
     link: string;
     text: string;
 
     constructor(private router: Router,
                 private platformLocation: PlatformLocation,
-                @Optional() @Inject(LinkOpenerToken) private linkOpener: LinkOpener) { }
-
-    ngOnInit() {
-    }
+                @Optional() @Inject(LINK_OPENER_TOKEN) private linkOpener: LinkOpener) { }
 
     onClick($event: Event) {
         if (this.linkOpener) {
