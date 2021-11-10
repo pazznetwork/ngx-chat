@@ -32,7 +32,7 @@ const nodeName = 'contact-message-state';
  */
 export class MessageStatePlugin extends AbstractXmppPlugin {
 
-    private jidToMessageStateDate: JidToMessageStateDate = new Map();
+    private jidToMessageStateDate: JidToMessageStateDate = Object.create(null);
 
     constructor(
         private readonly publishSubscribePlugin: PublishSubscribePlugin,

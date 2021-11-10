@@ -7,12 +7,12 @@ import { testLogService } from '../../../../test/log-service';
 import { MockClientFactory } from '../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../contact-factory.service';
 import { LogService } from '../../../log.service';
+import { IqResponseError } from '../iq-response.error';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageUuidPlugin } from './message-uuid.plugin';
 import { MultiUserChatPlugin } from './multi-user-chat.plugin';
-import { IqResponseError } from '../iq-response.error';
 
 const defaultRoomConfiguration = {
     roomId: 'roomId',
@@ -182,14 +182,15 @@ describe('multi user chat plugin', () => {
                     fail('unexpected stanza: ' + content.toString());
                 }
             });
+
             try {
-                expect(multiUserChatPlugin.createRoom(defaultRoomConfiguration)).toThrowMatching((e) => {
-                    expect((e as IqResponseError).errorType).toBe('modify');
-                    expect((e as IqResponseError).errorCondition).toBe('not-acceptable');
-                    return expect(e instanceof IqResponseError).toBeTrue();
-                });
+                await multiUserChatPlugin.createRoom(defaultRoomConfiguration);
                 fail('should be rejected');
-            } catch (e) {}
+            } catch (e: unknown) {
+                expect(e instanceof IqResponseError).toBeTrue();
+                expect((e as IqResponseError).errorType).toBe('modify');
+                expect((e as IqResponseError).errorCondition).toBe('not-acceptable');
+            }
         });
 
 
