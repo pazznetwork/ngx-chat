@@ -1,15 +1,17 @@
 <a name="0.12.0"></a>
-# [0.12.0](https://github.com/pazznetwork/ngx-chat/compare/v0.11.4...v0.12.0) (2021-10-29)
+# [0.12.0](https://github.com/pazznetwork/ngx-chat/compare/v0.11.4...v0.12.0) (2021-11-10)
 
 
 ### Bug Fixes
 
+* fit image preview in chat bubbles withoutn overflowing ([f6a7ef4](https://github.com/pazznetwork/ngx-chat/commit/f6a7ef4))
 * fit image preview in chat bubbles withoutn overflowing ([a1ff73b](https://github.com/pazznetwork/ngx-chat/commit/a1ff73b))
 
 
 ### Features
 
 * **muc/sub:** correctly handle archive messages delivered via MUC/Sub ([921f573](https://github.com/pazznetwork/ngx-chat/commit/921f573))
+* **muc/sub:** extended subscription management ([d4c53b9](https://github.com/pazznetwork/ngx-chat/commit/d4c53b9))
 
 
 
