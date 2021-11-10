@@ -185,6 +185,9 @@ ng serve
 For clean and standardised commit messages we use commit lint, for the format see: https://www.conventionalcommits.org/en/v1.0.0/.
 
 ### Releasing
+`npm run build-lib` is necessary because otherwise creates a package with ngcc and throws on publish the following error:  
+`trying to publish a package that has been compiled by ngcc`
+
 ```bash
 # increment version number in projects/pazznetwork/ngx-chat/package.json
 VERSION=0.12.0 # change accordingly
