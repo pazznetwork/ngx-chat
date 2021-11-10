@@ -23,6 +23,7 @@
         <button (click)="unsubscribeFromMucSub(roomJid)">unsubscribe from MUC/Sub</button>
         <button (click)="getSubscriptions()">get MUC/Sub subscriptions</button>
 
+        <div>Current MUC subscriptions to room: {{roomJid}}</div>
         <ul>
             <li *ngFor="let subscription of mucSubSubscriptions | keyvalue">
                 {{subscription.key}}:
@@ -34,18 +35,6 @@
             </li>
         </ul>
 
-        <br>
-        <div>Current MUC subscriptions to room: {{roomJid}}</div>
-        <ul>
-            <li *ngFor="let subscription of mucSubRoomSubscriptions | keyvalue">
-                {{subscription.key}}:
-                <ul>
-                    <li *ngFor="let subscribedNode of subscription.value">
-                        {{subscribedNode}}
-                    </li>
-                </ul>
-            </li>
-        </ul>
         <br>
         <div>Members of room: {{roomJid}}</div>
         <ul>

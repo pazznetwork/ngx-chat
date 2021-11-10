@@ -1,14 +1,14 @@
 import { Component, Inject } from '@angular/core';
 import {
+    CHAT_SERVICE_TOKEN,
     ChatService,
-    ChatServiceToken,
-    MemberlistItem,
+    MemberListItem,
     MUC_SUB_EVENT_TYPE,
     MucSubPlugin,
     MultiUserChatPlugin,
     Room,
-    RoomSummary,
     RoomCreationOptions,
+    RoomSummary,
 } from '@pazznetwork/ngx-chat';
 import { jid } from '@xmpp/client';
 
@@ -24,11 +24,11 @@ export class MultiUserChatComponent {
     roomJid: string;
     selectedRoom: Room;
     allRooms: RoomSummary[] = [];
-    roomMemberList: MemberlistItem[] = [];
+    roomMemberList: MemberListItem[] = [];
     newRoom?: RoomCreationOptions;
     mucSubSubscriptions = new Map<string, string[]>();
 
-    constructor(@Inject(ChatServiceToken) public chatService: ChatService) {
+    constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {
         this.multiUserChatPlugin = chatService.getPlugin(MultiUserChatPlugin);
         this.mucSubPlugin = chatService.getPlugin(MucSubPlugin);
     }

@@ -67,14 +67,14 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
     }
 
     private async parseContactMessageStates(): Promise<void> {
-        const itemElement = await this.publishSubscribePlugin.retrieveNodeItems(STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES);
-        this.processPubSub(itemElement);
+        const itemElements = await this.publishSubscribePlugin.retrieveNodeItems(STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES);
+        this.processPubSub(itemElements);
     }
 
-    private processPubSub(itemElement: Stanza[]): void {
+    private processPubSub(itemElements: Stanza[]): void {
         let results = [] as [string, StateDate][];
-        if (itemElement.length === 1) {
-            results = itemElement[0]
+        if (itemElements.length === 1) {
+            results = itemElements[0]
                 .getChild(wrapperNodeName)
                 .getChildren(nodeName)
                 .map((contactMessageStateElement: Stanza) => {

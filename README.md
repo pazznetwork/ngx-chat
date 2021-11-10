@@ -75,7 +75,7 @@ You are now ready to go. You will not see anything until you log in.
 Log in via `ngx-chat` wherever you want (e.g. in a component or a service)
 by injecting `ChatService` and calling `login`:
 ```
-constructor(@Inject(ChatServiceToken) chatService: ChatService) {
+constructor(@Inject(CHAT_SERVICE_TOKEN) chatService: ChatService) {
     chatService.logIn({
         domain: 'ngx-chat.example',
         service: 'wss://ngx-chat.example:5280/websocket',
@@ -128,7 +128,7 @@ A: Yes, if the following criteria are met:
 * the common name (CN) matches the uri of the service you are connecting to
 
 **Q: Can ngx-chat be used without the UI?**  
-A: Yes. Inject the chat service via `@Inject(ChatServiceToken) public chatService: ChatService`, login via `logIn` and start sending messages via the `sendMessage` method.
+A: Yes. Inject the chat service via `@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService`, login via `logIn` and start sending messages via the `sendMessage` method.
 
 **Q: My question is not answered**  
 A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-chat/issues/new).
