@@ -287,7 +287,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const roomConfigurationOptions =
             this.applyRoomCreationRequestOptions(
                 this.extractDefaultConfiguration(configurationListElement.getChildren('field')),
-                request
+                request,
             );
 
         try {
@@ -304,7 +304,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
                 ),
             );
             return room;
-        } catch (e: unknown) {
+        } catch (e) {
             this.logService.error('room configuration rejected', e);
             throw e;
         }
@@ -317,7 +317,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
                 xml('iq', {type: 'set', to: roomJid.toString()},
                     xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'},
                         xml('destroy'))));
-        } catch (e: unknown) {
+        } catch (e) {
             this.logService.error('error destroying room');
             throw e;
         }
@@ -339,7 +339,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
         const occupantJid = parseJid(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
         const roomJoinedPromise = new Promise<Stanza>(
-            resolve => this.roomJoinResponseHandlers.set(occupantJid.toString(), resolve)
+            resolve => this.roomJoinResponseHandlers.set(occupantJid.toString(), resolve),
         );
 
         try {
@@ -348,7 +348,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
                     xml('x', {xmlns: 'http://jabber.org/protocol/muc'}),
                 ),
             );
-        } catch (e: unknown) {
+        } catch (e) {
             this.logService.error('error sending presence stanza to join a room', e);
             this.roomJoinResponseHandlers.delete(occupantJid.toString());
             throw e;
@@ -385,7 +385,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         );
         result.push(...this.extractRoomSummariesFromResponse(roomQueryResponse));
 
-
         let resultSet = this.extractResultSetFromResponse(roomQueryResponse);
         while (resultSet && resultSet.getChild('last')) {
             const lastReceivedRoom = resultSet.getChildText('last');
@@ -406,10 +405,18 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     }
 
     private extractRoomSummariesFromResponse(iq: IqResponseStanza): RoomSummary[] {
-        return iq
+        const roomSummaries = iq
             .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
             ?.getChildren('item')
-            ?.map(room => room.attrs) || [];
+            ?.map(room => room.attrs);
+        return this.isRoomSummaryArray(roomSummaries) ? roomSummaries : [];
+    }
+
+    private isRoomSummaryArray(elements: { [attrName: string]: any; }[]): elements is RoomSummary[] {
+        return elements.every(element => {
+            const keys = Object.keys(element);
+            return keys.length === 2 && keys.includes('jid') && keys.includes('name');
+        });
     }
 
     private extractResultSetFromResponse(iq: IqResponseStanza): Stanza {
@@ -492,7 +499,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             .filter(field => field.attrs.type !== 'hidden')
             .map((field) => ([
                 field.attrs.var as string,
-                field.getChildren('value').map(value => value.getText())
+                field.getChildren('value').map(value => value.getText()),
             ] as const));
 
         return new Map(entries);
@@ -500,7 +507,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     private applyRoomCreationRequestOptions(
         defaultOptions: ReadonlyMap<string, string[]>,
-        request: RoomCreationOptions
+        request: RoomCreationOptions,
     ): Map<string, string[]> {
         const options = new Map(defaultOptions);
         options
@@ -546,7 +553,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             from,
             direction: from.equals(room.occupantJid) ? Direction.out : Direction.in,
             delayed: !!delayElement,
-            fromArchive: archiveDelayElement != null
+            fromArchive: archiveDelayElement != null,
         };
 
         const messageReceivedEvent = new MessageReceivedEvent();

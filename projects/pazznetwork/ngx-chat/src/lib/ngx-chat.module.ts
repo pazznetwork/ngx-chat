@@ -48,7 +48,6 @@ import { CHAT_SERVICE_TOKEN } from './services/chat-service';
 import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
 
-
 @NgModule({
     imports: [
         CommonModule,

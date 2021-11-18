@@ -4,7 +4,7 @@
   "newProjectRoot": "projects",
   "projects": {
     "ngx-chat": {
-      "projectType": "application",
+      "projectType": "library",
       "schematics": {},
       "root": "",
       "sourceRoot": "src",

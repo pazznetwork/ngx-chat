@@ -4,10 +4,10 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { IqResponseStanza, Stanza } from '../../../../core/stanza';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
+import { IqResponseError } from '../iq-response.error';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
-import { IqResponseError } from '../iq-response.error';
 
 export const PUBSUB_EVENT_XMLNS = 'http://jabber.org/protocol/pubsub#event';
 
@@ -41,22 +41,22 @@ class PublishStanzaBuilder extends AbstractStanzaBuilder {
         return xml('iq', {type: 'set'},
             xml('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'},
                 xml('publish', {node},
-                    xml('item', {id}, data)
+                    xml('item', {id}, data),
                 ),
                 xml('publish-options', {},
                     xml('x', {xmlns: 'jabber:x:data', type: 'submit'},
                         xml('field', {var: 'FORM_TYPE', type: 'hidden'},
-                            xml('value', {}, 'http://jabber.org/protocol/pubsub#publish-options')
+                            xml('value', {}, 'http://jabber.org/protocol/pubsub#publish-options'),
                         ),
                         xml('field', {var: 'pubsub#persist_items'},
-                            xml('value', {}, persistItems ? 1 : 0)
+                            xml('value', {}, persistItems ? 1 : 0),
                         ),
                         xml('field', {var: 'pubsub#access_model'},
-                            xml('value', {}, 'whitelist')
-                        )
-                    )
-                )
-            )
+                            xml('value', {}, 'whitelist'),
+                        ),
+                    ),
+                ),
+            ),
         );
     }
 
@@ -71,8 +71,8 @@ class RetrieveDataStanzaBuilder extends AbstractStanzaBuilder {
     toStanza() {
         return xml('iq', {type: 'get'},
             xml('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'},
-                xml('items', {node: this.node})
-            )
+                xml('items', {node: this.node}),
+            ),
         );
     }
 
@@ -87,8 +87,10 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
     readonly publish$ = new Subject<Stanza>();
     private readonly supportsPrivatePublish = new BehaviorSubject<boolean | 'unknown'>('unknown');
 
-    constructor(private readonly xmppChatAdapter: XmppChatAdapter,
-                private readonly serviceDiscoveryPlugin: ServiceDiscoveryPlugin) {
+    constructor(
+        private readonly xmppChatAdapter: XmppChatAdapter,
+        private readonly serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
+    ) {
         super();
     }
 
@@ -109,7 +111,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
                         reject(new Error('does not support private publish subscribe'));
                     } else {
                         resolve(this.xmppChatAdapter.chatConnectionService.sendIq(
-                            new PublishStanzaBuilder({node, id, data, persistItems: true}).toStanza()
+                            new PublishStanzaBuilder({node, id, data, persistItems: true}).toStanza(),
                         ));
                     }
                 });
@@ -125,7 +127,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
                         reject(new Error('does not support private publish subscribe'));
                     } else {
                         resolve(this.xmppChatAdapter.chatConnectionService.sendIq(
-                            new PublishStanzaBuilder({node, id, data, persistItems: false}).toStanza()
+                            new PublishStanzaBuilder({node, id, data, persistItems: false}).toStanza(),
                         ));
                     }
                 });
@@ -144,10 +146,10 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
     async retrieveNodeItems(node: string): Promise<Element[]> {
         try {
             const iqResponseStanza = await this.xmppChatAdapter.chatConnectionService.sendIq(
-                new RetrieveDataStanzaBuilder(node).toStanza()
+                new RetrieveDataStanzaBuilder(node).toStanza(),
             );
             return iqResponseStanza.getChild('pubsub').getChild('items').getChildren('item');
-        } catch (e: unknown) {
+        } catch (e) {
             if (e instanceof IqResponseError &&
                 (e.errorCondition === 'item-not-found' || e.errorCode === 404)) {
                 return [];
