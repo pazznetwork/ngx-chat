@@ -20,13 +20,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "app",
+      "ngxChat",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "app",
+      "ngx-chat",
       "kebab-case"
     ],
     "eofline": true,
@@ -60,12 +60,7 @@
     ],
     "no-consecutive-blank-lines": false,
     "no-console": [
-      true,
-      "debug",
-      "info",
-      "time",
-      "timeEnd",
-      "trace"
+      true
     ],
     "no-empty": false,
     "no-inferrable-types": [
@@ -129,8 +124,8 @@
       ]
     },
     "use-lifecycle-interface": true,
-    "use-pipe-transform-interface": true
-  ,    "variable-name": {
+    "use-pipe-transform-interface": true,
+    "variable-name": {
       "options": [
         "ban-keywords",
         "check-format",
@@ -147,7 +142,7 @@
         "check-typecast"
       ]
     }
-},
+  },
   "rulesDirectory": [
     "codelyzer"
   ]
