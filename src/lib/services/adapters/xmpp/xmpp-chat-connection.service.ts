@@ -6,8 +6,8 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { LogInRequest } from '../../../core/log-in-request';
 import { IqResponseStanza, Stanza } from '../../../core/stanza';
 import { LogService } from '../../log.service';
-import { XmppClientFactoryService } from './xmpp-client-factory.service';
 import { IqResponseError } from './iq-response.error';
+import { XmppClientFactoryService } from './xmpp-client-factory.service';
 
 export type XmppChatStates = 'disconnected' | 'online' | 'reconnecting';
 
@@ -146,6 +146,9 @@ export class XmppChatConnectionService {
 
             this.client.on('stanza', (stanza: Stanza) => {
                 this.ngZone.run(() => {
+                    if (this.skipXmppClientResponses(stanza)) {
+                        return;
+                    }
                     this.onStanzaReceived(stanza);
                 });
             });
@@ -158,6 +161,15 @@ export class XmppChatConnectionService {
 
             await this.client.start();
         });
+    }
+
+    /**
+     * We should skip our iq handling for the following xmpp/client response:
+     * - resource bind on start by https://xmpp.org/rfcs/rfc6120.html#bind
+     */
+    private skipXmppClientResponses(stanza: Stanza) {
+        const xmppBindNS = 'urn:ietf:params:xml:ns:xmpp-bind';
+        return stanza.getChild('bind')?.getNS() === xmppBindNS;
     }
 
     async logOut(): Promise<void> {

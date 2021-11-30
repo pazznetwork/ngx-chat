@@ -18,8 +18,8 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
     async onBeforeOnline(): Promise<IqResponseStanza> {
         return await this.xmppChatAdapter.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
-                xml('enable', {xmlns: 'urn:xmpp:carbons:2'})
-            )
+                xml('enable', {xmlns: 'urn:xmpp:carbons:2'}),
+            ),
         );
     }
 
@@ -38,9 +38,11 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
 
     private handleCarbonMessageStanza(messageElement: Element, receivedOrSent: Element): boolean {
         const direction = receivedOrSent.is('received') ? Direction.in : Direction.out;
+        // body can be missing on type=chat messageElements
+        const body = messageElement.getChildText('body')?.trim();
 
         const message = {
-            body: messageElement.getChildText('body').trim(),
+            body,
             direction,
             datetime: new Date(), // TODO: replace with entity time plugin
             delayed: false,

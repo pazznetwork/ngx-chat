@@ -1,0 +1,23 @@
+{
+  "name": "ngx-chat-demo",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "dependencies": {
+    "@angular/animations": "~12.2.12",
+    "@angular/cdk": "~12.2.12",
+    "@angular/common": "~12.2.12",
+    "@angular/compiler": "~12.2.12",
+    "@angular/core": "~12.2.12",
+    "@angular/forms": "~12.2.12",
+    "@angular/platform-browser": "~12.2.12",
+    "@angular/platform-browser-dynamic": "~12.2.12",
+    "@angular/router": "~12.2.12",
+    "@types/ltx": "2.8.2",
+    "@xmpp/client": "0.13.0",
+    "rxjs": "~6.6.0",
+    "tslib": "^2.3.1",
+    "zone.js": "~0.11.4"
+  },
+  "devDependencies": {}
+}
