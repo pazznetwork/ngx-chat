@@ -4,6 +4,7 @@
  * Keep the imports zone.js first in order, otherwise the karma runner breaks.
  * Required order is: 'zone.js', 'zone.js/testing' ...
  */
+ // tslint:disable:ordered-imports
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
