@@ -24,7 +24,7 @@ class QueryStanzaBuilder extends AbstractStanzaBuilder {
 
 }
 
-export interface Identity {
+export interface IdentityAttrs {
     category: string;
     type: string;
     name?: string;
@@ -32,7 +32,7 @@ export interface Identity {
 
 export interface Service {
     jid: string;
-    identities: Identity[];
+    identitiesAttrs: IdentityAttrs[];
     features: string[];
 }
 
@@ -89,7 +89,8 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
 
             this.servicesInitialized$.pipe(first(value => !!value)).subscribe(() => {
                 const results = this.hostedServices.filter(service =>
-                    service.identities.filter(identity => identity.category === category && identity.type === type).length > 0,
+                    service.identitiesAttrs.filter(identityAttrs => identityAttrs.category === category
+                        && identityAttrs.type === type).length > 0,
                 );
 
                 if (results.length === 0) {
@@ -133,13 +134,13 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
 
         const queryNode = serviceInformationResponse.getChild('query');
         const features = queryNode.getChildren('feature').map((featureNode: Element) => featureNode.attrs.var);
-        const identities = queryNode
+        const identitiesAttrs = queryNode
             .getChildren('identity')
             .filter((identityNode: Element) => identityNode.attrs)
             .map((identityNode: Element) => identityNode.attrs);
 
         const serviceInformation: Service = {
-            identities: this.isIdentities(identities) ? identities : [],
+            identitiesAttrs: this.isIdentitiesAttrs(identitiesAttrs) ? identitiesAttrs : [],
             features,
             jid: serviceInformationResponse.attrs.from,
         };
@@ -147,7 +148,7 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
         return serviceInformation;
     }
 
-    private isIdentities(elements: { [attrName: string]: any }[]): elements is Identity[] {
+    private isIdentitiesAttrs(elements: { [attrName: string]: any }[]): elements is IdentityAttrs[] {
         return elements.every((element) => {
             const keys = Object.keys(element);
             const mustHave = keys.includes('category') && keys.includes('type');
