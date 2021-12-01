@@ -87,7 +87,7 @@
             "main": "demo/test.ts",
             "polyfills": "demo/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "demo/karma.conf.js",
+            "karmaConfig": "karma.conf.js",
             "assets": [
               "demo/favicon.ico",
               "demo/assets"
