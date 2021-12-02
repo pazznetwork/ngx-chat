@@ -9,6 +9,7 @@ import { ChatListStateService, ChatWindowState } from '../../services/chat-list-
 import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';
 import { ChatMessageListComponent } from '../chat-message-list/chat-message-list.component';
+import {FILE_UPLOAD_HANDLER_TOKEN, FileUploadHandler} from '../../services/file-upload-handler';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -34,6 +35,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
         @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
         private readonly chatListService: ChatListStateService,
         @Inject(CONTACT_CLICK_HANDLER_TOKEN) @Optional() readonly contactClickHandler: ChatContactClickHandler,
+        @Inject(FILE_UPLOAD_HANDLER_TOKEN) @Optional() readonly fileUploadHandler: FileUploadHandler
     ) {
         this.httpFileUploadPlugin = this.chatService.getPlugin(HttpFileUploadPlugin);
     }
@@ -72,7 +74,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     }
 
     async uploadFile(file: File) {
-        const url = await this.httpFileUploadPlugin.upload(file);
+        let url: string;
+        if (this.fileUploadHandler) {
+            url = this.fileUploadHandler.upload(file);
+        } else {
+            url = await this.httpFileUploadPlugin.upload(file);
+        }
         this.chatService.sendMessage(this.chatWindowState.recipient, url);
     }
 
