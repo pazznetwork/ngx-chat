@@ -4,12 +4,12 @@ import { filter, takeUntil } from 'rxjs/operators';
 import { Direction, Message } from '../../core/message';
 import { HttpFileUploadPlugin } from '../../services/adapters/xmpp/plugins/http-file-upload.plugin';
 import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
-import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../services/chat-contact-click-handler';
+import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../hooks/chat-contact-click-handler';
 import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
 import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';
 import { ChatMessageListComponent } from '../chat-message-list/chat-message-list.component';
-import {FILE_UPLOAD_HANDLER_TOKEN, FileUploadHandler} from '../../services/file-upload-handler';
+import {FILE_UPLOAD_HANDLER_TOKEN, FileUploadHandler} from '../../hooks/file-upload-handler';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -76,7 +76,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     async uploadFile(file: File) {
         let url: string;
         if (this.fileUploadHandler) {
-            url = this.fileUploadHandler.upload(file);
+            url = await this.fileUploadHandler.upload(file);
         } else {
             url = await this.httpFileUploadPlugin.upload(file);
         }

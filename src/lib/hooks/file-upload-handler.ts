@@ -7,9 +7,8 @@ export const FILE_UPLOAD_HANDLER_TOKEN = new InjectionToken<FileUploadHandler>('
 
 export interface FileUploadHandler {
     /**
-     * @param {File} file The file to upload.
-     * @return {string} Returns the public URL of the file.
+     * @return {string} Returns the public URL of the uploaded file.
      */
-    upload(file: File): string;
+    upload(file: File): Promise<string>;
 
 }
