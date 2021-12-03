@@ -2,13 +2,13 @@ import { Component, Inject, Input, OnDestroy, OnInit, Optional, ViewChild } from
 import { Observable, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Direction, Message } from '../../core/message';
-import { HttpFileUploadPlugin } from '../../services/adapters/xmpp/plugins/http-file-upload.plugin';
 import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
-import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../services/chat-contact-click-handler';
+import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../hooks/chat-contact-click-handler';
 import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
 import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';
 import { ChatMessageListComponent } from '../chat-message-list/chat-message-list.component';
+import {FILE_UPLOAD_HANDLER_TOKEN, FileUploadHandler} from '../../hooks/file-upload-handler';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -26,16 +26,14 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     @ViewChild(ChatMessageListComponent)
     private readonly contactMessageList: ChatMessageListComponent;
 
-    readonly httpFileUploadPlugin: HttpFileUploadPlugin;
-
     private readonly ngDestroy = new Subject<void>();
 
     constructor(
         @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
         private readonly chatListService: ChatListStateService,
+        @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler,
         @Inject(CONTACT_CLICK_HANDLER_TOKEN) @Optional() readonly contactClickHandler: ChatContactClickHandler,
     ) {
-        this.httpFileUploadPlugin = this.chatService.getPlugin(HttpFileUploadPlugin);
     }
 
     ngOnInit() {
@@ -72,7 +70,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     }
 
     async uploadFile(file: File) {
-        const url = await this.httpFileUploadPlugin.upload(file);
+        const url = await this.fileUploadHandler.upload(file);
         this.chatService.sendMessage(this.chatWindowState.recipient, url);
     }
 

@@ -34,7 +34,7 @@
     <ngx-chat-filedrop
             *ngIf="!chatWindowState.isCollapsed"
             class="window-content"
-            [enabled]="httpFileUploadPlugin.fileUploadSupported"
+            [enabled]="fileUploadHandler.isUploadSupported()"
             (fileUpload)="uploadFile($event)"
             [dropMessage]="chatService.translations.dropMessage">
         <div (click)="onFocus()">
