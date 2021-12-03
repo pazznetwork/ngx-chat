@@ -4,13 +4,14 @@ import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { Service, ServiceDiscoveryPlugin } from './service-discovery.plugin';
+import {FileUploadHandler} from '../../../../hooks/file-upload-handler';
 
 /**
  * XEP-0363 http file upload
  */
-export class HttpFileUploadPlugin extends AbstractXmppPlugin {
+export class HttpFileUploadPlugin extends AbstractXmppPlugin implements FileUploadHandler {
 
-    fileUploadSupported: boolean;
+    private fileUploadSupported: boolean;
     private uploadService: Promise<Service>;
 
     constructor(
@@ -43,6 +44,10 @@ export class HttpFileUploadPlugin extends AbstractXmppPlugin {
         const {name, size, type} = file;
         const slotUrl = await this.requestSlot(name, size.toString(), type);
         return await this.uploadToSlot(slotUrl, file);
+    }
+
+    isUploadSupported(): boolean {
+        return this.fileUploadSupported;
     }
 
     private async requestSlot(filename: string, size: string, contentType: string): Promise<string | undefined> {

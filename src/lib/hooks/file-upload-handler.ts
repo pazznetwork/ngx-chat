@@ -11,4 +11,6 @@ export interface FileUploadHandler {
      */
     upload(file: File): Promise<string>;
 
+    isUploadSupported(): boolean;
+
 }
