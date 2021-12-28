@@ -12,7 +12,7 @@ import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageUuidPlugin } from './message-uuid.plugin';
-import { MultiUserChatPlugin } from './multi-user-chat.plugin';
+import { Affiliation, MultiUserChatPlugin, Role } from './multi-user-chat.plugin';
 
 const defaultRoomConfiguration = {
     roomId: 'roomId',
@@ -127,7 +127,12 @@ describe('multi user chat plugin', () => {
                     );
                 } else if (content.name === 'iq') {
                     chatConnectionService.onStanzaReceived(
-                        xml('iq', {from: content.attrs.to, to: content.attrs.from, type: 'result', id: content.attrs.id},
+                        xml('iq', {
+                                from: content.attrs.to,
+                                to: content.attrs.from,
+                                type: 'result',
+                                id: content.attrs.id
+                            },
                             xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'})
                         )
                     );
@@ -160,7 +165,12 @@ describe('multi user chat plugin', () => {
                     );
                 } else if (content.name === 'iq' && content.attrs.type === 'get') {
                     chatConnectionService.onStanzaReceived(
-                        xml('iq', {from: content.attrs.to, to: content.attrs.from, type: 'result', id: content.attrs.id},
+                        xml('iq', {
+                                from: content.attrs.to,
+                                to: content.attrs.from,
+                                type: 'result',
+                                id: content.attrs.id
+                            },
                             xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'},
                                 xml('x', {type: 'form', xmlns: 'jabber:x:data'},
                                     xml('field', {var: 'FORM_TYPE', type: 'hidden'},
@@ -209,7 +219,12 @@ describe('multi user chat plugin', () => {
                     );
                 } else if (content.name === 'iq' && content.attrs.type === 'get') {
                     chatConnectionService.onStanzaReceived(
-                        xml('iq', {from: content.attrs.to, to: content.attrs.from, type: 'result', id: content.attrs.id},
+                        xml('iq', {
+                                from: content.attrs.to,
+                                to: content.attrs.from,
+                                type: 'result',
+                                id: content.attrs.id
+                            },
                             xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'},
                                 xml('x', {type: 'form', xmlns: 'jabber:x:data'},
                                     xml('field', {var: 'FORM_TYPE', type: 'hidden'},
@@ -230,7 +245,12 @@ describe('multi user chat plugin', () => {
                     expectConfigurationOption(configurationList, 'muc#roomconfig_membersonly', '1');
                     expectConfigurationOption(configurationList, 'multipleValues', ['value1', 'value2']);
                     chatConnectionService.onStanzaReceived(
-                        xml('iq', {from: content.attrs.to, to: content.attrs.from, type: 'result', id: content.attrs.id})
+                        xml('iq', {
+                            from: content.attrs.to,
+                            to: content.attrs.from,
+                            type: 'result',
+                            id: content.attrs.id
+                        })
                     );
                 } else {
                     fail('unexpected stanza: ' + content.toString());
@@ -272,7 +292,12 @@ describe('multi user chat plugin', () => {
 
             const otherOccupant = 'chatroom@conference.example.com/other-occupant';
             chatConnectionService.onStanzaReceived(
-                xml('message', {from: otherOccupant, id: '1', to: chatConnectionService.userJid.toString(), type: 'groupchat'},
+                xml('message', {
+                        from: otherOccupant,
+                        id: '1',
+                        to: chatConnectionService.userJid.toString(),
+                        type: 'groupchat'
+                    },
                     xml('body', {}, 'message content here')
                 )
             );
@@ -291,7 +316,11 @@ describe('multi user chat plugin', () => {
                     expect(stanza.getChildText('body')).toEqual('message body');
 
                     chatConnectionService.onStanzaReceived(
-                        xml('message', {from: 'chatroom@conference.example.com/me', to: 'me@example.com/something', type: 'groupchat'},
+                        xml('message', {
+                                from: 'chatroom@conference.example.com/me',
+                                to: 'me@example.com/something',
+                                type: 'groupchat'
+                            },
                             xml('body', {}, 'message body'),
                             xml('origin-id', {id: stanza.getChild('origin-id').attrs.id})
                         )
@@ -326,6 +355,235 @@ describe('multi user chat plugin', () => {
 
         });
 
+    });
+
+    describe('room operations handling', () => {
+
+        it('should handle kicked occupant', async (resolve) => {
+            const otherOccupantJid = parseJid('chatroom@conference.example.com/other');
+
+            xmppClientMock.send.and.callFake((stanza: Stanza) => {
+                chatConnectionService.onStanzaReceived(
+                    xml('presence', {
+                            from: stanza.attrs.to + '/' + otherOccupantJid.resource,
+                            to: stanza.attrs.from,
+                            type: 'unavailable'
+                        },
+                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                            xml('item', {affiliation: 'none', role: 'none'}),
+                            xml('status', {code: '307'})
+                        ),
+                    )
+                );
+            });
+
+            multiUserChatPlugin.onOccupantKicked$.subscribe(occupant => {
+                expect(occupant.nick).toEqual(otherOccupantJid.resource);
+                expect(occupant.role).toEqual(Role.none);
+                expect(occupant.affiliation).toEqual(Affiliation.none);
+                resolve();
+            });
+            await multiUserChatPlugin.kickOccupant(otherOccupantJid.resource, 'chatroom@conference.example.com');
+        });
+
+        it('should leave room if kicked', async (resolve) => {
+            const otherOccupantJid = parseJid('chatroom@conference.example.com/other');
+
+            xmppClientMock.send.and.callFake((stanza: Stanza) => {
+                chatConnectionService.onStanzaReceived(
+                    xml('presence', {
+                            from: stanza.attrs.to + '/' + otherOccupantJid.resource,
+                            to: otherOccupantJid.toString(),
+                            type: 'unavailable'
+                        },
+                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                            xml('item', {affiliation: 'none', role: 'none'},
+                                xml('actor', {nick: 'me'}),
+                                xml('reason', null, 'reason you got kicked')
+                            ),
+                            xml('status', {code: '307'}),
+                            xml('status', {code: '110'}),
+                        ),
+                    )
+                );
+            });
+            multiUserChatPlugin.onOccupantKicked$.subscribe(occupant => {
+                expect(occupant.nick).toEqual(otherOccupantJid.resource);
+                expect(occupant.role).toEqual(Role.none);
+                expect(occupant.affiliation).toEqual(Affiliation.none);
+                expect(multiUserChatPlugin.rooms$.getValue().length).toEqual(0);
+                resolve();
+            });
+
+            await multiUserChatPlugin.joinRoom(otherOccupantJid);
+            expect(multiUserChatPlugin.rooms$.getValue().length).toEqual(1);
+
+            await multiUserChatPlugin.kickOccupant(
+                otherOccupantJid.resource,
+                'chatroom@conference.example.com',
+                'reason you got kicked'
+            );
+        });
+
+        it('should handle banned occupant', async (resolve) => {
+            const otherOccupantJid = parseJid('chatroom@conference.example.com/other');
+
+            xmppClientMock.send.and.callFake((stanza: Stanza) => {
+                chatConnectionService.onStanzaReceived(
+                    xml('presence', {
+                            from: stanza.attrs.to + '/' + otherOccupantJid.resource,
+                            to: stanza.attrs.from,
+                            type: 'unavailable'
+                        },
+                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                            xml('item', {
+                                affiliation: 'outcast',
+                                role: Role.none,
+                                jid: otherOccupantJid.toString()
+                            }),
+                            xml('status', {code: '301'})
+                        ),
+                    )
+                );
+            });
+
+            multiUserChatPlugin.onOccupantBanned$.subscribe(occupant => {
+                expect(occupant.nick).toEqual(otherOccupantJid.resource);
+                expect(occupant.role).toEqual(Role.none);
+                expect(occupant.affiliation).toEqual(Affiliation.outcast);
+                resolve();
+            });
+            await multiUserChatPlugin.banOccupant(otherOccupantJid.toString(), 'chatroom@conference.example.com');
+        });
+
+        it('should handle unban occupant', async () => {
+            const otherOccupantJid = 'chatroom@conference.example.com/other';
+            const roomJid = 'chatroom@conference.example.com';
+            let bannedOccupantItem = xml('item', {affiliation: 'outcast', jid: otherOccupantJid});
+
+            xmppClientMock.send.and.callFake((stanza: Stanza) => {
+                if (stanza.name === 'presence') {
+                    chatConnectionService.onStanzaReceived(
+                        xml('presence', {
+                                from: stanza.attrs.to + '/other',
+                                to: stanza.attrs.from,
+                                type: 'unavailable'
+                            },
+                            xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                                xml('item', {
+                                    affiliation: 'outcast',
+                                    role: Role.none,
+                                    jid: otherOccupantJid.toString()
+                                }),
+                                xml('status', {code: '301'})
+                            ),
+                        )
+                    );
+                } else if (stanza.name === 'iq') {
+                    if (stanza.attrs.type === 'get') { // get ban list
+                        chatConnectionService.onStanzaReceived(
+                            xml('iq', {
+                                    from: stanza.attrs.to,
+                                    to: stanza.attrs.from,
+                                    type: 'result',
+                                    id: stanza.attrs.id
+                                },
+                                xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+                                    bannedOccupantItem
+                                ),
+                            ),
+                        );
+                    } else if (stanza.attrs.type === 'set') { // unban
+                        chatConnectionService.onStanzaReceived(
+                            xml('iq', {
+                                    from: stanza.attrs.to,
+                                    to: stanza.attrs.from,
+                                    type: 'result',
+                                    id: stanza.attrs.id
+                                },
+                                xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+                                    xml('item', {affiliation: 'none', jid: otherOccupantJid}),
+                                ),
+                            ),
+                        );
+                    }
+                }
+            });
+
+            await multiUserChatPlugin.banOccupant(otherOccupantJid, roomJid);
+            let banList = await multiUserChatPlugin.getBanList(roomJid);
+            expect(banList.length).toEqual(1);
+            await multiUserChatPlugin.unbanOccupant(otherOccupantJid, roomJid);
+            bannedOccupantItem = null;
+            banList = await multiUserChatPlugin.getBanList(roomJid);
+            expect(banList.length).toEqual(0);
+        });
+
+        it('should be able to invite user', () => {
+            // todo
+        });
+
+        it('should be able to change nick', async (resolve) => {
+
+            xmppClientMock.send.and.callFake((stanza: Stanza) => {
+                chatConnectionService.onStanzaReceived(
+                    xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from, type: 'unavailable'},
+                        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                            xml('item', {
+                                nick: 'newMe',
+                                jid: chatConnectionService.userJid.toString(),
+                            }),
+                            xml('status', {code: '303'}),
+                            xml('status', {code: '110'})
+                        ),
+                    ),
+                );
+            });
+
+            multiUserChatPlugin.onOccupantChangedNick$.subscribe(({occupant, newNick}) => {
+                expect(newNick).toEqual('newMe');
+                expect(occupant.jid).toEqual(chatConnectionService.userJid.toString());
+                resolve();
+            });
+
+            await multiUserChatPlugin.changeUserNickname('newMe', 'chatroom@conference.example.com');
+        });
+
+        it('should be able to change room topic', async () => {
+            xmppClientMock.send.and.callFake((stanza: Stanza) => {
+                if (stanza.name === 'presence') {
+                    chatConnectionService.onStanzaReceived(
+                        xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from},
+                            xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'},
+                                xml('item', {affiliation: 'member', role: 'participant'}),
+                                xml('status', {code: '110'}),
+                                xml('status', {code: '210'})
+                            ),
+                        )
+                    );
+                } else if (stanza.name === 'message') {
+                    chatConnectionService.onStanzaReceived(
+                        xml('message', {
+                                from: stanza.attrs.to,
+                                to: stanza.attrs.from,
+                                id: stanza.attrs.id,
+                                type: 'groupchat'
+                            },
+                            xml('subject', {}, stanza.getChildText('subject'))
+                        )
+                    );
+                }
+            });
+
+            const roomJid = parseJid('chatroom', 'conference.example.com');
+            const room = await multiUserChatPlugin.joinRoom(roomJid);
+
+            expect(room.name).toBeTruthy();
+            const newSubject = 'new subject';
+
+            await multiUserChatPlugin.changeRoomTopic(room.roomJid.toString(), newSubject);
+            expect(multiUserChatPlugin.rooms$.getValue()[0].name).toEqual(newSubject);
+        });
     });
 
 });
