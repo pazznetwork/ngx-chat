@@ -2,7 +2,8 @@
 body {
     transition-property: padding-right;
     transition-duration: 0.4s;
-    padding-right: 0px;
+    padding-right: 0;
+    margin: 0;
 }
 
 body.has-roster {

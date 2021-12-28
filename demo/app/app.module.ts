@@ -10,6 +10,7 @@ import { MultiUserChatComponent } from './multi-user-chat/multi-user-chat.compon
 import { IndexComponent } from './routes/index/index.component';
 import { UiComponent } from './routes/ui/ui.component';
 import { SendStanzaComponent } from './send-stanza/send-stanza.component';
+import { MucComponent } from './routes/muc/muc.component';
 
 @NgModule({
     declarations: [
@@ -19,6 +20,7 @@ import { SendStanzaComponent } from './send-stanza/send-stanza.component';
         MultiUserChatComponent,
         IndexComponent,
         UiComponent,
+        MucComponent,
     ],
     imports: [
         BrowserModule,

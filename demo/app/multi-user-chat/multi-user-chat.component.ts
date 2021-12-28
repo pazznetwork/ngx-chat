@@ -1,14 +1,15 @@
 import { Component, Inject } from '@angular/core';
 import {
+    Affiliation,
     CHAT_SERVICE_TOKEN,
     ChatService,
-    MemberListItem,
     MUC_SUB_EVENT_TYPE,
     MucSubPlugin,
     MultiUserChatPlugin,
+    Occupant,
     Room,
     RoomCreationOptions,
-    RoomSummary,
+    RoomSummary
 } from '@pazznetwork/ngx-chat';
 import { jid } from '@xmpp/client';
 
@@ -24,7 +25,7 @@ export class MultiUserChatComponent {
     roomJid: string;
     selectedRoom: Room;
     allRooms: RoomSummary[] = [];
-    roomMemberList: MemberListItem[] = [];
+    roomMemberList: Occupant[] = [];
     newRoom?: RoomCreationOptions;
     mucSubSubscriptions = new Map<string, string[]>();
 
@@ -36,6 +37,7 @@ export class MultiUserChatComponent {
     async joinRoom(roomJid: string) {
         const occupantJid = jid(roomJid);
         this.selectedRoom = await this.multiUserChatPlugin.joinRoom(occupantJid);
+        this.roomJid = roomJid;
     }
 
     async subscribeWithMucSub(roomJid: string): Promise<void> {
@@ -51,8 +53,7 @@ export class MultiUserChatComponent {
     }
 
     async queryMemberList(roomJid: string) {
-        const fullRoomJid = new Room(jid(roomJid), null).toString();
-        this.roomMemberList = await this.multiUserChatPlugin.queryMemberList(fullRoomJid);
+        this.roomMemberList = await this.multiUserChatPlugin.queryMemberList(roomJid);
     }
 
     async destroyRoom(roomJid: string) {
@@ -88,5 +89,25 @@ export class MultiUserChatComponent {
         await this.multiUserChatPlugin.createRoom(this.newRoom);
 
         this.newRoom = undefined;
+    }
+
+    async kick(nick: string) {
+        await this.multiUserChatPlugin.kickOccupant(nick, this.selectedRoom.jidBare.toString());
+    }
+
+    async banOrUnban(memberJid: string, affiliation?: Affiliation, reason?: string) {
+        if (affiliation === Affiliation.outcast) {
+            await this.multiUserChatPlugin.unbanOccupant(memberJid, this.selectedRoom.jidBare.toString());
+            return;
+        }
+        await this.multiUserChatPlugin.banOccupant(memberJid, this.selectedRoom.jidBare.toString(), reason);
+    }
+
+    async leaveRoom(roomJid: string) {
+        if (roomJid === this.roomJid) {
+            this.roomJid = '';
+            this.selectedRoom = null;
+        }
+        await this.multiUserChatPlugin.leaveRoom(roomJid);
     }
 }

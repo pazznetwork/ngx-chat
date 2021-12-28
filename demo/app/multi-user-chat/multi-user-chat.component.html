@@ -2,9 +2,9 @@
     <h2>Chat rooms:</h2>
     <div *ngIf="(chatService.state$ | async) === 'online'; else offline">
         <div *ngFor="let room of (multiUserChatPlugin.rooms$ | async)">
-            <button (click)="selectedRoom = room">
-                {{room.roomJid.bare().toString()}}
-            </button>
+            {{room.roomJid.bare().toString()}}:
+            <button (click)="selectedRoom = room">Select</button>
+            <button (click)="leaveRoom(room.roomJid.bare().toString())" class="red">Leave</button>
         </div>
 
         <ng-container *ngIf="selectedRoom">
@@ -22,6 +22,7 @@
         <button (click)="subscribeWithMucSub(roomJid)">subscribe with MUC/Sub</button>
         <button (click)="unsubscribeFromMucSub(roomJid)">unsubscribe from MUC/Sub</button>
         <button (click)="getSubscriptions()">get MUC/Sub subscriptions</button>
+        <button (click)="queryMemberList(roomJid)">get member list</button>
 
         <div>Current MUC subscriptions to room: {{roomJid}}</div>
         <ul>
@@ -36,14 +37,28 @@
         </ul>
 
         <br>
-        <div>Members of room: {{roomJid}}</div>
-        <ul>
-            <li *ngFor="let member of roomMemberList">
-                {{member.jid}}
-            </li>
-        </ul>
-
-
+        <ng-container *ngIf="roomMemberList.length > 0">
+            <div>Members of room: {{roomJid}}</div>
+            <table>
+                <thead>
+                <tr>
+                    <th>JID</th>
+                    <th>Affiliation</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let member of roomMemberList">
+                    <td>{{member.jid}}</td>
+                    <td>{{member.affiliation}}</td>
+                    <td>
+                        <button (click)="kick(member.nick)">Kick</button>
+                        <button (click)="banOrUnban(member.jid, member.affiliation)">Ban/Unban</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </ng-container>
         <hr/>
 
         <button (click)="queryAllRooms()">List all rooms</button>
