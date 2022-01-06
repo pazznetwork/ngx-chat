@@ -21,7 +21,7 @@ import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
                 right: '0em',
             })),
             transition('hidden => shown', animate('400ms ease')),
-            transition('shown => hidden', animate('400ms ease'))
+            transition('shown => hidden', animate('400ms ease')),
         ]),
         trigger('drawerVisibility', [
             state('hidden', style({
@@ -31,9 +31,9 @@ import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
                 right: '14em',
             })),
             transition('hidden => shown', animate('400ms ease')),
-            transition('shown => hidden', animate('400ms ease'))
-        ])
-    ]
+            transition('shown => hidden', animate('400ms ease')),
+        ]),
+    ],
 })
 export class RosterListComponent implements OnInit {
 
@@ -83,7 +83,8 @@ export class RosterListComponent implements OnInit {
             this.contactRequestsSent$,
             this.contactsUnaffiliated$,
         ]).pipe(
-            map(([contacts, received, sent, unaffiliated]) => contacts.length + received.length + sent.length + unaffiliated.length === 0)
+            map(([contacts, received, sent, unaffiliated]) =>
+                contacts.length + received.length + sent.length + unaffiliated.length === 0),
         );
     }
 

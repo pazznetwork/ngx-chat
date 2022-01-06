@@ -11,11 +11,13 @@
             <div class="list-item" *ngFor="let room of rooms$ | async">
                 <div>
                     <p>{{room.name}}</p>
-                    <small>{{room.jid}}</small>
+                    <small>{{room.jid.toString()}}</small>
                 </div>
                 <div>
-                    <button *ngIf="!currentRoom || currentRoom?.roomJid.toString() !== room.jid" (click)="joinRoom(room.jid)">Join</button>
-                    <button *ngIf="currentRoom?.roomJid.toString() === room.jid" (click)="leaveRoom()">Leave</button>
+                    <button *ngIf="!currentRoom || currentRoom?.roomJid.equals(room.jid)"
+                            (click)="joinRoom(room.jid)">Join
+                    </button>
+                    <button *ngIf="currentRoom?.roomJid.equals(room.jid)" (click)="leaveRoom()">Leave</button>
                 </div>
             </div>
         </div>
@@ -29,10 +31,10 @@
             <h2>Actions:</h2>
             <form>
                 <div class="form-group">
-                    <label for="room-topic">Room subject:</label>
-                    <input [(ngModel)]="topic" class="form-control" id="room-topic" name="room-topic"
+                    <label for="room-subject">Room subject:</label>
+                    <input [(ngModel)]="subject" class="form-control" id="room-subject" name="room-subject"
                            placeholder="Enter a new room subject" type="text"/>
-                    <button type="button" (click)="changeRoomTopic()">Change</button>
+                    <button type="button" (click)="changeRoomSubject()">Change</button>
                 </div>
                 <div class="form-group">
                     <label for="change-nick">Change nick:</label>
@@ -48,13 +50,15 @@
                 </div>
                 <div class="form-group">
                     <label for="member">Grant or revoke membership</label>
-                    <input [(ngModel)]="memberJid" class="form-control" id="member" name="member" type="text" placeholder="Enter JID of an occupant to grant/revoke membership" />
+                    <input [(ngModel)]="memberJid" class="form-control" id="member" name="member" type="text"
+                           placeholder="Enter JID of an occupant to grant/revoke membership"/>
                     <button type="button" (click)="revokeMembership()">Revoke</button>
                     <button type="button" (click)="grantMembership()">Grant</button>
                 </div>
                 <div class="form-group">
                     <label for="moderator">Grant or revoke moderator status</label>
-                    <input [(ngModel)]="moderatorJid" class="form-control" id="moderator" name="moderator" type="text" placeholder="Enter nick of an occupant to grant or revoke moderator status"/>
+                    <input [(ngModel)]="moderatorNick" class="form-control" id="moderator" name="moderator" type="text"
+                           placeholder="Enter nick of an occupant to grant or revoke moderator status"/>
                     <button type="button" (click)="revokeModeratorStatus()">Revoke</button>
                     <button type="button" (click)="grantModeratorStatus()">Grant</button>
                 </div>
@@ -69,14 +73,14 @@
     <aside>
         <h4>Occupants:</h4>
         <div class="list">
-            <div class="list-item" *ngFor="let occupant of occupants">
+            <div class="list-item" *ngFor="let item of occupants | keyvalue">
                 <div>
-                    <p>{{occupant.nick}} - <small>{{occupant.affiliation}}, {{occupant.role}}</small></p>
-                    <small>{{occupant.jid}}</small>
+                    <p>{{item.value.nick}} - <small>{{item.value.affiliation}}, {{item.value.role}}</small></p>
+                    <small>{{item.value.jid.toString()}}</small>
                 </div>
                 <div>
-                    <button (click)="kick(occupant)">Kick</button>
-                    <button (click)="ban(occupant)">Ban</button>
+                    <button (click)="kick(item.value)">Kick</button>
+                    <button (click)="ban(item.value)">Ban</button>
                 </div>
             </div>
         </div>

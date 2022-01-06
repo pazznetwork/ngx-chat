@@ -44,10 +44,10 @@ import { XmppClientFactoryService } from './services/adapters/xmpp/xmpp-client-f
 import { ChatBackgroundNotificationService } from './services/chat-background-notification.service';
 import { ChatListStateService } from './services/chat-list-state.service';
 import { ChatMessageListRegistryService } from './services/chat-message-list-registry.service';
-import {CHAT_SERVICE_TOKEN, ChatService} from './services/chat-service';
+import { CHAT_SERVICE_TOKEN, ChatService } from './services/chat-service';
 import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
-import {FILE_UPLOAD_HANDLER_TOKEN} from './hooks/file-upload-handler';
+import { FILE_UPLOAD_HANDLER_TOKEN } from './hooks/file-upload-handler';
 
 @NgModule({
     imports: [
@@ -113,13 +113,15 @@ export class NgxChatModule {
                 {
                     provide: FILE_UPLOAD_HANDLER_TOKEN,
                     deps: [CHAT_SERVICE_TOKEN],
-                    useFactory: (chatService: ChatService) => {
-                        return chatService.getPlugin(HttpFileUploadPlugin);
-                    }
-                }
+                    useFactory: NgxChatModule.fileUploadHandlerFactory,
+                },
             ],
         };
 
+    }
+
+    private static fileUploadHandlerFactory(chatService: ChatService) {
+        return chatService.getPlugin(HttpFileUploadPlugin);
     }
 
     private static xmppChatAdapter(

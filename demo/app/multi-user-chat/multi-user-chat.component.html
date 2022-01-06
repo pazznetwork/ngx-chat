@@ -4,7 +4,7 @@
         <div *ngFor="let room of (multiUserChatPlugin.rooms$ | async)">
             {{room.roomJid.bare().toString()}}:
             <button (click)="selectedRoom = room">Select</button>
-            <button (click)="leaveRoom(room.roomJid.bare().toString())" class="red">Leave</button>
+            <button (click)="leaveRoom(room.occupantJid)" class="red">Leave</button>
         </div>
 
         <ng-container *ngIf="selectedRoom">
@@ -15,16 +15,18 @@
 
         <hr/>
 
+        <input [(ngModel)]="enteredOccupantJid" (ngModelChange)="updateOccupantJid($event)" class="form-control"
+               #roomOccupantJid="ngModel"
+               [ngClass]="roomOccupantJid.control.invalid ? 'red' : null"
+               type="text" placeholder="room"/>
 
-        <input [(ngModel)]="roomJid" class="form-control" type="text" placeholder="room"/>
-
-        <button (click)="joinRoom(roomJid)">Join room</button>
-        <button (click)="subscribeWithMucSub(roomJid)">subscribe with MUC/Sub</button>
-        <button (click)="unsubscribeFromMucSub(roomJid)">unsubscribe from MUC/Sub</button>
+        <button (click)="joinRoom(occupantJid)">Join room</button>
+        <button (click)="subscribeWithMucSub(occupantJid)">subscribe with MUC/Sub</button>
+        <button (click)="unsubscribeFromMucSub(occupantJid)">unsubscribe from MUC/Sub</button>
         <button (click)="getSubscriptions()">get MUC/Sub subscriptions</button>
-        <button (click)="queryMemberList(roomJid)">get member list</button>
+        <button (click)="queryMemberList(occupantJid)">get member list</button>
 
-        <div>Current MUC subscriptions to room: {{roomJid}}</div>
+        <div>Current MUC subscriptions to room: {{occupantJid}}</div>
         <ul>
             <li *ngFor="let subscription of mucSubSubscriptions | keyvalue">
                 {{subscription.key}}:
@@ -38,7 +40,7 @@
 
         <br>
         <ng-container *ngIf="roomMemberList.length > 0">
-            <div>Members of room: {{roomJid}}</div>
+            <div>Members of room: {{occupantJid}}</div>
             <table>
                 <thead>
                 <tr>
@@ -49,7 +51,7 @@
                 </thead>
                 <tbody>
                 <tr *ngFor="let member of roomMemberList">
-                    <td>{{member.jid}}</td>
+                    <td>{{member.jid.toString()}}</td>
                     <td>{{member.affiliation}}</td>
                     <td>
                         <button (click)="kick(member.nick)">Kick</button>

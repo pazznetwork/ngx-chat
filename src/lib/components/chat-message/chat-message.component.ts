@@ -13,7 +13,7 @@ export const MAX_IMAGE_SIZE = 250 * 1024;
 @Component({
     selector: 'ngx-chat-message',
     templateUrl: './chat-message.component.html',
-    styleUrls: ['./chat-message.component.less']
+    styleUrls: ['./chat-message.component.less'],
 })
 export class ChatMessageComponent implements OnInit {
 

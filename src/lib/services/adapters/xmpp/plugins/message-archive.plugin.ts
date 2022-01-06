@@ -157,7 +157,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
             if (messageHandled) {
                 this.mamMessageReceived$.next();
             }
-        } else if (type === 'groupchat') {
+        } else if (type === 'groupchat' || this.multiUserChatPlugin.isRoomInvitationStanza(messageElement)) {
             this.multiUserChatPlugin.handleStanza(messageElement, delayEl);
         } else {
             throw new Error(`unknown archived message type: ${type}`);

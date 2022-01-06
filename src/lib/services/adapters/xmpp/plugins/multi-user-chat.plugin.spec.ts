@@ -13,6 +13,7 @@ import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageUuidPlugin } from './message-uuid.plugin';
 import { Affiliation, MultiUserChatPlugin, Role } from './multi-user-chat.plugin';
+import { jid } from '@xmpp/jid';
 
 const defaultRoomConfiguration = {
     roomId: 'roomId',
@@ -40,8 +41,8 @@ describe('multi user chat plugin', () => {
                 {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
-                ContactFactoryService
-            ]
+                ContactFactoryService,
+            ],
         });
 
         chatConnectionService = TestBed.inject(XmppChatConnectionService);
@@ -54,13 +55,13 @@ describe('multi user chat plugin', () => {
             jid: 'conference.jabber.example.com',
         };
         const serviceDiscoveryPluginMock: any = {
-            findService: () => conferenceService
+            findService: () => conferenceService,
         };
 
         logService = TestBed.inject(LogService);
         chatAdapter.addPlugins([
             new MultiUserChatPlugin(chatAdapter, logService, serviceDiscoveryPluginMock),
-            new MessageUuidPlugin()
+            new MessageUuidPlugin(),
         ]);
 
         multiUserChatPlugin = chatAdapter.getPlugin(MultiUserChatPlugin);
@@ -75,9 +76,9 @@ describe('multi user chat plugin', () => {
                     xml('presence', {from: content.attrs.to, to: content.attrs.from},
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'}),
                         xml('error', {by: 'me@example.com', type: 'cancel'},
-                            xml('not-allowed', {xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas'})
-                        )
-                    )
+                            xml('not-allowed', {xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas'}),
+                        ),
+                    ),
                 );
             });
 
@@ -96,9 +97,9 @@ describe('multi user chat plugin', () => {
                 chatConnectionService.onStanzaReceived(
                     xml('presence', {from: content.attrs.to, to: content.attrs.from},
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
-                            xml('item', {affiliation: 'visitor', role: 'visitor'})
-                        )
-                    )
+                            xml('item', {affiliation: 'visitor', role: 'visitor'}),
+                        ),
+                    ),
                 );
             });
 
@@ -121,9 +122,9 @@ describe('multi user chat plugin', () => {
                             xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
-                                xml('status', {code: '201'})
-                            )
-                        )
+                                xml('status', {code: '201'}),
+                            ),
+                        ),
                     );
                 } else if (content.name === 'iq') {
                     chatConnectionService.onStanzaReceived(
@@ -131,10 +132,10 @@ describe('multi user chat plugin', () => {
                                 from: content.attrs.to,
                                 to: content.attrs.from,
                                 type: 'result',
-                                id: content.attrs.id
+                                id: content.attrs.id,
                             },
-                            xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'})
-                        )
+                            xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'}),
+                        ),
                     );
                 } else {
                     fail('unexpected stanza: ' + content.toString());
@@ -159,9 +160,9 @@ describe('multi user chat plugin', () => {
                             xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
-                                xml('status', {code: '201'})
-                            )
-                        )
+                                xml('status', {code: '201'}),
+                            ),
+                        ),
                     );
                 } else if (content.name === 'iq' && content.attrs.type === 'get') {
                     chatConnectionService.onStanzaReceived(
@@ -169,24 +170,24 @@ describe('multi user chat plugin', () => {
                                 from: content.attrs.to,
                                 to: content.attrs.from,
                                 type: 'result',
-                                id: content.attrs.id
+                                id: content.attrs.id,
                             },
                             xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'},
                                 xml('x', {type: 'form', xmlns: 'jabber:x:data'},
                                     xml('field', {var: 'FORM_TYPE', type: 'hidden'},
-                                        xml('value', {}, 'http://jabber.org/protocol/muc#roomconfig')
-                                    )
-                                )
-                            )
-                        )
+                                        xml('value', {}, 'http://jabber.org/protocol/muc#roomconfig'),
+                                    ),
+                                ),
+                            ),
+                        ),
                     );
                 } else if (content.name === 'iq' && content.attrs.type === 'set') {
                     chatConnectionService.onStanzaReceived(
                         xml('iq', {from: content.attrs.to, to: content.attrs.from, type: 'error', id: content.attrs.id},
                             xml('error', {type: 'modify'},
-                                xml('not-acceptable', {xmlns: IqResponseError.ERROR_ELEMENT_NS})
-                            )
-                        )
+                                xml('not-acceptable', {xmlns: IqResponseError.ERROR_ELEMENT_NS}),
+                            ),
+                        ),
                     );
                 } else {
                     fail('unexpected stanza: ' + content.toString());
@@ -213,9 +214,9 @@ describe('multi user chat plugin', () => {
                             xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
-                                xml('status', {code: '201'})
-                            )
-                        )
+                                xml('status', {code: '201'}),
+                            ),
+                        ),
                     );
                 } else if (content.name === 'iq' && content.attrs.type === 'get') {
                     chatConnectionService.onStanzaReceived(
@@ -223,20 +224,20 @@ describe('multi user chat plugin', () => {
                                 from: content.attrs.to,
                                 to: content.attrs.from,
                                 type: 'result',
-                                id: content.attrs.id
+                                id: content.attrs.id,
                             },
                             xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'},
                                 xml('x', {type: 'form', xmlns: 'jabber:x:data'},
                                     xml('field', {var: 'FORM_TYPE', type: 'hidden'},
-                                        xml('value', {}, 'http://jabber.org/protocol/muc#roomconfig')
+                                        xml('value', {}, 'http://jabber.org/protocol/muc#roomconfig'),
                                     ),
                                     xml('field', {var: 'multipleValues', type: 'list-multi'},
                                         xml('value', {}, 'value1'),
-                                        xml('value', {}, 'value2')
-                                    )
-                                )
-                            )
-                        )
+                                        xml('value', {}, 'value2'),
+                                    ),
+                                ),
+                            ),
+                        ),
                     );
                 } else if (content.name === 'iq' && content.attrs.type === 'set') {
                     const configurationList = content.getChild('query').getChild('x');
@@ -249,8 +250,8 @@ describe('multi user chat plugin', () => {
                             from: content.attrs.to,
                             to: content.attrs.from,
                             type: 'result',
-                            id: content.attrs.id
-                        })
+                            id: content.attrs.id,
+                        }),
                     );
                 } else {
                     fail('unexpected stanza: ' + content.toString());
@@ -272,9 +273,9 @@ describe('multi user chat plugin', () => {
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'},
                             xml('item', {affiliation: 'member', role: 'participant'}),
                             xml('status', {code: '110'}),
-                            xml('status', {code: '210'})
+                            xml('status', {code: '210'}),
                         ),
-                    )
+                    ),
                 );
             });
 
@@ -296,10 +297,10 @@ describe('multi user chat plugin', () => {
                         from: otherOccupant,
                         id: '1',
                         to: chatConnectionService.userJid.toString(),
-                        type: 'groupchat'
+                        type: 'groupchat',
                     },
-                    xml('body', {}, 'message content here')
-                )
+                    xml('body', {}, 'message content here'),
+                ),
             );
 
         });
@@ -319,11 +320,11 @@ describe('multi user chat plugin', () => {
                         xml('message', {
                                 from: 'chatroom@conference.example.com/me',
                                 to: 'me@example.com/something',
-                                type: 'groupchat'
+                                type: 'groupchat',
                             },
                             xml('body', {}, 'message body'),
-                            xml('origin-id', {id: stanza.getChild('origin-id').attrs.id})
-                        )
+                            xml('origin-id', {id: stanza.getChild('origin-id').attrs.id}),
+                        ),
                     );
                 } else if (stanza.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
@@ -331,9 +332,9 @@ describe('multi user chat plugin', () => {
                             xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
-                                xml('status', {code: '201'})
-                            )
-                        )
+                                xml('status', {code: '201'}),
+                            ),
+                        ),
                     );
                 } else {
                     throw new Error('unknown stanza: ' + stanza.toString());
@@ -367,13 +368,13 @@ describe('multi user chat plugin', () => {
                     xml('presence', {
                             from: stanza.attrs.to + '/' + otherOccupantJid.resource,
                             to: stanza.attrs.from,
-                            type: 'unavailable'
+                            type: 'unavailable',
                         },
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
                             xml('item', {affiliation: 'none', role: 'none'}),
-                            xml('status', {code: '307'})
+                            xml('status', {code: '307'}),
                         ),
-                    )
+                    ),
                 );
             });
 
@@ -383,7 +384,7 @@ describe('multi user chat plugin', () => {
                 expect(occupant.affiliation).toEqual(Affiliation.none);
                 resolve();
             });
-            await multiUserChatPlugin.kickOccupant(otherOccupantJid.resource, 'chatroom@conference.example.com');
+            await multiUserChatPlugin.kickOccupant(otherOccupantJid.resource, jid('chatroom@conference.example.com'));
         });
 
         it('should leave room if kicked', async (resolve) => {
@@ -394,17 +395,17 @@ describe('multi user chat plugin', () => {
                     xml('presence', {
                             from: stanza.attrs.to + '/' + otherOccupantJid.resource,
                             to: otherOccupantJid.toString(),
-                            type: 'unavailable'
+                            type: 'unavailable',
                         },
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
                             xml('item', {affiliation: 'none', role: 'none'},
                                 xml('actor', {nick: 'me'}),
-                                xml('reason', null, 'reason you got kicked')
+                                xml('reason', null, 'reason you got kicked'),
                             ),
                             xml('status', {code: '307'}),
                             xml('status', {code: '110'}),
                         ),
-                    )
+                    ),
                 );
             });
             multiUserChatPlugin.onOccupantKicked$.subscribe(occupant => {
@@ -420,8 +421,8 @@ describe('multi user chat plugin', () => {
 
             await multiUserChatPlugin.kickOccupant(
                 otherOccupantJid.resource,
-                'chatroom@conference.example.com',
-                'reason you got kicked'
+                jid('chatroom@conference.example.com'),
+                'reason you got kicked',
             );
         });
 
@@ -433,17 +434,17 @@ describe('multi user chat plugin', () => {
                     xml('presence', {
                             from: stanza.attrs.to + '/' + otherOccupantJid.resource,
                             to: stanza.attrs.from,
-                            type: 'unavailable'
+                            type: 'unavailable',
                         },
                         xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
                             xml('item', {
                                 affiliation: 'outcast',
                                 role: Role.none,
-                                jid: otherOccupantJid.toString()
+                                jid: otherOccupantJid.toString(),
                             }),
-                            xml('status', {code: '301'})
+                            xml('status', {code: '301'}),
                         ),
-                    )
+                    ),
                 );
             });
 
@@ -453,7 +454,7 @@ describe('multi user chat plugin', () => {
                 expect(occupant.affiliation).toEqual(Affiliation.outcast);
                 resolve();
             });
-            await multiUserChatPlugin.banOccupant(otherOccupantJid.toString(), 'chatroom@conference.example.com');
+            await multiUserChatPlugin.banOccupant(otherOccupantJid, jid('chatroom@conference.example.com'));
         });
 
         it('should handle unban occupant', async () => {
@@ -467,17 +468,17 @@ describe('multi user chat plugin', () => {
                         xml('presence', {
                                 from: stanza.attrs.to + '/other',
                                 to: stanza.attrs.from,
-                                type: 'unavailable'
+                                type: 'unavailable',
                             },
                             xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
                                 xml('item', {
                                     affiliation: 'outcast',
                                     role: Role.none,
-                                    jid: otherOccupantJid.toString()
+                                    jid: otherOccupantJid.toString(),
                                 }),
-                                xml('status', {code: '301'})
+                                xml('status', {code: '301'}),
                             ),
-                        )
+                        ),
                     );
                 } else if (stanza.name === 'iq') {
                     if (stanza.attrs.type === 'get') { // get ban list
@@ -486,10 +487,10 @@ describe('multi user chat plugin', () => {
                                     from: stanza.attrs.to,
                                     to: stanza.attrs.from,
                                     type: 'result',
-                                    id: stanza.attrs.id
+                                    id: stanza.attrs.id,
                                 },
                                 xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
-                                    bannedOccupantItem
+                                    bannedOccupantItem,
                                 ),
                             ),
                         );
@@ -499,7 +500,7 @@ describe('multi user chat plugin', () => {
                                     from: stanza.attrs.to,
                                     to: stanza.attrs.from,
                                     type: 'result',
-                                    id: stanza.attrs.id
+                                    id: stanza.attrs.id,
                                 },
                                 xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
                                     xml('item', {affiliation: 'none', jid: otherOccupantJid}),
@@ -510,12 +511,12 @@ describe('multi user chat plugin', () => {
                 }
             });
 
-            await multiUserChatPlugin.banOccupant(otherOccupantJid, roomJid);
-            let banList = await multiUserChatPlugin.getBanList(roomJid);
+            await multiUserChatPlugin.banOccupant(jid(otherOccupantJid), jid(roomJid));
+            let banList = await multiUserChatPlugin.getBanList(jid(roomJid));
             expect(banList.length).toEqual(1);
-            await multiUserChatPlugin.unbanOccupant(otherOccupantJid, roomJid);
+            await multiUserChatPlugin.unbanOccupant(jid(otherOccupantJid), jid(roomJid));
             bannedOccupantItem = null;
-            banList = await multiUserChatPlugin.getBanList(roomJid);
+            banList = await multiUserChatPlugin.getBanList(jid(roomJid));
             expect(banList.length).toEqual(0);
         });
 
@@ -534,7 +535,7 @@ describe('multi user chat plugin', () => {
                                 jid: chatConnectionService.userJid.toString(),
                             }),
                             xml('status', {code: '303'}),
-                            xml('status', {code: '110'})
+                            xml('status', {code: '110'}),
                         ),
                     ),
                 );
@@ -546,7 +547,7 @@ describe('multi user chat plugin', () => {
                 resolve();
             });
 
-            await multiUserChatPlugin.changeUserNickname('newMe', 'chatroom@conference.example.com');
+            await multiUserChatPlugin.changeUserNickname('newMe', jid('chatroom@conference.example.com'));
         });
 
         it('should be able to change room topic', async () => {
@@ -557,9 +558,9 @@ describe('multi user chat plugin', () => {
                             xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'},
                                 xml('item', {affiliation: 'member', role: 'participant'}),
                                 xml('status', {code: '110'}),
-                                xml('status', {code: '210'})
+                                xml('status', {code: '210'}),
                             ),
-                        )
+                        ),
                     );
                 } else if (stanza.name === 'message') {
                     chatConnectionService.onStanzaReceived(
@@ -567,10 +568,10 @@ describe('multi user chat plugin', () => {
                                 from: stanza.attrs.to,
                                 to: stanza.attrs.from,
                                 id: stanza.attrs.id,
-                                type: 'groupchat'
+                                type: 'groupchat',
                             },
-                            xml('subject', {}, stanza.getChildText('subject'))
-                        )
+                            xml('subject', {}, stanza.getChildText('subject')),
+                        ),
                     );
                 }
             });
@@ -581,7 +582,7 @@ describe('multi user chat plugin', () => {
             expect(room.name).toBeTruthy();
             const newSubject = 'new subject';
 
-            await multiUserChatPlugin.changeRoomTopic(room.roomJid.toString(), newSubject);
+            await multiUserChatPlugin.changeRoomSubject(room.roomJid, newSubject);
             expect(multiUserChatPlugin.rooms$.getValue()[0].name).toEqual(newSubject);
         });
     });

@@ -12,12 +12,13 @@ export class StanzaBuilder {
     static buildRoomMessageWithBody(from: string, roomJid: string, body: string, content: Element[] = []): Element {
         return StanzaBuilder.buildRoomMessage(from, roomJid, [
             xml('body', {}, body),
-            ...content]);
+            ...content,
+        ]);
     }
 
     static buildRoomMessageWithThread(from: string, roomJid: string, body: string, thread: string): Element {
         return StanzaBuilder.buildRoomMessageWithBody(from, roomJid, body, [
-            xml('thread', {}, thread)
-           ]);
+            xml('thread', {}, thread),
+        ]);
     }
 }

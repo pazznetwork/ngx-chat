@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import {
     Affiliation,
     CHAT_SERVICE_TOKEN,
@@ -9,20 +9,24 @@ import {
     Occupant,
     Room,
     RoomCreationOptions,
-    RoomSummary
+    RoomSummary,
+    JID,
 } from '@pazznetwork/ngx-chat';
-import { jid } from '@xmpp/client';
+import { jid } from '@xmpp/jid';
+import { NgModel } from '@angular/forms';
 
 @Component({
     selector: 'app-multi-user-chat',
     templateUrl: './multi-user-chat.component.html',
-    styleUrls: ['./multi-user-chat.component.css']
+    styleUrls: ['./multi-user-chat.component.css'],
 })
 export class MultiUserChatComponent {
 
     multiUserChatPlugin: MultiUserChatPlugin;
     mucSubPlugin: MucSubPlugin;
-    roomJid: string;
+    @ViewChild('roomOccupantJid') roomOccupantJid: NgModel;
+    enteredOccupantJid: string;
+    occupantJid: JID;
     selectedRoom: Room;
     allRooms: RoomSummary[] = [];
     roomMemberList: Occupant[] = [];
@@ -34,30 +38,38 @@ export class MultiUserChatComponent {
         this.mucSubPlugin = chatService.getPlugin(MucSubPlugin);
     }
 
-    async joinRoom(roomJid: string) {
-        const occupantJid = jid(roomJid);
+    updateOccupantJid(enteredJid: string) {
+        try {
+            this.occupantJid = jid(enteredJid);
+            this.roomOccupantJid.control.setErrors(null);
+        } catch (e) {
+            this.roomOccupantJid.control.setErrors({notAJid: true});
+        }
+    }
+
+    async joinRoom(occupantJid: JID) {
         this.selectedRoom = await this.multiUserChatPlugin.joinRoom(occupantJid);
-        this.roomJid = roomJid;
+        this.occupantJid = occupantJid;
+        this.enteredOccupantJid = occupantJid.toString();
     }
 
-    async subscribeWithMucSub(roomJid: string): Promise<void> {
-        await this.mucSubPlugin.subscribeRoom(roomJid, [MUC_SUB_EVENT_TYPE.messages]);
+    async subscribeWithMucSub(occupantJid: JID): Promise<void> {
+        await this.mucSubPlugin.subscribeRoom(occupantJid.toString(), [MUC_SUB_EVENT_TYPE.messages]);
     }
 
-    async unsubscribeFromMucSub(roomJid: string): Promise<void> {
-        await this.mucSubPlugin.unsubscribeRoom(roomJid);
+    async unsubscribeFromMucSub(occupantJid: JID): Promise<void> {
+        await this.mucSubPlugin.unsubscribeRoom(occupantJid.toString());
     }
 
     async getSubscriptions() {
         this.mucSubSubscriptions = await this.mucSubPlugin.retrieveSubscriptions();
     }
 
-    async queryMemberList(roomJid: string) {
-        this.roomMemberList = await this.multiUserChatPlugin.queryMemberList(roomJid);
+    async queryMemberList(occupantJid: JID) {
+        this.roomMemberList = await this.multiUserChatPlugin.queryMemberList(occupantJid);
     }
 
-    async destroyRoom(roomJid: string) {
-        const occupantJid = jid(roomJid);
+    async destroyRoom(occupantJid: JID) {
         await this.multiUserChatPlugin.destroyRoom(occupantJid);
         await this.queryAllRooms();
     }
@@ -92,20 +104,20 @@ export class MultiUserChatComponent {
     }
 
     async kick(nick: string) {
-        await this.multiUserChatPlugin.kickOccupant(nick, this.selectedRoom.jidBare.toString());
+        await this.multiUserChatPlugin.kickOccupant(nick, this.selectedRoom.jidBare);
     }
 
-    async banOrUnban(memberJid: string, affiliation?: Affiliation, reason?: string) {
+    async banOrUnban(memberJid: JID, affiliation?: Affiliation, reason?: string) {
         if (affiliation === Affiliation.outcast) {
-            await this.multiUserChatPlugin.unbanOccupant(memberJid, this.selectedRoom.jidBare.toString());
+            await this.multiUserChatPlugin.unbanOccupant(memberJid, this.selectedRoom.jidBare);
             return;
         }
-        await this.multiUserChatPlugin.banOccupant(memberJid, this.selectedRoom.jidBare.toString(), reason);
+        await this.multiUserChatPlugin.banOccupant(memberJid, this.selectedRoom.jidBare, reason);
     }
 
-    async leaveRoom(roomJid: string) {
-        if (roomJid === this.roomJid) {
-            this.roomJid = '';
+    async leaveRoom(roomJid: JID) {
+        if (roomJid === this.occupantJid) {
+            this.occupantJid = '';
             this.selectedRoom = null;
         }
         await this.multiUserChatPlugin.leaveRoom(roomJid);

@@ -87,7 +87,8 @@
 
         <div class="contact-pending-request-received-wrapper">
             debug contact requests in:
-            <div class="contact-pending-request-received" *ngFor="let request of (chatService.contactRequestsReceived$ | async)">
+            <div class="contact-pending-request-received"
+                 *ngFor="let request of (chatService.contactRequestsReceived$ | async)">
                 {{request.name}}
             </div>
         </div>
@@ -96,7 +97,8 @@
 
         <div class="contact-pending-request-sent-wrapper">
             debug contact requests out:
-            <div class="contact-pending-request-sent" *ngFor="let request of (chatService.contactRequestsSent$ | async)">
+            <div class="contact-pending-request-sent"
+                 *ngFor="let request of (chatService.contactRequestsSent$ | async)">
                 {{request.name}}
             </div>
         </div>
