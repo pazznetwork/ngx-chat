@@ -6,7 +6,7 @@ import {
     MUC_SUB_EVENT_TYPE,
     MucSubPlugin,
     MultiUserChatPlugin,
-    Occupant,
+    RoomUser,
     Room,
     RoomCreationOptions,
     RoomSummary,
@@ -24,12 +24,12 @@ export class MultiUserChatComponent {
 
     multiUserChatPlugin: MultiUserChatPlugin;
     mucSubPlugin: MucSubPlugin;
-    @ViewChild('roomOccupantJid') roomOccupantJid: NgModel;
-    enteredOccupantJid: string;
-    occupantJid: JID;
+    @ViewChild('occupantJidInput') occupantJidInput: NgModel;
+    occupantJidText: string;
+    occupantJid: JID | null = null;
     selectedRoom: Room;
     allRooms: RoomSummary[] = [];
-    roomMemberList: Occupant[] = [];
+    roomUserList: RoomUser[] = [];
     newRoom?: RoomCreationOptions;
     mucSubSubscriptions = new Map<string, string[]>();
 
@@ -41,16 +41,16 @@ export class MultiUserChatComponent {
     updateOccupantJid(enteredJid: string) {
         try {
             this.occupantJid = jid(enteredJid);
-            this.roomOccupantJid.control.setErrors(null);
+            this.occupantJidInput.control.setErrors(null);
         } catch (e) {
-            this.roomOccupantJid.control.setErrors({notAJid: true});
+            this.occupantJidInput.control.setErrors({notAJid: true});
         }
     }
 
     async joinRoom(occupantJid: JID) {
         this.selectedRoom = await this.multiUserChatPlugin.joinRoom(occupantJid);
         this.occupantJid = occupantJid;
-        this.enteredOccupantJid = occupantJid.toString();
+        this.occupantJidText = occupantJid.toString();
     }
 
     async subscribeWithMucSub(occupantJid: JID): Promise<void> {
@@ -66,7 +66,18 @@ export class MultiUserChatComponent {
     }
 
     async queryMemberList(occupantJid: JID) {
-        this.roomMemberList = await this.multiUserChatPlugin.queryMemberList(occupantJid);
+        this.roomUserList = await this.multiUserChatPlugin.queryMemberList(occupantJid);
+    }
+
+    displayMemberJid(member: RoomUser): string {
+        return member.userIdentifiers[0].userJid.bare().toString();
+    }
+
+    displayMemberNicks(member: RoomUser): string {
+        const nicks = new Set(member.userIdentifiers
+            .filter(id => id.nick != null)
+            .map(id => id.nick));
+        return [...nicks].join(', ');
     }
 
     async destroyRoom(occupantJid: JID) {
@@ -103,21 +114,28 @@ export class MultiUserChatComponent {
         this.newRoom = undefined;
     }
 
-    async kick(nick: string) {
+    findIdWithNick(member: RoomUser) {
+        return member.userIdentifiers.find(id => id.nick != null);
+    }
+
+    async kick(member: RoomUser) {
+        const {nick} = this.findIdWithNick(member);
         await this.multiUserChatPlugin.kickOccupant(nick, this.selectedRoom.jidBare);
     }
 
-    async banOrUnban(memberJid: JID, affiliation?: Affiliation, reason?: string) {
-        if (affiliation === Affiliation.outcast) {
-            await this.multiUserChatPlugin.unbanOccupant(memberJid, this.selectedRoom.jidBare);
+    async banOrUnban(member: RoomUser) {
+        const memberJid = member.userIdentifiers[0].userJid.bare();
+        if (member.affiliation === Affiliation.outcast) {
+            await this.multiUserChatPlugin.unbanUser(memberJid, this.selectedRoom.jidBare);
             return;
         }
-        await this.multiUserChatPlugin.banOccupant(memberJid, this.selectedRoom.jidBare, reason);
+        await this.multiUserChatPlugin.banUser(memberJid, this.selectedRoom.jidBare);
     }
 
     async leaveRoom(roomJid: JID) {
-        if (roomJid === this.occupantJid) {
-            this.occupantJid = '';
+        if (roomJid.equals(this.occupantJid.bare())) {
+            this.occupantJidText = '';
+            this.occupantJid = null;
             this.selectedRoom = null;
         }
         await this.multiUserChatPlugin.leaveRoom(roomJid);

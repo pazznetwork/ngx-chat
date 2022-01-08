@@ -76,7 +76,7 @@
             <div class="list-item" *ngFor="let item of occupants | keyvalue">
                 <div>
                     <p>{{item.value.nick}} - <small>{{item.value.affiliation}}, {{item.value.role}}</small></p>
-                    <small>{{item.value.jid.toString()}}</small>
+                    <small>{{item.value.occupantJid.toString()}}</small>
                 </div>
                 <div>
                     <button (click)="kick(item.value)">Kick</button>

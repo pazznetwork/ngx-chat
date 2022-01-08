@@ -454,7 +454,7 @@ describe('multi user chat plugin', () => {
                 expect(occupant.affiliation).toEqual(Affiliation.outcast);
                 resolve();
             });
-            await multiUserChatPlugin.banOccupant(otherOccupantJid, jid('chatroom@conference.example.com'));
+            await multiUserChatPlugin.banUser(otherOccupantJid, jid('chatroom@conference.example.com'));
         });
 
         it('should handle unban occupant', async () => {
@@ -511,10 +511,10 @@ describe('multi user chat plugin', () => {
                 }
             });
 
-            await multiUserChatPlugin.banOccupant(jid(otherOccupantJid), jid(roomJid));
+            await multiUserChatPlugin.banUser(jid(otherOccupantJid), jid(roomJid));
             let banList = await multiUserChatPlugin.getBanList(jid(roomJid));
             expect(banList.length).toEqual(1);
-            await multiUserChatPlugin.unbanOccupant(jid(otherOccupantJid), jid(roomJid));
+            await multiUserChatPlugin.unbanUser(jid(otherOccupantJid), jid(roomJid));
             bannedOccupantItem = null;
             banList = await multiUserChatPlugin.getBanList(jid(roomJid));
             expect(banList.length).toEqual(0);
@@ -543,7 +543,7 @@ describe('multi user chat plugin', () => {
 
             multiUserChatPlugin.onOccupantChangedNick$.subscribe(({occupant, newNick}) => {
                 expect(newNick).toEqual('newMe');
-                expect(occupant.jid).toEqual(chatConnectionService.userJid.toString());
+                expect(occupant.occupantJid).toEqual(chatConnectionService.userJid.toString());
                 resolve();
             });
 

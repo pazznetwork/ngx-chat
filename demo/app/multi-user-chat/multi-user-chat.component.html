@@ -15,9 +15,9 @@
 
         <hr/>
 
-        <input [(ngModel)]="enteredOccupantJid" (ngModelChange)="updateOccupantJid($event)" class="form-control"
-               #roomOccupantJid="ngModel"
-               [ngClass]="roomOccupantJid.control.invalid ? 'red' : null"
+        <input [(ngModel)]="occupantJidText" (ngModelChange)="updateOccupantJid($event)" class="form-control"
+               #occupantJidInput="ngModel"
+               [ngClass]="occupantJidInput.control.invalid ? 'red' : null"
                type="text" placeholder="room"/>
 
         <button (click)="joinRoom(occupantJid)">Join room</button>
@@ -39,23 +39,31 @@
         </ul>
 
         <br>
-        <ng-container *ngIf="roomMemberList.length > 0">
+        <ng-container *ngIf="roomUserList.length > 0">
             <div>Members of room: {{occupantJid}}</div>
             <table>
                 <thead>
                 <tr>
                     <th>JID</th>
+                    <th>Nicks</th>
                     <th>Affiliation</th>
+                    <th>Role</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr *ngFor="let member of roomMemberList">
-                    <td>{{member.jid.toString()}}</td>
+                <tr *ngFor="let member of roomUserList">
+                    <td>{{displayMemberJid(member)}}</td>
+                    <td>{{displayMemberNicks(member) || '[unknown]'}}</td>
                     <td>{{member.affiliation}}</td>
+                    <td>{{member.role}}</td>
                     <td>
-                        <button (click)="kick(member.nick)">Kick</button>
-                        <button (click)="banOrUnban(member.jid, member.affiliation)">Ban/Unban</button>
+                        <button (click)="kick(member)">
+                            Kick ({{findIdWithNick(member)?.nick || '[unknown]'}})
+                        </button>
+                        <button (click)="banOrUnban(member)">
+                            Ban/Unban
+                        </button>
                     </td>
                 </tr>
                 </tbody>

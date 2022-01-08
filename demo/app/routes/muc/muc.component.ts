@@ -4,12 +4,12 @@ import {
     ChatService,
     ConnectionStates,
     MultiUserChatPlugin,
-    Occupant,
+    RoomOccupant,
     Room,
     RoomSummary,
     JID,
 } from '@pazznetwork/ngx-chat';
-import { from, Observable, Subject } from 'rxjs';
+import { from, merge, Observable, Subject } from 'rxjs';
 import { jid } from '@xmpp/client';
 import { takeUntil } from 'rxjs/operators';
 
@@ -33,7 +33,7 @@ export class MucComponent implements OnInit, OnDestroy {
     rooms$: Observable<RoomSummary[]>;
     readonly state$: Observable<ConnectionStates> = this.chatService.state$.asObservable();
 
-    readonly occupants = new Map<string, Occupant>();
+    readonly occupants = new Map<string, RoomOccupant>();
 
     private readonly multiUserChatPlugin: MultiUserChatPlugin;
     private readonly ngDestroySubject = new Subject<void>();
@@ -65,34 +65,29 @@ export class MucComponent implements OnInit, OnDestroy {
         this.multiUserChatPlugin.onOccupantJoined$
             .pipe(takeUntil(this.ngDestroySubject))
             .subscribe(occupant => {
-                this.occupants.set(occupant.jid.toString(), occupant);
+                this.occupants.set(occupant.occupantJid.toString(), occupant);
             });
         this.multiUserChatPlugin.onOccupantChangedNick$
             .pipe(takeUntil(this.ngDestroySubject))
             .subscribe(({occupant, newNick}) => {
-                let existingOccupant = this.occupants.get(occupant.jid.toString());
+                let existingOccupant = this.occupants.get(occupant.occupantJid.toString());
                 if (!existingOccupant) {
                     existingOccupant = {...occupant};
-                    existingOccupant.jid = jid(occupant.jid.toString());
+                    existingOccupant.occupantJid = jid(occupant.occupantJid.toString());
                 }
-                existingOccupant.jid.resource = newNick;
+                existingOccupant.occupantJid.resource = newNick;
                 existingOccupant.nick = newNick;
-                this.occupants.delete(occupant.jid.toString());
-                this.occupants.set(existingOccupant.jid.toString(), existingOccupant);
+                this.occupants.delete(occupant.occupantJid.toString());
+                this.occupants.set(existingOccupant.occupantJid.toString(), existingOccupant);
             });
-        this.multiUserChatPlugin.onOccupantKicked$
+        // need to explicitly pass type parameters, otherwise TS selects the wrong overload and reports a deprecation
+        merge<RoomOccupant, RoomOccupant, RoomOccupant>(
+            this.multiUserChatPlugin.onOccupantKicked$,
+            this.multiUserChatPlugin.onOccupantBanned$,
+            this.multiUserChatPlugin.onOccupantLeft$,
+        )
             .pipe(takeUntil(this.ngDestroySubject))
-            .subscribe(occupant => this.removeOccupant(occupant));
-        this.multiUserChatPlugin.onOccupantBanned$
-            .pipe(takeUntil(this.ngDestroySubject))
-            .subscribe(occupant => this.removeOccupant(occupant));
-        this.multiUserChatPlugin.onOccupantLeft$
-            .pipe(takeUntil(this.ngDestroySubject))
-            .subscribe(occupant => this.removeOccupant(occupant));
-    }
-
-    removeOccupant(occupant: Occupant) {
-        this.occupants.delete(occupant.jid.toString());
+            .subscribe(occupant => this.occupants.delete(occupant.occupantJid.toString()));
     }
 
     ngOnDestroy(): void {
@@ -123,12 +118,12 @@ export class MucComponent implements OnInit, OnDestroy {
         this.multiUserChatPlugin.changeUserNickname(this.nick, this.currentRoom.roomJid);
     }
 
-    kick(occupant: Occupant) {
+    kick(occupant: RoomOccupant) {
         this.multiUserChatPlugin.kickOccupant(occupant.nick, this.currentRoom.roomJid);
     }
 
-    ban(occupant: Occupant) {
-        this.multiUserChatPlugin.banOccupant(occupant.jid, this.currentRoom.roomJid);
+    ban(occupant: RoomOccupant) {
+        this.multiUserChatPlugin.banUser(occupant.occupantJid, this.currentRoom.roomJid);
     }
 
     grantMembership() {
