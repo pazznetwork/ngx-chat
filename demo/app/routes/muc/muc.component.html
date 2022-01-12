@@ -73,14 +73,14 @@
     <aside>
         <h4>Occupants:</h4>
         <div class="list">
-            <div class="list-item" *ngFor="let item of occupants | keyvalue">
+            <div class="list-item" *ngFor="let occupant of occupants$ | async">
                 <div>
-                    <p>{{item.value.nick}} - <small>{{item.value.affiliation}}, {{item.value.role}}</small></p>
-                    <small>{{item.value.occupantJid.toString()}}</small>
+                    <p>{{occupant.nick}} - <small>{{occupant.affiliation}}, {{occupant.role}}</small></p>
+                    <small>{{occupant.occupantJid.toString()}}</small>
                 </div>
                 <div>
-                    <button (click)="kick(item.value)">Kick</button>
-                    <button (click)="ban(item.value)">Ban</button>
+                    <button (click)="kick(occupant)">Kick</button>
+                    <button (click)="ban(occupant)">Ban</button>
                 </div>
             </div>
         </div>

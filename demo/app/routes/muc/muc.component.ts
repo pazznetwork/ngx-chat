@@ -3,15 +3,16 @@ import {
     CHAT_SERVICE_TOKEN,
     ChatService,
     ConnectionStates,
-    MultiUserChatPlugin,
-    RoomOccupant,
-    Room,
-    RoomSummary,
     JID,
+    MultiUserChatPlugin,
+    OccupantChange,
+    Room,
+    RoomOccupant,
+    RoomSummary
 } from '@pazznetwork/ngx-chat';
 import { from, merge, Observable, Subject } from 'rxjs';
 import { jid } from '@xmpp/client';
-import { takeUntil } from 'rxjs/operators';
+import { filter, share, switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-muc',
@@ -33,16 +34,24 @@ export class MucComponent implements OnInit, OnDestroy {
     rooms$: Observable<RoomSummary[]>;
     readonly state$: Observable<ConnectionStates> = this.chatService.state$.asObservable();
 
-    readonly occupants = new Map<string, RoomOccupant>();
+    occupants$: Observable<RoomOccupant[]>;
 
     private readonly multiUserChatPlugin: MultiUserChatPlugin;
     private readonly ngDestroySubject = new Subject<void>();
+    private currentUser: {
+        domain?: string;
+        service?: string;
+        password?: string;
+        username?: string;
+    };
 
     constructor(@Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService) {
         this.multiUserChatPlugin = chatService.getPlugin(MultiUserChatPlugin);
     }
 
     ngOnInit(): void {
+        this.currentUser = JSON.parse(localStorage.getItem('data')) || {};
+
         this.rooms$ = from(this.multiUserChatPlugin.queryAllRooms());
 
         this.selectedRoom$
@@ -50,6 +59,13 @@ export class MucComponent implements OnInit, OnDestroy {
             .subscribe(room => {
                 this.currentRoom = room;
             });
+
+        this.occupants$ = this.selectedRoom$.pipe(
+            filter(room => room !== null),
+            switchMap(room => room.occupants$),
+            takeUntil(this.ngDestroySubject),
+        );
+
         this.multiUserChatPlugin.rooms$
             .pipe(takeUntil(this.ngDestroySubject))
             .subscribe((rooms) => {
@@ -62,32 +78,52 @@ export class MucComponent implements OnInit, OnDestroy {
                     this.selectedRoomSubject.next(updatedRoom);
                 }
             });
-        this.multiUserChatPlugin.onOccupantJoined$
-            .pipe(takeUntil(this.ngDestroySubject))
-            .subscribe(occupant => {
-                this.occupants.set(occupant.occupantJid.toString(), occupant);
+
+        const onOccupantChanged$ = this.selectedRoom$.pipe(
+            filter(room => room !== null),
+            switchMap((room) => room.onOccupantChanged$),
+            share(),
+        );
+        onOccupantChanged$
+            .pipe(
+                filter(({change}) => change === 'joined'),
+                takeUntil(this.ngDestroySubject)
+            )
+            .subscribe(({occupant}) => {
+                console.log('joined', occupant);
             });
-        this.multiUserChatPlugin.onOccupantChangedNick$
-            .pipe(takeUntil(this.ngDestroySubject))
+
+        onOccupantChanged$
+            .pipe(
+                filter(({change}) => change === 'changedNick'),
+                takeUntil(this.ngDestroySubject)
+            )
             .subscribe(({occupant, newNick}) => {
-                let existingOccupant = this.occupants.get(occupant.occupantJid.toString());
-                if (!existingOccupant) {
-                    existingOccupant = {...occupant};
-                    existingOccupant.occupantJid = jid(occupant.occupantJid.toString());
+                console.log('changed nick', occupant, newNick);
+                if (this.isOccupantCurrentUser(occupant)) {
+                    this.currentUser.username = newNick;
                 }
-                existingOccupant.occupantJid.resource = newNick;
-                existingOccupant.nick = newNick;
-                this.occupants.delete(occupant.occupantJid.toString());
-                this.occupants.set(existingOccupant.occupantJid.toString(), existingOccupant);
             });
+
         // need to explicitly pass type parameters, otherwise TS selects the wrong overload and reports a deprecation
-        merge<RoomOccupant, RoomOccupant, RoomOccupant>(
-            this.multiUserChatPlugin.onOccupantKicked$,
-            this.multiUserChatPlugin.onOccupantBanned$,
-            this.multiUserChatPlugin.onOccupantLeft$,
+        merge<OccupantChange, OccupantChange, OccupantChange>(
+            onOccupantChanged$.pipe(
+                filter(({change}) => change === 'kicked'),
+            ),
+            onOccupantChanged$.pipe(
+                filter(({change}) => change === 'banned'),
+            ),
+            onOccupantChanged$.pipe(
+                filter(({change}) => change === 'left'),
+            ),
         )
             .pipe(takeUntil(this.ngDestroySubject))
-            .subscribe(occupant => this.occupants.delete(occupant.occupantJid.toString()));
+            .subscribe(({occupant, change}) => {
+                console.log(occupant, change);
+                if (this.isOccupantCurrentUser(occupant)) {
+                    this.selectedRoomSubject.next(null);
+                }
+            });
     }
 
     ngOnDestroy(): void {
@@ -103,7 +139,6 @@ export class MucComponent implements OnInit, OnDestroy {
     leaveRoom() {
         this.multiUserChatPlugin.leaveRoom(this.currentRoom.roomJid);
         this.selectedRoomSubject.next(null);
-        this.occupants.clear();
     }
 
     changeRoomSubject() {
@@ -140,5 +175,9 @@ export class MucComponent implements OnInit, OnDestroy {
 
     revokeModeratorStatus() {
         this.multiUserChatPlugin.revokeModeratorStatus(this.moderatorNick, this.currentRoom.roomJid);
+    }
+
+    private isOccupantCurrentUser(occupant: RoomOccupant) {
+        return this.currentUser.username === occupant.nick;
     }
 }

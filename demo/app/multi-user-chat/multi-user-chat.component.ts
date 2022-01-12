@@ -66,7 +66,7 @@ export class MultiUserChatComponent {
     }
 
     async queryMemberList(occupantJid: JID) {
-        this.roomUserList = await this.multiUserChatPlugin.queryMemberList(occupantJid);
+        this.roomUserList = await this.multiUserChatPlugin.queryUserList(occupantJid);
     }
 
     displayMemberJid(member: RoomUser): string {

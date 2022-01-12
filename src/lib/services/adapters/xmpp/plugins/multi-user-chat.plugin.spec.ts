@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { jid as parseJid, xml } from '@xmpp/client';
-import { first } from 'rxjs/operators';
+import { filter, first } from 'rxjs/operators';
 import { Direction } from '../../../../core/message';
 import { Stanza } from '../../../../core/stanza';
 import { testLogService } from '../../../../test/log-service';
@@ -12,7 +12,7 @@ import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageUuidPlugin } from './message-uuid.plugin';
-import { Affiliation, MultiUserChatPlugin, Role } from './multi-user-chat.plugin';
+import { Affiliation, MultiUserChatPlugin, Role, Room } from './multi-user-chat.plugin';
 import { jid } from '@xmpp/jid';
 
 const defaultRoomConfiguration = {
@@ -378,13 +378,17 @@ describe('multi user chat plugin', () => {
                 );
             });
 
-            multiUserChatPlugin.onOccupantKicked$.subscribe(occupant => {
+            const room: Room = new Room(jid('chatroom@conference.example.com'), logService);
+
+            room.onOccupantChanged$.pipe(
+                filter(({change}) => change === 'kicked')
+            ).subscribe(({occupant}) => {
                 expect(occupant.nick).toEqual(otherOccupantJid.resource);
                 expect(occupant.role).toEqual(Role.none);
                 expect(occupant.affiliation).toEqual(Affiliation.none);
                 resolve();
             });
-            await multiUserChatPlugin.kickOccupant(otherOccupantJid.resource, jid('chatroom@conference.example.com'));
+            await multiUserChatPlugin.kickOccupant(otherOccupantJid.resource, room.roomJid);
         });
 
         it('should leave room if kicked', async (resolve) => {
@@ -408,7 +412,11 @@ describe('multi user chat plugin', () => {
                     ),
                 );
             });
-            multiUserChatPlugin.onOccupantKicked$.subscribe(occupant => {
+            const room: Room = new Room(jid('chatroom@conference.example.com'), logService);
+
+            room.onOccupantChanged$.pipe(
+                filter(({change}) => change === 'kicked')
+            ).subscribe(({occupant}) => {
                 expect(occupant.nick).toEqual(otherOccupantJid.resource);
                 expect(occupant.role).toEqual(Role.none);
                 expect(occupant.affiliation).toEqual(Affiliation.none);
@@ -448,7 +456,11 @@ describe('multi user chat plugin', () => {
                 );
             });
 
-            multiUserChatPlugin.onOccupantBanned$.subscribe(occupant => {
+            const room: Room = new Room(jid('chatroom@conference.example.com'), logService);
+
+            room.onOccupantChanged$.pipe(
+                filter(({change}) => change === 'banned')
+            ).subscribe(({occupant}) => {
                 expect(occupant.nick).toEqual(otherOccupantJid.resource);
                 expect(occupant.role).toEqual(Role.none);
                 expect(occupant.affiliation).toEqual(Affiliation.outcast);
@@ -541,9 +553,13 @@ describe('multi user chat plugin', () => {
                 );
             });
 
-            multiUserChatPlugin.onOccupantChangedNick$.subscribe(({occupant, newNick}) => {
+            const room: Room = new Room(jid('chatroom@conference.example.com'), logService);
+
+            room.onOccupantChanged$.pipe(
+                filter(({change}) => change === 'changedNick')
+            ).subscribe(({occupant, newNick}) => {
                 expect(newNick).toEqual('newMe');
-                expect(occupant.occupantJid).toEqual(chatConnectionService.userJid.toString());
+                expect(occupant.occupantJid.toString()).toEqual(chatConnectionService.userJid.toString());
                 resolve();
             });
 

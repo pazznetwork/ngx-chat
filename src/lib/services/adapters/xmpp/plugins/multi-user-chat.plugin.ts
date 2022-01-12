@@ -1,6 +1,6 @@
 import { jid as parseJid, xml } from '@xmpp/client';
 import { Element } from 'ltx';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { dummyAvatarRoom } from '../../../../core/contact-avatar';
 import { Direction, Message } from '../../../../core/message';
 import { DateMessagesGroup, MessageStore } from '../../../../core/message-store';
@@ -93,6 +93,14 @@ export class Room {
     avatar = dummyAvatarRoom;
     metadata: RoomMetadata = {};
     private messageStore: MessageStore<RoomMessage>;
+    private logService: LogService;
+    private roomOccupants = new Map<string, RoomOccupant>();
+
+    private onOccupantChangedSubject = new Subject<OccupantChange>();
+    readonly onOccupantChanged$ = this.onOccupantChangedSubject.asObservable();
+
+    private occupantsSubject = new ReplaySubject<RoomOccupant[]>(1);
+    readonly occupants$ = this.occupantsSubject.asObservable();
 
     get jidBare(): JID {
         return this.roomJid;
@@ -101,6 +109,7 @@ export class Room {
     constructor(roomJid: JID, logService: LogService, nick?: string, name?: string) {
         this.roomJid = roomJid.bare();
         this.name = name ?? this.roomJid.toString();
+        this.logService = logService;
         if (nick) {
             this.setNick(nick);
         }
@@ -149,6 +158,79 @@ export class Room {
             return this.roomJid.equals(otherJid);
         }
         return false;
+    }
+
+    handleOccupantLeft(occupant: RoomOccupant, isCurrenUser: boolean) {
+        this.removeOccupant(occupant);
+        if (isCurrenUser) {
+            this.roomOccupants.clear();
+            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
+        }
+        this.logService.debug(`user ${occupant.occupantJid.toString()} left room '${this.roomJid.toString()}'`);
+        this.onOccupantChangedSubject.next({occupant, change: 'left'});
+        return true;
+    }
+
+    handleOccupantJoined(occupant: RoomOccupant) {
+        this.addOccupant(occupant);
+
+        this.onOccupantChangedSubject.next({occupant, change: 'joined'});
+        this.logService.debug(`user '${occupant}' joined room '${this.roomJid.toString()}'`);
+        return true;
+    }
+
+    handleOccupantKicked(occupant: RoomOccupant, isCurrentUser: boolean, actor?: string, reason?: string) {
+        this.removeOccupant(occupant);
+        if (isCurrentUser) {
+            this.roomOccupants.clear();
+            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
+            this.logService.info(`you got kicked from room! room jid: ${this.roomJid.toString()}, by: ${actor}, with reason: ${reason}`);
+        }
+        this.logService.debug(`user got kicked: ${JSON.stringify(occupant)}`);
+        this.onOccupantChangedSubject.next({occupant, change: 'kicked'});
+        return true;
+    }
+
+    handleOccupantBanned(occupant: RoomOccupant, isCurrentUser: boolean, actor: string, reason: string) {
+        this.removeOccupant(occupant);
+        if (isCurrentUser) {
+            this.roomOccupants.clear();
+            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
+            this.logService.info(`you got banned from room! room jid: ${this.roomJid.toString()}, by: ${actor}, with reason: ${reason}`);
+        }
+        this.logService.debug(`user got banned: ${JSON.stringify(occupant)}`);
+        this.onOccupantChangedSubject.next({occupant, change: 'banned'});
+        return true;
+    }
+
+    handleOccupantChangedNick(occupant: RoomOccupant, isCurrentUser: boolean, newNick: string) {
+        if (isCurrentUser) {
+            this.setNick(newNick);
+        }
+        let existingOccupant = this.roomOccupants.get(occupant.occupantJid.toString());
+        if (!existingOccupant) {
+            existingOccupant = {...occupant};
+            existingOccupant.occupantJid = parseJid(occupant.occupantJid.toString());
+        }
+        existingOccupant.occupantJid.resource = newNick;
+        existingOccupant.nick = newNick;
+        this.roomOccupants.delete(occupant.occupantJid.toString());
+        this.roomOccupants.set(existingOccupant.occupantJid.toString(), existingOccupant);
+
+        this.logService.debug(`user changed nick from ${occupant.nick} to ${newNick}`);
+        this.onOccupantChangedSubject.next({occupant, newNick, change: 'changedNick'});
+        return true;
+    }
+
+    private addOccupant(occupant: RoomOccupant) {
+        this.roomOccupants.set(occupant.occupantJid.toString(), occupant);
+        this.occupantsSubject.next([...this.roomOccupants.values()]);
+    }
+
+    private removeOccupant(occupant: RoomOccupant) {
+        if (this.roomOccupants.delete(occupant.occupantJid.toString())) {
+            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
+        }
     }
 
 }
@@ -234,6 +316,14 @@ export interface RoleModification {
     reason?: string;
 }
 
+export type OccupantChangeType = 'joined' | 'left' | 'kicked' | 'banned' | 'changedNick' | 'invitation';
+
+export interface OccupantChange {
+    occupant: RoomOccupant;
+    change: OccupantChangeType;
+    newNick?: string;
+}
+
 class ModifyAffiliationsOrRolesStanzaBuilder extends AbstractStanzaBuilder {
 
     constructor(
@@ -286,30 +376,15 @@ class ModifyAffiliationsOrRolesStanzaBuilder extends AbstractStanzaBuilder {
  */
 export class MultiUserChatPlugin extends AbstractXmppPlugin {
     public static readonly MUC = 'http://jabber.org/protocol/muc';
-    public static readonly MUC_USER = 'http://jabber.org/protocol/muc#user';
-    public static readonly MUC_ADMIN = 'http://jabber.org/protocol/muc#admin';
-    public static readonly MUC_OWNER = 'http://jabber.org/protocol/muc#owner';
-    public static readonly MUC_ROOM_CONFIG = 'http://jabber.org/protocol/muc#roomconfig';
-    public static readonly MUC_REQUEST = 'http://jabber.org/protocol/muc#request';
+    public static readonly MUC_USER = `${MultiUserChatPlugin.MUC}#user`;
+    public static readonly MUC_ADMIN = `${MultiUserChatPlugin.MUC}#admin`;
+    public static readonly MUC_OWNER = `${MultiUserChatPlugin.MUC}#owner`;
+    public static readonly MUC_ROOM_CONFIG = `${MultiUserChatPlugin.MUC}#roomconfig`;
+    public static readonly MUC_REQUEST = `${MultiUserChatPlugin.MUC}#request`;
 
     readonly rooms$ = new BehaviorSubject<Room[]>([]);
     readonly message$ = new Subject<Room>();
     private readonly roomJoinResponseHandlers = new Map<string, [(stanza: Stanza) => void, (e: Error) => void]>();
-
-    private onOccupantJoinedSubject = new Subject<RoomOccupant>();
-    readonly onOccupantJoined$ = this.onOccupantJoinedSubject.asObservable();
-
-    private onOccupantLeftSubject = new Subject<RoomOccupant>();
-    readonly onOccupantLeft$ = this.onOccupantLeftSubject.asObservable();
-
-    private onOccupantKickedSubject = new Subject<RoomOccupant>();
-    readonly onOccupantKicked$ = this.onOccupantKickedSubject.asObservable();
-
-    private onOccupantBannedSubject = new Subject<RoomOccupant>();
-    readonly onOccupantBanned$ = this.onOccupantBannedSubject.asObservable();
-
-    private onOccupantChangedNickSubject = new Subject<{ occupant: RoomOccupant, newNick: string }>();
-    readonly onOccupantChangedNick$ = this.onOccupantChangedNickSubject.asObservable();
 
     private onInvitationSubject = new Subject<Invitation>();
     readonly onInvitation$ = this.onInvitationSubject.asObservable();
@@ -354,15 +429,16 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const stanzaType = stanza.attrs.type;
 
         if (stanzaType === 'error') {
-            this.handlerErrorMessage(stanza);
+            this.logService.error(stanza);
+            throw new Error('error handling message, stanza: ' + stanza);
         }
 
         const occupantJid = parseJid(stanza.attrs.from);
         const roomJid = occupantJid.bare();
 
-        const x = stanza.getChild('x', MultiUserChatPlugin.MUC_USER);
+        const xEl = stanza.getChild('x', MultiUserChatPlugin.MUC_USER);
 
-        const itemEl = x.getChild('item');
+        const itemEl = xEl.getChild('item');
         const subjectOccupant: RoomOccupant = {
             occupantJid,
             affiliation: itemEl.attrs.affiliation,
@@ -371,31 +447,34 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         };
 
         let stanzaHandled = false;
+        const room = this.getOrCreateRoom(occupantJid);
         if (stanzaType === 'unavailable') {
-            const statusCodes: string[] = x.getChildren('status').map(status => status.attrs.code);
+            const statusCodes: string[] = xEl.getChildren('status').map(status => status.attrs.code);
+            const isCurrenUser = statusCodes.includes('110');
+            const actor = itemEl.getChild('actor')?.attrs.nick;
+            const reason = itemEl.getChild('reason')?.getText();
 
-            if (statusCodes.includes('307') && subjectOccupant.affiliation === Affiliation.none) {
-                const actor = itemEl.getChild('actor')?.attrs.nick;
-                const reason = itemEl.getChild('reason')?.getText();
-
-                stanzaHandled = this.handleOccupantKicked(subjectOccupant, roomJid, statusCodes.includes('110'), actor, reason);
+            if (statusCodes.includes('307') && (subjectOccupant.affiliation === Affiliation.none || subjectOccupant.role === Role.none)) {
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                stanzaHandled = room.handleOccupantKicked(subjectOccupant, isCurrenUser, actor, reason);
             } else if (statusCodes.includes('301') && subjectOccupant.affiliation === Affiliation.outcast) {
-                const actor = itemEl.getChild('actor')?.attrs.nick;
-                const reason = itemEl.getChild('reason')?.getText();
-
-                stanzaHandled = this.handleOccupantBanned(subjectOccupant, roomJid, itemEl.attrs.jid == null, actor, reason);
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                stanzaHandled = room.handleOccupantBanned(subjectOccupant, isCurrenUser, actor, reason);
             } else if (statusCodes.includes('303')) {
-                stanzaHandled = this.handleOccupantChangedNick(
-                    subjectOccupant,
-                    x.getChild('item').attrs.nick,
-                    statusCodes,
-                );
+                stanzaHandled = room.handleOccupantChangedNick(subjectOccupant, isCurrenUser, xEl.getChild('item').attrs.nick);
+                this.rooms$.next(this.rooms$.getValue());
             } else {
-                stanzaHandled = this.handleOccupantLeft(subjectOccupant, roomJid, statusCodes.includes('110'));
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                stanzaHandled = room.handleOccupantLeft(subjectOccupant, isCurrenUser);
             }
         } else if (!stanzaType) {
-            const room = this.getOrCreateRoom(occupantJid);
-            stanzaHandled = this.handleOccupantJoined(subjectOccupant, room.roomJid);
+            stanzaHandled = room.handleOccupantJoined(subjectOccupant);
         }
 
         return joinRoomResponseHandled || stanzaHandled;
@@ -417,59 +496,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
         handleResponse(stanza);
         return true;
-    }
-
-    private handleOccupantJoined(occupant: RoomOccupant, roomJid: JID): boolean {
-        this.logService.debug(`user '${occupant}' joined room '${roomJid.toString()}'`);
-        this.onOccupantJoinedSubject.next(occupant);
-        return true;
-    }
-
-    private handleOccupantLeft(occupant: RoomOccupant, roomJid: JID, isCurrentUser: boolean): boolean {
-        if (isCurrentUser) {
-            this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
-        }
-        this.logService.debug(`user ${occupant.occupantJid.toString()} left room '${roomJid.toString()}'`);
-        this.onOccupantLeftSubject.next(occupant);
-        return true;
-    }
-
-    private handleOccupantKicked(occupant: RoomOccupant, roomJid: JID, isCurrentUser: boolean, actor?: string, reason?: string): boolean {
-        if (isCurrentUser) {
-            this.logService.info(`you got kicked from room! room jid: ${roomJid.toString()}, by: ${actor}, with reason: ${reason}`);
-            this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
-        }
-        this.logService.debug(`user got kicked: ${JSON.stringify(occupant)}`);
-        this.onOccupantKickedSubject.next(occupant);
-        return true;
-    }
-
-    private handleOccupantBanned(occupant: RoomOccupant, roomJid: JID, isCurrentUser: boolean, actor?: string, reason?: string): boolean {
-        if (isCurrentUser) {
-            this.logService.info(`you got banned from room! room jid: ${roomJid.toString()}, by: ${actor}, with reason: ${reason}`);
-            this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
-        }
-        this.logService.debug(`user got banned: ${JSON.stringify(occupant)}`);
-        this.onOccupantBannedSubject.next(occupant);
-        return true;
-    }
-
-    private handleOccupantChangedNick(occupant: RoomOccupant, newNick: string, statusCodes: string[]): boolean {
-        this.logService.debug(`user changed nick from ${occupant.nick} to ${newNick}`);
-        this.onOccupantChangedNickSubject.next({occupant, newNick});
-        if (statusCodes.includes('110')) {
-            const room = this.rooms$.getValue().find(r => r.roomJid.equals(occupant.occupantJid.bare()));
-            if (room) {
-                room.setNick(newNick);
-                this.rooms$.next(this.rooms$.getValue());
-            }
-        }
-        return true;
-    }
-
-    private handlerErrorMessage(stanza: Stanza) {
-        this.logService.error(stanza);
-        throw new Error('error handling message, stanza: ' + stanza);
     }
 
     /**
@@ -533,7 +559,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         let room = this.getRoomByJid(roomJid);
         if (!room) {
             room = new Room(roomJid, this.logService, nick, name);
-            this.rooms$.next([room].concat(this.rooms$.getValue()));
+            this.rooms$.next([room, ...this.rooms$.getValue()]);
         }
         if (nick && !room.occupantJid) {
             room.setNick(nick);
@@ -664,7 +690,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
      * Get all members of a MUC-Room with their affiliation to the room using the rooms fullJid
      * @param roomJid jid of the room
      */
-    async queryMemberList(roomJid: JID): Promise<RoomUser[]> {
+    async queryUserList(roomJid: JID): Promise<RoomUser[]> {
         const memberQueryResponses = await Promise.all(
             [
                 ...Object
@@ -823,17 +849,17 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return this.rooms$.getValue().find(room => room.roomJid.equals(jid.bare()));
     }
 
-    async banUser(userJid: JID, roomJid: JID, reason?: string): Promise<IqResponseStanza> {
-        if (userJid.bare().equals(roomJid)) {
-            throw new Error('occupant\'s room JID is not sufficient to ban an occupant, you must provide user\'s bare JID!');
-        }
+    async banUser(occupantJid: JID, roomJid: JID, reason?: string): Promise<IqResponseStanza> {
+        const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
+
         const response = await this.modifyAffiliationOrRole(roomJid, {
             userJid: userJid.bare(),
             affiliation: Affiliation.outcast,
             reason,
         });
+        this.logService.debug(`ban response ${response.toString()}`);
 
-        return Promise.resolve(response);
+        return response;
     }
 
     async unbanUser(userJid: JID, roomJid: JID): Promise<IqResponseStanza> {
@@ -862,14 +888,14 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         );
         const response = await this.xmppChatAdapter.chatConnectionService.sendIq(iq);
 
-        return Promise.resolve(response.getChild('query').getChildren('item').map(item => ({
+        return response.getChild('query').getChildren('item').map(item => ({
             userJid: parseJid(item.attrs.jid),
             affiliation: item.attrs.affiliation,
             reason: item.getChild('reason')?.getText(),
-        })));
+        }));
     }
 
-    async inviteUser(inviteeJid: JID, roomJid: JID, invitationMessage?: string) {
+    async inviteUser(inviteeJid: JID, roomJid: JID, invitationMessage?: string): Promise<void> {
         const from = this.xmppChatAdapter.chatConnectionService.userJid.toString();
         const stanza = xml('message', {to: roomJid.toString(), from},
             xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
@@ -957,10 +983,8 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return true;
     }
 
-    private async setAffiliation(userJid: JID, roomJid: JID, affiliation: Affiliation, reason?: string): Promise<IqResponseStanza> {
-        if (userJid.bare().equals(roomJid)) {
-            throw new Error('occupant\'s room JID is not sufficient to change affiliation, you must provide user\'s bare JID!');
-        }
+    private async setAffiliation(occupantJid: JID, roomJid: JID, affiliation: Affiliation, reason?: string): Promise<IqResponseStanza> {
+        const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
 
         return await this.modifyAffiliationOrRole(roomJid, {userJid, affiliation, reason});
     }
@@ -991,5 +1015,12 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     async revokeModeratorStatus(occupantNick: string, roomJid: JID, reason?: string) {
         await this.setRole(occupantNick, roomJid, Role.participant, reason);
+    }
+
+    private async getUserJidByOccupantJid(occupantJid: JID, roomJid: JID): Promise<JID> {
+        const users = await this.queryUserList(roomJid);
+        return users.find(roomUser => roomUser.userIdentifiers.find(
+            ids => ids.nick === occupantJid.resource || ids.userJid.bare().equals(occupantJid.bare()))
+        )?.userIdentifiers?.[0].userJid;
     }
 }
