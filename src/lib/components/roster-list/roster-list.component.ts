@@ -4,7 +4,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Contact } from '../../core/contact';
 import { Recipient } from '../../core/recipient';
-import { MultiUserChatPlugin } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
+import { MultiUserChatPlugin } from '../../services/adapters/xmpp/plugins/multi-user-chat/multi-user-chat.plugin';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 

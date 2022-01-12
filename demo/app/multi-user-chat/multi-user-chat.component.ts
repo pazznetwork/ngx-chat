@@ -65,7 +65,7 @@ export class MultiUserChatComponent {
         this.mucSubSubscriptions = await this.mucSubPlugin.retrieveSubscriptions();
     }
 
-    async queryMemberList(occupantJid: JID) {
+    async queryUserList(occupantJid: JID) {
         this.roomUserList = await this.multiUserChatPlugin.queryUserList(occupantJid);
     }
 

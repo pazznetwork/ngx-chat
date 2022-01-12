@@ -1,19 +1,22 @@
 import { TestBed } from '@angular/core/testing';
 import { jid as parseJid, xml } from '@xmpp/client';
 import { filter, first } from 'rxjs/operators';
-import { Direction } from '../../../../core/message';
-import { Stanza } from '../../../../core/stanza';
-import { testLogService } from '../../../../test/log-service';
-import { MockClientFactory } from '../../../../test/xmppClientMock';
-import { ContactFactoryService } from '../../../contact-factory.service';
-import { LogService } from '../../../log.service';
-import { IqResponseError } from '../iq-response.error';
-import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
-import { XmppClientFactoryService } from '../xmpp-client-factory.service';
-import { MessageUuidPlugin } from './message-uuid.plugin';
-import { Affiliation, MultiUserChatPlugin, Role, Room } from './multi-user-chat.plugin';
+import { Direction } from '../../../../../core/message';
+import { Stanza } from '../../../../../core/stanza';
+import { testLogService } from '../../../../../test/log-service';
+import { MockClientFactory } from '../../../../../test/xmppClientMock';
+import { ContactFactoryService } from '../../../../contact-factory.service';
+import { LogService } from '../../../../log.service';
+import { IqResponseError } from '../../iq-response.error';
+import { XmppChatAdapter } from '../../xmpp-chat-adapter.service';
+import { XmppChatConnectionService } from '../../xmpp-chat-connection.service';
+import { XmppClientFactoryService } from '../../xmpp-client-factory.service';
+import { MessageUuidPlugin } from '../message-uuid.plugin';
+import { MultiUserChatPlugin} from './multi-user-chat.plugin';
 import { jid } from '@xmpp/jid';
+import { Room } from './room';
+import { Affiliation } from './affiliation';
+import { Role } from './role';
 
 const defaultRoomConfiguration = {
     roomId: 'roomId',

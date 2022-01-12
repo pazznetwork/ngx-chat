@@ -30,7 +30,7 @@ import { MessageStatePlugin } from './services/adapters/xmpp/plugins/message-sta
 import { MessageUuidPlugin } from './services/adapters/xmpp/plugins/message-uuid.plugin';
 import { MessagePlugin } from './services/adapters/xmpp/plugins/message.plugin';
 import { MucSubPlugin } from './services/adapters/xmpp/plugins/muc-sub.plugin';
-import { MultiUserChatPlugin } from './services/adapters/xmpp/plugins/multi-user-chat.plugin';
+import { MultiUserChatPlugin } from './services/adapters/xmpp/plugins/multi-user-chat/multi-user-chat.plugin';
 import { PingPlugin } from './services/adapters/xmpp/plugins/ping.plugin';
 import { PublishSubscribePlugin } from './services/adapters/xmpp/plugins/publish-subscribe.plugin';
 import { PushPlugin } from './services/adapters/xmpp/plugins/push.plugin';

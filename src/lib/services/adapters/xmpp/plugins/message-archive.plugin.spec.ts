@@ -13,7 +13,8 @@ import { MessageArchivePlugin } from './message-archive.plugin';
 import SpyObj = jasmine.SpyObj;
 import { MessagePlugin } from './message.plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
-import { MultiUserChatPlugin, Room } from './multi-user-chat.plugin';
+import { MultiUserChatPlugin} from './multi-user-chat/multi-user-chat.plugin';
+import { Room } from './multi-user-chat/room';
 
 describe('message archive plugin', () => {
 

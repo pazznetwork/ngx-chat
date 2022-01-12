@@ -20,13 +20,13 @@ import { Direction, Message } from '../../core/message';
 import { Recipient } from '../../core/recipient';
 import { BlockPlugin } from '../../services/adapters/xmpp/plugins/block.plugin';
 import { MessageArchivePlugin } from '../../services/adapters/xmpp/plugins/message-archive.plugin';
-import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatMessageListRegistryService } from '../../services/chat-message-list-registry.service';
 import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ContactFactoryService } from '../../services/contact-factory.service';
 import { REPORT_USER_INJECTION_TOKEN, ReportUserService } from '../../services/report-user-service';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
+import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room.message';
 
 enum SubscriptionAction {
     PENDING_REQUEST,
