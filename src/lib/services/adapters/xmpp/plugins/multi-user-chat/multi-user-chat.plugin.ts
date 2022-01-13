@@ -654,10 +654,8 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return response;
     }
 
-    async unbanUser(userJid: JID, roomJid: JID): Promise<IqResponseStanza> {
-        if (userJid.bare().equals(roomJid)) {
-            throw new Error('occupant\'s room JID is not sufficient to unban an occupant, you must provide user\'s bare JID!');
-        }
+    async unbanUser(occupantJid: JID, roomJid: JID): Promise<IqResponseStanza> {
+        const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
 
         const banList = (await this.getBanList(roomJid)).map(bannedUser => bannedUser.userJid);
         this.logService.debug(`ban list: ${JSON.stringify(banList)}`);

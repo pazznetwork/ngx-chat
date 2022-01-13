@@ -12,9 +12,8 @@ import { XmppChatAdapter } from '../../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../../xmpp-client-factory.service';
 import { MessageUuidPlugin } from '../message-uuid.plugin';
-import { MultiUserChatPlugin} from './multi-user-chat.plugin';
+import { MultiUserChatPlugin } from './multi-user-chat.plugin';
 import { jid } from '@xmpp/jid';
-import { Room } from './room';
 import { Affiliation } from './affiliation';
 import { Role } from './role';
 
@@ -33,6 +32,13 @@ describe('multi user chat plugin', () => {
     let xmppClientMock: any;
     let multiUserChatPlugin: MultiUserChatPlugin;
     let logService: LogService;
+
+    const joinedPresenceStanza = (stanza: Stanza) => xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from},
+        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+            xml('item', {affiliation: 'owner', role: 'moderator'}),
+            xml('status', {code: '110'}),
+        ),
+    );
 
     beforeEach(() => {
         const mockClientFactory = new MockClientFactory();
@@ -77,7 +83,7 @@ describe('multi user chat plugin', () => {
             xmppClientMock.send.and.callFake((content: Stanza) => {
                 chatConnectionService.onStanzaReceived(
                     xml('presence', {from: content.attrs.to, to: content.attrs.from},
-                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'}),
+                        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER, type: 'error'}),
                         xml('error', {by: 'me@example.com', type: 'cancel'},
                             xml('not-allowed', {xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas'}),
                         ),
@@ -99,7 +105,7 @@ describe('multi user chat plugin', () => {
             xmppClientMock.send.and.callFake((content: Stanza) => {
                 chatConnectionService.onStanzaReceived(
                     xml('presence', {from: content.attrs.to, to: content.attrs.from},
-                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
                             xml('item', {affiliation: 'visitor', role: 'visitor'}),
                         ),
                     ),
@@ -122,7 +128,7 @@ describe('multi user chat plugin', () => {
                 if (content.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: content.attrs.to, to: content.attrs.from},
-                            xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
                                 xml('status', {code: '201'}),
@@ -160,7 +166,7 @@ describe('multi user chat plugin', () => {
                 if (content.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: content.attrs.to, to: content.attrs.from},
-                            xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
                                 xml('status', {code: '201'}),
@@ -214,7 +220,7 @@ describe('multi user chat plugin', () => {
                 if (content.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: content.attrs.to, to: content.attrs.from},
-                            xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
                                 xml('status', {code: '201'}),
@@ -273,7 +279,7 @@ describe('multi user chat plugin', () => {
             xmppClientMock.send.and.callFake((content: Stanza) => {
                 chatConnectionService.onStanzaReceived(
                     xml('presence', {from: content.attrs.to, to: content.attrs.from},
-                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'},
+                        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER, type: 'error'},
                             xml('item', {affiliation: 'member', role: 'participant'}),
                             xml('status', {code: '110'}),
                             xml('status', {code: '210'}),
@@ -332,7 +338,7 @@ describe('multi user chat plugin', () => {
                 } else if (stanza.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from},
-                            xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
                                 xml('status', {code: '201'}),
@@ -363,59 +369,32 @@ describe('multi user chat plugin', () => {
 
     describe('room operations handling', () => {
 
-        it('should handle kicked occupant', async (resolve) => {
+        it('should handle kicked occupant and leave room', async (resolve) => {
             const otherOccupantJid = parseJid('chatroom@conference.example.com/other');
 
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
-                chatConnectionService.onStanzaReceived(
-                    xml('presence', {
-                            from: stanza.attrs.to + '/' + otherOccupantJid.resource,
-                            to: stanza.attrs.from,
-                            type: 'unavailable',
-                        },
-                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
-                            xml('item', {affiliation: 'none', role: 'none'}),
-                            xml('status', {code: '307'}),
-                        ),
-                    ),
-                );
-            });
-
-            const room: Room = new Room(jid('chatroom@conference.example.com'), logService);
-
-            room.onOccupantChanged$.pipe(
-                filter(({change}) => change === 'kicked')
-            ).subscribe(({occupant}) => {
-                expect(occupant.nick).toEqual(otherOccupantJid.resource);
-                expect(occupant.role).toEqual(Role.none);
-                expect(occupant.affiliation).toEqual(Affiliation.none);
-                resolve();
-            });
-            await multiUserChatPlugin.kickOccupant(otherOccupantJid.resource, room.roomJid);
-        });
-
-        it('should leave room if kicked', async (resolve) => {
-            const otherOccupantJid = parseJid('chatroom@conference.example.com/other');
-
-            xmppClientMock.send.and.callFake((stanza: Stanza) => {
-                chatConnectionService.onStanzaReceived(
-                    xml('presence', {
-                            from: stanza.attrs.to + '/' + otherOccupantJid.resource,
-                            to: otherOccupantJid.toString(),
-                            type: 'unavailable',
-                        },
-                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
-                            xml('item', {affiliation: 'none', role: 'none'},
-                                xml('actor', {nick: 'me'}),
-                                xml('reason', null, 'reason you got kicked'),
+                if (stanza.attrs.type) {
+                    chatConnectionService.onStanzaReceived(
+                        xml('presence', {
+                                from: stanza.attrs.to + '/' + otherOccupantJid.resource,
+                                to: stanza.attrs.from,
+                                type: 'unavailable',
+                            },
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                                xml('item', {affiliation: 'none', role: 'none'}),
+                                xml('status', {code: '307'}),
+                                xml('status', {code: '110'}),
                             ),
-                            xml('status', {code: '307'}),
-                            xml('status', {code: '110'}),
                         ),
-                    ),
-                );
+                    );
+                } else {
+                    chatConnectionService.onStanzaReceived(joinedPresenceStanza(stanza));
+                }
             });
-            const room: Room = new Room(jid('chatroom@conference.example.com'), logService);
+
+            const room = await multiUserChatPlugin.joinRoom(otherOccupantJid);
+
+            expect(multiUserChatPlugin.rooms$.getValue().length).toEqual(1);
 
             room.onOccupantChanged$.pipe(
                 filter(({change}) => change === 'kicked')
@@ -426,40 +405,36 @@ describe('multi user chat plugin', () => {
                 expect(multiUserChatPlugin.rooms$.getValue().length).toEqual(0);
                 resolve();
             });
-
-            await multiUserChatPlugin.joinRoom(otherOccupantJid);
-            expect(multiUserChatPlugin.rooms$.getValue().length).toEqual(1);
-
-            await multiUserChatPlugin.kickOccupant(
-                otherOccupantJid.resource,
-                jid('chatroom@conference.example.com'),
-                'reason you got kicked',
-            );
+            await multiUserChatPlugin.kickOccupant(otherOccupantJid.resource, room.roomJid);
         });
 
         it('should handle banned occupant', async (resolve) => {
             const otherOccupantJid = parseJid('chatroom@conference.example.com/other');
 
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
-                chatConnectionService.onStanzaReceived(
-                    xml('presence', {
-                            from: stanza.attrs.to + '/' + otherOccupantJid.resource,
-                            to: stanza.attrs.from,
-                            type: 'unavailable',
-                        },
-                        xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
-                            xml('item', {
-                                affiliation: 'outcast',
-                                role: Role.none,
-                                jid: otherOccupantJid.toString(),
-                            }),
-                            xml('status', {code: '301'}),
+                if (stanza.attrs.type) {
+                    chatConnectionService.onStanzaReceived(
+                        xml('presence', {
+                                from: stanza.attrs.to + '/' + otherOccupantJid.resource,
+                                to: stanza.attrs.from,
+                                type: 'unavailable',
+                            },
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                                xml('item', {
+                                    affiliation: 'outcast',
+                                    role: Role.none,
+                                    jid: otherOccupantJid.toString(),
+                                }),
+                                xml('status', {code: '301'}),
+                            ),
                         ),
-                    ),
-                );
+                    );
+                } else {
+                    chatConnectionService.onStanzaReceived(joinedPresenceStanza(stanza));
+                }
             });
 
-            const room: Room = new Room(jid('chatroom@conference.example.com'), logService);
+            const room = await multiUserChatPlugin.joinRoom(otherOccupantJid);
 
             room.onOccupantChanged$.pipe(
                 filter(({change}) => change === 'banned')
@@ -485,7 +460,7 @@ describe('multi user chat plugin', () => {
                                 to: stanza.attrs.from,
                                 type: 'unavailable',
                             },
-                            xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'},
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
                                 xml('item', {
                                     affiliation: 'outcast',
                                     role: Role.none,
@@ -540,33 +515,37 @@ describe('multi user chat plugin', () => {
         });
 
         it('should be able to change nick', async (resolve) => {
-
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
-                chatConnectionService.onStanzaReceived(
-                    xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from, type: 'unavailable'},
-                        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
-                            xml('item', {
-                                nick: 'newMe',
-                                jid: chatConnectionService.userJid.toString(),
-                            }),
-                            xml('status', {code: '303'}),
-                            xml('status', {code: '110'}),
+                if (stanza.getChild('x', MultiUserChatPlugin.MUC)) {
+                    chatConnectionService.onStanzaReceived(joinedPresenceStanza(stanza));
+                } else {
+                    chatConnectionService.onStanzaReceived(
+                        xml('presence', {from: myOccupantJid.toString(), to: stanza.attrs.from, type: 'unavailable'},
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                                xml('item', {
+                                    nick: 'newNick',
+                                    jid: myOccupantJid.toString(),
+                                }),
+                                xml('status', {code: '303'}),
+                                xml('status', {code: '110'}),
+                            ),
                         ),
-                    ),
-                );
+                    );
+                }
             });
 
-            const room: Room = new Room(jid('chatroom@conference.example.com'), logService);
+            const myOccupantJid = parseJid('chatroom@conference.example.com/something');
+            const room = await multiUserChatPlugin.joinRoom(myOccupantJid);
 
             room.onOccupantChanged$.pipe(
                 filter(({change}) => change === 'changedNick')
             ).subscribe(({occupant, newNick}) => {
-                expect(newNick).toEqual('newMe');
-                expect(occupant.occupantJid.toString()).toEqual(chatConnectionService.userJid.toString());
+                expect(newNick).toEqual('newNick');
+                expect(occupant.occupantJid.toString()).toEqual(myOccupantJid.toString());
                 resolve();
             });
 
-            await multiUserChatPlugin.changeUserNickname('newMe', jid('chatroom@conference.example.com'));
+            await multiUserChatPlugin.changeUserNickname('newNick', room.roomJid);
         });
 
         it('should be able to change room topic', async () => {
@@ -574,7 +553,7 @@ describe('multi user chat plugin', () => {
                 if (stanza.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from},
-                            xml('x', {xmlns: 'http://jabber.org/protocol/muc#user', type: 'error'},
+                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER, type: 'error'},
                                 xml('item', {affiliation: 'member', role: 'participant'}),
                                 xml('status', {code: '110'}),
                                 xml('status', {code: '210'}),
