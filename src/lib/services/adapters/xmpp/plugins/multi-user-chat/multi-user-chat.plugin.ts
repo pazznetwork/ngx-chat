@@ -259,6 +259,12 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             } else if (statusCodes.includes('303')) {
                 stanzaHandled = room.handleOccupantChangedNick(subjectOccupant, isCurrenUser, xEl.getChild('item').attrs.nick);
                 this.rooms$.next(this.rooms$.getValue());
+            } else if (statusCodes.includes('321') && subjectOccupant.affiliation === Affiliation.none
+                && subjectOccupant.role === Role.none) {
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                stanzaHandled = room.handleOccupantMembershipRevoked(subjectOccupant, isCurrenUser);
             } else {
                 if (isCurrenUser) {
                     this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));

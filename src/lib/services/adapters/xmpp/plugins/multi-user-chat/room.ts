@@ -5,7 +5,7 @@ import { LogService } from '../../../../log.service';
 import { ReplaySubject, Subject } from 'rxjs';
 import { jid as parseJid } from '@xmpp/client';
 import { isJid, Recipient } from '../../../../../core/recipient';
-import { RoomMetadata} from './multi-user-chat.plugin';
+import { RoomMetadata } from './multi-user-chat.plugin';
 import { RoomOccupant } from './room.occupant';
 import { RoomMessage } from './room.message';
 import { OccupantChange } from './occupant.change';
@@ -148,6 +148,17 @@ export class Room {
         return true;
     }
 
+    handleOccupantMembershipRevoked(occupant: RoomOccupant, isCurrentUser: boolean) {
+        this.removeOccupant(occupant);
+        if (isCurrentUser) {
+            this.roomOccupants.clear();
+            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
+            this.logService.info(`your membership got revoked and you got kicked from member-only room: ${this.roomJid.toString()}`);
+        }
+        this.onOccupantChangedSubject.next({occupant, change: 'revokedMembership'});
+        return true;
+    }
+
     private addOccupant(occupant: RoomOccupant) {
         this.roomOccupants.set(occupant.occupantJid.toString(), occupant);
         this.occupantsSubject.next([...this.roomOccupants.values()]);
@@ -158,5 +169,4 @@ export class Room {
             this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
         }
     }
-
 }

@@ -106,7 +106,7 @@ export class MucComponent implements OnInit, OnDestroy {
             });
 
         // need to explicitly pass type parameters, otherwise TS selects the wrong overload and reports a deprecation
-        merge<OccupantChange, OccupantChange, OccupantChange>(
+        merge<OccupantChange, OccupantChange, OccupantChange, OccupantChange>(
             onOccupantChanged$.pipe(
                 filter(({change}) => change === 'kicked'),
             ),
@@ -115,6 +115,9 @@ export class MucComponent implements OnInit, OnDestroy {
             ),
             onOccupantChanged$.pipe(
                 filter(({change}) => change === 'left'),
+            ),
+            onOccupantChanged$.pipe(
+                filter(({change}) => change === 'revokedMembership'),
             ),
         )
             .pipe(takeUntil(this.ngDestroySubject))
@@ -136,45 +139,45 @@ export class MucComponent implements OnInit, OnDestroy {
         this.selectedRoomSubject.next(room);
     }
 
-    leaveRoom() {
-        this.multiUserChatPlugin.leaveRoom(this.currentRoom.roomJid);
+    async leaveRoom() {
+        await this.multiUserChatPlugin.leaveRoom(this.currentRoom.roomJid);
         this.selectedRoomSubject.next(null);
     }
 
-    changeRoomSubject() {
-        this.multiUserChatPlugin.changeRoomSubject(this.currentRoom.roomJid, this.subject);
+    async changeRoomSubject() {
+        await this.multiUserChatPlugin.changeRoomSubject(this.currentRoom.roomJid, this.subject);
     }
 
-    inviteUser() {
-        this.multiUserChatPlugin.inviteUser(jid(this.inviteJid), this.currentRoom.roomJid);
+    async inviteUser() {
+        await this.multiUserChatPlugin.inviteUser(jid(this.inviteJid), this.currentRoom.roomJid);
     }
 
-    changeNick() {
-        this.multiUserChatPlugin.changeUserNickname(this.nick, this.currentRoom.roomJid);
+    async changeNick() {
+        await this.multiUserChatPlugin.changeUserNickname(this.nick, this.currentRoom.roomJid);
     }
 
-    kick(occupant: RoomOccupant) {
-        this.multiUserChatPlugin.kickOccupant(occupant.nick, this.currentRoom.roomJid);
+    async kick(occupant: RoomOccupant) {
+        await this.multiUserChatPlugin.kickOccupant(occupant.nick, this.currentRoom.roomJid);
     }
 
-    ban(occupant: RoomOccupant) {
-        this.multiUserChatPlugin.banUser(occupant.occupantJid, this.currentRoom.roomJid);
+    async ban(occupant: RoomOccupant) {
+        await this.multiUserChatPlugin.banUser(occupant.occupantJid, this.currentRoom.roomJid);
     }
 
-    grantMembership() {
-        this.multiUserChatPlugin.grantMembership(jid(this.memberJid), this.currentRoom.roomJid);
+    async grantMembership() {
+        await this.multiUserChatPlugin.grantMembership(jid(this.memberJid), this.currentRoom.roomJid);
     }
 
-    revokeMembership() {
-        this.multiUserChatPlugin.revokeMembership(jid(this.memberJid), this.currentRoom.roomJid);
+    async revokeMembership() {
+        await this.multiUserChatPlugin.revokeMembership(jid(this.memberJid), this.currentRoom.roomJid);
     }
 
-    grantModeratorStatus() {
-        this.multiUserChatPlugin.grantModeratorStatus(this.moderatorNick, this.currentRoom.roomJid);
+    async grantModeratorStatus() {
+        await this.multiUserChatPlugin.grantModeratorStatus(this.moderatorNick, this.currentRoom.roomJid);
     }
 
-    revokeModeratorStatus() {
-        this.multiUserChatPlugin.revokeModeratorStatus(this.moderatorNick, this.currentRoom.roomJid);
+    async revokeModeratorStatus() {
+        await this.multiUserChatPlugin.revokeModeratorStatus(this.moderatorNick, this.currentRoom.roomJid);
     }
 
     private isOccupantCurrentUser(occupant: RoomOccupant) {
