@@ -171,7 +171,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
         const contact = this.chatService.getOrCreateContactById(jid);
         contact.pendingIn$.next(false);
         this.chatService.chatConnectionService.send(
-            xml('presence', {to: jid, type: 'subscribed', id: this.chatService.chatConnectionService.getNextIqId()})
+            xml('presence', {to: jid, type: 'subscribed', id: this.chatService.chatConnectionService.getNextRequestId()}),
         );
     }
 
@@ -183,15 +183,15 @@ export class RosterPlugin extends AbstractXmppPlugin {
         return new Promise((resolve) =>
             this.chatService.chatConnectionService.sendIq(
                 xml('iq', {type: 'get'},
-                    xml('query', {xmlns: 'jabber:iq:roster'})
-                )
+                    xml('query', {xmlns: 'jabber:iq:roster'}),
+                ),
             ).then(
                 (responseStanza: Stanza) => resolve(this.convertToContacts(responseStanza)),
                 (responseStanza: Stanza) => {
                     this.logService.error('error converting roster contact push', responseStanza.toString());
                     resolve([]);
-                }
-            )
+                },
+            ),
         );
     }
 
@@ -235,7 +235,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
 
     private sendSubscribeToPresence(jid: string) {
         this.chatService.chatConnectionService.send(
-            xml('presence', {id: this.chatService.chatConnectionService.getNextIqId(), to: jid, type: 'subscribe'})
+            xml('presence', {id: this.chatService.chatConnectionService.getNextRequestId(), to: jid, type: 'subscribe'}),
         );
     }
 
@@ -259,7 +259,7 @@ export class RosterPlugin extends AbstractXmppPlugin {
 
     private sendWithdrawPresenceSubscription(jid: string) {
         this.chatService.chatConnectionService.send(
-            xml('presence', {id: this.chatService.chatConnectionService.getNextIqId(), to: jid, type: 'unsubscribed'})
+            xml('presence', {id: this.chatService.chatConnectionService.getNextRequestId(), to: jid, type: 'unsubscribed'}),
         );
     }
 

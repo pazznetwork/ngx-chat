@@ -1,29 +1,51 @@
 import { JID } from '@xmpp/jid';
+import { ReplaySubject, Subject } from 'rxjs';
 import { dummyAvatarRoom } from '../../../../../core/contact-avatar';
 import { DateMessagesGroup, MessageStore } from '../../../../../core/message-store';
 import { LogService } from '../../../../log.service';
-import { ReplaySubject, Subject } from 'rxjs';
 import { jid as parseJid } from '@xmpp/client';
 import { isJid, Recipient } from '../../../../../core/recipient';
 import { RoomMetadata } from './multi-user-chat.plugin';
-import { RoomOccupant } from './room.occupant';
-import { RoomMessage } from './room.message';
-import { OccupantChange } from './occupant.change';
+import { RoomOccupant } from './room-occupant';
+import { RoomMessage } from './room-message';
+import { OccupantChange } from './occupant-change';
 
 export class Room {
 
     readonly recipientType = 'room';
     readonly roomJid: JID;
     occupantJid: JID | undefined;
-    name: string;
+
+    get nick(): string | undefined {
+        return this.occupantJid?.resource;
+    }
+
+    set nick(nick: string) {
+        const occupantJid = parseJid(this.roomJid.toString());
+        occupantJid.resource = nick;
+        this.occupantJid = occupantJid;
+    }
+
+    // tslint:disable-next-line:variable-name
+    private _name: string;
+    get name(): string {
+        return this._name;
+    }
+
+    set name(name: string | undefined) {
+        this._name = !!name ? name : this.roomJid.local;
+    }
+
+    description = '';
+    subject = '';
     avatar = dummyAvatarRoom;
     metadata: RoomMetadata = {};
     private messageStore: MessageStore<RoomMessage>;
     private logService: LogService;
     private roomOccupants = new Map<string, RoomOccupant>();
 
-    private onOccupantChangedSubject = new Subject<OccupantChange>();
-    readonly onOccupantChanged$ = this.onOccupantChangedSubject.asObservable();
+    private onOccupantChangeSubject = new ReplaySubject<OccupantChange>(Infinity, 1000);
+    readonly onOccupantChange$ = this.onOccupantChangeSubject.asObservable();
 
     private occupantsSubject = new ReplaySubject<RoomOccupant[]>(1);
     readonly occupants$ = this.occupantsSubject.asObservable();
@@ -32,13 +54,10 @@ export class Room {
         return this.roomJid;
     }
 
-    constructor(roomJid: JID, logService: LogService, nick?: string, name?: string) {
+    constructor(roomJid: JID, logService: LogService) {
         this.roomJid = roomJid.bare();
-        this.name = name ?? this.roomJid.toString();
+        this.name = undefined;
         this.logService = logService;
-        if (nick) {
-            this.setNick(nick);
-        }
         this.messageStore = new MessageStore<RoomMessage>(logService);
     }
 
@@ -70,10 +89,6 @@ export class Room {
         return this.messageStore.mostRecentMessageSent;
     }
 
-    setNick(nick: string): void {
-        this.occupantJid = parseJid(`${this.roomJid}/${nick}`);
-    }
-
     addMessage(message: RoomMessage): void {
         this.messageStore.addMessage(message);
     }
@@ -86,52 +101,60 @@ export class Room {
         return false;
     }
 
-    handleOccupantLeft(occupant: RoomOccupant, isCurrenUser: boolean) {
-        this.removeOccupant(occupant);
-        if (isCurrenUser) {
-            this.roomOccupants.clear();
-            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
-        }
-        this.logService.debug(`user ${occupant.occupantJid.toString()} left room '${this.roomJid.toString()}'`);
-        this.onOccupantChangedSubject.next({occupant, change: 'left'});
+    handleOccupantJoined(occupant: RoomOccupant, isCurrentUser: boolean) {
+        this.addOccupant(occupant);
+
+        this.onOccupantChangeSubject.next({change: 'joined', occupant, isCurrentUser});
+        this.logService.debug(`occupant joined room: occupantJid=${occupant.occupantJid.toString()}, roomJid=${this.roomJid.toString()}`);
         return true;
     }
 
-    handleOccupantJoined(occupant: RoomOccupant) {
-        this.addOccupant(occupant);
+    handleOccupantLeft(occupant: RoomOccupant, isCurrentUser: boolean) {
+        this.removeOccupant(occupant, isCurrentUser);
+        this.logService.debug(`occupant left room: occupantJid=${occupant.occupantJid.toString()}, roomJid=${this.roomJid.toString()}`);
+        this.onOccupantChangeSubject.next({change: 'left', occupant, isCurrentUser});
+        return true;
+    }
 
-        this.onOccupantChangedSubject.next({occupant, change: 'joined'});
-        this.logService.debug(`user '${occupant}' joined room '${this.roomJid.toString()}'`);
+    handleOccupantConnectionError(occupant: RoomOccupant, isCurrentUser: boolean) {
+        this.removeOccupant(occupant, isCurrentUser);
+        this.logService.debug(`occupant left room due to connection error: occupantJid=${occupant.occupantJid.toString()}, roomJid=${this.roomJid.toString()}`);
+        this.onOccupantChangeSubject.next({change: 'leftOnConnectionError', occupant, isCurrentUser});
         return true;
     }
 
     handleOccupantKicked(occupant: RoomOccupant, isCurrentUser: boolean, actor?: string, reason?: string) {
-        this.removeOccupant(occupant);
+        this.removeOccupant(occupant, isCurrentUser);
         if (isCurrentUser) {
-            this.roomOccupants.clear();
-            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
-            this.logService.info(`you got kicked from room! room jid: ${this.roomJid.toString()}, by: ${actor}, with reason: ${reason}`);
+            this.logService.info(`you got kicked from room! roomJid=${this.roomJid.toString()}, by=${actor}, reason=${reason}`);
         }
-        this.logService.debug(`user got kicked: ${JSON.stringify(occupant)}`);
-        this.onOccupantChangedSubject.next({occupant, change: 'kicked'});
+        this.logService.debug(`occupant got kicked: occupantJid=${occupant.occupantJid.toString()}, roomJid=${this.roomJid.toString()}`);
+        this.onOccupantChangeSubject.next({change: 'kicked', occupant, isCurrentUser, actor, reason});
         return true;
     }
 
-    handleOccupantBanned(occupant: RoomOccupant, isCurrentUser: boolean, actor: string, reason: string) {
-        this.removeOccupant(occupant);
+    handleOccupantBanned(occupant: RoomOccupant, isCurrentUser: boolean, actor?: string, reason?: string) {
+        this.removeOccupant(occupant, isCurrentUser);
         if (isCurrentUser) {
-            this.roomOccupants.clear();
-            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
-            this.logService.info(`you got banned from room! room jid: ${this.roomJid.toString()}, by: ${actor}, with reason: ${reason}`);
+            this.logService.info(`you got banned from room! roomJid=${this.roomJid.toString()}, by=${actor}, reason=${reason}`);
         }
-        this.logService.debug(`user got banned: ${JSON.stringify(occupant)}`);
-        this.onOccupantChangedSubject.next({occupant, change: 'banned'});
+        this.logService.debug(`occupant got banned: occupantJid=${occupant.occupantJid.toString()}, roomJid=${this.roomJid.toString()}`);
+        this.onOccupantChangeSubject.next({change: 'banned', occupant, isCurrentUser, actor, reason});
+        return true;
+    }
+
+    handleOccupantLostMembership(occupant: RoomOccupant, isCurrentUser: boolean) {
+        this.removeOccupant(occupant, isCurrentUser);
+        if (isCurrentUser) {
+            this.logService.info(`your membership got revoked and you got kicked from member-only room: ${this.roomJid.toString()}`);
+        }
+        this.onOccupantChangeSubject.next({change: 'lostMembership', occupant, isCurrentUser});
         return true;
     }
 
     handleOccupantChangedNick(occupant: RoomOccupant, isCurrentUser: boolean, newNick: string) {
         if (isCurrentUser) {
-            this.setNick(newNick);
+            this.nick = newNick;
         }
         let existingOccupant = this.roomOccupants.get(occupant.occupantJid.toString());
         if (!existingOccupant) {
@@ -143,19 +166,8 @@ export class Room {
         this.roomOccupants.delete(occupant.occupantJid.toString());
         this.roomOccupants.set(existingOccupant.occupantJid.toString(), existingOccupant);
 
-        this.logService.debug(`user changed nick from ${occupant.nick} to ${newNick}`);
-        this.onOccupantChangedSubject.next({occupant, newNick, change: 'changedNick'});
-        return true;
-    }
-
-    handleOccupantMembershipRevoked(occupant: RoomOccupant, isCurrentUser: boolean) {
-        this.removeOccupant(occupant);
-        if (isCurrentUser) {
-            this.roomOccupants.clear();
-            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
-            this.logService.info(`your membership got revoked and you got kicked from member-only room: ${this.roomJid.toString()}`);
-        }
-        this.onOccupantChangedSubject.next({occupant, change: 'revokedMembership'});
+        this.logService.debug(`occupant changed nick: from=${occupant.nick}, to=${newNick}, occupantJid=${occupant.occupantJid.toString()}, roomJid=${this.roomJid.toString()}`);
+        this.onOccupantChangeSubject.next({change: 'changedNick', occupant, newNick, isCurrentUser});
         return true;
     }
 
@@ -164,9 +176,14 @@ export class Room {
         this.occupantsSubject.next([...this.roomOccupants.values()]);
     }
 
-    private removeOccupant(occupant: RoomOccupant) {
-        if (this.roomOccupants.delete(occupant.occupantJid.toString())) {
-            this.occupantsSubject.next(Array.from(this.roomOccupants.values()));
+    private removeOccupant(occupant: RoomOccupant, isCurrentUser: boolean) {
+        if (isCurrentUser) {
+            this.roomOccupants.clear();
+            this.occupantsSubject.next([]);
+        } else {
+            if (this.roomOccupants.delete(occupant.occupantJid.toString())) {
+                this.occupantsSubject.next([...this.roomOccupants.values()]);
+            }
         }
     }
 }

@@ -12,12 +12,14 @@ import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 import { PUBSUB_EVENT_XMLNS } from './publish-subscribe.plugin';
 import { MessagePlugin } from './message.plugin';
 import { MUC_SUB_EVENT_TYPE } from './muc-sub.plugin';
+import { Form, serializeToSubmitForm } from '../../../../core/form';
 
 /**
  * https://xmpp.org/extensions/xep-0313.html
  * Message Archive Management
  */
 export class MessageArchivePlugin extends AbstractXmppPlugin {
+    static readonly MAM_NS = 'urn:xmpp:mam:2';
 
     private readonly mamMessageReceived$ = new Subject<void>();
 
@@ -47,7 +49,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
     private async requestNewestMessages(): Promise<void> {
         await this.chatService.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
-                xml('query', {xmlns: 'urn:xmpp:mam:2'},
+                xml('query', {xmlns: MessageArchivePlugin.MAM_NS},
                     xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
                         xml('max', {}, 250),
                         xml('before'),
@@ -61,24 +63,24 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         // for user-to-user chats no to-attribute is necessary, in case of multi-user-chats it has to be set to the bare room jid
         const to = recipient.recipientType === 'room' ? recipient.roomJid.toString() : undefined;
 
+        const form: Form = {
+            type: 'submit',
+            instructions: [],
+            fields: [
+                {type: 'hidden', variable: 'FORM_TYPE', value: MessageArchivePlugin.MAM_NS},
+                ...(recipient.recipientType === 'contact'
+                    ? [{type: 'jid-single', variable: 'with', value: recipient.jidBare}] as const
+                    : []),
+                ...(recipient.oldestMessage
+                    ? [{type: 'text-single', variable: 'end', value: recipient.oldestMessage.datetime.toISOString()}] as const
+                    : []),
+            ],
+        };
+
         const request =
             xml('iq', {type: 'set', to},
-                xml('query', {xmlns: 'urn:xmpp:mam:2'},
-                    xml('x', {xmlns: 'jabber:x:data', type: 'submit'},
-                        xml('field', {var: 'FORM_TYPE', type: 'hidden'},
-                            xml('value', {}, 'urn:xmpp:mam:2'),
-                        ),
-                        recipient.recipientType === 'contact' ?
-                            xml('field', {var: 'with'},
-                                xml('value', {}, recipient.jidBare),
-                            )
-                            : undefined,
-                        recipient.oldestMessage ?
-                            xml('field', {var: 'end'},
-                                xml('value', {}, recipient.oldestMessage.datetime.toISOString()),
-                            )
-                            : undefined,
-                    ),
+                xml('query', {xmlns: MessageArchivePlugin.MAM_NS},
+                    serializeToSubmitForm(form),
                     xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
                         xml('max', {}, 100),
                         xml('before'),
@@ -96,7 +98,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
 
         let lastMamResponse = await this.chatService.chatConnectionService.sendIq(
             xml('iq', {type: 'set'},
-                xml('query', {xmlns: 'urn:xmpp:mam:2'}),
+                xml('query', {xmlns: MessageArchivePlugin.MAM_NS}),
             ),
         );
 
@@ -104,7 +106,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
             const lastReceivedMessageId = lastMamResponse.getChild('fin').getChild('set').getChildText('last');
             lastMamResponse = await this.chatService.chatConnectionService.sendIq(
                 xml('iq', {type: 'set'},
-                    xml('query', {xmlns: 'urn:xmpp:mam:2'},
+                    xml('query', {xmlns: MessageArchivePlugin.MAM_NS},
                         xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
                             xml('max', {}, 250),
                             xml('after', {}, lastReceivedMessageId),
@@ -117,9 +119,11 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
 
     private async supportsMessageArchiveManagement(): Promise<boolean> {
         const supportsMessageArchiveManagement = await this.serviceDiscoveryPlugin.supportsFeature(
-            this.chatService.chatConnectionService.userJid.bare().toString(), 'urn:xmpp:mam:2');
+            this.chatService.chatConnectionService.userJid.bare().toString(),
+            MessageArchivePlugin.MAM_NS,
+        );
         if (!supportsMessageArchiveManagement) {
-            this.logService.info('server doesnt support MAM');
+            this.logService.info('server doesn\'t support MAM');
         }
         return supportsMessageArchiveManagement;
     }
@@ -134,7 +138,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
 
     private isMamMessageStanza(stanza: Stanza): boolean {
         const result = stanza.getChild('result');
-        return stanza.name === 'message' && result?.attrs.xmlns === 'urn:xmpp:mam:2';
+        return stanza.name === 'message' && result?.attrs.xmlns === MessageArchivePlugin.MAM_NS;
     }
 
     private handleMamMessageStanza(stanza: Stanza): void {

@@ -2,6 +2,8 @@
  * Public API Surface of ngx-chat
  */
 
+export { jid as parseJid } from '@xmpp/client';
+export { JID } from '@xmpp/jid';
 export * from './lib/components/chat-filedrop/file-drop.component';
 export * from './lib/components/chat-message-input/chat-message-input.component';
 export * from './lib/components/chat-message-list/chat-message-list.component';
@@ -11,6 +13,7 @@ export * from './lib/components/chat-window/chat-window.component';
 export * from './lib/components/chat.component';
 export * from './lib/core/contact';
 export * from './lib/core/contact-avatar';
+export * from './lib/core/form';
 export * from './lib/core/get-domain';
 export * from './lib/core/id-generator';
 export * from './lib/core/log-in-request';
@@ -48,6 +51,7 @@ export * from './lib/services/adapters/xmpp/plugins/unread-message-count.plugin'
 export * from './lib/services/adapters/xmpp/xmpp-chat-adapter.service';
 export * from './lib/services/adapters/xmpp/xmpp-chat-connection.service';
 export * from './lib/services/adapters/xmpp/xmpp-client-factory.service';
+export * from './lib/services/adapters/xmpp/xmpp-response.error';
 export * from './lib/services/chat-background-notification.service';
 export * from './lib/services/chat-list-state.service';
 export * from './lib/services/chat-message-list-registry.service';
@@ -57,15 +61,11 @@ export * from './lib/services/log.service';
 export * from './lib/services/report-user-service';
 export { LinkOpener, LINK_OPENER_TOKEN } from './lib/components/chat-message-link/chat-message-link.component';
 export { selectFile } from './lib/core/utils-file';
-export { jid as parseJid } from '@xmpp/client';
-export { JID } from '@xmpp/jid';
 export { Room } from './lib/services/adapters/xmpp/plugins/multi-user-chat/room';
-export { Affiliation } from './lib/services/adapters/xmpp/plugins/multi-user-chat/affiliation';
-export { Role } from './lib/services/adapters/xmpp/plugins/multi-user-chat/role';
-export { RoomUser } from './lib/services/adapters/xmpp/plugins/multi-user-chat/room.user';
-export { RoomOccupant } from './lib/services/adapters/xmpp/plugins/multi-user-chat/room.occupant';
+export { Affiliation, AffiliationModification } from './lib/services/adapters/xmpp/plugins/multi-user-chat/affiliation';
+export { Role, RoleModification } from './lib/services/adapters/xmpp/plugins/multi-user-chat/role';
+export { RoomUser } from './lib/services/adapters/xmpp/plugins/multi-user-chat/room-user';
+export { RoomOccupant } from './lib/services/adapters/xmpp/plugins/multi-user-chat/room-occupant';
 export { Invitation } from './lib/services/adapters/xmpp/plugins/multi-user-chat/invitation';
-export { RoomMessage } from './lib/services/adapters/xmpp/plugins/multi-user-chat/room.message';
-export { RoleModification } from './lib/services/adapters/xmpp/plugins/multi-user-chat/role.modification';
-export { OccupantChange } from './lib/services/adapters/xmpp/plugins/multi-user-chat/occupant.change';
-export { AffiliationModification } from './lib/services/adapters/xmpp/plugins/multi-user-chat/affiliation.modification';
+export { RoomMessage } from './lib/services/adapters/xmpp/plugins/multi-user-chat/room-message';
+export { OccupantChange } from './lib/services/adapters/xmpp/plugins/multi-user-chat/occupant-change';

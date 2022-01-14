@@ -7,7 +7,7 @@ import { testLogService } from '../../../../../test/log-service';
 import { MockClientFactory } from '../../../../../test/xmppClientMock';
 import { ContactFactoryService } from '../../../../contact-factory.service';
 import { LogService } from '../../../../log.service';
-import { IqResponseError } from '../../iq-response.error';
+import { XmppResponseError } from '../../xmpp-response.error';
 import { XmppChatAdapter } from '../../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../../xmpp-client-factory.service';
@@ -16,6 +16,7 @@ import { MultiUserChatPlugin } from './multi-user-chat.plugin';
 import { jid } from '@xmpp/jid';
 import { Affiliation } from './affiliation';
 import { Role } from './role';
+import { OccupantNickChange } from './occupant-change';
 
 const defaultRoomConfiguration = {
     roomId: 'roomId',
@@ -194,7 +195,7 @@ describe('multi user chat plugin', () => {
                     chatConnectionService.onStanzaReceived(
                         xml('iq', {from: content.attrs.to, to: content.attrs.from, type: 'error', id: content.attrs.id},
                             xml('error', {type: 'modify'},
-                                xml('not-acceptable', {xmlns: IqResponseError.ERROR_ELEMENT_NS}),
+                                xml('not-acceptable', {xmlns: XmppResponseError.ERROR_ELEMENT_NS}),
                             ),
                         ),
                     );
@@ -207,9 +208,9 @@ describe('multi user chat plugin', () => {
                 await multiUserChatPlugin.createRoom(defaultRoomConfiguration);
                 fail('should be rejected');
             } catch (e: unknown) {
-                expect(e instanceof IqResponseError).toBeTrue();
-                expect((e as IqResponseError).errorType).toBe('modify');
-                expect((e as IqResponseError).errorCondition).toBe('not-acceptable');
+                expect(e instanceof XmppResponseError).toBeTrue();
+                expect((e as XmppResponseError).errorType).toBe('modify');
+                expect((e as XmppResponseError).errorCondition).toBe('not-acceptable');
             }
         });
 
@@ -396,8 +397,8 @@ describe('multi user chat plugin', () => {
 
             expect(multiUserChatPlugin.rooms$.getValue().length).toEqual(1);
 
-            room.onOccupantChanged$.pipe(
-                filter(({change}) => change === 'kicked')
+            room.onOccupantChange$.pipe(
+                filter(({change}) => change === 'kicked'),
             ).subscribe(({occupant}) => {
                 expect(occupant.nick).toEqual(otherOccupantJid.resource);
                 expect(occupant.role).toEqual(Role.none);
@@ -436,8 +437,8 @@ describe('multi user chat plugin', () => {
 
             const room = await multiUserChatPlugin.joinRoom(otherOccupantJid);
 
-            room.onOccupantChanged$.pipe(
-                filter(({change}) => change === 'banned')
+            room.onOccupantChange$.pipe(
+                filter(({change}) => change === 'banned'),
             ).subscribe(({occupant}) => {
                 expect(occupant.nick).toEqual(otherOccupantJid.resource);
                 expect(occupant.role).toEqual(Role.none);
@@ -537,9 +538,9 @@ describe('multi user chat plugin', () => {
             const myOccupantJid = parseJid('chatroom@conference.example.com/something');
             const room = await multiUserChatPlugin.joinRoom(myOccupantJid);
 
-            room.onOccupantChanged$.pipe(
-                filter(({change}) => change === 'changedNick')
-            ).subscribe(({occupant, newNick}) => {
+            room.onOccupantChange$.pipe(
+                filter(({change}) => change === 'changedNick'),
+            ).subscribe(({occupant, newNick}: OccupantNickChange) => {
                 expect(newNick).toEqual('newNick');
                 expect(occupant.occupantJid.toString()).toEqual(myOccupantJid.toString());
                 resolve();

@@ -7,8 +7,8 @@ import { ChatListStateService, ChatWindowState } from '../../services/chat-list-
 import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';
 import { ChatMessageListComponent } from '../chat-message-list/chat-message-list.component';
-import {FILE_UPLOAD_HANDLER_TOKEN, FileUploadHandler} from '../../hooks/file-upload-handler';
-import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room.message';
+import { FILE_UPLOAD_HANDLER_TOKEN, FileUploadHandler } from '../../hooks/file-upload-handler';
+import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room-message';
 
 @Component({
     selector: 'ngx-chat-window',

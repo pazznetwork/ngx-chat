@@ -3,6 +3,8 @@ import {
     Affiliation,
     CHAT_SERVICE_TOKEN,
     ChatService,
+    Form,
+    JID,
     MUC_SUB_EVENT_TYPE,
     MucSubPlugin,
     MultiUserChatPlugin,
@@ -10,7 +12,6 @@ import {
     Room,
     RoomCreationOptions,
     RoomSummary,
-    JID,
 } from '@pazznetwork/ngx-chat';
 import { jid } from '@xmpp/jid';
 import { NgModel } from '@angular/forms';
@@ -32,6 +33,7 @@ export class MultiUserChatComponent {
     roomUserList: RoomUser[] = [];
     newRoom?: RoomCreationOptions;
     mucSubSubscriptions = new Map<string, string[]>();
+    roomConfiguration: Form;
 
     constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {
         this.multiUserChatPlugin = chatService.getPlugin(MultiUserChatPlugin);
@@ -66,7 +68,11 @@ export class MultiUserChatComponent {
     }
 
     async queryUserList(occupantJid: JID) {
-        this.roomUserList = await this.multiUserChatPlugin.queryUserList(occupantJid);
+        this.roomUserList = await this.multiUserChatPlugin.queryUserList(occupantJid.bare());
+    }
+
+    async getRoomConfiguration(occupantJid: JID) {
+        this.roomConfiguration = await this.multiUserChatPlugin.getRoomConfiguration(occupantJid.bare());
     }
 
     displayMemberJid(member: RoomUser): string {
@@ -109,7 +115,8 @@ export class MultiUserChatComponent {
             return;
         }
 
-        await this.multiUserChatPlugin.createRoom(this.newRoom);
+        const createdRoom = await this.multiUserChatPlugin.createRoom(this.newRoom);
+        this.updateOccupantJid(createdRoom.occupantJid.toString());
 
         this.newRoom = undefined;
     }

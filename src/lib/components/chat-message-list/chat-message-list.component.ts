@@ -26,7 +26,7 @@ import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ContactFactoryService } from '../../services/contact-factory.service';
 import { REPORT_USER_INJECTION_TOKEN, ReportUserService } from '../../services/report-user-service';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
-import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room.message';
+import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room-message';
 
 enum SubscriptionAction {
     PENDING_REQUEST,

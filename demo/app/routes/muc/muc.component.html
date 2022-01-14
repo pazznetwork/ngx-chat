@@ -11,7 +11,7 @@
             <div class="list-item" *ngFor="let room of rooms$ | async">
                 <div>
                     <p>{{room.name}}</p>
-                    <small>{{room.jid.toString()}}</small>
+                    <small>JID: {{room.jid.toString()}}</small>
                 </div>
                 <div>
                     <button *ngIf="!currentRoom || currentRoom?.roomJid.equals(room.jid)"
@@ -26,7 +26,8 @@
         <ng-container *ngIf="selectedRoom$ | async as room">
             <h1 style="text-align: center">
                 {{room.name}}<br>
-                <small>({{room.jidBare.toString()}})</small>
+                <small>JID: {{room.roomJid.toString()}}</small><br>
+                <small>Subject: {{room.subject || '[unset]'}}</small>
             </h1>
             <h2>Actions:</h2>
             <form>

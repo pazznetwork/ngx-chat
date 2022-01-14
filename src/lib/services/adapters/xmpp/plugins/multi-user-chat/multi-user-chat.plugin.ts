@@ -1,4 +1,5 @@
 import { jid as parseJid, xml } from '@xmpp/client';
+import { JID } from '@xmpp/jid';
 import { Element } from 'ltx';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Direction } from '../../../../../core/message';
@@ -11,54 +12,62 @@ import { AbstractXmppPlugin } from '../abstract-xmpp-plugin';
 import { MessageReceivedEvent } from '../message.plugin';
 import { ServiceDiscoveryPlugin } from '../service-discovery.plugin';
 import { Presence } from '../../../../../core/presence';
-import { JID } from '@xmpp/jid';
 import { Room } from './room';
-import { Affiliation } from './affiliation';
-import { Role } from './role';
-import { RoomUser } from './room.user';
-import { RoomOccupant } from './room.occupant';
+import { Affiliation, AffiliationModification } from './affiliation';
+import { Role, RoleModification } from './role';
+import { RoomUser } from './room-user';
+import { RoomOccupant } from './room-occupant';
 import { Invitation } from './invitation';
-import { RoomMessage } from './room.message';
-import { RoleModification } from './role.modification';
-import { AffiliationModification } from './affiliation.modification';
+import { RoomMessage } from './room-message';
+import { Form, FORM_NS, getField, parseForm, serializeToSubmitForm, setFieldValue, TextualFormField } from '../../../../../core/form';
+import { XmppResponseError } from '../../xmpp-response.error';
 
 /**
  * see:
  * https://xmpp.org/extensions/xep-0045.html#terms-rooms
  */
-export interface RoomCreationOptions {
-    name?: string;
+export interface RoomCreationOptions extends RoomConfiguration {
+    /**
+     * The room id to create the room with. This is the `local` part of the room JID.
+     */
     roomId: string;
+    /**
+     * Optional nickname to use in the room. Current user's nickname will be used if not provided.
+     */
+    nick?: string;
+}
+
+export interface RoomConfiguration {
+    /**
+     * Optional name for the room. If none is provided, room will be only identified by its JID.
+     */
+    name?: string;
     /**
      * A room that can be found by any user through normal means such as searching and service discovery
      */
-    public: boolean;
+    public?: boolean;
     /**
      * for true:
      * A room that a user cannot enter without being on the member list.
      * for false:
      * A room that non-banned entities are allowed to enter without being on the member list.
      */
-    membersOnly: boolean;
+    membersOnly?: boolean;
     /**
      * for true:
      * A room in which an occupant's full JID is exposed to all other occupants,
      * although the occupant can request any desired room nickname.
      * for false:
-     * A room in which an occupant's full JID can be discovered by room admins only.
+     * A room in which an occupant's full JID can be discovered by room moderators only.
      */
-    nonAnonymous: boolean;
+    nonAnonymous?: boolean;
     /**
      * for true:
      * A room that is not destroyed if the last occupant exits.
      * for false:
      * A room that is destroyed if the last occupant exits.
      */
-    persistentRoom: boolean;
-    /**
-     * Optional name for the room. If none is provided, room will be only identified by its jid
-     */
-    nick?: string;
+    persistentRoom?: boolean;
     /**
      * allow ejabberd MucSub subscriptions.
      * Room occupants are allowed to subscribe to message notifications being archived while they were offline
@@ -114,6 +123,7 @@ class QueryOccupantListStanzaBuilder extends AbstractStanzaBuilder {
 export interface RoomSummary {
     jid: JID;
     name: string;
+    roomInfo: Form | null;
 }
 
 class ModifyAffiliationsOrRolesStanzaBuilder extends AbstractStanzaBuilder {
@@ -171,12 +181,11 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     public static readonly MUC_USER = `${MultiUserChatPlugin.MUC}#user`;
     public static readonly MUC_ADMIN = `${MultiUserChatPlugin.MUC}#admin`;
     public static readonly MUC_OWNER = `${MultiUserChatPlugin.MUC}#owner`;
-    public static readonly MUC_ROOM_CONFIG = `${MultiUserChatPlugin.MUC}#roomconfig`;
-    public static readonly MUC_REQUEST = `${MultiUserChatPlugin.MUC}#request`;
+    public static readonly MUC_ROOM_CONFIG_FORM = `${MultiUserChatPlugin.MUC}#roomconfig`;
+    public static readonly MUC_REQUEST_FORM = `${MultiUserChatPlugin.MUC}#request`;
 
     readonly rooms$ = new BehaviorSubject<Room[]>([]);
     readonly message$ = new Subject<Room>();
-    private readonly roomJoinResponseHandlers = new Map<string, [(stanza: Stanza) => void, (e: Error) => void]>();
 
     private onInvitationSubject = new Subject<Invitation>();
     readonly onInvitation$ = this.onInvitationSubject.asObservable();
@@ -190,8 +199,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     }
 
     onOffline(): void {
-        this.roomJoinResponseHandlers.forEach(([, reject]) => reject(new Error('offline')));
-        this.roomJoinResponseHandlers.clear();
         this.rooms$.next([]);
     }
 
@@ -216,8 +223,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     }
 
     private handleRoomPresenceStanza(stanza: Stanza): boolean {
-        const joinRoomResponseHandled = this.handleJoinRoomResponse(stanza);
-
         const stanzaType = stanza.attrs.type;
 
         if (stanzaType === 'error') {
@@ -238,130 +243,84 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             nick: occupantJid.resource,
         };
 
-        let stanzaHandled = false;
         const room = this.getOrCreateRoom(occupantJid);
+        const statusCodes: string[] = xEl.getChildren('status').map(status => status.attrs.code);
+        const isCurrenUser = statusCodes.includes('110');
         if (stanzaType === 'unavailable') {
-            const statusCodes: string[] = xEl.getChildren('status').map(status => status.attrs.code);
-            const isCurrenUser = statusCodes.includes('110');
             const actor = itemEl.getChild('actor')?.attrs.nick;
             const reason = itemEl.getChild('reason')?.getText();
 
-            if (statusCodes.includes('307') && (subjectOccupant.affiliation === Affiliation.none || subjectOccupant.role === Role.none)) {
+            if (statusCodes.includes('333')) {
                 if (isCurrenUser) {
                     this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
                 }
-                stanzaHandled = room.handleOccupantKicked(subjectOccupant, isCurrenUser, actor, reason);
-            } else if (statusCodes.includes('301') && subjectOccupant.affiliation === Affiliation.outcast) {
+                return room.handleOccupantConnectionError(subjectOccupant, isCurrenUser);
+            } else if (statusCodes.includes('307')) {
                 if (isCurrenUser) {
                     this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
                 }
-                stanzaHandled = room.handleOccupantBanned(subjectOccupant, isCurrenUser, actor, reason);
+                return room.handleOccupantKicked(subjectOccupant, isCurrenUser, actor, reason);
+            } else if (statusCodes.includes('301')) {
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                return room.handleOccupantBanned(subjectOccupant, isCurrenUser, actor, reason);
             } else if (statusCodes.includes('303')) {
-                stanzaHandled = room.handleOccupantChangedNick(subjectOccupant, isCurrenUser, xEl.getChild('item').attrs.nick);
-                this.rooms$.next(this.rooms$.getValue());
-            } else if (statusCodes.includes('321') && subjectOccupant.affiliation === Affiliation.none
-                && subjectOccupant.role === Role.none) {
+                const handled = room.handleOccupantChangedNick(subjectOccupant, isCurrenUser, xEl.getChild('item').attrs.nick);
+                if (handled && isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue());
+                }
+                return handled;
+            } else if (statusCodes.includes('321')) {
                 if (isCurrenUser) {
                     this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
                 }
-                stanzaHandled = room.handleOccupantMembershipRevoked(subjectOccupant, isCurrenUser);
+                return room.handleOccupantLostMembership(subjectOccupant, isCurrenUser);
             } else {
                 if (isCurrenUser) {
                     this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
                 }
-                stanzaHandled = room.handleOccupantLeft(subjectOccupant, isCurrenUser);
+                return room.handleOccupantLeft(subjectOccupant, isCurrenUser);
             }
         } else if (!stanzaType) {
-            stanzaHandled = room.handleOccupantJoined(subjectOccupant);
+            return room.handleOccupantJoined(subjectOccupant, isCurrenUser);
         }
 
-        return joinRoomResponseHandled || stanzaHandled;
-    }
-
-    private handleJoinRoomResponse(stanza: Stanza): boolean {
-        const [handleResponse, handleResponseError] = this.roomJoinResponseHandlers.get(stanza.attrs.from) ?? [];
-
-        if (handleResponse == null || handleResponseError == null) {
-            return false;
-        }
-
-        this.roomJoinResponseHandlers.delete(stanza.attrs.from);
-
-        if (stanza.attrs.type === 'error') {
-            handleResponseError(new Error('error received as response to join room request, stanza: ' + stanza));
-            return true;
-        }
-
-        handleResponse(stanza);
-        return true;
+        return false;
     }
 
     /**
      * Resolves if room could be configured as requested, rejects if room did exist or server did not accept configuration.
      */
-    async createRoom(request: RoomCreationOptions): Promise<Room> {
-        const {roomId, nick, name} = request;
+    async createRoom(options: RoomCreationOptions): Promise<Room> {
+        const {roomId, nick} = options;
         const service = await this.serviceDiscoveryPlugin.findService('conference', 'text');
         const occupantJid = parseJid(roomId, service.jid, nick);
-        const {presenceResponse, room} = await this.joinRoomInternal(occupantJid, name);
+        const {presenceResponse, room} = await this.joinRoomInternal(occupantJid);
 
         const itemElement = presenceResponse.getChild('x').getChild('item');
         if (itemElement.attrs.affiliation !== Affiliation.owner) {
             throw new Error('error creating room, user is not owner: ' + presenceResponse.toString());
         }
 
-        /**
-         * requests a configuration form for a room which returns with the default values
-         * for an example see:
-         * https://xmpp.org/extensions/xep-0045.html#registrar-formtype-owner
-         */
-        const configurationForm = await this.xmppChatAdapter.chatConnectionService.sendIq(
-            xml('iq', {type: 'get', to: room.roomJid.toString()},
-                xml('query', {xmlns: MultiUserChatPlugin.MUC_OWNER}),
-            ),
-        );
-
-        const configurationListElement = configurationForm.getChild('query').getChild('x');
-        if (!configurationListElement) {
-            throw new Error('room not configurable');
-        }
-
-        const roomConfigurationOptions =
-            this.applyRoomCreationRequestOptions(
-                this.extractDefaultConfiguration(configurationListElement.getChildren('field')),
-                request,
-            );
-
         try {
-            await this.xmppChatAdapter.chatConnectionService.sendIq(
-                xml('iq', {type: 'set', to: room.roomJid.toString()},
-                    xml('query', {xmlns: MultiUserChatPlugin.MUC_OWNER},
-                        xml('x', {xmlns: 'jabber:x:data', type: 'submit'},
-                            xml('field', {var: 'FORM_TYPE'},
-                                xml('value', {}, MultiUserChatPlugin.MUC_ROOM_CONFIG),
-                            ),
-                            ...this.configurationToElements(roomConfigurationOptions),
-                        ),
-                    ),
-                ),
-            );
-            return room;
+            await this.applyRoomConfiguration(room.roomJid, options);
+            room.name = options.name || undefined;
+            this.rooms$.next(this.rooms$.getValue());
         } catch (e) {
             this.logService.error('room configuration rejected', e);
             throw e;
         }
+
+        return room;
     }
 
-    private getOrCreateRoom(roomJid: JID, nick?: string, name?: string): Room {
+    private getOrCreateRoom(roomJid: JID): Room {
         roomJid = roomJid.bare();
         let room = this.getRoomByJid(roomJid);
         if (!room) {
-            room = new Room(roomJid, this.logService, nick, name);
+            room = new Room(roomJid, this.logService);
             this.rooms$.next([room, ...this.rooms$.getValue()]);
-        }
-        if (nick && !room.occupantJid) {
-            room.setNick(nick);
-            this.rooms$.next(this.rooms$.getValue());
         }
         return room;
     }
@@ -388,51 +347,72 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return roomDestroyedResponse;
     }
 
-    private async joinRoomInternal(roomJid: JID, name?: string | undefined): Promise<{ presenceResponse: Stanza, room: Room }> {
+    private async joinRoomInternal(roomJid: JID): Promise<{ presenceResponse: Stanza, room: Room }> {
         if (this.getRoomByJid(roomJid.bare())) {
             throw new Error('can not join room more than once: ' + roomJid.bare().toString());
         }
         const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
         const occupantJid = parseJid(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
 
-        let rejectRoomJoinedPromise: (e: Error) => void;
-        const roomJoinedPromise = new Promise<Stanza>(
-            (resolve, reject) => {
-                this.roomJoinResponseHandlers.set(occupantJid.toString(), [resolve, reject]);
-                rejectRoomJoinedPromise = reject;
-            },
-        );
+        let roomInfo: Form | null = null;
+        try {
+            roomInfo = await this.getRoomInfo(occupantJid.bare());
+        } catch (e) {
+            if (!(e instanceof XmppResponseError) || e.errorCondition !== 'item-not-found') {
+                throw e;
+            }
+        }
 
         try {
-            await this.xmppChatAdapter.chatConnectionService.send(
-                xml('presence', {from: userJid.toString(), to: occupantJid.toString()},
+            const presenceResponse = await this.xmppChatAdapter.chatConnectionService.sendAwaitingResponse(
+                xml('presence', {to: occupantJid.toString()},
                     xml('x', {xmlns: MultiUserChatPlugin.MUC}),
                 ),
             );
+            this.handleRoomPresenceStanza(presenceResponse);
+
+            const room = this.getOrCreateRoom(occupantJid.bare());
+            room.nick = occupantJid.resource;
+            if (roomInfo) {
+                room.name = getField(roomInfo, 'muc#roomconfig_roomname')?.value as string | undefined;
+                room.description = getField(roomInfo, 'muc#roominfo_description')?.value as string | undefined || '';
+            }
+
+            return {presenceResponse, room};
         } catch (e) {
-            this.logService.error('error sending presence stanza to join a room', e);
-            this.roomJoinResponseHandlers.delete(occupantJid.toString());
-            rejectRoomJoinedPromise(e);
+            this.logService.error('error joining room', e);
             throw e;
         }
-
-        const presenceResponse = await roomJoinedPromise;
-        if (presenceResponse.getChild('error')) {
-            throw new Error('error joining room: ' + presenceResponse.toString());
-        }
-
-        return {presenceResponse, room: this.getOrCreateRoom(occupantJid.bare(), occupantJid.resource, name)};
     }
 
     async joinRoom(occupantJid: JID): Promise<Room> {
-        return (await this.joinRoomInternal(occupantJid)).room;
+        const {room} = await this.joinRoomInternal(occupantJid);
+        this.rooms$.next(this.rooms$.getValue());
+        return room;
+    }
+
+    async getRoomInfo(roomJid: JID): Promise<Form | null> {
+        const roomInfoResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
+            xml('iq', {type: 'get', to: roomJid.toString()},
+                xml('query', {xmlns: ServiceDiscoveryPlugin.DISCO_INFO}),
+            ),
+        );
+        const formEl = roomInfoResponse
+            .getChild('query', ServiceDiscoveryPlugin.DISCO_INFO)
+            ?.getChild('x', FORM_NS);
+
+        if (formEl) {
+            return parseForm(formEl);
+        }
+
+        return null;
     }
 
     async queryAllRooms(): Promise<RoomSummary[]> {
         const conferenceServer = await this.serviceDiscoveryPlugin.findService('conference', 'text');
         const to = conferenceServer.jid.toString();
 
-        const result = [];
+        const result: RoomSummary[] = [];
 
         let roomQueryResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
             xml('iq', {type: 'get', to},
@@ -457,6 +437,13 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
             result.push(...this.extractRoomSummariesFromResponse(roomQueryResponse));
             resultSet = this.extractResultSetFromResponse(roomQueryResponse);
         }
+
+        await Promise.all(
+            result.map(async (summary) => {
+                summary.roomInfo = await this.getRoomInfo(summary.jid);
+            }),
+        );
+
         return result;
     }
 
@@ -471,6 +458,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
                     acc.push({
                         jid: parseJid(jid),
                         name,
+                        roomInfo: null,
                     });
                 }
 
@@ -555,48 +543,69 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return await this.xmppChatAdapter.chatConnectionService.send(roomMessageStanza);
     }
 
-    private configurationToElements(configurationOptions: Map<string, string[]>): Element[] {
-        return [...configurationOptions.entries()]
-            .map(([configurationKey, configurationValues]) =>
-                xml('field', {var: configurationKey},
-                    ...configurationValues.map(value => xml('value', {}, value))));
-    }
+    /**
+     * requests a configuration form for a room which returns with the default values
+     * for an example see:
+     * https://xmpp.org/extensions/xep-0045.html#registrar-formtype-owner
+     */
+    async getRoomConfiguration(roomJid: JID): Promise<Form> {
+        const configurationForm = await this.xmppChatAdapter.chatConnectionService.sendIq(
+            xml('iq', {type: 'get', to: roomJid.toString()},
+                xml('query', {xmlns: MultiUserChatPlugin.MUC_OWNER}),
+            ),
+        );
 
-    private extractDefaultConfiguration(fields: Element[]): Map<string, string[]> {
-        const entries = fields
-            .filter(field => field.attrs.type !== 'hidden')
-            .map((field) => ([
-                field.attrs.var as string,
-                field.getChildren('value').map(value => value.getText()),
-            ] as const));
-
-        return new Map(entries);
-    }
-
-    private applyRoomCreationRequestOptions(
-        defaultOptions: ReadonlyMap<string, string[]>,
-        request: RoomCreationOptions,
-    ): Map<string, string[]> {
-        const options = new Map(defaultOptions);
-        options
-            .set('muc#roomconfig_whois', [request.nonAnonymous ? 'anyone' : 'moderators'])
-            .set('muc#roomconfig_publicroom', [request.public ? '1' : '0'])
-            .set('muc#roomconfig_membersonly', [request.membersOnly ? '1' : '0'])
-            .set('muc#roomconfig_persistentroom', [request.persistentRoom ? '1' : '0']);
-
-        if (request.allowSubscription !== undefined) {
-            options.set('allow_subscription', [request.allowSubscription === true ? '1' : '0']);
+        const formElement = configurationForm.getChild('query').getChild('x', FORM_NS);
+        if (!formElement) {
+            throw new Error('room not configurable');
         }
 
-        return options;
+        return parseForm(formElement);
+    }
+
+    async applyRoomConfiguration(roomJid: JID, roomConfiguration: RoomConfiguration): Promise<void> {
+        const roomConfigForm = await this.getRoomConfiguration(roomJid);
+
+        const formTypeField = getField(roomConfigForm, 'FORM_TYPE') as TextualFormField | undefined;
+        if (formTypeField.value !== MultiUserChatPlugin.MUC_ROOM_CONFIG_FORM) {
+            throw new Error(`unexpected form type for room configuration form: formType=${formTypeField.value}, formTypeField=${JSON.stringify(formTypeField)}`);
+        }
+
+        if (typeof roomConfiguration.name === 'string') {
+            setFieldValue(roomConfigForm, 'text-single', 'muc#roomconfig_roomname', roomConfiguration.name);
+        }
+        if (typeof roomConfiguration.nonAnonymous === 'boolean') {
+            setFieldValue(
+                roomConfigForm,
+                'list-single',
+                'muc#roomconfig_whois',
+                roomConfiguration.nonAnonymous ? 'anyone' : 'moderators',
+            );
+        }
+        if (typeof roomConfiguration.public === 'boolean') {
+            setFieldValue(roomConfigForm, 'boolean', 'muc#roomconfig_publicroom', roomConfiguration.public);
+        }
+        if (typeof roomConfiguration.membersOnly === 'boolean') {
+            setFieldValue(roomConfigForm, 'boolean', 'muc#roomconfig_membersonly', roomConfiguration.membersOnly);
+        }
+        if (typeof roomConfiguration.persistentRoom === 'boolean') {
+            setFieldValue(roomConfigForm, 'boolean', 'muc#roomconfig_persistentroom', roomConfiguration.persistentRoom);
+        }
+        if (typeof roomConfiguration.allowSubscription === 'boolean') {
+            setFieldValue(roomConfigForm, 'boolean', 'allow_subscription', roomConfiguration.allowSubscription);
+        }
+
+        await this.xmppChatAdapter.chatConnectionService.sendIq(
+            xml('iq', {type: 'set', to: roomJid.toString()},
+                xml('query', {xmlns: MultiUserChatPlugin.MUC_OWNER},
+                    serializeToSubmitForm(roomConfigForm),
+                ),
+            ),
+        );
     }
 
     private isRoomMessageStanza(stanza: Stanza): boolean {
         return stanza.name === 'message' && stanza.attrs.type === 'groupchat' && !!stanza.getChildText('body')?.trim();
-    }
-
-    private isRoomSubjectStanza(stanza: Stanza): boolean {
-        return stanza.name === 'message' && stanza.attrs.type === 'groupchat' && stanza.getChild('subject') != null;
     }
 
     private handleRoomMessageStanza(messageStanza: Stanza, archiveDelayElement?: Stanza): boolean {
@@ -639,6 +648,37 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         if (!message.delayed) {
             this.message$.next(room);
         }
+
+        return true;
+    }
+
+    private isRoomSubjectStanza(stanza: Stanza): boolean {
+        return stanza.name === 'message'
+            && stanza.attrs.type === 'groupchat'
+            && stanza.getChild('subject') != null
+            && stanza.getChild('body') == null;
+    }
+
+    private handleRoomSubjectStanza(stanza: Stanza, archiveDelayElement: Stanza): boolean {
+        const roomJid = parseJid(stanza.attrs.from).bare();
+        const room = this.getRoomByJid(roomJid);
+
+        if (!room) {
+            throw new Error(`unknown room trying to change room subject: roomJid=${roomJid.toString()}`);
+        }
+
+        // The archive only stores non-empty subjects. The current value of the subject is sent directly after entering a room by the room,
+        // not the archive.
+        // If a subject was first set, then unset, we would first receive the empty subject on room entry and then overwrite it with the
+        // previous non-empty value from archive. This is why we want to always ignore subjects from archive.
+        // This actually looks like a bug in MAM, it seems that MAM interprets messages with just subject in them as if they were chat
+        // messages and not room metadata. This would explain why empty subjects are not stored.
+        if (archiveDelayElement) {
+            return true;
+        }
+
+        room.subject = stanza.getChild('subject').getText().trim();
+        this.rooms$.next(this.rooms$.getValue());
 
         return true;
     }
@@ -705,13 +745,15 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     async kickOccupant(nick: string, roomJid: JID, reason?: string): Promise<IqResponseStanza> {
         const response = await this.modifyAffiliationOrRole(roomJid, {nick, role: Role.none, reason});
-        this.logService.debug(`kicking occupant response: ${response.toString()}`);
+        this.logService.debug(`kick occupant response: ${response.toString()}`);
         return response;
     }
 
     async changeUserNickname(newNick: string, roomJid: JID): Promise<void> {
+        const newRoomJid = parseJid(roomJid.toString());
+        newRoomJid.resource = newNick;
         const stanza = xml('presence', {
-            to: `${roomJid.toString()}/${newNick}`,
+            to: newRoomJid.toString(),
             from: this.xmppChatAdapter.chatConnectionService.userJid.toString(),
         });
         await this.xmppChatAdapter.chatConnectionService.send(stanza);
@@ -727,7 +769,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         );
 
         await this.xmppChatAdapter.chatConnectionService.send(stanza);
-        this.logService.debug(`left room: ${occupantJid}`);
+        this.logService.debug(`occupant left room: occupantJid=${occupantJid.toString()}`);
     }
 
     async changeRoomSubject(roomJid: JID, subject: string): Promise<void> {
@@ -737,31 +779,14 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
                 xml('subject', {}, subject),
             ),
         );
-        this.logService.debug(`change room '${roomJid}' subject to: ${subject}`);
-    }
-
-    private handleRoomSubjectStanza(stanza: Stanza, archiveDelayElement: Stanza): boolean {
-        const roomJid = parseJid(stanza.attrs.from).bare();
-        const room = this.getRoomByJid(roomJid);
-
-        if (!room) {
-            throw new Error(`unknown room ${roomJid.toString()} trying to change room subject`);
-        }
-
-        const subject = stanza.getChild('subject').getText().trim();
-        if (subject) {
-            room.name = subject;
-            this.rooms$.next(this.rooms$.getValue());
-        }
-
-        return true;
+        this.logService.debug(`room subject changed: roomJid=${roomJid.toString()}, new subject=${subject}`);
     }
 
     isRoomInvitationStanza(stanza: Stanza): boolean {
-        let x;
+        let x: Element | undefined;
         return stanza.name === 'message'
-            && !!(x = stanza.getChild('x', MultiUserChatPlugin.MUC_USER))
-            && (x.getChild('invite') || x.getChild('decline'));
+            && (x = stanza.getChild('x', MultiUserChatPlugin.MUC_USER)) != null
+            && (x.getChild('invite') != null || x.getChild('decline') != null);
     }
 
     private handleRoomInvitationStanza(stanza: Stanza): boolean {
@@ -816,7 +841,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     private async getUserJidByOccupantJid(occupantJid: JID, roomJid: JID): Promise<JID> {
         const users = await this.queryUserList(roomJid);
         return users.find(roomUser => roomUser.userIdentifiers.find(
-            ids => ids.nick === occupantJid.resource || ids.userJid.bare().equals(occupantJid.bare()))
+            ids => ids.nick === occupantJid.resource || ids.userJid.bare().equals(occupantJid.bare())),
         )?.userIdentifiers?.[0].userJid;
     }
 }

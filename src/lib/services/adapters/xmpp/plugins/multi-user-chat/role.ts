@@ -4,3 +4,9 @@ export enum Role {
     participant = 'participant',
     moderator = 'moderator',
 }
+
+export interface RoleModification {
+    nick: string;
+    role: Role;
+    reason?: string;
+}

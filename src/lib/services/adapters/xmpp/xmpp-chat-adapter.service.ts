@@ -90,17 +90,13 @@ export class XmppChatAdapter implements ChatService {
         });
     }
 
-    private handleInternalStateChange(internalState: XmppChatStates) {
-        if (internalState === 'online') {
+    private handleInternalStateChange(newState: XmppChatStates) {
+        if (newState === 'online') {
             this.state$.next('connecting');
-            Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
-                .then(
-                    () => this.announceAvailability(),
-                    (e) => {
-                        this.logService.error('error while connecting', e);
-                        this.announceAvailability();
-                    },
-                );
+            Promise
+                .all(this.plugins.map(plugin => plugin.onBeforeOnline()))
+                .catch((e) => this.logService.error('error while connecting', e))
+                .finally(() => this.announceAvailability());
         } else {
             if (this.state$.getValue() === 'online') {
                 // clear data the first time we transition to a not-online state
