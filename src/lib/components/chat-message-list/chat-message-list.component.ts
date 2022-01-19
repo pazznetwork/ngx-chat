@@ -27,6 +27,8 @@ import { ContactFactoryService } from '../../services/contact-factory.service';
 import { REPORT_USER_INJECTION_TOKEN, ReportUserService } from '../../services/report-user-service';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
 import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room-message';
+import { MultiUserChatPlugin } from '../../services/adapters/xmpp/plugins/multi-user-chat/multi-user-chat.plugin';
+import { Contact } from '../../core/contact';
 
 enum SubscriptionAction {
     PENDING_REQUEST,
@@ -63,6 +65,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
     private isAtBottom = true;
     private bottomLeftAt = 0;
     private oldestVisibleMessageBeforeLoading: Message = null;
+    private pendingRoomInvite = false;
 
     constructor(
         public chatListService: ChatListStateService,
@@ -91,6 +94,14 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
                     this.subscriptionAction = SubscriptionAction.PENDING_REQUEST;
                     this.scheduleScrollToLastMessage();
                 });
+
+            this.recipient.pendingRoomInvite$
+                .pipe(
+                    filter(invite => invite === true),
+                    takeUntil(this.ngDestroy),
+                ).subscribe(() => {
+                this.pendingRoomInvite = true;
+            });
         }
 
         this.chatMessageListRegistry.incrementOpenWindowCount(this.recipient);
@@ -160,21 +171,6 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         setTimeout(() => this.scrollToLastMessage(), 0);
     }
 
-    private scrollToLastMessage() {
-        if (this.chatMessageAreaElement) {
-            this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
-            this.isAtBottom = true; // in some browsers the intersection observer does not emit when scrolling programmatically
-        }
-    }
-
-    private scrollToMessage(message: Message) {
-        if (this.chatMessageAreaElement) {
-            const htmlIdAttribute = 'message-' + message.id;
-            const messageElement = document.getElementById(htmlIdAttribute);
-            messageElement.scrollIntoView(false);
-        }
-    }
-
     blockContact($event: MouseEvent) {
         $event.preventDefault();
         this.blockPlugin.blockJid(this.recipient.jidBare.toString());
@@ -217,16 +213,6 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         }
     }
 
-    private async loadMessages() {
-        try {
-            // improve performance when loading lots of old messages
-            this.changeDetectorRef.detach();
-            await this.chatService.getPlugin(MessageArchivePlugin).loadMostRecentUnloadedMessages(this.recipient);
-        } finally {
-            this.changeDetectorRef.reattach();
-        }
-    }
-
     onBottom(event: IntersectionObserverEntry) {
         this.isAtBottom = event.isIntersecting;
 
@@ -236,14 +222,6 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
             this.isAtBottom = false;
             this.bottomLeftAt = Date.now();
         }
-    }
-
-    private isNearBottom() {
-        return this.isAtBottom || Date.now() - this.bottomLeftAt < 1000;
-    }
-
-    private isLoadingHistory(): boolean {
-        return !!this.oldestVisibleMessageBeforeLoading;
     }
 
     getOrCreateContactWithFullJid(message: Message | RoomMessage): Recipient {
@@ -264,5 +242,60 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         }
 
         return matchingContact;
+    }
+
+    showPendingRoomInvite() {
+        if (this.recipient.recipientType !== 'contact') {
+            return false;
+        }
+        return this.pendingRoomInvite;
+    }
+
+    async acceptRoomInvite(event: MouseEvent) {
+        event.preventDefault();
+        await this.chatService.getPlugin(MultiUserChatPlugin).joinRoom(this.recipient.jidBare);
+        (this.recipient as Contact).pendingRoomInvite$.next(false);
+        this.pendingRoomInvite = false;
+    }
+
+    async declineRoomInvite(event: MouseEvent) {
+        event.preventDefault();
+        await this.chatService.getPlugin(MultiUserChatPlugin).declineRoomInvite(this.recipient.jidBare);
+        (this.recipient as Contact).pendingRoomInvite$.next(false);
+        this.pendingRoomInvite = false;
+        this.chatService.removeContact(this.recipient.jidBare.toString());
+    }
+
+    private scrollToLastMessage() {
+        if (this.chatMessageAreaElement) {
+            this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
+            this.isAtBottom = true; // in some browsers the intersection observer does not emit when scrolling programmatically
+        }
+    }
+
+    private scrollToMessage(message: Message) {
+        if (this.chatMessageAreaElement) {
+            const htmlIdAttribute = 'message-' + message.id;
+            const messageElement = document.getElementById(htmlIdAttribute);
+            messageElement.scrollIntoView(false);
+        }
+    }
+
+    private async loadMessages() {
+        try {
+            // improve performance when loading lots of old messages
+            this.changeDetectorRef.detach();
+            await this.chatService.getPlugin(MessageArchivePlugin).loadMostRecentUnloadedMessages(this.recipient);
+        } finally {
+            this.changeDetectorRef.reattach();
+        }
+    }
+
+    private isNearBottom() {
+        return this.isAtBottom || Date.now() - this.bottomLeftAt < 1000;
+    }
+
+    private isLoadingHistory(): boolean {
+        return !!this.oldestVisibleMessageBeforeLoading;
     }
 }

@@ -19,7 +19,15 @@ import { RoomUser } from './room-user';
 import { RoomOccupant } from './room-occupant';
 import { Invitation } from './invitation';
 import { RoomMessage } from './room-message';
-import { Form, FORM_NS, getField, parseForm, serializeToSubmitForm, setFieldValue, TextualFormField } from '../../../../../core/form';
+import {
+    Form,
+    FORM_NS,
+    getField,
+    parseForm,
+    serializeToSubmitForm,
+    setFieldValue,
+    TextualFormField
+} from '../../../../../core/form';
 import { XmppResponseError } from '../../xmpp-response.error';
 
 /**
@@ -215,80 +223,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return false;
     }
 
-    private isRoomPresenceStanza(stanza: Stanza): boolean {
-        return stanza.name === 'presence' && (
-            stanza.getChild('x', MultiUserChatPlugin.MUC)
-            || stanza.getChild('x', MultiUserChatPlugin.MUC_USER)
-        ) != null;
-    }
-
-    private handleRoomPresenceStanza(stanza: Stanza): boolean {
-        const stanzaType = stanza.attrs.type;
-
-        if (stanzaType === 'error') {
-            this.logService.error(stanza);
-            throw new Error('error handling message, stanza: ' + stanza);
-        }
-
-        const occupantJid = parseJid(stanza.attrs.from);
-        const roomJid = occupantJid.bare();
-
-        const xEl = stanza.getChild('x', MultiUserChatPlugin.MUC_USER);
-
-        const itemEl = xEl.getChild('item');
-        const subjectOccupant: RoomOccupant = {
-            occupantJid,
-            affiliation: itemEl.attrs.affiliation,
-            role: itemEl.attrs.role,
-            nick: occupantJid.resource,
-        };
-
-        const room = this.getOrCreateRoom(occupantJid);
-        const statusCodes: string[] = xEl.getChildren('status').map(status => status.attrs.code);
-        const isCurrenUser = statusCodes.includes('110');
-        if (stanzaType === 'unavailable') {
-            const actor = itemEl.getChild('actor')?.attrs.nick;
-            const reason = itemEl.getChild('reason')?.getText();
-
-            if (statusCodes.includes('333')) {
-                if (isCurrenUser) {
-                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
-                }
-                return room.handleOccupantConnectionError(subjectOccupant, isCurrenUser);
-            } else if (statusCodes.includes('307')) {
-                if (isCurrenUser) {
-                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
-                }
-                return room.handleOccupantKicked(subjectOccupant, isCurrenUser, actor, reason);
-            } else if (statusCodes.includes('301')) {
-                if (isCurrenUser) {
-                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
-                }
-                return room.handleOccupantBanned(subjectOccupant, isCurrenUser, actor, reason);
-            } else if (statusCodes.includes('303')) {
-                const handled = room.handleOccupantChangedNick(subjectOccupant, isCurrenUser, xEl.getChild('item').attrs.nick);
-                if (handled && isCurrenUser) {
-                    this.rooms$.next(this.rooms$.getValue());
-                }
-                return handled;
-            } else if (statusCodes.includes('321')) {
-                if (isCurrenUser) {
-                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
-                }
-                return room.handleOccupantLostMembership(subjectOccupant, isCurrenUser);
-            } else {
-                if (isCurrenUser) {
-                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
-                }
-                return room.handleOccupantLeft(subjectOccupant, isCurrenUser);
-            }
-        } else if (!stanzaType) {
-            return room.handleOccupantJoined(subjectOccupant, isCurrenUser);
-        }
-
-        return false;
-    }
-
     /**
      * Resolves if room could be configured as requested, rejects if room did exist or server did not accept configuration.
      */
@@ -315,16 +249,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return room;
     }
 
-    private getOrCreateRoom(roomJid: JID): Room {
-        roomJid = roomJid.bare();
-        let room = this.getRoomByJid(roomJid);
-        if (!room) {
-            room = new Room(roomJid, this.logService);
-            this.rooms$.next([room, ...this.rooms$.getValue()]);
-        }
-        return room;
-    }
-
     async destroyRoom(roomJid: JID): Promise<IqResponseStanza<'result'>> {
         let roomDestroyedResponse: IqResponseStanza<'result'>;
         try {
@@ -345,44 +269,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         this.rooms$.next(allRoomsWithoutDestroyedRoom);
 
         return roomDestroyedResponse;
-    }
-
-    private async joinRoomInternal(roomJid: JID): Promise<{ presenceResponse: Stanza, room: Room }> {
-        if (this.getRoomByJid(roomJid.bare())) {
-            throw new Error('can not join room more than once: ' + roomJid.bare().toString());
-        }
-        const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
-        const occupantJid = parseJid(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
-
-        let roomInfo: Form | null = null;
-        try {
-            roomInfo = await this.getRoomInfo(occupantJid.bare());
-        } catch (e) {
-            if (!(e instanceof XmppResponseError) || e.errorCondition !== 'item-not-found') {
-                throw e;
-            }
-        }
-
-        try {
-            const presenceResponse = await this.xmppChatAdapter.chatConnectionService.sendAwaitingResponse(
-                xml('presence', {to: occupantJid.toString()},
-                    xml('x', {xmlns: MultiUserChatPlugin.MUC}),
-                ),
-            );
-            this.handleRoomPresenceStanza(presenceResponse);
-
-            const room = this.getOrCreateRoom(occupantJid.bare());
-            room.nick = occupantJid.resource;
-            if (roomInfo) {
-                room.name = getField(roomInfo, 'muc#roomconfig_roomname')?.value as string | undefined;
-                room.description = getField(roomInfo, 'muc#roominfo_description')?.value as string | undefined || '';
-            }
-
-            return {presenceResponse, room};
-        } catch (e) {
-            this.logService.error('error joining room', e);
-            throw e;
-        }
     }
 
     async joinRoom(occupantJid: JID): Promise<Room> {
@@ -445,31 +331,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         );
 
         return result;
-    }
-
-    private extractRoomSummariesFromResponse(iq: IqResponseStanza): RoomSummary[] {
-        return iq
-            .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
-            ?.getChildren('item')
-            ?.reduce<RoomSummary[]>((acc, item) => {
-                const {jid, name} = item.attrs;
-
-                if (typeof jid === 'string' && typeof name === 'string') {
-                    acc.push({
-                        jid: parseJid(jid),
-                        name,
-                        roomInfo: null,
-                    });
-                }
-
-                return acc;
-            }, []) || [];
-    }
-
-    private extractResultSetFromResponse(iq: IqResponseStanza): Stanza {
-        return iq
-            .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
-            ?.getChild('set', 'http://jabber.org/protocol/rsm');
     }
 
     /**
@@ -604,6 +465,301 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         );
     }
 
+    getRoomByJid(jid: JID): Room | undefined {
+        return this.rooms$.getValue().find(room => room.roomJid.equals(jid.bare()));
+    }
+
+    async banUser(occupantJid: JID, roomJid: JID, reason?: string): Promise<IqResponseStanza> {
+        const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
+
+        const response = await this.modifyAffiliationOrRole(roomJid, {
+            userJid: userJid.bare(),
+            affiliation: Affiliation.outcast,
+            reason,
+        });
+        this.logService.debug(`ban response ${response.toString()}`);
+
+        return response;
+    }
+
+    async unbanUser(occupantJid: JID, roomJid: JID): Promise<IqResponseStanza> {
+        const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
+
+        const banList = (await this.getBanList(roomJid)).map(bannedUser => bannedUser.userJid);
+        this.logService.debug(`ban list: ${JSON.stringify(banList)}`);
+
+        if (!banList.find(bannedJid => bannedJid.equals(userJid))) {
+            throw new Error(`error unbanning: ${userJid} isn't on the ban list`);
+        }
+
+        const response = await this.modifyAffiliationOrRole(roomJid, {userJid, affiliation: Affiliation.none});
+        this.logService.debug('unban response: ' + response.toString());
+
+        return response;
+    }
+
+    async getBanList(roomJid: JID): Promise<AffiliationModification[]> {
+        const iq = xml('iq', {to: roomJid.toString(), type: 'get'},
+            xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+                xml('item', {affiliation: Affiliation.outcast}),
+            ),
+        );
+        const response = await this.xmppChatAdapter.chatConnectionService.sendIq(iq);
+
+        return response.getChild('query').getChildren('item').map(item => ({
+            userJid: parseJid(item.attrs.jid),
+            affiliation: item.attrs.affiliation,
+            reason: item.getChild('reason')?.getText(),
+        }));
+    }
+
+    async inviteUser(inviteeJid: JID, roomJid: JID, invitationMessage?: string): Promise<void> {
+        const from = this.xmppChatAdapter.chatConnectionService.userJid.toString();
+        const stanza = xml('message', {to: roomJid.toString(), from},
+            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                xml('invite', {to: inviteeJid.toString()},
+                    invitationMessage ? xml('reason', {}, invitationMessage) : null,
+                ),
+            ),
+        );
+        await this.xmppChatAdapter.chatConnectionService.send(stanza);
+    }
+
+    async declineRoomInvite(occupantJid: JID, reason?: string) {
+        const to = occupantJid.bare().toString();
+        const from = this.xmppChatAdapter.chatConnectionService.userJid.toString();
+        const stanza = xml('message', {to, from},
+            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                xml('decline', {to},
+                    xml('reason', {}, reason ? reason : 'Declined invitation')
+                ),
+            ),
+        );
+        await this.xmppChatAdapter.chatConnectionService.send(stanza);
+    }
+
+    async kickOccupant(nick: string, roomJid: JID, reason?: string): Promise<IqResponseStanza> {
+        const response = await this.modifyAffiliationOrRole(roomJid, {nick, role: Role.none, reason});
+        this.logService.debug(`kick occupant response: ${response.toString()}`);
+        return response;
+    }
+
+    async changeUserNickname(newNick: string, roomJid: JID): Promise<void> {
+        const newRoomJid = parseJid(roomJid.toString());
+        newRoomJid.resource = newNick;
+        const stanza = xml('presence', {
+            to: newRoomJid.toString(),
+            from: this.xmppChatAdapter.chatConnectionService.userJid.toString(),
+        });
+        await this.xmppChatAdapter.chatConnectionService.send(stanza);
+    }
+
+    async leaveRoom(occupantJid: JID, status?: string): Promise<void> {
+        const stanza = xml('presence', {
+                to: occupantJid.toString(),
+                from: this.xmppChatAdapter.chatConnectionService.userJid.toString(),
+                type: Presence[Presence.unavailable],
+            },
+            status ? xml('status', {}, status) : null,
+        );
+
+        await this.xmppChatAdapter.chatConnectionService.send(stanza);
+        this.logService.debug(`occupant left room: occupantJid=${occupantJid.toString()}`);
+    }
+
+    async changeRoomSubject(roomJid: JID, subject: string): Promise<void> {
+        const from = this.xmppChatAdapter.chatConnectionService.userJid.toString();
+        await this.xmppChatAdapter.chatConnectionService.send(
+            xml('message', {to: roomJid.toString(), from, type: 'groupchat'},
+                xml('subject', {}, subject),
+            ),
+        );
+        this.logService.debug(`room subject changed: roomJid=${roomJid.toString()}, new subject=${subject}`);
+    }
+
+    isRoomInvitationStanza(stanza: Stanza): boolean {
+        let x: Element | undefined;
+        return stanza.name === 'message'
+            && (x = stanza.getChild('x', MultiUserChatPlugin.MUC_USER)) != null
+            && (x.getChild('invite') != null || x.getChild('decline') != null);
+    }
+
+    async grantMembership(userJid: JID, roomJid: JID, reason?: string) {
+        await this.setAffiliation(userJid, roomJid, Affiliation.member, reason);
+    }
+
+    async revokeMembership(userJid: JID, roomJid: JID, reason?: string) {
+        await this.setAffiliation(userJid, roomJid, Affiliation.none, reason);
+    }
+
+    async grantAdmin(userJid: JID, roomJid: JID, reason?: string) {
+        await this.setAffiliation(userJid, roomJid, Affiliation.admin, reason);
+    }
+
+    async revokeAdmin(userJid: JID, roomJid: JID, reason?: string) {
+        await this.setAffiliation(userJid, roomJid, Affiliation.member, reason);
+    }
+
+    async grantModeratorStatus(occupantNick: string, roomJid: JID, reason?: string) {
+        await this.setRole(occupantNick, roomJid, Role.moderator, reason);
+    }
+
+    async revokeModeratorStatus(occupantNick: string, roomJid: JID, reason?: string) {
+        await this.setRole(occupantNick, roomJid, Role.participant, reason);
+    }
+
+    private isRoomPresenceStanza(stanza: Stanza): boolean {
+        return stanza.name === 'presence' && (
+            stanza.getChild('x', MultiUserChatPlugin.MUC)
+            || stanza.getChild('x', MultiUserChatPlugin.MUC_USER)
+        ) != null;
+    }
+
+    private handleRoomPresenceStanza(stanza: Stanza): boolean {
+        const stanzaType = stanza.attrs.type;
+
+        if (stanzaType === 'error') {
+            this.logService.error(stanza);
+            throw new Error('error handling message, stanza: ' + stanza);
+        }
+
+        const occupantJid = parseJid(stanza.attrs.from);
+        const roomJid = occupantJid.bare();
+
+        const xEl = stanza.getChild('x', MultiUserChatPlugin.MUC_USER);
+
+        const itemEl = xEl.getChild('item');
+        const subjectOccupant: RoomOccupant = {
+            occupantJid,
+            affiliation: itemEl.attrs.affiliation,
+            role: itemEl.attrs.role,
+            nick: occupantJid.resource,
+        };
+
+        const room = this.getOrCreateRoom(occupantJid);
+        const statusCodes: string[] = xEl.getChildren('status').map(status => status.attrs.code);
+        const isCurrenUser = statusCodes.includes('110');
+        if (stanzaType === 'unavailable') {
+            const actor = itemEl.getChild('actor')?.attrs.nick;
+            const reason = itemEl.getChild('reason')?.getText();
+
+            if (statusCodes.includes('333')) {
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                return room.handleOccupantConnectionError(subjectOccupant, isCurrenUser);
+            } else if (statusCodes.includes('307')) {
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                return room.handleOccupantKicked(subjectOccupant, isCurrenUser, actor, reason);
+            } else if (statusCodes.includes('301')) {
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                return room.handleOccupantBanned(subjectOccupant, isCurrenUser, actor, reason);
+            } else if (statusCodes.includes('303')) {
+                const handled = room.handleOccupantChangedNick(subjectOccupant, isCurrenUser, xEl.getChild('item').attrs.nick);
+                if (handled && isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue());
+                }
+                return handled;
+            } else if (statusCodes.includes('321')) {
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                return room.handleOccupantLostMembership(subjectOccupant, isCurrenUser);
+            } else {
+                if (isCurrenUser) {
+                    this.rooms$.next(this.rooms$.getValue().filter(r => !r.jidBare.equals(roomJid)));
+                }
+                return room.handleOccupantLeft(subjectOccupant, isCurrenUser);
+            }
+        } else if (!stanzaType) {
+            if (room.hasOccupant(subjectOccupant.occupantJid)) {
+                const oldOccupant = room.getOccupant(subjectOccupant.occupantJid);
+                return room.handleOccupantModified(subjectOccupant, oldOccupant, isCurrenUser);
+            } else {
+                return room.handleOccupantJoined(subjectOccupant, isCurrenUser);
+            }
+        }
+
+        return false;
+    }
+
+    private getOrCreateRoom(roomJid: JID): Room {
+        roomJid = roomJid.bare();
+        let room = this.getRoomByJid(roomJid);
+        if (!room) {
+            room = new Room(roomJid, this.logService);
+            this.rooms$.next([room, ...this.rooms$.getValue()]);
+        }
+        return room;
+    }
+
+    private async joinRoomInternal(roomJid: JID): Promise<{ presenceResponse: Stanza, room: Room }> {
+        if (this.getRoomByJid(roomJid.bare())) {
+            throw new Error('can not join room more than once: ' + roomJid.bare().toString());
+        }
+        const userJid = this.xmppChatAdapter.chatConnectionService.userJid;
+        const occupantJid = parseJid(roomJid.local, roomJid.domain, roomJid.resource || userJid.local);
+
+        let roomInfo: Form | null = null;
+        try {
+            roomInfo = await this.getRoomInfo(occupantJid.bare());
+        } catch (e) {
+            if (!(e instanceof XmppResponseError) || e.errorCondition !== 'item-not-found') {
+                throw e;
+            }
+        }
+
+        try {
+            const presenceResponse = await this.xmppChatAdapter.chatConnectionService.sendAwaitingResponse(
+                xml('presence', {to: occupantJid.toString()},
+                    xml('x', {xmlns: MultiUserChatPlugin.MUC}),
+                ),
+            );
+            this.handleRoomPresenceStanza(presenceResponse);
+
+            const room = this.getOrCreateRoom(occupantJid.bare());
+            room.nick = occupantJid.resource;
+            if (roomInfo) {
+                room.name = getField(roomInfo, 'muc#roomconfig_roomname')?.value as string | undefined;
+                room.description = getField(roomInfo, 'muc#roominfo_description')?.value as string | undefined || '';
+            }
+
+            return {presenceResponse, room};
+        } catch (e) {
+            this.logService.error('error joining room', e);
+            throw e;
+        }
+    }
+
+    private extractRoomSummariesFromResponse(iq: IqResponseStanza): RoomSummary[] {
+        return iq
+            .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
+            ?.getChildren('item')
+            ?.reduce<RoomSummary[]>((acc, item) => {
+                const {jid, name} = item.attrs;
+
+                if (typeof jid === 'string' && typeof name === 'string') {
+                    acc.push({
+                        jid: parseJid(jid),
+                        name,
+                        roomInfo: null,
+                    });
+                }
+
+                return acc;
+            }, []) || [];
+    }
+
+    private extractResultSetFromResponse(iq: IqResponseStanza): Stanza {
+        return iq
+            .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
+            ?.getChild('set', 'http://jabber.org/protocol/rsm');
+    }
+
     private isRoomMessageStanza(stanza: Stanza): boolean {
         return stanza.name === 'message' && stanza.attrs.type === 'groupchat' && !!stanza.getChildText('body')?.trim();
     }
@@ -683,112 +839,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return true;
     }
 
-    getRoomByJid(jid: JID): Room | undefined {
-        return this.rooms$.getValue().find(room => room.roomJid.equals(jid.bare()));
-    }
-
-    async banUser(occupantJid: JID, roomJid: JID, reason?: string): Promise<IqResponseStanza> {
-        const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
-
-        const response = await this.modifyAffiliationOrRole(roomJid, {
-            userJid: userJid.bare(),
-            affiliation: Affiliation.outcast,
-            reason,
-        });
-        this.logService.debug(`ban response ${response.toString()}`);
-
-        return response;
-    }
-
-    async unbanUser(occupantJid: JID, roomJid: JID): Promise<IqResponseStanza> {
-        const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
-
-        const banList = (await this.getBanList(roomJid)).map(bannedUser => bannedUser.userJid);
-        this.logService.debug(`ban list: ${JSON.stringify(banList)}`);
-
-        if (!banList.find(bannedJid => bannedJid.equals(userJid))) {
-            throw new Error(`error unbanning: ${userJid} isn't on the ban list`);
-        }
-
-        const response = await this.modifyAffiliationOrRole(roomJid, {userJid, affiliation: Affiliation.none});
-        this.logService.debug('unban response: ' + response.toString());
-
-        return response;
-    }
-
-    async getBanList(roomJid: JID): Promise<AffiliationModification[]> {
-        const iq = xml('iq', {to: roomJid.toString(), type: 'get'},
-            xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
-                xml('item', {affiliation: Affiliation.outcast}),
-            ),
-        );
-        const response = await this.xmppChatAdapter.chatConnectionService.sendIq(iq);
-
-        return response.getChild('query').getChildren('item').map(item => ({
-            userJid: parseJid(item.attrs.jid),
-            affiliation: item.attrs.affiliation,
-            reason: item.getChild('reason')?.getText(),
-        }));
-    }
-
-    async inviteUser(inviteeJid: JID, roomJid: JID, invitationMessage?: string): Promise<void> {
-        const from = this.xmppChatAdapter.chatConnectionService.userJid.toString();
-        const stanza = xml('message', {to: roomJid.toString(), from},
-            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
-                xml('invite', {to: inviteeJid.toString()},
-                    invitationMessage ? xml('reason', {}, invitationMessage) : null,
-                ),
-            ),
-        );
-        await this.xmppChatAdapter.chatConnectionService.send(stanza);
-    }
-
-    async kickOccupant(nick: string, roomJid: JID, reason?: string): Promise<IqResponseStanza> {
-        const response = await this.modifyAffiliationOrRole(roomJid, {nick, role: Role.none, reason});
-        this.logService.debug(`kick occupant response: ${response.toString()}`);
-        return response;
-    }
-
-    async changeUserNickname(newNick: string, roomJid: JID): Promise<void> {
-        const newRoomJid = parseJid(roomJid.toString());
-        newRoomJid.resource = newNick;
-        const stanza = xml('presence', {
-            to: newRoomJid.toString(),
-            from: this.xmppChatAdapter.chatConnectionService.userJid.toString(),
-        });
-        await this.xmppChatAdapter.chatConnectionService.send(stanza);
-    }
-
-    async leaveRoom(occupantJid: JID, status?: string): Promise<void> {
-        const stanza = xml('presence', {
-                to: occupantJid.toString(),
-                from: this.xmppChatAdapter.chatConnectionService.userJid.toString(),
-                type: Presence[Presence.unavailable],
-            },
-            status ? xml('status', {}, status) : null,
-        );
-
-        await this.xmppChatAdapter.chatConnectionService.send(stanza);
-        this.logService.debug(`occupant left room: occupantJid=${occupantJid.toString()}`);
-    }
-
-    async changeRoomSubject(roomJid: JID, subject: string): Promise<void> {
-        const from = this.xmppChatAdapter.chatConnectionService.userJid.toString();
-        await this.xmppChatAdapter.chatConnectionService.send(
-            xml('message', {to: roomJid.toString(), from, type: 'groupchat'},
-                xml('subject', {}, subject),
-            ),
-        );
-        this.logService.debug(`room subject changed: roomJid=${roomJid.toString()}, new subject=${subject}`);
-    }
-
-    isRoomInvitationStanza(stanza: Stanza): boolean {
-        let x: Element | undefined;
-        return stanza.name === 'message'
-            && (x = stanza.getChild('x', MultiUserChatPlugin.MUC_USER)) != null
-            && (x.getChild('invite') != null || x.getChild('decline') != null);
-    }
-
     private handleRoomInvitationStanza(stanza: Stanza): boolean {
         const xEl = stanza.getChild('x', MultiUserChatPlugin.MUC_USER);
         const invitationEl = xEl.getChild('invite') ?? xEl.getChild('decline');
@@ -812,30 +862,6 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     private async setRole(occupantNick: string, roomJid: JID, role: Role, reason?: string): Promise<IqResponseStanza> {
         return await this.modifyAffiliationOrRole(roomJid, {nick: occupantNick, role, reason});
-    }
-
-    async grantMembership(userJid: JID, roomJid: JID, reason?: string) {
-        await this.setAffiliation(userJid, roomJid, Affiliation.member, reason);
-    }
-
-    async revokeMembership(userJid: JID, roomJid: JID, reason?: string) {
-        await this.setAffiliation(userJid, roomJid, Affiliation.none, reason);
-    }
-
-    async grantAdmin(userJid: JID, roomJid: JID, reason?: string) {
-        await this.setAffiliation(userJid, roomJid, Affiliation.admin, reason);
-    }
-
-    async revokeAdmin(userJid: JID, roomJid: JID, reason?: string) {
-        await this.setAffiliation(userJid, roomJid, Affiliation.member, reason);
-    }
-
-    async grantModeratorStatus(occupantNick: string, roomJid: JID, reason?: string) {
-        await this.setRole(occupantNick, roomJid, Role.moderator, reason);
-    }
-
-    async revokeModeratorStatus(occupantNick: string, roomJid: JID, reason?: string) {
-        await this.setRole(occupantNick, roomJid, Role.participant, reason);
     }
 
     private async getUserJidByOccupantJid(occupantJid: JID, roomJid: JID): Promise<JID> {

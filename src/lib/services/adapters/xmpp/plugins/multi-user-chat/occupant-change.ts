@@ -7,7 +7,8 @@ export type OccupantChangeType =
     | 'kicked'
     | 'banned'
     | 'changedNick'
-    | 'lostMembership';
+    | 'lostMembership'
+    | 'modified';
 
 export type OccupantChange = OccupantKickedOrBannedChange | OccupantNickChange | OccupantChangeOther;
 
@@ -31,3 +32,10 @@ export interface OccupantNickChange extends OccupantChangeBase {
     change: 'changedNick';
     newNick: string;
 }
+
+export interface OccupantModified {
+    occupant: RoomOccupant;
+    oldOccupant: RoomOccupant;
+    isCurrentUser: boolean;
+}
+

@@ -29,6 +29,7 @@ export class Contact {
     public readonly pendingOut$ = new BehaviorSubject(false);
     public readonly pendingIn$ = new BehaviorSubject(false);
     public readonly resources$ = new BehaviorSubject<JidToPresence>(new Map());
+    readonly pendingRoomInvite$ = new BehaviorSubject(false);
 
     private readonly messageStore: MessageStore<Message>;
 

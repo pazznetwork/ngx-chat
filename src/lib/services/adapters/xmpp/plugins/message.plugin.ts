@@ -5,6 +5,7 @@ import { MessageWithBodyStanza, Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
+import { MultiUserChatPlugin } from './multi-user-chat/multi-user-chat.plugin';
 
 export class MessageReceivedEvent {
     discard = false;
@@ -31,53 +32,6 @@ export class MessagePlugin extends AbstractXmppPlugin {
         return false;
     }
 
-    private isMessageStanza(stanza: Stanza): stanza is MessageWithBodyStanza {
-        return stanza.name === 'message'
-            && stanza.attrs.type !== 'groupchat'
-            && stanza.attrs.type !== 'error'
-            && !!stanza.getChildText('body')?.trim();
-    }
-
-    private handleMessageStanza(messageStanza: MessageWithBodyStanza, archiveDelayElement?: Stanza) {
-        const isAddressedToMe = this.xmppChatAdapter.chatConnectionService.userJid.bare()
-            .equals(parseJid(messageStanza.attrs.to).bare());
-        const messageDirection = isAddressedToMe ? Direction.in : Direction.out;
-
-        const messageFromArchive = archiveDelayElement != null;
-
-        const delayElement = archiveDelayElement ?? messageStanza.getChild('delay');
-        const datetime = delayElement?.attrs.stamp
-            ? new Date(delayElement.attrs.stamp)
-            : new Date() /* TODO: replace with entity time plugin */;
-
-        if (messageDirection === Direction.in && !messageFromArchive) {
-            this.logService.debug('message received <=', messageStanza.getChildText('body'));
-        }
-
-        const message = {
-            body: messageStanza.getChildText('body').trim(),
-            direction: messageDirection,
-            datetime,
-            delayed: !!delayElement,
-            fromArchive: messageFromArchive
-        };
-
-        const messageReceivedEvent = new MessageReceivedEvent();
-        this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageStanza, messageReceivedEvent));
-
-        if (messageReceivedEvent.discard) {
-            return;
-        }
-
-        const contactJid = isAddressedToMe ? messageStanza.attrs.from : messageStanza.attrs.to;
-        const contact = this.xmppChatAdapter.getOrCreateContactById(contactJid);
-        contact.addMessage(message);
-
-        if (messageDirection === Direction.in && !messageFromArchive) {
-            this.xmppChatAdapter.message$.next(contact);
-        }
-    }
-
     sendMessage(contact: Contact, body: string) {
         const messageStanza = xml('message', {
                 to: contact.jidBare.toString(),
@@ -102,6 +56,60 @@ export class MessagePlugin extends AbstractXmppPlugin {
         }, (rej) => {
             this.logService.error('rejected message ' + message.id, rej);
         });
+    }
+
+    private isMessageStanza(stanza: Stanza): stanza is MessageWithBodyStanza {
+        return stanza.name === 'message'
+            && stanza.attrs.type !== 'groupchat'
+            && stanza.attrs.type !== 'error'
+            && !!stanza.getChildText('body')?.trim();
+    }
+
+    private handleMessageStanza(messageStanza: MessageWithBodyStanza, archiveDelayElement?: Stanza) {
+        const isAddressedToMe = this.xmppChatAdapter.chatConnectionService.userJid.bare()
+            .equals(parseJid(messageStanza.attrs.to).bare());
+        const messageDirection = isAddressedToMe ? Direction.in : Direction.out;
+
+        const messageFromArchive = archiveDelayElement != null;
+
+        const delayElement = archiveDelayElement ?? messageStanza.getChild('delay');
+        const datetime = delayElement?.attrs.stamp
+            ? new Date(delayElement.attrs.stamp)
+            : new Date() /* TODO: replace with entity time plugin */;
+
+        if (messageDirection === Direction.in && !messageFromArchive) {
+            this.logService.debug('message received <=', messageStanza.getChildText('body'));
+        }
+
+        const isRoomInviteMessage = messageStanza.getChild('x', MultiUserChatPlugin.MUC_USER)
+            && messageStanza.getChild('x', 'jabber:x:conference');
+
+        const message = {
+            body: messageStanza.getChildText('body').trim(),
+            direction: messageDirection,
+            datetime,
+            delayed: !!delayElement,
+            fromArchive: messageFromArchive
+        };
+
+        const messageReceivedEvent = new MessageReceivedEvent();
+        this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageStanza, messageReceivedEvent));
+
+        if (messageReceivedEvent.discard) {
+            return;
+        }
+
+        const contactJid = isAddressedToMe ? messageStanza.attrs.from : messageStanza.attrs.to;
+        const contact = this.xmppChatAdapter.getOrCreateContactById(contactJid);
+        contact.addMessage(message);
+
+        if (isRoomInviteMessage) {
+            contact.pendingRoomInvite$.next(true);
+        }
+
+        if (messageDirection === Direction.in && !messageFromArchive) {
+            this.xmppChatAdapter.message$.next(contact);
+        }
     }
 
 }

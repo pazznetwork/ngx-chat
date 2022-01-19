@@ -8,13 +8,33 @@ import { isJid, Recipient } from '../../../../../core/recipient';
 import { RoomMetadata } from './multi-user-chat.plugin';
 import { RoomOccupant } from './room-occupant';
 import { RoomMessage } from './room-message';
-import { OccupantChange } from './occupant-change';
+import { OccupantChange, OccupantModified } from './occupant-change';
 
 export class Room {
 
     readonly recipientType = 'room';
     readonly roomJid: JID;
     occupantJid: JID | undefined;
+    description = '';
+    subject = '';
+    avatar = dummyAvatarRoom;
+    metadata: RoomMetadata = {};
+    private messageStore: MessageStore<RoomMessage>;
+    private logService: LogService;
+    private roomOccupants = new Map<string, RoomOccupant>();
+    private onOccupantChangeSubject = new ReplaySubject<OccupantChange>(Infinity, 1000);
+    readonly onOccupantChange$ = this.onOccupantChangeSubject.asObservable();
+    private occupantsSubject = new ReplaySubject<RoomOccupant[]>(1);
+    readonly occupants$ = this.occupantsSubject.asObservable();
+    private onOccupantModifiedSubject = new Subject<OccupantModified>();
+    readonly onOccupantModified$ = this.onOccupantModifiedSubject.asObservable();
+
+    constructor(roomJid: JID, logService: LogService) {
+        this.roomJid = roomJid.bare();
+        this.name = undefined;
+        this.logService = logService;
+        this.messageStore = new MessageStore<RoomMessage>(logService);
+    }
 
     get nick(): string | undefined {
         return this.occupantJid?.resource;
@@ -28,6 +48,7 @@ export class Room {
 
     // tslint:disable-next-line:variable-name
     private _name: string;
+
     get name(): string {
         return this._name;
     }
@@ -36,29 +57,8 @@ export class Room {
         this._name = !!name ? name : this.roomJid.local;
     }
 
-    description = '';
-    subject = '';
-    avatar = dummyAvatarRoom;
-    metadata: RoomMetadata = {};
-    private messageStore: MessageStore<RoomMessage>;
-    private logService: LogService;
-    private roomOccupants = new Map<string, RoomOccupant>();
-
-    private onOccupantChangeSubject = new ReplaySubject<OccupantChange>(Infinity, 1000);
-    readonly onOccupantChange$ = this.onOccupantChangeSubject.asObservable();
-
-    private occupantsSubject = new ReplaySubject<RoomOccupant[]>(1);
-    readonly occupants$ = this.occupantsSubject.asObservable();
-
     get jidBare(): JID {
         return this.roomJid;
-    }
-
-    constructor(roomJid: JID, logService: LogService) {
-        this.roomJid = roomJid.bare();
-        this.name = undefined;
-        this.logService = logService;
-        this.messageStore = new MessageStore<RoomMessage>(logService);
     }
 
     get messages$(): Subject<RoomMessage> {
@@ -99,6 +99,14 @@ export class Room {
             return this.roomJid.equals(otherJid);
         }
         return false;
+    }
+
+    hasOccupant(occupantJid: JID): boolean {
+        return this.roomOccupants.has(occupantJid.toString());
+    }
+
+    getOccupant(occupantJid: JID): RoomOccupant | undefined {
+        return this.roomOccupants.get(occupantJid.toString());
     }
 
     handleOccupantJoined(occupant: RoomOccupant, isCurrentUser: boolean) {
@@ -168,6 +176,12 @@ export class Room {
 
         this.logService.debug(`occupant changed nick: from=${occupant.nick}, to=${newNick}, occupantJid=${occupant.occupantJid.toString()}, roomJid=${this.roomJid.toString()}`);
         this.onOccupantChangeSubject.next({change: 'changedNick', occupant, newNick, isCurrentUser});
+        return true;
+    }
+
+    handleOccupantModified(occupant: RoomOccupant, oldOccupant: RoomOccupant, isCurrentUser: boolean) {
+        this.logService.debug(`occupant changed: from=${JSON.stringify(oldOccupant)}, to=${JSON.stringify(occupant)}`);
+        this.onOccupantModifiedSubject.next({occupant, oldOccupant, isCurrentUser});
         return true;
     }
 

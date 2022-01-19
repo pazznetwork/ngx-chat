@@ -70,6 +70,14 @@ export class MucComponent implements OnInit, OnDestroy {
                 }
             });
 
+        this.selectedRoomSubject.pipe(
+            filter(room => room != null),
+            switchMap(room => room.onOccupantModified$),
+            takeUntil(this.ngDestroySubject),
+        ).subscribe(({occupant, oldOccupant, isCurrentUser}) => {
+            console.log(`modified=${occupant.occupantJid.toString()}, currentUser=${isCurrentUser}`, occupant, oldOccupant);
+        });
+
         this.selectedRoom$.pipe(
             distinctUntilChanged((r1, r2) =>
                 (r1 == null && r2 == null) || (r1 != null && r2 != null && r1.roomJid.equals(r2.roomJid))),

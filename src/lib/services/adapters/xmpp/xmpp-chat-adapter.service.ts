@@ -83,7 +83,7 @@ export class XmppChatAdapter implements ChatService {
         this.chatConnectionService.stanzaUnknown$.subscribe((stanza) => this.onUnknownStanza(stanza));
 
         merge(this.messageSent$, this.message$).subscribe(() => {
-            // re-emit contacts when sending or receiving a message to refresh contcat groups
+            // re-emit contacts when sending or receiving a message to refresh contact groups
             // if the sending contact was in 'other', he still is in other now, but passes the 'messages.length > 0' predicate, so that
             // he should be seen now.
             this.contacts$.next(this.contacts$.getValue());
