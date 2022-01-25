@@ -10,7 +10,7 @@ export type OccupantChangeType =
     | 'lostMembership'
     | 'modified';
 
-export type OccupantChange = OccupantKickedOrBannedChange | OccupantNickChange | OccupantChangeOther;
+export type OccupantChange = OccupantKickedOrBannedChange | OccupantNickChange | OccupantModifiedChange | OccupantChangeOther;
 
 interface OccupantChangeBase {
     change: string;
@@ -19,7 +19,7 @@ interface OccupantChangeBase {
 }
 
 export interface OccupantChangeOther extends OccupantChangeBase {
-    change: Exclude<OccupantChangeType, 'kicked' | 'banned' | 'changedNick'>;
+    change: Exclude<OccupantChangeType, 'kicked' | 'banned' | 'changedNick' | 'modified'>;
 }
 
 export interface OccupantKickedOrBannedChange extends OccupantChangeBase {
@@ -33,9 +33,7 @@ export interface OccupantNickChange extends OccupantChangeBase {
     newNick: string;
 }
 
-export interface OccupantModified {
-    occupant: RoomOccupant;
+export interface OccupantModifiedChange extends OccupantChangeBase {
+    change: 'modified';
     oldOccupant: RoomOccupant;
-    isCurrentUser: boolean;
 }
-

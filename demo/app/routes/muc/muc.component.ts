@@ -11,7 +11,7 @@ import {
 } from '@pazznetwork/ngx-chat';
 import { from, Observable, Subject } from 'rxjs';
 import { jid } from '@xmpp/client';
-import { distinctUntilChanged, filter, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-muc',
@@ -70,20 +70,28 @@ export class MucComponent implements OnInit, OnDestroy {
                 }
             });
 
-        this.selectedRoomSubject.pipe(
-            filter(room => room != null),
-            switchMap(room => room.onOccupantModified$),
-            takeUntil(this.ngDestroySubject),
-        ).subscribe(({occupant, oldOccupant, isCurrentUser}) => {
-            console.log(`modified=${occupant.occupantJid.toString()}, currentUser=${isCurrentUser}`, occupant, oldOccupant);
-        });
-
-        this.selectedRoom$.pipe(
-            distinctUntilChanged((r1, r2) =>
-                (r1 == null && r2 == null) || (r1 != null && r2 != null && r1.roomJid.equals(r2.roomJid))),
+        const occupantChanges$ = this.selectedRoom$.pipe(
+            distinctUntilChanged((r1, r2) => (r1 == null && r2 == null) || Boolean(r1?.equals(r2) || r2?.equals(r1))),
             filter(room => room != null),
             switchMap((room) => room.onOccupantChange$),
-            tap(({change, occupant, isCurrentUser}) => console.log(`change=${change}, currentUser=${isCurrentUser}`, occupant)),
+        );
+
+        occupantChanges$
+            .pipe(takeUntil(this.ngDestroySubject))
+            .subscribe((occupantChange) => {
+                const {change, occupant, isCurrentUser} = occupantChange;
+                if (occupantChange.change === 'modified') {
+                    console.log(
+                        `change=${change}, modified=${occupant.occupantJid.toString()}, currentUser=${isCurrentUser}`,
+                        occupant,
+                        occupantChange.oldOccupant,
+                    );
+                } else {
+                    console.log(`change=${change}, currentUser=${isCurrentUser}`, occupant);
+                }
+            });
+
+        occupantChanges$.pipe(
             filter(({change, isCurrentUser}) =>
                 (change === 'kicked'
                     || change === 'banned'

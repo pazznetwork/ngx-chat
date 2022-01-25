@@ -17,7 +17,7 @@ export class MessageStore<T extends Message> {
     public readonly dateMessageGroups: DateMessagesGroup<T>[] = [];
     public readonly messageIdToMessage = new Map<string, T>();
 
-    constructor(private readonly logService: LogService) {
+    constructor(private readonly logService?: LogService) {
         this.messages$ = new Subject<T>();
     }
 
@@ -59,7 +59,7 @@ export class MessageStore<T extends Message> {
         } else {
             const groupToInsert = {
                 date: message.datetime,
-                messages: [message]
+                messages: [message],
             };
             const insertIndex = findSortedInsertionIndexLast(dateString, this.dateMessageGroups,
                 group => extractDateStringFromDate(group.date));

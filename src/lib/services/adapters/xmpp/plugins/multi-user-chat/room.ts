@@ -8,7 +8,7 @@ import { isJid, Recipient } from '../../../../../core/recipient';
 import { RoomMetadata } from './multi-user-chat.plugin';
 import { RoomOccupant } from './room-occupant';
 import { RoomMessage } from './room-message';
-import { OccupantChange, OccupantModified } from './occupant-change';
+import { OccupantChange } from './occupant-change';
 
 export class Room {
 
@@ -19,20 +19,16 @@ export class Room {
     subject = '';
     avatar = dummyAvatarRoom;
     metadata: RoomMetadata = {};
-    private messageStore: MessageStore<RoomMessage>;
-    private logService: LogService;
-    private roomOccupants = new Map<string, RoomOccupant>();
-    private onOccupantChangeSubject = new ReplaySubject<OccupantChange>(Infinity, 1000);
+    private readonly messageStore: MessageStore<RoomMessage>;
+    private readonly roomOccupants = new Map<string, RoomOccupant>();
+    private readonly onOccupantChangeSubject = new ReplaySubject<OccupantChange>(Infinity, 1000);
     readonly onOccupantChange$ = this.onOccupantChangeSubject.asObservable();
-    private occupantsSubject = new ReplaySubject<RoomOccupant[]>(1);
+    private readonly occupantsSubject = new ReplaySubject<RoomOccupant[]>(1);
     readonly occupants$ = this.occupantsSubject.asObservable();
-    private onOccupantModifiedSubject = new Subject<OccupantModified>();
-    readonly onOccupantModified$ = this.onOccupantModifiedSubject.asObservable();
 
-    constructor(roomJid: JID, logService: LogService) {
+    constructor(roomJid: JID, private readonly logService: LogService) {
         this.roomJid = roomJid.bare();
         this.name = undefined;
-        this.logService = logService;
         this.messageStore = new MessageStore<RoomMessage>(logService);
     }
 
@@ -181,8 +177,20 @@ export class Room {
 
     handleOccupantModified(occupant: RoomOccupant, oldOccupant: RoomOccupant, isCurrentUser: boolean) {
         this.logService.debug(`occupant changed: from=${JSON.stringify(oldOccupant)}, to=${JSON.stringify(occupant)}`);
-        this.onOccupantModifiedSubject.next({occupant, oldOccupant, isCurrentUser});
+        this.onOccupantChangeSubject.next({change: 'modified', occupant, oldOccupant, isCurrentUser});
         return true;
+    }
+
+    equals(other: Room | null | undefined): boolean {
+        if (this === other) {
+            return true;
+        }
+
+        if (other == null || !(other instanceof Room)) {
+            return false;
+        }
+
+        return this.roomJid.equals(other.roomJid);
     }
 
     private addOccupant(occupant: RoomOccupant) {

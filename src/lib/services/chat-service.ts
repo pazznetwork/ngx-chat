@@ -125,7 +125,7 @@ export interface ChatService {
     addContact(identifier: string): void;
 
     /**
-     * Removes the given cotnact from the user roster. Will cancel a presence subscription from the user to the contact and will retract
+     * Removes the given contact from the user roster. Will cancel a presence subscription from the user to the contact and will retract
      * accepted subscriptions from the contact to the user.
      * @param identifier The ID of the contact.
      */

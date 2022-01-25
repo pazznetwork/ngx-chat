@@ -26,9 +26,10 @@ import {
     parseForm,
     serializeToSubmitForm,
     setFieldValue,
-    TextualFormField
+    TextualFormField,
 } from '../../../../../core/form';
 import { XmppResponseError } from '../../xmpp-response.error';
+import { mucNs, mucAdminNs, mucOwnerNs, mucRoomConfigFormNs, mucUserNs } from './multi-user-chat-constants';
 
 /**
  * see:
@@ -104,7 +105,7 @@ class QueryAffiliatedMemberListStanzaBuilder extends AbstractStanzaBuilder {
 
     toStanza(): Stanza {
         return xml('iq', {type: 'get', to: this.roomJid.toString()},
-            xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+            xml('query', {xmlns: mucAdminNs},
                 xml('item', {[this.queryType]: this.affiliationOrRole}),
             ),
         );
@@ -154,7 +155,7 @@ class ModifyAffiliationsOrRolesStanzaBuilder extends AbstractStanzaBuilder {
         return xml('iq', {to: this.roomJid.toString(), type: 'set'},
             xml(
                 'query',
-                {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+                {xmlns: mucAdminNs},
                 ...this.modifications.map(modification => this.buildItem(modification)),
             ),
         );
@@ -185,13 +186,6 @@ class ModifyAffiliationsOrRolesStanzaBuilder extends AbstractStanzaBuilder {
  * @see https://xmpp.org/extensions/xep-0045.html
  */
 export class MultiUserChatPlugin extends AbstractXmppPlugin {
-    public static readonly MUC = 'http://jabber.org/protocol/muc';
-    public static readonly MUC_USER = `${MultiUserChatPlugin.MUC}#user`;
-    public static readonly MUC_ADMIN = `${MultiUserChatPlugin.MUC}#admin`;
-    public static readonly MUC_OWNER = `${MultiUserChatPlugin.MUC}#owner`;
-    public static readonly MUC_ROOM_CONFIG_FORM = `${MultiUserChatPlugin.MUC}#roomconfig`;
-    public static readonly MUC_REQUEST_FORM = `${MultiUserChatPlugin.MUC}#request`;
-
     readonly rooms$ = new BehaviorSubject<Room[]>([]);
     readonly message$ = new Subject<Room>();
 
@@ -254,7 +248,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         try {
             roomDestroyedResponse = await this.xmppChatAdapter.chatConnectionService.sendIq(
                 xml('iq', {type: 'set', to: roomJid.toString()},
-                    xml('query', {xmlns: MultiUserChatPlugin.MUC_OWNER},
+                    xml('query', {xmlns: mucOwnerNs},
                         xml('destroy'))));
         } catch (e) {
             this.logService.error('error destroying room');
@@ -359,7 +353,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const members = new Map<string, RoomUser>();
         for (const memberQueryResponse of memberQueryResponses) {
             memberQueryResponse
-                .getChild('query', MultiUserChatPlugin.MUC_ADMIN)
+                .getChild('query', mucAdminNs)
                 .getChildren('item')
                 .forEach((memberItem: Element) => {
                     const userJid = parseJid(memberItem.attrs.jid);
@@ -412,7 +406,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     async getRoomConfiguration(roomJid: JID): Promise<Form> {
         const configurationForm = await this.xmppChatAdapter.chatConnectionService.sendIq(
             xml('iq', {type: 'get', to: roomJid.toString()},
-                xml('query', {xmlns: MultiUserChatPlugin.MUC_OWNER}),
+                xml('query', {xmlns: mucOwnerNs}),
             ),
         );
 
@@ -428,7 +422,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const roomConfigForm = await this.getRoomConfiguration(roomJid);
 
         const formTypeField = getField(roomConfigForm, 'FORM_TYPE') as TextualFormField | undefined;
-        if (formTypeField.value !== MultiUserChatPlugin.MUC_ROOM_CONFIG_FORM) {
+        if (formTypeField.value !== mucRoomConfigFormNs) {
             throw new Error(`unexpected form type for room configuration form: formType=${formTypeField.value}, formTypeField=${JSON.stringify(formTypeField)}`);
         }
 
@@ -458,7 +452,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
         await this.xmppChatAdapter.chatConnectionService.sendIq(
             xml('iq', {type: 'set', to: roomJid.toString()},
-                xml('query', {xmlns: MultiUserChatPlugin.MUC_OWNER},
+                xml('query', {xmlns: mucOwnerNs},
                     serializeToSubmitForm(roomConfigForm),
                 ),
             ),
@@ -500,7 +494,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     async getBanList(roomJid: JID): Promise<AffiliationModification[]> {
         const iq = xml('iq', {to: roomJid.toString(), type: 'get'},
-            xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+            xml('query', {xmlns: mucAdminNs},
                 xml('item', {affiliation: Affiliation.outcast}),
             ),
         );
@@ -516,7 +510,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     async inviteUser(inviteeJid: JID, roomJid: JID, invitationMessage?: string): Promise<void> {
         const from = this.xmppChatAdapter.chatConnectionService.userJid.toString();
         const stanza = xml('message', {to: roomJid.toString(), from},
-            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+            xml('x', {xmlns: mucUserNs},
                 xml('invite', {to: inviteeJid.toString()},
                     invitationMessage ? xml('reason', {}, invitationMessage) : null,
                 ),
@@ -529,9 +523,9 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const to = occupantJid.bare().toString();
         const from = this.xmppChatAdapter.chatConnectionService.userJid.toString();
         const stanza = xml('message', {to, from},
-            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+            xml('x', {xmlns: mucUserNs},
                 xml('decline', {to},
-                    xml('reason', {}, reason ? reason : 'Declined invitation')
+                    xml('reason', {}, reason ? reason : 'Declined invitation'),
                 ),
             ),
         );
@@ -580,7 +574,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     isRoomInvitationStanza(stanza: Stanza): boolean {
         let x: Element | undefined;
         return stanza.name === 'message'
-            && (x = stanza.getChild('x', MultiUserChatPlugin.MUC_USER)) != null
+            && (x = stanza.getChild('x', mucUserNs)) != null
             && (x.getChild('invite') != null || x.getChild('decline') != null);
     }
 
@@ -610,8 +604,8 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
 
     private isRoomPresenceStanza(stanza: Stanza): boolean {
         return stanza.name === 'presence' && (
-            stanza.getChild('x', MultiUserChatPlugin.MUC)
-            || stanza.getChild('x', MultiUserChatPlugin.MUC_USER)
+            stanza.getChild('x', mucNs)
+            || stanza.getChild('x', mucUserNs)
         ) != null;
     }
 
@@ -626,7 +620,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const occupantJid = parseJid(stanza.attrs.from);
         const roomJid = occupantJid.bare();
 
-        const xEl = stanza.getChild('x', MultiUserChatPlugin.MUC_USER);
+        const xEl = stanza.getChild('x', mucUserNs);
 
         const itemEl = xEl.getChild('item');
         const subjectOccupant: RoomOccupant = {
@@ -716,7 +710,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         try {
             const presenceResponse = await this.xmppChatAdapter.chatConnectionService.sendAwaitingResponse(
                 xml('presence', {to: occupantJid.toString()},
-                    xml('x', {xmlns: MultiUserChatPlugin.MUC}),
+                    xml('x', {xmlns: mucNs}),
                 ),
             );
             this.handleRoomPresenceStanza(presenceResponse);
@@ -840,7 +834,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     }
 
     private handleRoomInvitationStanza(stanza: Stanza): boolean {
-        const xEl = stanza.getChild('x', MultiUserChatPlugin.MUC_USER);
+        const xEl = stanza.getChild('x', mucUserNs);
         const invitationEl = xEl.getChild('invite') ?? xEl.getChild('decline');
 
         this.onInvitationSubject.next({

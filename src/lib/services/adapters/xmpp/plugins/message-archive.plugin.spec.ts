@@ -13,7 +13,7 @@ import { MessageArchivePlugin } from './message-archive.plugin';
 import SpyObj = jasmine.SpyObj;
 import { MessagePlugin } from './message.plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
-import { MultiUserChatPlugin} from './multi-user-chat/multi-user-chat.plugin';
+import { MultiUserChatPlugin } from './multi-user-chat/multi-user-chat.plugin';
 import { Room } from './multi-user-chat/room';
 
 describe('message archive plugin', () => {
@@ -66,8 +66,8 @@ describe('message archive plugin', () => {
                 {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 XmppChatAdapter,
                 {provide: LogService, useValue: testLogService()},
-                ContactFactoryService
-            ]
+                ContactFactoryService,
+            ],
         });
 
         chatConnectionService = TestBed.inject(XmppChatConnectionService);
@@ -82,7 +82,7 @@ describe('message archive plugin', () => {
         const serviceDiscoveryPlugin = {
             supportsFeature() {
                 return Promise.resolve(false);
-            }
+            },
         } as any as ServiceDiscoveryPlugin;
         const messagePlugin = new MessagePlugin(chatAdapter, testLogService());
         const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, serviceDiscoveryPlugin, null, testLogService(), messagePlugin);
@@ -107,14 +107,16 @@ describe('message archive plugin', () => {
         const serviceDiscoveryPlugin = {
             supportsFeature() {
                 return Promise.resolve(false);
-            }
+            },
         } as unknown as ServiceDiscoveryPlugin;
         const logService = testLogService();
         const multiUserChatPlugin = new MultiUserChatPlugin(chatAdapter, logService, null);
         const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, serviceDiscoveryPlugin, multiUserChatPlugin, logService, null);
         chatAdapter.addPlugins([messageArchivePlugin, multiUserChatPlugin]);
         chatConnectionService.onOnline(userJid);
-        multiUserChatPlugin.rooms$.next([new Room(roomJid, logService)]);
+        const room = new Room(roomJid, logService);
+        room.nick = roomJid.resource;
+        multiUserChatPlugin.rooms$.next([room]);
 
         chatConnectionService.onStanzaReceived(groupChatArchiveStanza);
 
@@ -134,14 +136,16 @@ describe('message archive plugin', () => {
         const serviceDiscoveryPlugin = {
             supportsFeature() {
                 return Promise.resolve(false);
-            }
+            },
         } as unknown as ServiceDiscoveryPlugin;
         const logService = testLogService();
         const multiUserChatPlugin = new MultiUserChatPlugin(chatAdapter, logService, null);
         const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, serviceDiscoveryPlugin, multiUserChatPlugin, logService, null);
         chatAdapter.addPlugins([messageArchivePlugin, multiUserChatPlugin]);
         chatConnectionService.onOnline(userJid);
-        multiUserChatPlugin.rooms$.next([new Room(roomJid, logService)]);
+        const room = new Room(roomJid, logService);
+        room.nick = roomJid.resource;
+        multiUserChatPlugin.rooms$.next([room]);
 
         chatConnectionService.onStanzaReceived(mucSubArchiveStanza);
 

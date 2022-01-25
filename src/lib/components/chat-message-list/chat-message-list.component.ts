@@ -28,7 +28,7 @@ import { REPORT_USER_INJECTION_TOKEN, ReportUserService } from '../../services/r
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
 import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room-message';
 import { MultiUserChatPlugin } from '../../services/adapters/xmpp/plugins/multi-user-chat/multi-user-chat.plugin';
-import { Contact } from '../../core/contact';
+import { Contact, Invitation } from '../../core/contact';
 
 enum SubscriptionAction {
     PENDING_REQUEST,
@@ -65,7 +65,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
     private isAtBottom = true;
     private bottomLeftAt = 0;
     private oldestVisibleMessageBeforeLoading: Message = null;
-    private pendingRoomInvite = false;
+    private pendingRoomInvite: Invitation | null = null;
 
     constructor(
         public chatListService: ChatListStateService,
@@ -97,11 +97,10 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
 
             this.recipient.pendingRoomInvite$
                 .pipe(
-                    filter(invite => invite === true),
+                    filter(invite => invite != null),
                     takeUntil(this.ngDestroy),
-                ).subscribe(() => {
-                this.pendingRoomInvite = true;
-            });
+                )
+                .subscribe((invite) => this.pendingRoomInvite = invite);
         }
 
         this.chatMessageListRegistry.incrementOpenWindowCount(this.recipient);
@@ -224,7 +223,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         }
     }
 
-    getOrCreateContactWithFullJid(message: Message | RoomMessage): Recipient {
+    getOrCreateContactWithFullJid(message: Message | RoomMessage): Contact {
         if (this.recipient.recipientType === 'contact') {
             // this is not a multi user chat, just use recipient as contact
             return this.recipient;
@@ -253,16 +252,16 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
 
     async acceptRoomInvite(event: MouseEvent) {
         event.preventDefault();
-        await this.chatService.getPlugin(MultiUserChatPlugin).joinRoom(this.recipient.jidBare);
-        (this.recipient as Contact).pendingRoomInvite$.next(false);
-        this.pendingRoomInvite = false;
+        await this.chatService.getPlugin(MultiUserChatPlugin).joinRoom(this.pendingRoomInvite.roomJid);
+        (this.recipient as Contact).pendingRoomInvite$.next(null);
+        this.pendingRoomInvite = null;
     }
 
     async declineRoomInvite(event: MouseEvent) {
         event.preventDefault();
-        await this.chatService.getPlugin(MultiUserChatPlugin).declineRoomInvite(this.recipient.jidBare);
-        (this.recipient as Contact).pendingRoomInvite$.next(false);
-        this.pendingRoomInvite = false;
+        await this.chatService.getPlugin(MultiUserChatPlugin).declineRoomInvite(this.pendingRoomInvite.roomJid);
+        (this.recipient as Contact).pendingRoomInvite$.next(null);
+        this.pendingRoomInvite = null;
         this.chatService.removeContact(this.recipient.jidBare.toString());
     }
 

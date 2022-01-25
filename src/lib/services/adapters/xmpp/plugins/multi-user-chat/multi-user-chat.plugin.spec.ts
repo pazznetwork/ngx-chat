@@ -18,6 +18,8 @@ import { Affiliation } from './affiliation';
 import { Role } from './role';
 import { OccupantNickChange } from './occupant-change';
 import { Invitation } from './invitation';
+import { mucNs, mucAdminNs, mucRoomConfigFormNs, mucUserNs } from './multi-user-chat-constants';
+import { ServiceDiscoveryPlugin } from '../service-discovery.plugin';
 
 const defaultRoomConfiguration = {
     roomId: 'roomId',
@@ -73,25 +75,36 @@ describe('multi user chat plugin', () => {
 
     describe('room creation', () => {
 
-        // error is thrown, but still awaiting some call and resulting in timeout
-        xit('should throw if user is not allowed to create rooms', async () => {
-
+        it('should throw if user is not allowed to create rooms', async () => {
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
-                chatConnectionService.onStanzaReceived(
-                    xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from, type: 'error'},
-                        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER, type: 'error'}),
-                        xml('error', {by: 'me@example.com', type: 'cancel'},
-                            xml('not-allowed', {xmlns: 'urn:ietf:params:xml:ns:xmpp-stanzas'}),
+                if (stanza.name === 'iq' && stanza.attrs.type === 'get' && stanza.getChild('query', ServiceDiscoveryPlugin.DISCO_INFO)) {
+                    chatConnectionService.onStanzaReceived(
+                        xml('iq', {id: stanza.attrs.id, from: stanza.attrs.to, to: stanza.attrs.from, type: 'error'},
+                            xml('error', {by: 'me@example.com', type: 'cancel'},
+                                xml('item-not-found', {xmlns: XmppResponseError.ERROR_ELEMENT_NS}),
+                            ),
                         ),
-                    ),
-                );
+                    );
+                } else if (stanza.name === 'presence') {
+                    chatConnectionService.onStanzaReceived(
+                        xml('presence', {id: stanza.attrs.id, from: stanza.attrs.to, to: stanza.attrs.from, type: 'error'},
+                            xml('x', {xmlns: mucUserNs, type: 'error'}),
+                            xml('error', {by: 'me@example.com', type: 'cancel'},
+                                xml('not-allowed', {xmlns: XmppResponseError.ERROR_ELEMENT_NS}),
+                                xml('text', {xmlns: XmppResponseError.ERROR_ELEMENT_NS}, `Not allowed for user ${stanza.attrs.from}!`),
+                            ),
+                        ),
+                    );
+                } else {
+                    throw new Error(`Unexpected stanza: ${stanza.toString()}`);
+                }
             });
 
             try {
                 await multiUserChatPlugin.createRoom(defaultRoomConfiguration);
                 fail('should have thrown');
             } catch (e) {
-                expect(e.message).toContain('error joining room: ');
+                expect(e.message).toContain('Not allowed for user');
             }
 
         });
@@ -104,7 +117,7 @@ describe('multi user chat plugin', () => {
                 } else {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from, id: stanza.attrs.id},
-                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                            xml('x', {xmlns: mucUserNs},
                                 xml('item', {affiliation: Affiliation.none, role: Role.visitor}),
                             ),
                         ),
@@ -127,7 +140,7 @@ describe('multi user chat plugin', () => {
                 if (stanza.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from, id: stanza.attrs.id},
-                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                            xml('x', {xmlns: mucUserNs},
                                 xml('item', {affiliation: 'owner', role: 'moderator'}),
                                 xml('status', {code: '110'}),
                                 xml('status', {code: '201'}),
@@ -333,7 +346,7 @@ describe('multi user chat plugin', () => {
                                     to: stanza.attrs.from,
                                     type: 'unavailable',
                                 },
-                                xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                                xml('x', {xmlns: mucUserNs},
                                     xml('item', {affiliation: 'none', role: 'none'}),
                                     xml('status', {code: '307'}),
                                     xml('status', {code: '110'}),
@@ -377,16 +390,16 @@ describe('multi user chat plugin', () => {
                                         to: stanza.attrs.from,
                                         from: stanza.attrs.to,
                                         id: stanza.attrs.id,
-                                        type: 'result'
+                                        type: 'result',
                                     },
-                                    xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+                                    xml('query', {xmlns: mucAdminNs},
                                         xml('item', {
                                             affiliation: Affiliation.member,
                                             role: Role.participant,
                                             jid: otherOccupantJid.bare().toString(),
-                                            nick: otherOccupantJid.resource
-                                        })
-                                    )
+                                            nick: otherOccupantJid.resource,
+                                        }),
+                                    ),
                                 ),
                             );
                         } else {
@@ -395,9 +408,9 @@ describe('multi user chat plugin', () => {
                                         to: stanza.attrs.from,
                                         from: stanza.attrs.to,
                                         id: stanza.attrs.id,
-                                        type: 'result'
+                                        type: 'result',
                                     },
-                                    xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN})
+                                    xml('query', {xmlns: mucAdminNs}),
                                 ),
                             );
                         }
@@ -408,7 +421,7 @@ describe('multi user chat plugin', () => {
                                     to: stanza.attrs.from,
                                     type: 'unavailable',
                                 },
-                                xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                                xml('x', {xmlns: mucUserNs},
                                     xml('item', {
                                         affiliation: 'outcast',
                                         role: Role.none,
@@ -450,7 +463,7 @@ describe('multi user chat plugin', () => {
                                 to: stanza.attrs.from,
                                 type: 'unavailable',
                             },
-                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                            xml('x', {xmlns: mucUserNs},
                                 xml('item', {
                                     affiliation: 'outcast',
                                     role: Role.none,
@@ -469,7 +482,7 @@ describe('multi user chat plugin', () => {
                                     type: 'result',
                                     id: stanza.attrs.id,
                                 },
-                                xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+                                xml('query', {xmlns: mucAdminNs},
                                     bannedOccupantItem,
                                 ),
                             ),
@@ -482,7 +495,7 @@ describe('multi user chat plugin', () => {
                                     type: 'result',
                                     id: stanza.attrs.id,
                                 },
-                                xml('query', {xmlns: MultiUserChatPlugin.MUC_ADMIN},
+                                xml('query', {xmlns: mucAdminNs},
                                     xml('item', {affiliation: 'none', jid: otherOccupantJid}),
                                 ),
                             ),
@@ -506,18 +519,18 @@ describe('multi user chat plugin', () => {
             const roomJid = parseJid('chatroom@conference.example.com');
 
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
-                const inviteEl = stanza.getChild('x', MultiUserChatPlugin.MUC_USER).getChild('invite');
+                const inviteEl = stanza.getChild('x', mucUserNs).getChild('invite');
                 expect(stanza.attrs.to).toEqual(roomJid.toString());
                 expect(stanza.attrs.from).toEqual(myOccupantJid.toString());
                 expect(inviteEl.attrs.to).toEqual(otherOccupantJid.toString());
 
                 chatConnectionService.onStanzaReceived(
                     xml('message', {from: stanza.attrs.to, to: inviteEl.attrs.to, id: stanza.attrs.id},
-                        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                        xml('x', {xmlns: mucUserNs},
                             xml('invite', {from: stanza.attrs.from},
                                 xml('reason', {}, 'reason')),
-                        )
-                    )
+                        ),
+                    ),
                 );
             });
 
@@ -533,14 +546,14 @@ describe('multi user chat plugin', () => {
 
         it('should be able to change nick', async (resolve) => {
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
-                if (stanza.getChild('x', MultiUserChatPlugin.MUC)) {
+                if (stanza.getChild('x', mucNs)) {
                     chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
                 } else if (stanza.name === 'iq') {
                     chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
                 } else {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: myOccupantJid.toString(), to: stanza.attrs.from, type: 'unavailable'},
-                            xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+                            xml('x', {xmlns: mucUserNs},
                                 xml('item', {
                                     nick: 'newNick',
                                     jid: myOccupantJid.toString(),
@@ -601,7 +614,7 @@ describe('multi user chat plugin', () => {
 
 function mockJoinPresenceStanza(stanza: Stanza) {
     return xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from, id: stanza.attrs.id},
-        xml('x', {xmlns: MultiUserChatPlugin.MUC_USER},
+        xml('x', {xmlns: mucUserNs},
             xml('item', {affiliation: 'owner', role: 'moderator'}),
             xml('status', {code: '110'}),
         ),
@@ -614,15 +627,15 @@ function mockRoomInfoStanza(stanza: Stanza) {
             to: stanza.attrs.from,
             from: stanza.attrs.to,
             type: 'result',
-            id: stanza.attrs.id
+            id: stanza.attrs.id,
         },
         xml('query', {xmlns: 'http://jabber.org/protocol/disco#info'},
             xml('identity', {type: 'text', category: 'conference'}),
             xml('x', {type: 'result', xmlns: 'jabber:x:data'},
                 xml('field', {
                     var: 'FORM_TYPE',
-                    type: 'hidden'
-                }, xml('value', {}, MultiUserChatPlugin.MUC_ROOM_CONFIG_FORM)),
+                    type: 'hidden',
+                }, xml('value', {}, mucRoomConfigFormNs)),
                 xml('field', {var: 'muc#roomconfig_roomname', type: 'text-single'}, xml('value', {}, 'Room Name')),
                 xml('field', {var: 'muc#roominfo_description', type: 'text-single'}, xml('value', {}, 'Room Desc')),
                 xml('field', {var: 'muc#roomconfig_whois', type: 'list-single'}, xml('value', {}, 'moderators')),

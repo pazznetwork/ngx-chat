@@ -9,6 +9,13 @@ import { Presence } from './presence';
 import { isJid, Recipient } from './recipient';
 import { ContactSubscription } from './subscription';
 
+export interface Invitation {
+    from: JID;
+    roomJid: JID;
+    reason?: string;
+    password?: string;
+}
+
 export interface ContactMetadata {
     [key: string]: any;
 }
@@ -18,18 +25,18 @@ export type JidToPresence = Map<string, Presence>;
 export class Contact {
 
     readonly recipientType = 'contact';
-    public avatar = dummyAvatarContact;
-    public metadata: ContactMetadata = {};
+    avatar = dummyAvatarContact;
+    metadata: ContactMetadata = {};
 
     /** use {@link jidBare}, jid resource is only set for chat room contacts */
-    public readonly jidFull: JID;
-    public readonly jidBare: JID;
-    public readonly presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
-    public readonly subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
-    public readonly pendingOut$ = new BehaviorSubject(false);
-    public readonly pendingIn$ = new BehaviorSubject(false);
-    public readonly resources$ = new BehaviorSubject<JidToPresence>(new Map());
-    readonly pendingRoomInvite$ = new BehaviorSubject(false);
+    readonly jidFull: JID;
+    readonly jidBare: JID;
+    readonly presence$ = new BehaviorSubject<Presence>(Presence.unavailable);
+    readonly subscription$ = new BehaviorSubject<ContactSubscription>(ContactSubscription.none);
+    readonly pendingOut$ = new BehaviorSubject(false);
+    readonly pendingIn$ = new BehaviorSubject(false);
+    readonly resources$ = new BehaviorSubject<JidToPresence>(new Map());
+    readonly pendingRoomInvite$ = new BehaviorSubject<null | Invitation>(null);
 
     private readonly messageStore: MessageStore<Message>;
 
@@ -81,7 +88,7 @@ export class Contact {
         this.messageStore.addMessage(message);
     }
 
-    public equalsBareJid(other: Recipient | JID): boolean {
+    equalsBareJid(other: Recipient | JID): boolean {
         if (other instanceof Contact || isJid(other)) {
             const otherJid = other instanceof Contact ? other.jidBare : other.bare();
             return this.jidBare.equals(otherJid);
