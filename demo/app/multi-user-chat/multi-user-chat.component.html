@@ -2,9 +2,9 @@
     <h2>Chat rooms:</h2>
     <div *ngIf="(chatService.state$ | async) === 'online'; else offline">
         <div *ngFor="let room of (multiUserChatPlugin.rooms$ | async)">
-            <button (click)="selectedRoom = room">
-                {{room.roomJid.bare().toString()}}
-            </button>
+            {{room.roomJid.bare().toString()}}:
+            <button (click)="selectedRoom = room">Select</button>
+            <button (click)="leaveRoom(room.occupantJid)" class="red">Leave</button>
         </div>
 
         <ng-container *ngIf="selectedRoom">
@@ -15,41 +15,112 @@
 
         <hr/>
 
+        <input [(ngModel)]="occupantJidText" (ngModelChange)="updateOccupantJid($event)" class="form-control"
+               #occupantJidInput="ngModel"
+               [ngClass]="occupantJidInput.control.invalid ? 'red' : null"
+               type="text" placeholder="room"/>
 
-        <input [(ngModel)]="roomJid" class="form-control" type="text" placeholder="room"/>
-
-        <button (click)="joinRoom(roomJid)">Join room</button>
-        <button (click)="subscribeWithMucSub(roomJid)">subscribe with MUC/Sub</button>
-        <button (click)="unsubscribeFromMucSub(roomJid)">unsubscribe from MUC/Sub</button>
+        <button (click)="joinRoom(occupantJid)">Join room</button>
+        <button (click)="subscribeWithMucSub(occupantJid)">subscribe with MUC/Sub</button>
+        <button (click)="unsubscribeFromMucSub(occupantJid)">unsubscribe from MUC/Sub</button>
         <button (click)="getSubscriptions()">get MUC/Sub subscriptions</button>
+        <button (click)="queryUserList(occupantJid)">get user list</button>
+        <button (click)="getRoomConfiguration(occupantJid)">get room configuration</button>
 
-        <div>Current MUC subscriptions to room: {{roomJid}}</div>
-        <ul>
-            <li *ngFor="let subscription of mucSubSubscriptions | keyvalue">
-                {{subscription.key}}:
-                <ul>
-                    <li *ngFor="let subscribedNode of subscription.value">
-                        {{subscribedNode}}
-                    </li>
-                </ul>
-            </li>
-        </ul>
+        <ng-container *ngIf="mucSubSubscriptions.size > 0">
+            <div>Current MUC subscriptions to room: {{occupantJid}}</div>
+            <ul>
+                <li *ngFor="let subscription of mucSubSubscriptions | keyvalue">
+                    {{subscription.key}}:
+                    <ul>
+                        <li *ngFor="let subscribedNode of subscription.value">
+                            {{subscribedNode}}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </ng-container>
 
         <br>
-        <div>Members of room: {{roomJid}}</div>
-        <ul>
-            <li *ngFor="let member of roomMemberList">
-                {{member.jid}}
-            </li>
-        </ul>
+        <ng-container *ngIf="roomUserList.length > 0">
+            <div>Members of room: {{occupantJid.bare().toString()}}</div>
+            <table>
+                <thead>
+                <tr>
+                    <th>JID</th>
+                    <th>Nicks</th>
+                    <th>Affiliation</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let member of roomUserList">
+                    <td>{{displayMemberJid(member)}}</td>
+                    <td>{{displayMemberNicks(member) || '[unknown]'}}</td>
+                    <td>{{member.affiliation}}</td>
+                    <td>{{member.role}}</td>
+                    <td>
+                        <button (click)="kick(member)">
+                            Kick ({{findIdWithNick(member)?.nick || '[unknown]'}})
+                        </button>
+                        <button (click)="banOrUnban(member)">
+                            Ban/Unban
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </ng-container>
 
-
+        <ng-container *ngIf="(roomConfiguration?.fields.length || 0) > 0">
+            <p>Configuration of room: {{occupantJid.bare().toString()}}</p>
+            <table>
+                <thead>
+                <tr>
+                    <th>Variable</th>
+                    <th>Value</th>
+                    <th>Label</th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let field of roomConfiguration.fields">
+                    <tr *ngIf="field.type !== 'hidden'">
+                        <td>{{field.variable}}</td>
+                        <td>{{field.value}}</td>
+                        <td>{{field.label}}</td>
+                    </tr>
+                </ng-container>
+                </tbody>
+            </table>
+        </ng-container>
         <hr/>
 
         <button (click)="queryAllRooms()">List all rooms</button>
 
         <div *ngFor="let room of allRooms">
-            {{room.name}}: {{room.jid}}
+            <p>{{room.name}}: {{room.jid.toString()}}</p>
+            <details>
+                <summary>Room info</summary>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Value</th>
+                        <th>Label</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <ng-container *ngFor="let field of room.roomInfo.fields">
+                        <tr *ngIf="field.type !== 'hidden'">
+                            <td>{{field.variable}}</td>
+                            <td>{{field.value}}</td>
+                            <td>{{field.label}}</td>
+                        </tr>
+                    </ng-container>
+                    </tbody>
+                </table>
+            </details>
             <button (click)="joinRoom(room.jid)">join</button>
             <button (click)="subscribeWithMucSub(room.jid)">subscribe with MUC/Sub</button>
             <button (click)="unsubscribeFromMucSub(room.jid)">unsubscribe from MUC/Sub</button>
@@ -62,13 +133,24 @@
 
         <form (submit)="createRoomOnServer()" *ngIf="newRoom != null">
             <div class="form-group">
-                <input name="roomId" [(ngModel)]="newRoom.roomId" class="form-control" type="text" placeholder="Room id"
+                <input name="roomId"
+                       [(ngModel)]="newRoom.roomId"
+                       class="form-control"
+                       type="text"
+                       placeholder="Room id"
                        required="required"
                        #roomId="ngModel"/>
                 <div [hidden]="roomId.valid || roomId.pristine"
                      class="alert alert-danger">
                     Room id is required
                 </div>
+            </div>
+            <div class="form-group">
+                <input name="roomName"
+                       class="form-control"
+                       [(ngModel)]="newRoom.name"
+                       type="text"
+                       placeholder="Room name"/>
             </div>
             <label>
                 <input name="membersOnly" [(ngModel)]="newRoom.membersOnly" type="checkbox"/>

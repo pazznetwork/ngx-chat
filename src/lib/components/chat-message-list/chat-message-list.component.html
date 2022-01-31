@@ -23,6 +23,22 @@
 
     <ngx-chat-message-simple
             [direction]="Direction.in"
+            [avatar]="undefined"
+            [footerHidden]="true"
+            *ngIf="showPendingRoomInvite()"
+    >
+        <ul class="chat-presence-subscription-actions">
+            <li>
+                <a (click)="acceptRoomInvite($event)" href="#">Join</a>
+            </li>
+            <li>
+                <a (click)="declineRoomInvite($event)" href="#">Decline</a>
+            </li>
+        </ul>
+    </ngx-chat-message-simple>
+
+    <ngx-chat-message-simple
+            [direction]="Direction.in"
             [avatar]="showAvatars ? recipient.avatar : undefined"
             [footerHidden]="true"
             *ngIf="subscriptionActionShown()"

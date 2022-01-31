@@ -20,8 +20,8 @@ describe('chat connection service', () => {
                 XmppChatConnectionService,
                 {provide: XmppClientFactoryService, useValue: mockClientFactory},
                 {provide: LogService, useValue: testLogService()},
-                ContactFactoryService
-            ]
+                ContactFactoryService,
+            ],
         });
 
         chatConnectionService = TestBed.inject(XmppChatConnectionService);
@@ -29,8 +29,8 @@ describe('chat connection service', () => {
     });
 
     it('#getNextIqId() should generate new iq ids', () => {
-        expect(chatConnectionService.getNextIqId())
-            .not.toEqual(chatConnectionService.getNextIqId(), 'two consecutive iq ids should not match');
+        expect(chatConnectionService.getNextRequestId())
+            .not.toEqual(chatConnectionService.getNextRequestId(), 'two consecutive iq ids should not match');
     });
 
 });

@@ -16,7 +16,7 @@ import { ContactFactoryService } from '../../contact-factory.service';
 import { LogService } from '../../log.service';
 import { MessageArchivePlugin } from './plugins/message-archive.plugin';
 import { MessagePlugin } from './plugins/message.plugin';
-import { MultiUserChatPlugin } from './plugins/multi-user-chat.plugin';
+import { MultiUserChatPlugin } from './plugins/multi-user-chat/multi-user-chat.plugin';
 import { RosterPlugin } from './plugins/roster.plugin';
 import { XmppChatConnectionService, XmppChatStates } from './xmpp-chat-connection.service';
 
@@ -83,24 +83,20 @@ export class XmppChatAdapter implements ChatService {
         this.chatConnectionService.stanzaUnknown$.subscribe((stanza) => this.onUnknownStanza(stanza));
 
         merge(this.messageSent$, this.message$).subscribe(() => {
-            // re-emit contacts when sending or receiving a message to refresh contcat groups
+            // re-emit contacts when sending or receiving a message to refresh contact groups
             // if the sending contact was in 'other', he still is in other now, but passes the 'messages.length > 0' predicate, so that
             // he should be seen now.
             this.contacts$.next(this.contacts$.getValue());
         });
     }
 
-    private handleInternalStateChange(internalState: XmppChatStates) {
-        if (internalState === 'online') {
+    private handleInternalStateChange(newState: XmppChatStates) {
+        if (newState === 'online') {
             this.state$.next('connecting');
-            Promise.all(this.plugins.map(plugin => plugin.onBeforeOnline()))
-                .then(
-                    () => this.announceAvailability(),
-                    (e) => {
-                        this.logService.error('error while connecting', e);
-                        this.announceAvailability();
-                    },
-                );
+            Promise
+                .all(this.plugins.map(plugin => plugin.onBeforeOnline()))
+                .catch((e) => this.logService.error('error while connecting', e))
+                .finally(() => this.announceAvailability());
         } else {
             if (this.state$.getValue() === 'online') {
                 // clear data the first time we transition to a not-online state

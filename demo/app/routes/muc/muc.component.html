@@ -1,0 +1,89 @@
+<div class="grid">
+    <nav>
+        <a routerLink="../">Back</a>
+        <div class="state">
+            Connection state: {{state$ | async}}
+        </div>
+    </nav>
+    <aside>
+        <h4>Rooms:</h4>
+        <div class="list">
+            <div class="list-item" *ngFor="let room of rooms$ | async">
+                <div>
+                    <p>{{room.name}}</p>
+                    <small>JID: {{room.jid.toString()}}</small>
+                </div>
+                <div>
+                    <button *ngIf="!currentRoom || currentRoom?.roomJid.equals(room.jid)"
+                            (click)="joinRoom(room.jid)">Join
+                    </button>
+                    <button *ngIf="currentRoom?.roomJid.equals(room.jid)" (click)="leaveRoom()">Leave</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <main>
+        <ng-container *ngIf="selectedRoom$ | async as room">
+            <h1 style="text-align: center">
+                {{room.name}}<br>
+                <small>JID: {{room.roomJid.toString()}}</small><br>
+                <small>Subject: {{room.subject || '[unset]'}}</small>
+            </h1>
+            <h2>Actions:</h2>
+            <form>
+                <div class="form-group">
+                    <label for="room-subject">Room subject:</label>
+                    <input [(ngModel)]="subject" class="form-control" id="room-subject" name="room-subject"
+                           placeholder="Enter a new room subject" type="text"/>
+                    <button type="button" (click)="changeRoomSubject()">Change</button>
+                </div>
+                <div class="form-group">
+                    <label for="change-nick">Change nick:</label>
+                    <input [(ngModel)]="nick" class="form-control" id="change-nick" name="change-nick"
+                           placeholder="Enter a new nick" type="text"/>
+                    <button type="button" (click)="changeNick()">Change</button>
+                </div>
+                <div class="form-group">
+                    <label for="invite-user">Invite user:</label>
+                    <input [(ngModel)]="inviteJid" class="form-control" id="invite-user" name="invite-user"
+                           placeholder="Enter JID of a user to invite" type="text"/>
+                    <button type="button" (click)="inviteUser()">Invite</button>
+                </div>
+                <div class="form-group">
+                    <label for="member">Grant or revoke membership</label>
+                    <input [(ngModel)]="memberJid" class="form-control" id="member" name="member" type="text"
+                           placeholder="Enter JID of an occupant to grant/revoke membership"/>
+                    <button type="button" (click)="revokeMembership()">Revoke</button>
+                    <button type="button" (click)="grantMembership()">Grant</button>
+                </div>
+                <div class="form-group">
+                    <label for="moderator">Grant or revoke moderator status</label>
+                    <input [(ngModel)]="moderatorNick" class="form-control" id="moderator" name="moderator" type="text"
+                           placeholder="Enter nick of an occupant to grant or revoke moderator status"/>
+                    <button type="button" (click)="revokeModeratorStatus()">Revoke</button>
+                    <button type="button" (click)="grantModeratorStatus()">Grant</button>
+                </div>
+            </form>
+        </ng-container>
+        <ng-container *ngIf="selectedRoom$ | async as room">
+            <h2>Chat:</h2>
+            <ngx-chat-message-list [recipient]="room"></ngx-chat-message-list>
+            <ngx-chat-message-input [recipient]="room"></ngx-chat-message-input>
+        </ng-container>
+    </main>
+    <aside>
+        <h4>Occupants:</h4>
+        <div class="list">
+            <div class="list-item" *ngFor="let occupant of occupants$ | async">
+                <div>
+                    <p>{{occupant.nick}} - <small>{{occupant.affiliation}}, {{occupant.role}}</small></p>
+                    <small>{{occupant.occupantJid.toString()}}</small>
+                </div>
+                <div>
+                    <button (click)="kick(occupant)">Kick</button>
+                    <button (click)="ban(occupant)">Ban</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>

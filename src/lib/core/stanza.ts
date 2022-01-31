@@ -32,5 +32,4 @@ export interface MessageWithBodyStanza extends Stanza {
         type?: string;
         id?: string;
     };
-
 }

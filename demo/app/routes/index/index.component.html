@@ -96,8 +96,10 @@
         Sum unread messages: {{unreadMessageCountPlugin.unreadMessageCountSum$ | async}}
         <pre>{{unreadMessageCountPlugin.jidToUnreadCount$ | async | keyvalue | json}}</pre>
     </div>
-
+    <h2>More:</h2>
     <a routerLink="/ui">Show mock chats</a>
+    <br>
+    <a routerLink="/muc">Show multi user chat</a>
 </div>
 
 <ngx-chat rosterState="shown"></ngx-chat>

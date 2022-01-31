@@ -4,10 +4,11 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { IqResponseStanza, Stanza } from '../../../../core/stanza';
 import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
-import { IqResponseError } from '../iq-response.error';
+import { XmppResponseError } from '../xmpp-response.error';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
+import { serializeToSubmitForm } from '../../../../core/form';
 
 export const PUBSUB_EVENT_XMLNS = 'http://jabber.org/protocol/pubsub#event';
 
@@ -44,17 +45,15 @@ class PublishStanzaBuilder extends AbstractStanzaBuilder {
                     xml('item', {id}, data),
                 ),
                 xml('publish-options', {},
-                    xml('x', {xmlns: 'jabber:x:data', type: 'submit'},
-                        xml('field', {var: 'FORM_TYPE', type: 'hidden'},
-                            xml('value', {}, 'http://jabber.org/protocol/pubsub#publish-options'),
-                        ),
-                        xml('field', {var: 'pubsub#persist_items'},
-                            xml('value', {}, persistItems ? 1 : 0),
-                        ),
-                        xml('field', {var: 'pubsub#access_model'},
-                            xml('value', {}, 'whitelist'),
-                        ),
-                    ),
+                    serializeToSubmitForm({
+                        type: 'submit',
+                        instructions: [],
+                        fields: [
+                            {type: 'hidden', variable: 'FORM_TYPE', value: 'http://jabber.org/protocol/pubsub#publish-options'},
+                            {type: 'boolean', variable: 'pubsub#persist_items', value: persistItems === true},
+                            {type: 'list-single', variable: 'pubsub#access_model', value: 'whitelist'},
+                        ],
+                    }),
                 ),
             ),
         );
@@ -150,7 +149,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
             );
             return iqResponseStanza.getChild('pubsub').getChild('items').getChildren('item');
         } catch (e) {
-            if (e instanceof IqResponseError &&
+            if (e instanceof XmppResponseError &&
                 (e.errorCondition === 'item-not-found' || e.errorCode === 404)) {
                 return [];
             }

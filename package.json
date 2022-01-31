@@ -27,7 +27,8 @@
     "@angular/cdk": "^12.2.12",
     "@angular/platform-browser-dynamic": "^12.2.12",
     "@types/ltx": "2.8.2",
-    "@xmpp/client": "0.13.0"
+    "@xmpp/client": "0.13.0",
+    "rxjs": "~6.6.0"
   },
   "devDependencies": {
     "@angular/common": "^12.2.12",

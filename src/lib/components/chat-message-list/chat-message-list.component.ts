@@ -20,13 +20,15 @@ import { Direction, Message } from '../../core/message';
 import { Recipient } from '../../core/recipient';
 import { BlockPlugin } from '../../services/adapters/xmpp/plugins/block.plugin';
 import { MessageArchivePlugin } from '../../services/adapters/xmpp/plugins/message-archive.plugin';
-import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat.plugin';
 import { ChatListStateService } from '../../services/chat-list-state.service';
 import { ChatMessageListRegistryService } from '../../services/chat-message-list-registry.service';
 import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
 import { ContactFactoryService } from '../../services/contact-factory.service';
 import { REPORT_USER_INJECTION_TOKEN, ReportUserService } from '../../services/report-user-service';
 import { ChatMessageComponent } from '../chat-message/chat-message.component';
+import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room-message';
+import { MultiUserChatPlugin } from '../../services/adapters/xmpp/plugins/multi-user-chat/multi-user-chat.plugin';
+import { Contact, Invitation } from '../../core/contact';
 
 enum SubscriptionAction {
     PENDING_REQUEST,
@@ -63,6 +65,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
     private isAtBottom = true;
     private bottomLeftAt = 0;
     private oldestVisibleMessageBeforeLoading: Message = null;
+    private pendingRoomInvite: Invitation | null = null;
 
     constructor(
         public chatListService: ChatListStateService,
@@ -91,6 +94,13 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
                     this.subscriptionAction = SubscriptionAction.PENDING_REQUEST;
                     this.scheduleScrollToLastMessage();
                 });
+
+            this.recipient.pendingRoomInvite$
+                .pipe(
+                    filter(invite => invite != null),
+                    takeUntil(this.ngDestroy),
+                )
+                .subscribe((invite) => this.pendingRoomInvite = invite);
         }
 
         this.chatMessageListRegistry.incrementOpenWindowCount(this.recipient);
@@ -160,21 +170,6 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         setTimeout(() => this.scrollToLastMessage(), 0);
     }
 
-    private scrollToLastMessage() {
-        if (this.chatMessageAreaElement) {
-            this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
-            this.isAtBottom = true; // in some browsers the intersection observer does not emit when scrolling programmatically
-        }
-    }
-
-    private scrollToMessage(message: Message) {
-        if (this.chatMessageAreaElement) {
-            const htmlIdAttribute = 'message-' + message.id;
-            const messageElement = document.getElementById(htmlIdAttribute);
-            messageElement.scrollIntoView(false);
-        }
-    }
-
     blockContact($event: MouseEvent) {
         $event.preventDefault();
         this.blockPlugin.blockJid(this.recipient.jidBare.toString());
@@ -217,16 +212,6 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         }
     }
 
-    private async loadMessages() {
-        try {
-            // improve performance when loading lots of old messages
-            this.changeDetectorRef.detach();
-            await this.chatService.getPlugin(MessageArchivePlugin).loadMostRecentUnloadedMessages(this.recipient);
-        } finally {
-            this.changeDetectorRef.reattach();
-        }
-    }
-
     onBottom(event: IntersectionObserverEntry) {
         this.isAtBottom = event.isIntersecting;
 
@@ -238,15 +223,7 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         }
     }
 
-    private isNearBottom() {
-        return this.isAtBottom || Date.now() - this.bottomLeftAt < 1000;
-    }
-
-    private isLoadingHistory(): boolean {
-        return !!this.oldestVisibleMessageBeforeLoading;
-    }
-
-    getOrCreateContactWithFullJid(message: Message | RoomMessage): Recipient {
+    getOrCreateContactWithFullJid(message: Message | RoomMessage): Contact {
         if (this.recipient.recipientType === 'contact') {
             // this is not a multi user chat, just use recipient as contact
             return this.recipient;
@@ -264,5 +241,60 @@ export class ChatMessageListComponent implements OnInit, OnDestroy, OnChanges, A
         }
 
         return matchingContact;
+    }
+
+    showPendingRoomInvite() {
+        if (this.recipient.recipientType !== 'contact') {
+            return false;
+        }
+        return this.pendingRoomInvite;
+    }
+
+    async acceptRoomInvite(event: MouseEvent) {
+        event.preventDefault();
+        await this.chatService.getPlugin(MultiUserChatPlugin).joinRoom(this.pendingRoomInvite.roomJid);
+        (this.recipient as Contact).pendingRoomInvite$.next(null);
+        this.pendingRoomInvite = null;
+    }
+
+    async declineRoomInvite(event: MouseEvent) {
+        event.preventDefault();
+        await this.chatService.getPlugin(MultiUserChatPlugin).declineRoomInvite(this.pendingRoomInvite.roomJid);
+        (this.recipient as Contact).pendingRoomInvite$.next(null);
+        this.pendingRoomInvite = null;
+        this.chatService.removeContact(this.recipient.jidBare.toString());
+    }
+
+    private scrollToLastMessage() {
+        if (this.chatMessageAreaElement) {
+            this.chatMessageAreaElement.nativeElement.scrollTop = this.chatMessageAreaElement.nativeElement.scrollHeight;
+            this.isAtBottom = true; // in some browsers the intersection observer does not emit when scrolling programmatically
+        }
+    }
+
+    private scrollToMessage(message: Message) {
+        if (this.chatMessageAreaElement) {
+            const htmlIdAttribute = 'message-' + message.id;
+            const messageElement = document.getElementById(htmlIdAttribute);
+            messageElement.scrollIntoView(false);
+        }
+    }
+
+    private async loadMessages() {
+        try {
+            // improve performance when loading lots of old messages
+            this.changeDetectorRef.detach();
+            await this.chatService.getPlugin(MessageArchivePlugin).loadMostRecentUnloadedMessages(this.recipient);
+        } finally {
+            this.changeDetectorRef.reattach();
+        }
+    }
+
+    private isNearBottom() {
+        return this.isAtBottom || Date.now() - this.bottomLeftAt < 1000;
+    }
+
+    private isLoadingHistory(): boolean {
+        return !!this.oldestVisibleMessageBeforeLoading;
     }
 }

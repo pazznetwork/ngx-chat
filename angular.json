@@ -13,6 +13,10 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "@xmpp/jid",
+              "@xmpp/client"
+            ],
             "outputPath": "dist/ngx-chat-demo",
             "index": "demo/index.html",
             "main": "demo/main.ts",

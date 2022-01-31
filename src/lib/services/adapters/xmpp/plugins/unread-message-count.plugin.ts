@@ -10,7 +10,7 @@ import { AbstractStanzaBuilder } from '../abstract-stanza-builder';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { EntityTimePlugin } from './entity-time.plugin';
-import { MultiUserChatPlugin } from './multi-user-chat.plugin';
+import { MultiUserChatPlugin } from './multi-user-chat/multi-user-chat.plugin';
 import { PublishSubscribePlugin } from './publish-subscribe.plugin';
 
 const STORAGE_NGX_CHAT_LAST_READ_DATE = 'ngxchat:unreadmessagedate';

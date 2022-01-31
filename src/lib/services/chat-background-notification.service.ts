@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@angular/core';
 import { JID } from '@xmpp/jid';
 import { Contact } from '../core/contact';
-import { MultiUserChatPlugin, Room } from './adapters/xmpp/plugins/multi-user-chat.plugin';
+import { MultiUserChatPlugin} from './adapters/xmpp/plugins/multi-user-chat/multi-user-chat.plugin';
 import { CHAT_SERVICE_TOKEN, ChatService } from './chat-service';
+import { Room } from './adapters/xmpp/plugins/multi-user-chat/room';
 
 @Injectable()
 export class ChatBackgroundNotificationService {

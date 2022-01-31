@@ -6,7 +6,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { LogInRequest } from '../../../core/log-in-request';
 import { IqResponseStanza, Stanza } from '../../../core/stanza';
 import { LogService } from '../../log.service';
-import { IqResponseError } from './iq-response.error';
+import { XmppResponseError } from './xmpp-response.error';
 import { XmppClientFactoryService } from './xmpp-client-factory.service';
 
 export type XmppChatStates = 'disconnected' | 'online' | 'reconnecting';
@@ -27,8 +27,8 @@ export class XmppChatConnectionService {
      * User JID with resource, not bare.
      */
     public userJid?: JID;
-    private iqId = new Date().getTime();
-    private readonly iqStanzaResponseHandlers = new Map<string, (stanza: IqResponseStanza) => void>();
+    private requestId = new Date().getTime();
+    private readonly stanzaResponseHandlers = new Map<string, [(stanza: Stanza) => void, (e: Error) => void]>();
     public client?: Client;
 
     constructor(
@@ -43,6 +43,11 @@ export class XmppChatConnectionService {
         this.state$.next('online');
     }
 
+    private onOffline(): void {
+        this.stanzaResponseHandlers.forEach(([, reject]) => reject(new Error('offline')));
+        this.stanzaResponseHandlers.clear();
+    }
+
     public async sendPresence(): Promise<void> {
         await this.send(
             xml('presence'),
@@ -54,55 +59,44 @@ export class XmppChatConnectionService {
         await this.client.send(content);
     }
 
-    public sendIq(request: Element): Promise<IqResponseStanza<'result'>> {
+    public sendAwaitingResponse(request: Element): Promise<Stanza> {
         return new Promise((resolve, reject) => {
-
             request.attrs = {
-                id: this.getNextIqId(),
+                id: this.getNextRequestId(),
                 from: this.userJid.toString(),
                 ...request.attrs,
             };
             const {id} = request.attrs;
 
-            if (!request.attrs.type) {
-                const message = 'iq stanza without type: ' + request.toString();
-                this.logService.error(message);
-                throw new Error(message);
-            }
+            this.stanzaResponseHandlers.set(id, [
+                (response) => {
+                    if (response.attrs.type === 'error') {
+                        reject(new XmppResponseError(response));
+                        return;
+                    }
 
-            this.iqStanzaResponseHandlers.set(id, (response: IqResponseStanza) => {
-                if (response.attrs.type === 'result') {
-                    resolve(response as IqResponseStanza<'result'>);
-                } else {
-                    const errorResponse = response as IqResponseStanza<'error'>;
-                    reject(new IqResponseError(errorResponse));
-                }
-            });
+                    resolve(response);
+                },
+                reject,
+            ]);
 
             this.send(request).catch((e: unknown) => {
-                this.logService.error('error sending iq', e);
-                this.iqStanzaResponseHandlers.delete(id);
+                this.logService.error('error sending stanza', e);
+                this.stanzaResponseHandlers.delete(id);
                 reject(e);
             });
         });
     }
 
-    public async sendIqAckResult(id: string): Promise<void> {
-        await this.send(
-            xml('iq', {from: this.userJid.toString(), id, type: 'result'}),
-        );
-    }
-
     public onStanzaReceived(stanza: Stanza): void {
         let handled = false;
-        if (this.isIqStanzaResponse(stanza)) {
-            const handleIqStanzaResponse = this.iqStanzaResponseHandlers.get(stanza.attrs.id);
-            if (handleIqStanzaResponse) {
-                this.logService.debug('<<<', stanza.toString(), 'handled by callback', handleIqStanzaResponse);
-                this.iqStanzaResponseHandlers.delete(stanza.attrs.id);
-                handleIqStanzaResponse(stanza);
-                handled = true;
-            }
+
+        const [handleResponse] = this.stanzaResponseHandlers.get(stanza.attrs.id) ?? [];
+        if (handleResponse) {
+            this.logService.debug('<<<', stanza.toString(), 'handled by response handler');
+            this.stanzaResponseHandlers.delete(stanza.attrs.id);
+            handleResponse(stanza);
+            handled = true;
         }
 
         if (!handled) {
@@ -110,9 +104,31 @@ export class XmppChatConnectionService {
         }
     }
 
+    public async sendIq(request: Element): Promise<IqResponseStanza<'result'>> {
+        const requestType: string | undefined = request.attrs.type;
+        // see https://datatracker.ietf.org/doc/html/draft-ietf-xmpp-3920bis#section-8.2.3
+        if (!requestType || (requestType !== 'get' && requestType !== 'set')) {
+            const message = `iq stanza without type: ${request.toString()}`;
+            this.logService.error(message);
+            throw new Error(message);
+        }
+
+        const response = await this.sendAwaitingResponse(request);
+        if (!this.isIqStanzaResponse(response)) {
+            throw new Error(`received unexpected stanza as iq response: type=${response.attrs.type}, stanza=${response.toString()}`);
+        }
+        return response as IqResponseStanza<'result'>;
+    }
+
     private isIqStanzaResponse(stanza: Stanza): stanza is IqResponseStanza {
         const stanzaType = stanza.attrs.type;
         return stanza.name === 'iq' && (stanzaType === 'result' || stanzaType === 'error');
+    }
+
+    public async sendIqAckResult(id: string): Promise<void> {
+        await this.send(
+            xml('iq', {from: this.userJid.toString(), id, type: 'result'}),
+        );
     }
 
     async logIn(logInRequest: LogInRequest): Promise<void> {
@@ -159,6 +175,12 @@ export class XmppChatConnectionService {
                 });
             });
 
+            this.client.on('offline', () => {
+                this.ngZone.run(() => {
+                    this.onOffline();
+                });
+            });
+
             await this.client.start();
         });
     }
@@ -187,8 +209,8 @@ export class XmppChatConnectionService {
         }
     }
 
-    getNextIqId(): string {
-        return String(this.iqId++);
+    getNextRequestId(): string {
+        return String(this.requestId++);
     }
 
     reconnectSilently(): void {

@@ -1,26 +1,26 @@
-import { IqResponseStanza } from '../../../core/stanza';
+import { Stanza } from '../../../core/stanza';
 
-export class IqResponseError extends Error {
+export class XmppResponseError extends Error {
     static readonly ERROR_ELEMENT_NS = 'urn:ietf:params:xml:ns:xmpp-stanzas';
     readonly errorCode?: number;
     readonly errorType?: string;
     readonly errorCondition?: string;
 
-    constructor(readonly errorStanza: IqResponseStanza<'error'>) {
+    constructor(readonly errorStanza: Stanza) {
         super(
-            IqResponseError.extractErrorTextFromErrorResponse(
+            XmppResponseError.extractErrorTextFromErrorResponse(
                 errorStanza,
-                IqResponseError.extractErrorDataFromErrorResponse(errorStanza)
-            )
+                XmppResponseError.extractErrorDataFromErrorResponse(errorStanza),
+            ),
         );
 
-        const {code, type, condition} = IqResponseError.extractErrorDataFromErrorResponse(errorStanza);
+        const {code, type, condition} = XmppResponseError.extractErrorDataFromErrorResponse(errorStanza);
         this.errorCode = code;
         this.errorType = type;
         this.errorCondition = condition;
     }
 
-    private static extractErrorDataFromErrorResponse(stanza: IqResponseStanza<'error'>): {
+    private static extractErrorDataFromErrorResponse(stanza: Stanza): {
         code?: number,
         type?: string,
         condition?: string
@@ -33,7 +33,7 @@ export class IqResponseError extends Error {
                 ?.children
                 .filter(childElement =>
                     childElement.getName() !== 'text' &&
-                    childElement.attrs.xmlns === IqResponseError.ERROR_ELEMENT_NS
+                    childElement.attrs.xmlns === XmppResponseError.ERROR_ELEMENT_NS,
                 )[0]
                 ?.getName();
 
@@ -45,7 +45,7 @@ export class IqResponseError extends Error {
     }
 
     private static extractErrorTextFromErrorResponse(
-        stanza: IqResponseStanza<'error'>,
+        stanza: Stanza,
         {code, type, condition}: {
             code?: number,
             type?: string,
@@ -54,11 +54,11 @@ export class IqResponseError extends Error {
         const additionalData = [
             `errorCode: ${code ?? '[unknown]'}`,
             `errorType: ${type ?? '[unknown]'}`,
-            `errorCondition: ${condition ?? '[unknown]'}`
+            `errorCondition: ${condition ?? '[unknown]'}`,
         ].join(', ');
         const errorText =
-            stanza.getChild('error')?.getChildText('text', IqResponseError.ERROR_ELEMENT_NS) || 'Unknown error';
+            stanza.getChild('error')?.getChildText('text', XmppResponseError.ERROR_ELEMENT_NS) || 'Unknown error';
 
-        return `IqResponseError: ${errorText}${additionalData ? ` (${additionalData})` : ''}`;
+        return `XmppResponseError: ${errorText}${additionalData ? ` (${additionalData})` : ''}`;
     }
 }
