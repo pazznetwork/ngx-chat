@@ -525,7 +525,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         const stanza = xml('message', {to, from},
             xml('x', {xmlns: mucUserNs},
                 xml('decline', {to},
-                    xml('reason', {}, reason ? reason : 'Declined invitation'),
+                    reason ? xml('reason', {}, reason) : null
                 ),
             ),
         );
