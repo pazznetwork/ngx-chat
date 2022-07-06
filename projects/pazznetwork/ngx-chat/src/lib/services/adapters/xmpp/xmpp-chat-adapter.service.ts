@@ -1,24 +1,41 @@
-import { Injectable } from '@angular/core';
-import { jid as parseJid } from '@xmpp/client';
-import { BehaviorSubject, combineLatest, merge, Observable, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { ChatActionContext } from '../../../components/chat-window/chat-window.component';
-import { Contact } from '../../../core/contact';
-import { dummyAvatarContact } from '../../../core/contact-avatar';
-import { LogInRequest } from '../../../core/log-in-request';
-import { ChatPlugin } from '../../../core/plugin';
-import { Recipient } from '../../../core/recipient';
-import { Stanza } from '../../../core/stanza';
-import { Translations } from '../../../core/translations';
-import { defaultTranslations } from '../../../core/translations-default';
-import { ChatService, ConnectionStates } from '../../chat-service';
-import { ContactFactoryService } from '../../contact-factory.service';
-import { LogService } from '../../log.service';
-import { MessageArchivePlugin } from './plugins/message-archive.plugin';
-import { MessagePlugin } from './plugins/message.plugin';
-import { MultiUserChatPlugin } from './plugins/multi-user-chat.plugin';
-import { RosterPlugin } from './plugins/roster.plugin';
-import { XmppChatConnectionService, XmppChatStates } from './xmpp-chat-connection.service';
+import {Injectable} from '@angular/core';
+import {jid as parseJid} from '@xmpp/client';
+import {BehaviorSubject, combineLatest, merge, Observable, Subject} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
+import {Contact} from '../../../core/contact';
+import {dummyAvatarContact} from '../../../core/contact-avatar';
+import {LogInRequest} from '../../../core/log-in-request';
+import {ChatPlugin} from '../../../core/plugin';
+import {Recipient} from '../../../core/recipient';
+import {Stanza} from '../../../core/stanza';
+import {Translations} from '../../../core/translations';
+import {defaultTranslations} from '../../../core/translations-default';
+import {ChatService, ConnectionStates} from '../../chat-service';
+import {ContactFactoryService} from '../../contact-factory.service';
+import {LogService} from '../../log.service';
+import {MessageArchivePlugin} from './plugins/message-archive.plugin';
+import {MessagePlugin} from './plugins/message.plugin';
+import {MultiUserChatPlugin} from './plugins/multi-user-chat.plugin';
+import {RosterPlugin} from './plugins/roster.plugin';
+import {XmppChatConnectionService, XmppChatStates} from './xmpp-chat-connection.service';
+
+
+export interface ChatAction<TChatWindow> {
+    cssClass: { [className: string]: boolean } | string | string[];
+    /**
+     * to identify actions
+     */
+    id: string;
+    html: string;
+
+    onClick(chatActionContext: ChatActionContext<TChatWindow>): void;
+}
+
+export interface ChatActionContext<TChatWindow> {
+    contact: string;
+    chatWindow: TChatWindow;
+}
+
 
 @Injectable()
 export class XmppChatAdapter implements ChatService {
@@ -62,7 +79,7 @@ export class XmppChatAdapter implements ChatService {
         id: 'sendMessage',
         cssClass: 'chat-window-send',
         html: '&raquo;',
-        onClick: (chatActionContext: ChatActionContext) => {
+        onClick: (chatActionContext: ChatActionContext<{ sendMessage: () => void }>) => {
             chatActionContext.chatWindow.sendMessage();
         },
     }];

@@ -1,11 +1,11 @@
-import { InjectionToken } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { ChatAction } from '../components/chat-window/chat-window.component';
-import { Contact } from '../core/contact';
-import { LogInRequest } from '../core/log-in-request';
-import { ChatPlugin } from '../core/plugin';
-import { Recipient } from '../core/recipient';
-import { Translations } from '../core/translations';
+import {InjectionToken} from '@angular/core';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {Contact} from '../core/contact';
+import {LogInRequest} from '../core/log-in-request';
+import {ChatPlugin} from '../core/plugin';
+import {Recipient} from '../core/recipient';
+import {Translations} from '../core/translations';
+import {ChatAction} from './adapters/xmpp/xmpp-chat-adapter.service';
 
 export const ChatServiceToken = new InjectionToken('pazznetworkNgxChatService');
 
@@ -90,7 +90,7 @@ export interface ChatService {
      * The actions visible to users near to chat inputs, e.g. the send message button. Customize it for branding or to add
      * new actions, e.g. for file uploads.
      */
-    chatActions: ChatAction[];
+    chatActions: ChatAction<{sendMessage: () => void}>[];
 
     /**
      * Forces asynchronous reloading of your roster list from the server, {@link contacts$} will reflect this.
