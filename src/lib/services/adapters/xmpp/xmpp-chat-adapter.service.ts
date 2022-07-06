@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { jid as parseJid } from '@xmpp/client';
 import { BehaviorSubject, combineLatest, merge, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { ChatActionContext } from '../../../components/chat-window/chat-window.component';
 import { Contact } from '../../../core/contact';
 import { dummyAvatarContact } from '../../../core/contact-avatar';
 import { LogInRequest } from '../../../core/log-in-request';
@@ -19,6 +18,24 @@ import { MessagePlugin } from './plugins/message.plugin';
 import { MultiUserChatPlugin } from './plugins/multi-user-chat/multi-user-chat.plugin';
 import { RosterPlugin } from './plugins/roster.plugin';
 import { XmppChatConnectionService, XmppChatStates } from './xmpp-chat-connection.service';
+
+
+export interface ChatAction<TChatWindow> {
+    cssClass: { [className: string]: boolean } | string | string[];
+    /**
+     * to identify actions
+     */
+    id: string;
+    html: string;
+
+    onClick(chatActionContext: ChatActionContext<TChatWindow>): void;
+}
+
+export interface ChatActionContext<TChatWindow> {
+    contact: string;
+    chatWindow: TChatWindow;
+}
+
 
 @Injectable()
 export class XmppChatAdapter implements ChatService {
@@ -62,7 +79,7 @@ export class XmppChatAdapter implements ChatService {
         id: 'sendMessage',
         cssClass: 'chat-window-send',
         html: '&raquo;',
-        onClick: (chatActionContext: ChatActionContext) => {
+        onClick: (chatActionContext: ChatActionContext<{ sendMessage: () => void }>) => {
             chatActionContext.chatWindow.sendMessage();
         },
     }];
