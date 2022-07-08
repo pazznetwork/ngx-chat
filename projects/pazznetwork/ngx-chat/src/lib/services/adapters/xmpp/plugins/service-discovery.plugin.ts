@@ -134,7 +134,7 @@ export class ServiceDiscoveryPlugin extends AbstractXmppPlugin {
         const queryNode = serviceInformationResponse.getChild('query');
         const features = queryNode.getChildren('feature').map((featureNode: Element) => featureNode.attrs.var);
         const serviceInformation = {
-            identities: queryNode.getChildren('identity').map((identityNode: Element) => identityNode.attrs),
+            identities: queryNode.getChildren('identity').map((identityNode: Element) => identityNode.attrs as Identity),
             features,
             jid: serviceInformationResponse.attrs.from
         };

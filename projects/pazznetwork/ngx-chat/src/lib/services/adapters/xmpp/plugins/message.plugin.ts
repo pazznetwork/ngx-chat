@@ -5,6 +5,7 @@ import { MessageWithBodyStanza, Stanza } from '../../../../core/stanza';
 import { LogService } from '../../../log.service';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
+import { Element} from 'ltx';
 
 export class MessageReceivedEvent {
     discard = false;
@@ -19,7 +20,7 @@ export class MessagePlugin extends AbstractXmppPlugin {
         super();
     }
 
-    handleStanza(stanza: Stanza, archiveDelayElement?: Stanza) {
+    handleStanza(stanza: Stanza, archiveDelayElement?: Element) {
         if (this.isMessageStanza(stanza)) {
             this.handleMessageStanza(stanza, archiveDelayElement);
             return true;
@@ -34,7 +35,7 @@ export class MessagePlugin extends AbstractXmppPlugin {
             && !!stanza.getChildText('body')?.trim();
     }
 
-    private handleMessageStanza(messageStanza: MessageWithBodyStanza, archiveDelayElement?: Stanza) {
+    private handleMessageStanza(messageStanza: MessageWithBodyStanza, archiveDelayElement?: Element) {
         const isAddressedToMe = this.xmppChatAdapter.chatConnectionService.userJid.bare()
             .equals(parseJid(messageStanza.attrs.to).bare());
         const messageDirection = isAddressedToMe ? Direction.in : Direction.out;

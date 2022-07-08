@@ -57,7 +57,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
             });
 
         this.publishSubscribePlugin.publish$
-            .subscribe((event) => this.handlePubSubEvent(event));
+            .subscribe((event) => this.handlePubSubEvent(event as Stanza));
     }
 
     async onBeforeOnline(): Promise<void> {
@@ -69,7 +69,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         this.processPubSub(itemElement);
     }
 
-    private processPubSub(itemElement: Stanza[]): void {
+    private processPubSub(itemElement: Element[]): void {
         let results = [] as [string, StateDate][];
         if (itemElement.length === 1) {
             results = itemElement[0]
@@ -214,10 +214,10 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         return this.jidToMessageStateDate.get(contactJid);
     }
 
-    private handlePubSubEvent(event: Stanza): void {
-        const items: Stanza | undefined = event.getChild('items');
+    private handlePubSubEvent(event: Element): void {
+        const items: Element | undefined = event.getChild('items');
         const itemsNode = items?.attrs.node;
-        const itemElements: Stanza[] | undefined = items?.getChildren('item');
+        const itemElements: Element[] | undefined = items?.getChildren('item');
         if (itemsNode === STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES && itemElements) {
             this.processPubSub(itemElements);
         }
