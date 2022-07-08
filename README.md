@@ -14,7 +14,7 @@ This library provides an out-of-the-box usable XMPP chat component. It is custom
 [Have a look at our demo (valid XMPP credentials required)](https://pazznetwork.github.io/ngx-chat-ghpages/)
 
 * 🌋 build in XMPP server support
-  * send and receive messages, load messages from message history (XEP-0313), supports multi user chat
+  * send and receive messages, load messages from message history (XEP-0313), supports multi-user chat
 * 🔥 fully featured angular chat components
 * 💉 open for injection
   * use the server side buddy list or use your own data source for that, API methods for adding / removing buddies available
@@ -36,6 +36,7 @@ This library provides an out-of-the-box usable XMPP chat component. It is custom
 ## Get Started
 
 ### Compatibility
+* Angular 13 (ngx-chat 0.13.x)
 * Angular 12 (ngx-chat 0.12.x)
 * Angular 11 (ngx-chat 0.11.x)
 * Angular 10 (ngx-chat 0.10.x)
@@ -187,7 +188,7 @@ For clean and standardised commit messages we use commit lint, for the format se
 ### Releasing
 ```bash
 # increment version number in projects/pazznetwork/ngx-chat/package.json
-VERSION=0.12.0 # change accordingly
+VERSION=0.13.0 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"
