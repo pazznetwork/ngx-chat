@@ -1,20 +1,10 @@
+<a name="0.14.1"></a>
+## [0.14.1](https://github.com/pazznetwork/ngx-chat/compare/v0.14.0...v0.14.1) (2022-07-08)
+
+
+
 <a name="0.14.0"></a>
-# [0.14.0](https://github.com/pazznetwork/ngx-chat/compare/v0.13.0...v0.14.0) (2022-07-08)
-
-
-### Features
-
-* **angular-13:** cli analytics false ([7fef2d1](https://github.com/pazznetwork/ngx-chat/commit/7fef2d1))
-* **angular-14:** cleanups and fixes ([2042215](https://github.com/pazznetwork/ngx-chat/commit/2042215))
-* **angular-14:** package-lock update ([8b95399](https://github.com/pazznetwork/ngx-chat/commit/8b95399))
-* **angular-14:** update cdk ([072f992](https://github.com/pazznetwork/ngx-chat/commit/072f992))
-* **angular-14:** version update ([a1a03d8](https://github.com/pazznetwork/ngx-chat/commit/a1a03d8))
-* **angular-14:** working with angular 14 ([a08b88d](https://github.com/pazznetwork/ngx-chat/commit/a08b88d))
-
-
-
-<a name="0.13.0"></a>
-# [0.13.0](https://github.com/pazznetwork/ngx-chat/compare/v0.11.4...v0.13.0) (2022-07-08)
+# [0.14.0](https://github.com/pazznetwork/ngx-chat/compare/v0.11.4...v0.14.0) (2022-07-08)
 
 
 ### Bug Fixes
@@ -26,11 +16,17 @@
 ### Features
 
 * **angular 13:** core and cli ([b37a2fc](https://github.com/pazznetwork/ngx-chat/commit/b37a2fc))
+* **angular-13:** cli analytics false ([7fef2d1](https://github.com/pazznetwork/ngx-chat/commit/7fef2d1))
 * **angular-13:** fixed circular dependency ([00fb2b1](https://github.com/pazznetwork/ngx-chat/commit/00fb2b1))
 * **angular-13:** fixed types ([77432f0](https://github.com/pazznetwork/ngx-chat/commit/77432f0))
 * **angular-13:** ignore cache ([0778532](https://github.com/pazznetwork/ngx-chat/commit/0778532))
 * **angular-13:** version update ([e1efc81](https://github.com/pazznetwork/ngx-chat/commit/e1efc81))
+* **angular-14:** cleanups and fixes ([2042215](https://github.com/pazznetwork/ngx-chat/commit/2042215))
 * **angular-14:** new package-lock.json ([d0f1921](https://github.com/pazznetwork/ngx-chat/commit/d0f1921))
+* **angular-14:** package-lock update ([8b95399](https://github.com/pazznetwork/ngx-chat/commit/8b95399))
+* **angular-14:** update cdk ([072f992](https://github.com/pazznetwork/ngx-chat/commit/072f992))
+* **angular-14:** version update ([a1a03d8](https://github.com/pazznetwork/ngx-chat/commit/a1a03d8))
+* **angular-14:** working with angular 14 ([a08b88d](https://github.com/pazznetwork/ngx-chat/commit/a08b88d))
 * **muc/sub:** correctly handle archive messages delivered via MUC/Sub ([921f573](https://github.com/pazznetwork/ngx-chat/commit/921f573))
 * **muc/sub:** extended subscription management ([d4c53b9](https://github.com/pazznetwork/ngx-chat/commit/d4c53b9))
 
