@@ -1,5 +1,5 @@
-<a name="0.12.0"></a>
-# [0.12.0](https://github.com/pazznetwork/ngx-chat/compare/v0.11.4...v0.12.0) (2021-11-10)
+<a name="0.13.0"></a>
+# [0.13.0](https://github.com/pazznetwork/ngx-chat/compare/v0.11.4...v0.13.0) (2022-07-08)
 
 
 ### Bug Fixes
@@ -10,6 +10,12 @@
 
 ### Features
 
+* **angular 13:** core and cli ([b37a2fc](https://github.com/pazznetwork/ngx-chat/commit/b37a2fc))
+* **angular-13:** fixed circular dependency ([00fb2b1](https://github.com/pazznetwork/ngx-chat/commit/00fb2b1))
+* **angular-13:** fixed types ([77432f0](https://github.com/pazznetwork/ngx-chat/commit/77432f0))
+* **angular-13:** ignore cache ([0778532](https://github.com/pazznetwork/ngx-chat/commit/0778532))
+* **angular-13:** version update ([e1efc81](https://github.com/pazznetwork/ngx-chat/commit/e1efc81))
+* **angular-14:** new package-lock.json ([d0f1921](https://github.com/pazznetwork/ngx-chat/commit/d0f1921))
 * **muc/sub:** correctly handle archive messages delivered via MUC/Sub ([921f573](https://github.com/pazznetwork/ngx-chat/commit/921f573))
 * **muc/sub:** extended subscription management ([d4c53b9](https://github.com/pazznetwork/ngx-chat/commit/d4c53b9))
 
