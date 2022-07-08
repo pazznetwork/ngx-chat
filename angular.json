@@ -141,5 +141,8 @@
       }
     }
   },
-  "defaultProject": "ngx-chat-xmpp-shell"
+  "defaultProject": "ngx-chat-xmpp-shell",
+  "cli": {
+    "analytics": false
+  }
 }
