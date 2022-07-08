@@ -1,3 +1,18 @@
+<a name="0.14.0"></a>
+# [0.14.0](https://github.com/pazznetwork/ngx-chat/compare/v0.13.0...v0.14.0) (2022-07-08)
+
+
+### Features
+
+* **angular-13:** cli analytics false ([7fef2d1](https://github.com/pazznetwork/ngx-chat/commit/7fef2d1))
+* **angular-14:** cleanups and fixes ([2042215](https://github.com/pazznetwork/ngx-chat/commit/2042215))
+* **angular-14:** package-lock update ([8b95399](https://github.com/pazznetwork/ngx-chat/commit/8b95399))
+* **angular-14:** update cdk ([072f992](https://github.com/pazznetwork/ngx-chat/commit/072f992))
+* **angular-14:** version update ([a1a03d8](https://github.com/pazznetwork/ngx-chat/commit/a1a03d8))
+* **angular-14:** working with angular 14 ([a08b88d](https://github.com/pazznetwork/ngx-chat/commit/a08b88d))
+
+
+
 <a name="0.13.0"></a>
 # [0.13.0](https://github.com/pazznetwork/ngx-chat/compare/v0.11.4...v0.13.0) (2022-07-08)
 
