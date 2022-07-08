@@ -146,19 +146,19 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         if (messageElement.getAttr('type') == null && eventElement != null) {
             this.handlePubSubEvent(eventElement, delayElement);
         } else {
-            this.handleArchivedMessage(messageElement, delayElement);
+            this.handleArchivedMessage(messageElement as Stanza, delayElement);
         }
     }
 
-    private handleArchivedMessage(messageElement: Stanza, delayEl: Element): void {
+    private handleArchivedMessage(messageElement: Element, delayEl: Element): void {
         const type = messageElement.getAttr('type');
         if (type === 'chat') {
-            const messageHandled = this.messagePlugin.handleStanza(messageElement, delayEl);
+            const messageHandled = this.messagePlugin.handleStanza(messageElement as Stanza, delayEl);
             if (messageHandled) {
                 this.mamMessageReceived$.next();
             }
         } else if (type === 'groupchat') {
-            this.multiUserChatPlugin.handleStanza(messageElement, delayEl);
+            this.multiUserChatPlugin.handleStanza(messageElement as Stanza, delayEl as Stanza);
         } else {
             throw new Error(`unknown archived message type: ${type}`);
         }
@@ -174,6 +174,6 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         }
 
         const itemElements = itemsElement.getChildren('item');
-        itemElements.forEach((itemEl) => this.handleArchivedMessage(itemEl.getChild('message'), delayElement));
+        itemElements.forEach((itemEl) => this.handleArchivedMessage(itemEl.getChild('message') as Stanza, delayElement));
     }
 }

@@ -409,13 +409,13 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
         return iq
             .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
             ?.getChildren('item')
-            ?.map(room => room.attrs) || [];
+            ?.map(room => room.attrs as RoomSummary) || [];
     }
 
     private extractResultSetFromResponse(iq: IqResponseStanza): Stanza {
         return iq
             .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
-            ?.getChild('set', 'http://jabber.org/protocol/rsm');
+            ?.getChild('set', 'http://jabber.org/protocol/rsm') as Stanza;
     }
 
     /**
