@@ -32,7 +32,7 @@ const nodeName = 'contact-message-state';
  */
 export class MessageStatePlugin extends AbstractXmppPlugin {
 
-    private jidToMessageStateDate: JidToMessageStateDate = Object.create(null);
+    private jidToMessageStateDate: JidToMessageStateDate = new Map();
 
     constructor(
         private readonly publishSubscribePlugin: PublishSubscribePlugin,
@@ -59,7 +59,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
             });
 
         this.publishSubscribePlugin.publish$
-            .subscribe((event) => this.handlePubSubEvent(event));
+            .subscribe((event) => this.handlePubSubEvent(event as Stanza));
     }
 
     async onBeforeOnline(): Promise<void> {
@@ -71,7 +71,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         this.processPubSub(itemElements);
     }
 
-    private processPubSub(itemElements: Stanza[]): void {
+    private processPubSub(itemElements: Element[]): void {
         let results = [] as [string, StateDate][];
         if (itemElements.length === 1) {
             results = itemElements[0]
@@ -216,10 +216,10 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         return this.jidToMessageStateDate.get(contactJid);
     }
 
-    private handlePubSubEvent(event: Stanza): void {
-        const items: Stanza | undefined = event.getChild('items');
+    private handlePubSubEvent(event: Element): void {
+        const items: Element | undefined = event.getChild('items');
         const itemsNode = items?.attrs.node;
-        const itemElements: Stanza[] | undefined = items?.getChildren('item');
+        const itemElements: Element[] | undefined = items?.getChildren('item');
         if (itemsNode === STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES && itemElements) {
             this.processPubSub(itemElements);
         }

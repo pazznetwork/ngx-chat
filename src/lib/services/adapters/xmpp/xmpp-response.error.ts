@@ -29,13 +29,13 @@ export class XmppResponseError extends Error {
         const errorCode = Number(errorElement?.attrs.code) || undefined;
         const errorType = errorElement?.attrs.type as string | undefined;
         const errorCondition =
-            errorElement
+            (errorElement
                 ?.children
                 .filter(childElement =>
                     childElement.getName() !== 'text' &&
                     childElement.attrs.xmlns === XmppResponseError.ERROR_ELEMENT_NS,
                 )[0]
-                ?.getName();
+                ?.getName());
 
         return {
             code: errorCode,
