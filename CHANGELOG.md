@@ -1,3 +1,13 @@
+<a name="0.14.3"></a>
+## [0.14.3](https://github.com/pazznetwork/ngx-chat/compare/v0.14.2...v0.14.3) (2022-07-11)
+
+
+### Features
+
+* **angular-14:** fixed type export for 14 ([0ad232d](https://github.com/pazznetwork/ngx-chat/commit/0ad232d))
+
+
+
 <a name="0.14.2"></a>
 ## [0.14.2](https://github.com/pazznetwork/ngx-chat/compare/v0.13.1...v0.14.2) (2022-07-08)
 
@@ -8,6 +18,7 @@
 * **angular-13:** fixed types ([61de1e7](https://github.com/pazznetwork/ngx-chat/commit/61de1e7))
 * **angular-13:** readme for ng 13 ([3d44ad5](https://github.com/pazznetwork/ngx-chat/commit/3d44ad5))
 * **angular-14:** cleanups and fixes ([2790d34](https://github.com/pazznetwork/ngx-chat/commit/2790d34))
+* **angular-14:** fixed build args ([a15d0f8](https://github.com/pazznetwork/ngx-chat/commit/a15d0f8))
 * **angular-14:** package-lock update ([8ab803d](https://github.com/pazznetwork/ngx-chat/commit/8ab803d))
 * **angular-14:** update cdk ([056bc9f](https://github.com/pazznetwork/ngx-chat/commit/056bc9f))
 * **angular-14:** version update ([39db10b](https://github.com/pazznetwork/ngx-chat/commit/39db10b))
