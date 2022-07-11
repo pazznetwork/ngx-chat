@@ -61,7 +61,7 @@ These instructions require Angular 12.
 First install ngx-chat and its dependencies via npm:
 
 ```bash
-npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.13.0 @angular/cdk@~12.2.0
+npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.9.2 @angular/cdk@~14.0.5
 ```
 
 After that, import ngx-chat in your root module:
@@ -210,7 +210,7 @@ For clean and standardised commit messages we use commit lint, for the format se
 
 ```bash
 # increment version number in projects/pazznetwork/ngx-chat/package.json
-VERSION=0.14.2 # change accordingly
+VERSION=0.14.3 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"
