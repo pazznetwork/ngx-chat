@@ -82,6 +82,11 @@ export interface RoomConfiguration {
      * Room occupants are allowed to subscribe to message notifications being archived while they were offline
      */
     allowSubscription?: boolean;
+    
+    /**
+    * Only members of the room can enter. The default value is false.
+    */
+    moderated?: boolean;
 }
 
 export interface RoomMetadata {
