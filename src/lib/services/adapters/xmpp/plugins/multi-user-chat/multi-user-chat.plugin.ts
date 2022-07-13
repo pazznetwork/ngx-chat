@@ -84,7 +84,7 @@ export interface RoomConfiguration {
     allowSubscription?: boolean;
     
     /**
-    * Only members of the room can enter. The default value is false.
+    * Only occupants with "voice" can send public messages. The default value is true.
     */
     moderated?: boolean;
 }
