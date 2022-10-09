@@ -70,11 +70,11 @@ export class ChatMessageComponent implements OnInit {
     private async tryFindEmbedImageUrls(candidateUrls: RegExpMatchArray) {
         for (const url of candidateUrls) {
             try {
-                const headRequest = await this.httpClient.head(url, {observe: 'response'}).toPromise();
+                const headRequest = await this.httpClient.head(url, { observe: 'response' }).toPromise();
                 const contentType = headRequest.headers.get('Content-Type');
-                const isImage = contentType && contentType.startsWith('image');
-                const contentLength = headRequest.headers.get('Content-Length');
-                if (isImage && parseInt(contentLength, 10) < MAX_IMAGE_SIZE) {
+                const isImage = contentType && contentType.startsWith('image'); debugger
+                const isAudio = url.includes('mp3')
+                if (isImage || isAudio) {
                     this.imageLink = url;
                     break;
                 }
