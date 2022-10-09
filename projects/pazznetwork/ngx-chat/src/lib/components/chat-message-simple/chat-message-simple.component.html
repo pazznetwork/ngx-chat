@@ -1,30 +1,29 @@
-<div class="chat-message"
-     [class.chat-message--in]="direction === 'in'"
-     [class.chat-message--out]="direction === 'out'">
+<div class="chat-message" [class.chat-message--in]="direction === 'in'" [class.chat-message--out]="direction === 'out'">
     <div class="chat-message-text-wrapper">
         <div *ngIf="avatar" class="chat-message-avatar">
-            <ngx-chat-avatar [class.has-click-handler]="avatarInteractive"
-                             (click)="avatarClickHandler.emit()"
-                             [imageUrl]="avatar"></ngx-chat-avatar>
+            <ngx-chat-avatar [class.has-click-handler]="avatarInteractive" (click)="avatarClickHandler.emit()"
+                [imageUrl]="avatar"></ngx-chat-avatar>
         </div>
         <div class="chat-message-text">
             <ng-content></ng-content>
         </div>
     </div>
-    <div class="chat-message-image-wrapper"
-         [class.chat-message-image-wrapper--placeholder]="showImagePlaceholder"
-         *ngIf="imageLink || showImagePlaceholder">
-        <img class="chat-message-image"
-             (load)="showImagePlaceholder = false"
-             [src]="imageLink"/>
+    <div class="chat-message-image-wrapper" *ngIf="imageLink && !imageLink.includes('mp3')">
+        <img class="chat-message-image" [src]="imageLink" />
+
+
     </div>
+    <audio controls *ngIf="imageLink && imageLink.includes('mp3')">
+        <source [src]="imageLink" type="audio/mpeg">
+    </audio>
     <div class="chat-message-footer" *ngIf="!footerHidden">
         <small title="{{nick}}" class="chat-message-name">
             {{nick}}
             <ng-container *ngIf="direction === 'out'" [ngSwitch]="messageState">
                 <ng-container *ngSwitchCase="MessageState.SENT">✓</ng-container>
                 <ng-container *ngSwitchCase="MessageState.RECIPIENT_RECEIVED">✓✓</ng-container>
-                <ng-container *ngSwitchCase="MessageState.RECIPIENT_SEEN"><span class="state--seen">✓✓</span></ng-container>
+                <ng-container *ngSwitchCase="MessageState.RECIPIENT_SEEN"><span class="state--seen">✓✓</span>
+                </ng-container>
             </ng-container>
         </small>
         <small class="chat-message-datetime">{{formattedDate}}</small>
