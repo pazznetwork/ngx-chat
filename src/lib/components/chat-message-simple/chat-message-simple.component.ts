@@ -28,7 +28,7 @@ export class ChatMessageSimpleComponent {
     footerHidden = false;
 
     @Input()
-    imageLink: string;
+    mediaLink: string;
 
     @Input()
     showImagePlaceholder: boolean;
