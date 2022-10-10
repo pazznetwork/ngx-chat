@@ -36,7 +36,7 @@ export class ChatMessageComponent implements OnInit {
     showMessageReadState = true;
 
     showImagePlaceholder = true;
-    imageLink: string;
+    mediaLink: string;
 
     Direction = Direction;
 
@@ -72,17 +72,17 @@ export class ChatMessageComponent implements OnInit {
             try {
                 const headRequest = await this.httpClient.head(url, { observe: 'response' }).toPromise();
                 const contentType = headRequest.headers.get('Content-Type');
-                const isImage = contentType && contentType.startsWith('image'); debugger
+                const isImage = contentType && contentType.startsWith('image');
                 const isAudio = url.includes('mp3')
                 if (isImage || isAudio) {
-                    this.imageLink = url;
+                    this.mediaLink = url;
                     break;
                 }
             } catch (e) {
             }
         }
 
-        if (!this.imageLink) {
+        if (!this.mediaLink) {
             this.showImagePlaceholder = false;
         }
     }
