@@ -1,3 +1,13 @@
+<a name="0.14.6"></a>
+## [0.14.6](https://github.com/pazznetwork/ngx-chat/compare/v0.14.5...v0.14.6) (2022-10-12)
+
+
+### Bug Fixes
+
+* **multi-user-chat-plugin:** add moderated field to RoomCreationOptions ([1b55dd1](https://github.com/pazznetwork/ngx-chat/commit/1b55dd1))
+
+
+
 <a name="0.14.5"></a>
 ## [0.14.5](https://github.com/pazznetwork/ngx-chat/compare/v0.14.3...v0.14.5) (2022-10-12)
 
