@@ -58,6 +58,10 @@ export interface RoomCreationOptions {
      * Room occupants are allowed to subscribe to message notifications being archived while they were offline
      */
     allowSubscription?: boolean;
+    /**
+     * Only occupants with "voice" can send public messages. The default value is true.
+     */
+    moderated?: boolean;
 }
 
 export interface RoomMessage extends Message {
