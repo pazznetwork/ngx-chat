@@ -1,3 +1,13 @@
+<a name="0.14.5"></a>
+## [0.14.5](https://github.com/pazznetwork/ngx-chat/compare/v0.14.3...v0.14.5) (2022-10-12)
+
+
+### Bug Fixes
+
+* **message-carbons-plugin:** null check for empty body ([a696254](https://github.com/pazznetwork/ngx-chat/commit/a696254))
+
+
+
 <a name="0.14.3"></a>
 ## [0.14.3](https://github.com/pazznetwork/ngx-chat/compare/v0.14.2...v0.14.3) (2022-07-11)
 
