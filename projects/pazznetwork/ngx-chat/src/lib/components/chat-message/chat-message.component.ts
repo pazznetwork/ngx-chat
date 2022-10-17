@@ -5,8 +5,8 @@ import {Direction, Message, MessageState} from '../../core/message';
 import {extractUrls} from '../../core/utils-links';
 import {MessageStatePlugin, StateDate} from '../../services/adapters/xmpp/plugins/message-state.plugin';
 import {XmppChatAdapter} from '../../services/adapters/xmpp/xmpp-chat-adapter.service';
-import {ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN} from '../../hooks/chat-contact-click-handler';
 import {CHAT_SERVICE_TOKEN, ChatService} from '../../services/chat-service';
+import {ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN} from '../../services/chat-contact-click-handler';
 
 @Component({
     selector: 'ngx-chat-message',
