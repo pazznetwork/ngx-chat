@@ -1,14 +1,12 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { Contact } from '../../core/contact';
-import { Direction, Message, MessageState } from '../../core/message';
-import { extractUrls } from '../../core/utils-links';
-import { MessageStatePlugin, StateDate } from '../../services/adapters/xmpp/plugins/message-state.plugin';
-import { XmppChatAdapter } from '../../services/adapters/xmpp/xmpp-chat-adapter.service';
-import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../services/chat-contact-click-handler';
-import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
-
-export const MAX_IMAGE_SIZE = 250 * 1024;
+import {HttpClient} from '@angular/common/http';
+import {Component, Inject, Input, OnInit, Optional} from '@angular/core';
+import {Contact} from '../../core/contact';
+import {Direction, Message, MessageState} from '../../core/message';
+import {extractUrls} from '../../core/utils-links';
+import {MessageStatePlugin, StateDate} from '../../services/adapters/xmpp/plugins/message-state.plugin';
+import {XmppChatAdapter} from '../../services/adapters/xmpp/xmpp-chat-adapter.service';
+import {ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN} from '../../hooks/chat-contact-click-handler';
+import {CHAT_SERVICE_TOKEN, ChatService} from '../../services/chat-service';
 
 @Component({
     selector: 'ngx-chat-message',
@@ -36,6 +34,11 @@ export class ChatMessageComponent implements OnInit {
     showMessageReadState = true;
 
     showImagePlaceholder = true;
+
+    isImage = false;
+
+    isAudio = false;
+
     mediaLink: string;
 
     Direction = Direction;
@@ -70,11 +73,11 @@ export class ChatMessageComponent implements OnInit {
     private async tryFindEmbedImageUrls(candidateUrls: RegExpMatchArray) {
         for (const url of candidateUrls) {
             try {
-                const headRequest = await this.httpClient.head(url, { observe: 'response' }).toPromise();
+                const headRequest = await this.httpClient.head(url, {observe: 'response'}).toPromise();
                 const contentType = headRequest.headers.get('Content-Type');
-                const isImage = contentType && contentType.startsWith('image');
-                const isAudio = url.includes('mp3')
-                if (isImage || isAudio) {
+                this.isImage = contentType && contentType.startsWith('image');
+                this.isAudio = url.includes('mp3');
+                if (this.isImage || this.isAudio) {
                     this.mediaLink = url;
                     break;
                 }
@@ -82,20 +85,18 @@ export class ChatMessageComponent implements OnInit {
             }
         }
 
-        if (!this.mediaLink) {
-            this.showImagePlaceholder = false;
-        }
+        this.showImagePlaceholder = this.isImage;
     }
 
     getMessageState(): MessageState | undefined {
-        if (this.showMessageReadState) {
-            if (this.message.state) {
-                return this.message.state;
-            } else if (this.messageStatePlugin && this.contact) {
-                const date = this.message.datetime;
-                const states = this.messageStatePlugin.getContactMessageState(this.contact.jidBare.toString());
-                return this.getStateForDate(date, states);
-            }
+        if (this.showMessageReadState && this.message.state) {
+            return this.message.state;
+        }
+
+        if (this.showMessageReadState && this.messageStatePlugin && this.contact) {
+            const date = this.message.datetime;
+            const states = this.messageStatePlugin.getContactMessageState(this.contact.jidBare.toString());
+            return this.getStateForDate(date, states);
         }
         return undefined;
     }
