@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import {Component, EventEmitter, Inject, Optional, Output} from '@angular/core';
+import {ChatStyle, CHAT_STYLE_TOKEN } from 'src/lib/services/chat-style';
 
 @Component({
     selector: 'ngx-chat-window-frame',
@@ -12,5 +13,8 @@ export class ChatWindowFrameComponent {
 
     @Output()
     headerClick = new EventEmitter<void>();
+
+    constructor(@Optional() @Inject(CHAT_STYLE_TOKEN) public chatStyle: ChatStyle) {
+    }
 
 }

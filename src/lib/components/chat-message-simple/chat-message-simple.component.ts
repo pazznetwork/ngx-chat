@@ -31,6 +31,12 @@ export class ChatMessageSimpleComponent {
     mediaLink: string;
 
     @Input()
+    isImage: boolean;
+
+    @Input()
+    isAudio: boolean;
+
+    @Input()
     showImagePlaceholder: boolean;
 
     @Input()

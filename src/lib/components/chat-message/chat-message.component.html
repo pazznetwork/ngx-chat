@@ -1,6 +1,12 @@
-<ngx-chat-message-simple [mediaLink]="mediaLink" [showImagePlaceholder]="showImagePlaceholder" [avatar]="getAvatar()"
-    [avatarInteractive]="message.direction === Direction.in" (avatarClickHandler)="onContactClick()"
-    [direction]="message.direction" [messageState]="getMessageState()"
-    [formattedDate]="message.datetime | date:chatService.translations.timeFormat" [nick]="nick">
+<ngx-chat-message-simple [mediaLink]="mediaLink"
+                         [isImage]="isImage"
+                         [isAudio]="isAudio"
+                         [avatar]="getAvatar()"
+                         [avatarInteractive]="message.direction === Direction.in"
+                         (avatarClickHandler)="onContactClick()"
+                         [direction]="message.direction"
+                         [messageState]="getMessageState()"
+                         [formattedDate]="message.datetime | date:chatService.translations.timeFormat"
+                         [nick]="nick">
     <span [ngxChatLinks]="message.body"></span>
 </ngx-chat-message-simple>
