@@ -1,6 +1,6 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "0.14.4",
+  "version": "0.14.7",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -17,7 +17,7 @@
     "bundle-report": "webpack-bundle-analyzer dist/ngx-chat-demo/stats-es5.json",
     "documentation": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json",
     "documentation:serve": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json --serve --watch",
-    "changelog": "conventional-changelog --infile CHANGELOG.md --same-file --preset angular --pkg projects/pazznetwork/ngx-chat/package.json --release-count 0"
+    "changelog": "conventional-changelog --infile CHANGELOG.md --same-file --preset angular --pkg package.json --release-count 0"
   },
   "keywords": [
     "ngx-chat",

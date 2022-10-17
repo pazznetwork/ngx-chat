@@ -1,46 +1,43 @@
-<a name="0.14.3"></a>
-## [0.14.3](https://github.com/pazznetwork/ngx-chat/compare/v0.14.2...v0.14.3) (2022-07-11)
+<a name="0.14.4"></a>
+## [0.14.4](https://github.com/pazznetwork/ngx-chat/compare/v0.12.0...v0.14.4) (2022-10-17)
+
+
+### Bug Fixes
+
+* fixed identities by mapping them to element.attrs ([5641991](https://github.com/pazznetwork/ngx-chat/commit/5641991))
+* handle the revoke membership case in a member-only room ([085b351](https://github.com/pazznetwork/ngx-chat/commit/085b351))
+* moderated description ([968dbaa](https://github.com/pazznetwork/ngx-chat/commit/968dbaa))
 
 
 ### Features
 
-* **angular-14:** fixed type export for 14 ([0ad232d](https://github.com/pazznetwork/ngx-chat/commit/0ad232d))
-
-
-
-<a name="0.14.2"></a>
-## [0.14.2](https://github.com/pazznetwork/ngx-chat/compare/v0.13.1...v0.14.2) (2022-07-08)
-
-
-### Features
-
-* **angular 13:** core and cli ([ce3a963](https://github.com/pazznetwork/ngx-chat/commit/ce3a963))
-* **angular-13:** fixed types ([61de1e7](https://github.com/pazznetwork/ngx-chat/commit/61de1e7))
-* **angular-13:** readme for ng 13 ([3d44ad5](https://github.com/pazznetwork/ngx-chat/commit/3d44ad5))
-* **angular-14:** cleanups and fixes ([2790d34](https://github.com/pazznetwork/ngx-chat/commit/2790d34))
-* **angular-14:** fixed build args ([a15d0f8](https://github.com/pazznetwork/ngx-chat/commit/a15d0f8))
-* **angular-14:** package-lock update ([8ab803d](https://github.com/pazznetwork/ngx-chat/commit/8ab803d))
-* **angular-14:** update cdk ([056bc9f](https://github.com/pazznetwork/ngx-chat/commit/056bc9f))
-* **angular-14:** version update ([39db10b](https://github.com/pazznetwork/ngx-chat/commit/39db10b))
-* **angular-14:** working with angular 14 ([d77fb74](https://github.com/pazznetwork/ngx-chat/commit/d77fb74))
-
-
-
-<a name="0.13.1"></a>
-## [0.13.1](https://github.com/pazznetwork/ngx-chat/compare/v0.12.0...v0.13.1) (2022-07-08)
-
-
-### Features
-
-* **angular 13:** core and cli ([4fcb162](https://github.com/pazznetwork/ngx-chat/commit/4fcb162))
-* **angular-13:** cli analytics false ([a833890](https://github.com/pazznetwork/ngx-chat/commit/a833890))
-* **angular-13:** features from v0.12 and new package-lock.json ([3e0b233](https://github.com/pazznetwork/ngx-chat/commit/3e0b233))
-* **angular-13:** fixed circular dependency ([ca20975](https://github.com/pazznetwork/ngx-chat/commit/ca20975))
-* **angular-13:** fixed types ([badcb7c](https://github.com/pazznetwork/ngx-chat/commit/badcb7c))
-* **angular-13:** ignore cache ([1edc42d](https://github.com/pazznetwork/ngx-chat/commit/1edc42d))
-* **angular-13:** readme for ng 13 ([87fb29e](https://github.com/pazznetwork/ngx-chat/commit/87fb29e))
-* **angular-13:** version update ([e1968f7](https://github.com/pazznetwork/ngx-chat/commit/e1968f7))
-* **angular-14:** new package-lock.json ([6d1c2ea](https://github.com/pazznetwork/ngx-chat/commit/6d1c2ea))
+* **add-audio-media-links:** fixed pr comments ([e82426e](https://github.com/pazznetwork/ngx-chat/commit/e82426e))
+* added file-upload-handler.ts for custom file upload handling ([62db91f](https://github.com/pazznetwork/ngx-chat/commit/62db91f))
+* added following muc methods: ([d97478d](https://github.com/pazznetwork/ngx-chat/commit/d97478d))
+* added tests for muc plugin ([1bc94f3](https://github.com/pazznetwork/ngx-chat/commit/1bc94f3))
+* **angular 13:** core and cli ([5a0fe74](https://github.com/pazznetwork/ngx-chat/commit/5a0fe74))
+* **angular 13:** core and cli ([9e49333](https://github.com/pazznetwork/ngx-chat/commit/9e49333))
+* **angular-13:** cli analytics false ([5ba930a](https://github.com/pazznetwork/ngx-chat/commit/5ba930a))
+* **angular-13:** features from v0.12 and new package-lock.json ([9715b81](https://github.com/pazznetwork/ngx-chat/commit/9715b81))
+* **angular-13:** fixed circular dependency ([2d6c6bd](https://github.com/pazznetwork/ngx-chat/commit/2d6c6bd))
+* **angular-13:** fixed types ([d0c8c79](https://github.com/pazznetwork/ngx-chat/commit/d0c8c79))
+* **angular-13:** fixed types ([43b2693](https://github.com/pazznetwork/ngx-chat/commit/43b2693))
+* **angular-13:** ignore cache ([3102d7e](https://github.com/pazznetwork/ngx-chat/commit/3102d7e))
+* **angular-13:** readme for ng 13 ([a21eee2](https://github.com/pazznetwork/ngx-chat/commit/a21eee2))
+* **angular-13:** readme for ng 13 ([3535476](https://github.com/pazznetwork/ngx-chat/commit/3535476))
+* **angular-13:** version update ([acbcf15](https://github.com/pazznetwork/ngx-chat/commit/acbcf15))
+* **angular-14:** cleanups and fixes ([3d38777](https://github.com/pazznetwork/ngx-chat/commit/3d38777))
+* **angular-14:** fixed build args ([53d081d](https://github.com/pazznetwork/ngx-chat/commit/53d081d))
+* **angular-14:** fixed type export for 14 ([b007121](https://github.com/pazznetwork/ngx-chat/commit/b007121))
+* **angular-14:** new package-lock.json ([605b416](https://github.com/pazznetwork/ngx-chat/commit/605b416))
+* **angular-14:** package-lock update ([aaf079c](https://github.com/pazznetwork/ngx-chat/commit/aaf079c))
+* **angular-14:** update cdk ([125a099](https://github.com/pazznetwork/ngx-chat/commit/125a099))
+* **angular-14:** version update ([6656151](https://github.com/pazznetwork/ngx-chat/commit/6656151))
+* **angular-14:** working with angular 14 ([ccfa509](https://github.com/pazznetwork/ngx-chat/commit/ccfa509))
+* implemented new muc plugin functions on new page ([c940ef2](https://github.com/pazznetwork/ngx-chat/commit/c940ef2))
+* **multi-user-chat:** rework Occupant/banOccupant/unbanOccupant ([94d46d3](https://github.com/pazznetwork/ngx-chat/commit/94d46d3))
+* **ng-14:** rebase on master ([7ae0166](https://github.com/pazznetwork/ngx-chat/commit/7ae0166))
+* **plugins:** reworking plugins for better stanze handling ([5040f1a](https://github.com/pazznetwork/ngx-chat/commit/5040f1a))
 
 
 
