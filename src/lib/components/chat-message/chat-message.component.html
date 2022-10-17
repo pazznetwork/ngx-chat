@@ -1,5 +1,6 @@
-<ngx-chat-message-simple [imageLink]="imageLink"
-                         [showImagePlaceholder]="showImagePlaceholder"
+<ngx-chat-message-simple [mediaLink]="mediaLink"
+                         [isImage]="isImage"
+                         [isAudio]="isAudio"
                          [avatar]="getAvatar()"
                          [avatarInteractive]="message.direction === Direction.in"
                          (avatarClickHandler)="onContactClick()"
