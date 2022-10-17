@@ -25,7 +25,7 @@ export class ChatMessageLinkComponent {
                 private platformLocation: PlatformLocation,
                 @Optional() @Inject(LINK_OPENER_TOKEN) private linkOpener: LinkOpener) { }
 
-    onClick($event: Event) {
+   async onClick($event: Event) {
         if (this.linkOpener) {
             $event.preventDefault();
             this.linkOpener.openLink(this.link);
@@ -33,7 +33,7 @@ export class ChatMessageLinkComponent {
             $event.preventDefault();
             const linkParser = document.createElement('a');
             linkParser.href = this.link;
-            this.router.navigateByUrl(linkParser.pathname);
+            await this.router.navigateByUrl(linkParser.pathname);
         }
     }
 

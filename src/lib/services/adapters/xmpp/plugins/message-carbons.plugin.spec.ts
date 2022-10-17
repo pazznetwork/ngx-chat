@@ -11,6 +11,7 @@ import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageCarbonsPlugin } from './message-carbons.plugin';
+import {Stanza} from '../../../../core/stanza';
 
 describe('message carbons plugin', () => {
 
@@ -56,7 +57,7 @@ describe('message carbons plugin', () => {
                   </message>
                 </forwarded>
               </received>
-            </message>`);
+            </message>`) as Stanza;
 
     const validSentCarbonMessage = parse(`
             <message xmlns='jabber:client'
@@ -74,7 +75,7 @@ describe('message carbons plugin', () => {
                   </message>
                 </forwarded>
               </sent>
-            </message>`);
+            </message>`) as Stanza;
 
 
     it('should accept carbon-copy message stanzas', () => {
@@ -82,7 +83,7 @@ describe('message carbons plugin', () => {
     });
 
     it('should not accept non-carbon-copy message stanzas', () => {
-        const invalidMessage = xml('message');
+        const invalidMessage = xml('message') as Stanza;
         expect(messageCarbonsPlugin.handleStanza(invalidMessage)).toBeFalsy();
     });
 

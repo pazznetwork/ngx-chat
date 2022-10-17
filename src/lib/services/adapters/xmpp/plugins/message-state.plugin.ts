@@ -1,17 +1,17 @@
-import { jid as parseJid, xml } from '@xmpp/client';
-import { JID } from '@xmpp/jid';
-import { Element } from 'ltx';
-import { filter } from 'rxjs/operators';
-import { Direction, Message, MessageState } from '../../../../core/message';
-import { MessageWithBodyStanza, Stanza } from '../../../../core/stanza';
-import { ChatMessageListRegistryService } from '../../../chat-message-list-registry.service';
-import { LogService } from '../../../log.service';
-import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
-import { EntityTimePlugin } from './entity-time.plugin';
-import { MessageUuidPlugin } from './message-uuid.plugin';
-import { MessageReceivedEvent } from './message.plugin';
-import { PublishSubscribePlugin } from './publish-subscribe.plugin';
+import {jid as parseJid, xml} from '@xmpp/client';
+import {JID} from '@xmpp/jid';
+import {Element} from 'ltx';
+import {filter} from 'rxjs/operators';
+import {Direction, Message, MessageState} from '../../../../core/message';
+import {MessageWithBodyStanza, Stanza} from '../../../../core/stanza';
+import {ChatMessageListRegistryService} from '../../../chat-message-list-registry.service';
+import {LogService} from '../../../log.service';
+import {XmppChatAdapter} from '../xmpp-chat-adapter.service';
+import {AbstractXmppPlugin} from './abstract-xmpp-plugin';
+import {EntityTimePlugin} from './entity-time.plugin';
+import {MessageUuidPlugin} from './message-uuid.plugin';
+import {MessageReceivedEvent} from './message.plugin';
+import {PublishSubscribePlugin} from './publish-subscribe.plugin';
 
 export interface StateDate {
     lastRecipientReceived: Date;
@@ -107,7 +107,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         await this.publishSubscribePlugin.storePrivatePayloadPersistent(
             STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES,
             'current',
-            xml(wrapperNodeName, {}, messageStateElements));
+            xml(wrapperNodeName, {}, ...messageStateElements));
     }
 
     onOffline(): void {

@@ -82,7 +82,7 @@ export interface RoomConfiguration {
      * Room occupants are allowed to subscribe to message notifications being archived while they were offline
      */
     allowSubscription?: boolean;
-    
+
     /**
     * Only occupants with "voice" can send public messages. The default value is true.
     */
@@ -113,7 +113,7 @@ class QueryAffiliatedMemberListStanzaBuilder extends AbstractStanzaBuilder {
             xml('query', {xmlns: mucAdminNs},
                 xml('item', {[this.queryType]: this.affiliationOrRole}),
             ),
-        );
+        ) as Stanza;
     }
 }
 
@@ -130,7 +130,7 @@ class QueryOccupantListStanzaBuilder extends AbstractStanzaBuilder {
     toStanza(): Stanza {
         return xml('iq', {type: 'get', to: this.roomJid.toString()},
             xml('query', {xmlns: ServiceDiscoveryPlugin.DISCO_ITEMS}),
-        );
+        ) as Stanza;
     }
 }
 
@@ -163,7 +163,7 @@ class ModifyAffiliationsOrRolesStanzaBuilder extends AbstractStanzaBuilder {
                 {xmlns: mucAdminNs},
                 ...this.modifications.map(modification => this.buildItem(modification)),
             ),
-        );
+        ) as Stanza;
     }
 
     private buildItem(modification: AffiliationModification | RoleModification): Element {
@@ -313,7 +313,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
                 xml('iq', {type: 'get', to},
                     xml('query', {xmlns: ServiceDiscoveryPlugin.DISCO_ITEMS},
                         xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
-                            xml('max', {}, 250),
+                            xml('max', {}, '250'),
                             xml('after', {}, lastReceivedRoom),
                         ),
                     ),
@@ -756,7 +756,7 @@ export class MultiUserChatPlugin extends AbstractXmppPlugin {
     private extractResultSetFromResponse(iq: IqResponseStanza): Stanza {
         return iq
             .getChild('query', ServiceDiscoveryPlugin.DISCO_ITEMS)
-            ?.getChild('set', 'http://jabber.org/protocol/rsm');
+            ?.getChild('set', 'http://jabber.org/protocol/rsm') as Stanza;
     }
 
     private isRoomMessageStanza(stanza: Stanza): boolean {

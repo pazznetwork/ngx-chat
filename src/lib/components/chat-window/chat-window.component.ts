@@ -1,14 +1,15 @@
-import { Component, Inject, Input, OnDestroy, OnInit, Optional, ViewChild } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
-import { Direction, Message } from '../../core/message';
-import { ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN } from '../../hooks/chat-contact-click-handler';
-import { ChatListStateService, ChatWindowState } from '../../services/chat-list-state.service';
-import { CHAT_SERVICE_TOKEN, ChatService } from '../../services/chat-service';
-import { ChatMessageInputComponent } from '../chat-message-input/chat-message-input.component';
-import { ChatMessageListComponent } from '../chat-message-list/chat-message-list.component';
-import { FILE_UPLOAD_HANDLER_TOKEN, FileUploadHandler } from '../../hooks/file-upload-handler';
-import { RoomMessage } from '../../services/adapters/xmpp/plugins/multi-user-chat/room-message';
+import {Component, Inject, Input, OnDestroy, OnInit, Optional, ViewChild} from '@angular/core';
+import {Observable, Subject} from 'rxjs';
+import {filter, takeUntil} from 'rxjs/operators';
+import {Direction, Message} from '../../core/message';
+import {ChatContactClickHandler, CONTACT_CLICK_HANDLER_TOKEN} from '../../hooks/chat-contact-click-handler';
+import {ChatListStateService, ChatWindowState} from '../../services/chat-list-state.service';
+import {CHAT_SERVICE_TOKEN, ChatService} from '../../services/chat-service';
+import {ChatMessageInputComponent} from '../chat-message-input/chat-message-input.component';
+import {ChatMessageListComponent} from '../chat-message-list/chat-message-list.component';
+import {FILE_UPLOAD_HANDLER_TOKEN, FileUploadHandler} from '../../hooks/file-upload-handler';
+import {RoomMessage} from '../../services/adapters/xmpp/plugins/multi-user-chat/room-message';
+import {ChatAction} from '../../services/adapters/xmpp/xmpp-chat-adapter.service';
 
 @Component({
     selector: 'ngx-chat-window',
@@ -78,7 +79,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
         this.messageInput.focus();
     }
 
-    onActionClick(chatAction: ChatAction) {
+    onActionClick(chatAction: ChatAction<this>) {
         chatAction.onClick({
             contact: this.chatWindowState.recipient.jidBare.toString(),
             chatWindow: this,
@@ -91,20 +92,4 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
             this.contactClickHandler.onClick(this.chatWindowState.recipient);
         }
     }
-}
-
-export interface ChatAction {
-    cssClass: { [className: string]: boolean } | string | string[];
-    /**
-     * to identify actions
-     */
-    id: string;
-    html: string;
-
-    onClick(chatActionContext: ChatActionContext): void;
-}
-
-export interface ChatActionContext {
-    contact: string;
-    chatWindow: ChatWindowComponent;
 }

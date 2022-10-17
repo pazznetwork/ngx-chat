@@ -2,7 +2,6 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ModuleWithProviders, NgModule, NgZone } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ChatAvatarComponent } from './components/chat-avatar/chat-avatar.component';
 import { FileDropComponent } from './components/chat-filedrop/file-drop.component';
 import { ChatMessageInputComponent } from './components/chat-message-input/chat-message-input.component';
@@ -48,13 +47,16 @@ import { CHAT_SERVICE_TOKEN, ChatService } from './services/chat-service';
 import { ContactFactoryService } from './services/contact-factory.service';
 import { LogService } from './services/log.service';
 import { FILE_UPLOAD_HANDLER_TOKEN } from './hooks/file-upload-handler';
+import {FormsModule} from '@angular/forms';
+import {RouterModule} from '@angular/router';
 
 @NgModule({
     imports: [
         CommonModule,
-        FormsModule,
         HttpClientModule,
+        FormsModule,
         TextFieldModule,
+        RouterModule,
     ],
     declarations: [
         ChatComponent,

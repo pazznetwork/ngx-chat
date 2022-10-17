@@ -52,7 +52,7 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
             STORAGE_BOOKMARKS,
             null,
             xml('storage', {xmlns: STORAGE_BOOKMARKS},
-                deduplicatedConferences.map(c => this.convertSavedConferenceToElement(c)),
+                ...deduplicatedConferences.map(c => this.convertSavedConferenceToElement(c)),
             ),
         );
     }
@@ -81,7 +81,7 @@ export class BookmarkPlugin extends AbstractXmppPlugin {
     }
 
     private convertSavedConferenceToElement({name, autojoin, jid}: SavedConference): Stanza {
-        return xml('conference', {name, jid, autojoin: autojoin.toString()});
+        return xml('conference', {name, jid, autojoin: autojoin.toString()}) as Stanza;
     }
 
 }

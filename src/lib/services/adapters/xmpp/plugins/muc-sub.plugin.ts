@@ -128,19 +128,19 @@ export class MucSubPlugin extends AbstractXmppPlugin {
 function makeSubscribeRoomStanza(roomJid: string, nick: string, nodes: readonly string[]): Stanza {
     return xml('iq', {type: 'set', to: roomJid},
         xml('subscribe', {xmlns: MUC_SUB_FEATURE_ID, nick},
-            nodes.map(node => xml('event', {node}))
+            ...nodes.map(node => xml('event', {node}))
         )
-    );
+    ) as Stanza;
 }
 
 function makeUnsubscribeRoomStanza(roomJid: string): Stanza {
     return xml('iq', {type: 'set', to: roomJid},
         xml('unsubscribe', {xmlns: MUC_SUB_FEATURE_ID})
-    );
+    ) as Stanza;
 }
 
 function makeRetrieveSubscriptionsStanza(conferenceServiceJid: string): Stanza {
     return xml('iq', {type: 'get', to: conferenceServiceJid},
         xml('subscriptions', {xmlns: MUC_SUB_FEATURE_ID})
-    );
+    ) as Stanza;
 }

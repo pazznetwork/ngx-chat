@@ -1,18 +1,17 @@
-import { xml } from '@xmpp/client';
-import { Element } from 'ltx';
-import { Subject } from 'rxjs';
-import { debounceTime, filter } from 'rxjs/operators';
-import { Recipient } from '../../../../core/recipient';
-import { Stanza } from '../../../../core/stanza';
-import { LogService } from '../../../log.service';
-import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
-import { MultiUserChatPlugin } from './multi-user-chat/multi-user-chat.plugin';
-import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
-import { PUBSUB_EVENT_XMLNS } from './publish-subscribe.plugin';
-import { MessagePlugin } from './message.plugin';
-import { MUC_SUB_EVENT_TYPE } from './muc-sub.plugin';
-import { Form, serializeToSubmitForm } from '../../../../core/form';
+import {xml} from '@xmpp/client';
+import {Subject} from 'rxjs';
+import {debounceTime, filter} from 'rxjs/operators';
+import {Recipient} from '../../../../core/recipient';
+import {Stanza} from '../../../../core/stanza';
+import {LogService} from '../../../log.service';
+import {XmppChatAdapter} from '../xmpp-chat-adapter.service';
+import {AbstractXmppPlugin} from './abstract-xmpp-plugin';
+import {MultiUserChatPlugin} from './multi-user-chat/multi-user-chat.plugin';
+import {ServiceDiscoveryPlugin} from './service-discovery.plugin';
+import {PUBSUB_EVENT_XMLNS} from './publish-subscribe.plugin';
+import {MessagePlugin} from './message.plugin';
+import {MUC_SUB_EVENT_TYPE} from './muc-sub.plugin';
+import {Form, serializeToSubmitForm} from '../../../../core/form';
 
 /**
  * https://xmpp.org/extensions/xep-0313.html
@@ -51,7 +50,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
             xml('iq', {type: 'set'},
                 xml('query', {xmlns: MessageArchivePlugin.MAM_NS},
                     xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
-                        xml('max', {}, 250),
+                        xml('max', {}, '250'),
                         xml('before'),
                     ),
                 ),
@@ -82,7 +81,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
                 xml('query', {xmlns: MessageArchivePlugin.MAM_NS},
                     serializeToSubmitForm(form),
                     xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
-                        xml('max', {}, 100),
+                        xml('max', {}, '100'),
                         xml('before'),
                     ),
                 ),
@@ -108,7 +107,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
                 xml('iq', {type: 'set'},
                     xml('query', {xmlns: MessageArchivePlugin.MAM_NS},
                         xml('set', {xmlns: 'http://jabber.org/protocol/rsm'},
-                            xml('max', {}, 250),
+                            xml('max', {}, '250'),
                             xml('after', {}, lastReceivedMessageId),
                         ),
                     ),
@@ -142,11 +141,11 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
     }
 
     private handleMamMessageStanza(stanza: Stanza): void {
-        const forwardedElement = stanza.getChild('result').getChild('forwarded');
-        const messageElement = forwardedElement.getChild('message');
-        const delayElement = forwardedElement.getChild('delay');
+        const forwardedElement = stanza.getChild('result').getChild('forwarded') as Stanza;
+        const messageElement = forwardedElement.getChild('message') as Stanza;
+        const delayElement = forwardedElement.getChild('delay') as Stanza;
 
-        const eventElement = messageElement.getChild('event', PUBSUB_EVENT_XMLNS);
+        const eventElement = messageElement.getChild('event', PUBSUB_EVENT_XMLNS) as Stanza;
         if (messageElement.getAttr('type') == null && eventElement != null) {
             this.handlePubSubEvent(eventElement, delayElement);
         } else {
@@ -154,7 +153,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         }
     }
 
-    private handleArchivedMessage(messageElement: Stanza, delayEl: Element): void {
+    private handleArchivedMessage(messageElement: Stanza, delayEl: Stanza): void {
         const type = messageElement.getAttr('type');
         if (type === 'chat') {
             const messageHandled = this.messagePlugin.handleStanza(messageElement, delayEl);
@@ -168,7 +167,7 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         }
     }
 
-    private handlePubSubEvent(eventElement: Element, delayElement: Element): void {
+    private handlePubSubEvent(eventElement: Stanza, delayElement: Stanza): void {
         const itemsElement = eventElement.getChild('items');
         const itemsNode = itemsElement?.attrs.node;
 
@@ -178,6 +177,6 @@ export class MessageArchivePlugin extends AbstractXmppPlugin {
         }
 
         const itemElements = itemsElement.getChildren('item');
-        itemElements.forEach((itemEl) => this.handleArchivedMessage(itemEl.getChild('message'), delayElement));
+        itemElements.forEach((itemEl) => this.handleArchivedMessage(itemEl.getChild('message') as Stanza, delayElement));
     }
 }

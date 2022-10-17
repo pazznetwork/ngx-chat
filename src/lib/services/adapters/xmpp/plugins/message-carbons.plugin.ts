@@ -1,7 +1,7 @@
 import { xml } from '@xmpp/client';
 import { Element } from 'ltx';
 import { Direction } from '../../../../core/message';
-import { IqResponseStanza, Stanza } from '../../../../core/stanza';
+import {IqResponseStanza, MessageWithBodyStanza, Stanza} from '../../../../core/stanza';
 import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
 import { MessageReceivedEvent } from './message.plugin';
@@ -50,7 +50,7 @@ export class MessageCarbonsPlugin extends AbstractXmppPlugin {
         };
 
         const messageReceivedEvent = new MessageReceivedEvent();
-        this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageElement, messageReceivedEvent));
+        this.xmppChatAdapter.plugins.forEach(plugin => plugin.afterReceiveMessage(message, messageElement as MessageWithBodyStanza, messageReceivedEvent));
         if (!messageReceivedEvent.discard) {
             const {from, to} = messageElement.attrs;
             const contactJid = direction === Direction.in ? from : to;

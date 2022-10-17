@@ -1,4 +1,4 @@
-import { Stanza } from '../../../core/stanza';
+import {Stanza} from '../../../core/stanza';
 
 export class XmppResponseError extends Error {
     static readonly ERROR_ELEMENT_NS = 'urn:ietf:params:xml:ns:xmpp-stanzas';
@@ -25,17 +25,17 @@ export class XmppResponseError extends Error {
         type?: string,
         condition?: string
     } {
-        const errorElement = stanza.getChild('error');
+        const errorElement = stanza.getChild('error') as Stanza;
         const errorCode = Number(errorElement?.attrs.code) || undefined;
         const errorType = errorElement?.attrs.type as string | undefined;
         const errorCondition =
-            (errorElement
+            errorElement
                 ?.children
                 .filter(childElement =>
                     childElement.getName() !== 'text' &&
                     childElement.attrs.xmlns === XmppResponseError.ERROR_ELEMENT_NS,
                 )[0]
-                ?.getName());
+                ?.getName();
 
         return {
             code: errorCode,
