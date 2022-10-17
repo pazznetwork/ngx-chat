@@ -46,7 +46,7 @@
     "@angular/compiler": "~12.2.12",
     "@angular/compiler-cli": "~12.2.12",
     "@angular/language-service": "~12.2.12",
-    "@commitlint/cli": "^8.0.0",
+    "@commitlint/cli": "^17.1.2",
     "@commitlint/config-angular": "^8.0.0",
     "@compodoc/compodoc": "^1.1.15",
     "@types/jasmine": "~3.6.0",
