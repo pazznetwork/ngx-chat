@@ -31,7 +31,7 @@ class LastReadEntriesNodeBuilder extends AbstractStanzaBuilder {
     }
 
     toStanza(): Element {
-        return xml(wrapperNodeName, {}, this.lastReadNodes);
+        return xml(wrapperNodeName, {}, ...this.lastReadNodes);
     }
 
 }

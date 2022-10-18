@@ -1,17 +1,17 @@
-import { jid as parseJid, xml } from '@xmpp/client';
-import { JID } from '@xmpp/jid';
-import { Element } from 'ltx';
-import { filter } from 'rxjs/operators';
-import { Direction, Message, MessageState } from '../../../../core/message';
-import { MessageWithBodyStanza, Stanza } from '../../../../core/stanza';
-import { ChatMessageListRegistryService } from '../../../chat-message-list-registry.service';
-import { LogService } from '../../../log.service';
-import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
-import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
-import { EntityTimePlugin } from './entity-time.plugin';
-import { MessageUuidPlugin } from './message-uuid.plugin';
-import { MessageReceivedEvent } from './message.plugin';
-import { PublishSubscribePlugin } from './publish-subscribe.plugin';
+import {jid as parseJid, xml} from '@xmpp/client';
+import {JID} from '@xmpp/jid';
+import {Element} from 'ltx';
+import {filter} from 'rxjs/operators';
+import {Direction, Message, MessageState} from '../../../../core/message';
+import {MessageWithBodyStanza, Stanza} from '../../../../core/stanza';
+import {ChatMessageListRegistryService} from '../../../chat-message-list-registry.service';
+import {LogService} from '../../../log.service';
+import {XmppChatAdapter} from '../xmpp-chat-adapter.service';
+import {AbstractXmppPlugin} from './abstract-xmpp-plugin';
+import {EntityTimePlugin} from './entity-time.plugin';
+import {MessageUuidPlugin} from './message-uuid.plugin';
+import {MessageReceivedEvent} from './message.plugin';
+import {PublishSubscribePlugin} from './publish-subscribe.plugin';
 
 export interface StateDate {
     lastRecipientReceived: Date;
@@ -32,7 +32,7 @@ const nodeName = 'contact-message-state';
  */
 export class MessageStatePlugin extends AbstractXmppPlugin {
 
-    private jidToMessageStateDate: JidToMessageStateDate = Object.create(null);
+    private jidToMessageStateDate: JidToMessageStateDate = new Map();
 
     constructor(
         private readonly publishSubscribePlugin: PublishSubscribePlugin,
@@ -59,7 +59,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
             });
 
         this.publishSubscribePlugin.publish$
-            .subscribe((event) => this.handlePubSubEvent(event));
+            .subscribe((event) => this.handlePubSubEvent(event as Stanza));
     }
 
     async onBeforeOnline(): Promise<void> {
@@ -71,7 +71,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         this.processPubSub(itemElements);
     }
 
-    private processPubSub(itemElements: Stanza[]): void {
+    private processPubSub(itemElements: Element[]): void {
         let results = [] as [string, StateDate][];
         if (itemElements.length === 1) {
             results = itemElements[0]
@@ -107,7 +107,7 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         await this.publishSubscribePlugin.storePrivatePayloadPersistent(
             STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES,
             'current',
-            xml(wrapperNodeName, {}, messageStateElements));
+            xml(wrapperNodeName, {}, ...messageStateElements));
     }
 
     onOffline(): void {
@@ -216,10 +216,10 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         return this.jidToMessageStateDate.get(contactJid);
     }
 
-    private handlePubSubEvent(event: Stanza): void {
-        const items: Stanza | undefined = event.getChild('items');
+    private handlePubSubEvent(event: Element): void {
+        const items: Element | undefined = event.getChild('items');
         const itemsNode = items?.attrs.node;
-        const itemElements: Stanza[] | undefined = items?.getChildren('item');
+        const itemElements: Element[] | undefined = items?.getChildren('item');
         if (itemsNode === STORAGE_NGX_CHAT_CONTACT_MESSAGE_STATES && itemElements) {
             this.processPubSub(itemElements);
         }

@@ -100,7 +100,7 @@ describe('roster plugin', () => {
                 .toEqual(Presence.unavailable);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'}) as Stanza
             );
             expect(handled).toBeTruthy();
 
@@ -117,7 +117,7 @@ describe('roster plugin', () => {
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'},
-                    xml('show', {}, show))
+                    xml('show', {}, show)) as Stanza
             );
             expect(handled).toBeTruthy();
 
@@ -148,7 +148,7 @@ describe('roster plugin', () => {
             expect(contact.presence$.getValue()).toEqual(Presence.present);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
-                xml('presence', {from: 'test@example.com/bla', to: 'me@example.com/bla', type: 'unavailable'})
+                xml('presence', {from: 'test@example.com/bla', to: 'me@example.com/bla', type: 'unavailable'}) as Stanza
             );
             expect(handled).toBeTruthy();
 
@@ -186,7 +186,7 @@ describe('roster plugin', () => {
             contact.subscription$.next(ContactSubscription.to);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'}) as Stanza
             );
             expect(handled).toBeTruthy();
 
@@ -202,7 +202,7 @@ describe('roster plugin', () => {
             contact.subscription$.next(ContactSubscription.none);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'}) as Stanza
             );
             expect(handled).toBeTruthy();
 
@@ -217,7 +217,7 @@ describe('roster plugin', () => {
             chatAdapter.contacts$.next([contact]);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'}) as Stanza
             );
             expect(handled).toBeTruthy();
 
@@ -226,7 +226,7 @@ describe('roster plugin', () => {
 
         it('should add a pending in flag and create a contact when we never seen him before', async () => {
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribe'}) as Stanza
             );
             expect(handled).toBeTruthy();
 
@@ -244,7 +244,7 @@ describe('roster plugin', () => {
             contact.pendingOut$.next(true);
 
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
-                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribed'})
+                xml('presence', {from: 'test@example.com', to: 'me@example.com/resource', type: 'subscribed'}) as Stanza
             );
             expect(handled).toBeTruthy();
 
@@ -261,7 +261,7 @@ describe('roster plugin', () => {
             const handled = chatAdapter.getPlugin(RosterPlugin).handleStanza(
                 xml('presence', {from: 'test@example.com', to: 'me@example.com/resource'},
                     xml('x', {xmlns: 'http://jabber.org/protocol/muc#user'})
-                )
+                ) as Stanza
             );
             expect(handled).toBeFalsy();
         });

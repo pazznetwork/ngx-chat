@@ -134,7 +134,7 @@ export class PublishSubscribePlugin extends AbstractXmppPlugin {
     }
 
     handleStanza(stanza: Stanza): boolean {
-        const eventElement = stanza.getChild('event', PUBSUB_EVENT_XMLNS);
+        const eventElement = stanza.getChild('event', PUBSUB_EVENT_XMLNS) as Stanza;
         if (stanza.is('message') && eventElement) {
             this.publish$.next(eventElement);
             return true;

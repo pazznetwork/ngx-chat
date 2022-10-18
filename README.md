@@ -6,6 +6,14 @@
 
 This library provides an out-of-the-box usable XMPP chat component. It is customizable and offers an API to integrate it with your
 application.
+This library provides an out-of-the-box usable XMPP chat component. It is customizable and offers an API to integrate it with your application.
+
+## Features
+* connect to XMPP servers via websocket
+* send and receive messages
+* load messages from message history (XEP-0313)
+* use the server side buddy list or use your own data source for that, API methods for adding / removing buddies available 
+* supports multi-user chat
 
 ![screenshot](https://user-images.githubusercontent.com/4292951/49931801-f5c3d880-fec7-11e8-8a74-6600ea2cf9b0.png)
 
@@ -36,13 +44,15 @@ application.
 
 ### Compatibility
 
+* Angular 14 (ngx-chat 0.14.x)
+* Angular 13 (ngx-chat 0.13.x)
 * Angular 12 (ngx-chat 0.12.x)
 * Angular 11 (ngx-chat 0.11.x)
 * Angular 10 (ngx-chat 0.10.x)
 * Angular 9 (ngx-chat 0.9.x)
 * Angular 8 (ngx-chat 0.4.x)
 * Angular 6 (ngx-chat 0.3.x)
-* requires node >= 10.13 && npm >= 5 for build
+* requires node >= 16.16 && npm >= 8.11 for build
 
 ### Installation and usage
 
@@ -51,7 +61,7 @@ These instructions require Angular 12.
 First install ngx-chat and its dependencies via npm:
 
 ```bash
-npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.13.0 @angular/cdk@~12.2.0
+npm install --save @pazznetwork/ngx-chat @xmpp/client@~0.9.2 @angular/cdk@~14.0.5
 ```
 
 After that, import ngx-chat in your root module:
@@ -91,7 +101,6 @@ constructor(@Inject(CHAT_SERVICE_TOKEN) chatService: ChatService) {
 ```
 
 Add the following to polyfills.ts:
-
 ```
 /***************************************************************************************************
  * APPLICATION IMPORTS
@@ -143,6 +152,7 @@ messages via the `sendMessage` method.
 
 **Q: My question is not answered**  
 A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-chat/issues/new).
+
 
 ## Get Involved
 
@@ -200,7 +210,7 @@ For clean and standardised commit messages we use commit lint, for the format se
 
 ```bash
 # increment version number in projects/pazznetwork/ngx-chat/package.json
-VERSION=0.12.0 # change accordingly
+VERSION=0.14.8 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"
