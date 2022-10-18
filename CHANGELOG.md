@@ -1,3 +1,13 @@
+<a name="0.14.9"></a>
+## [0.14.9](https://github.com/pazznetwork/ngx-chat/compare/v0.14.8...v0.14.9) (2022-10-18)
+
+
+### Features
+
+* **ng-14:** fixed old paths for docs ([8cd8a05](https://github.com/pazznetwork/ngx-chat/commit/8cd8a05))
+
+
+
 <a name="0.14.8"></a>
 ## [0.14.8](https://github.com/pazznetwork/ngx-chat/compare/v0.12.0...v0.14.8) (2022-10-18)
 
