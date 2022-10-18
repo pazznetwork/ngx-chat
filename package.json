@@ -7,7 +7,7 @@
     "append-with-ref":"echo '/// <reference path=\"xmpp-client.d.ts\" />' | cat - dist/pazznetwork/ngx-chat/public-api.d.ts > temp && mv temp dist/pazznetwork/ngx-chat/public-api.d.ts",
     "start": "ng build @pazznetwork/ngx-chat && ng serve",
     "clean": "rimraf out-tsc && rimraf dist && rimraf coverage && rimraf documentation",
-    "compile": "tsc -p projects/pazznetwork/ngx-chat/tsconfig.lib.json --noEmit --noImplicitAny",
+    "compile": "tsc -p tsconfig.lib.json --noEmit --noImplicitAny",
     "build-lib": "npm run clean && ng build @pazznetwork/ngx-chat --configuration production",
     "build": "npm run build-lib && ng build ngx-chat-demo --stats-json --configuration production",
     "test": "ng test @pazznetwork/ngx-chat --watch",
@@ -15,8 +15,8 @@
     "lint": "ng lint @pazznetwork/ngx-chat",
     "e2e": "ng e2e",
     "bundle-report": "webpack-bundle-analyzer dist/ngx-chat-demo/stats-es5.json",
-    "documentation": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json",
-    "documentation:serve": "compodoc --tsconfig projects/pazznetwork/ngx-chat/tsconfig.lib.json --serve --watch",
+    "documentation": "compodoc --tsconfig tsconfig.lib.json",
+    "documentation:serve": "compodoc --tsconfig tsconfig.lib.json --serve --watch",
     "changelog": "conventional-changelog --infile CHANGELOG.md --same-file --preset angular --pkg package.json --release-count 0"
   },
   "keywords": [
