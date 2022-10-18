@@ -1,5 +1,5 @@
-<a name="0.14.4"></a>
-## [0.14.4](https://github.com/pazznetwork/ngx-chat/compare/v0.12.0...v0.14.4) (2022-10-17)
+<a name="0.14.8"></a>
+## [0.14.8](https://github.com/pazznetwork/ngx-chat/compare/v0.12.0...v0.14.8) (2022-10-18)
 
 
 ### Bug Fixes
@@ -36,6 +36,8 @@
 * **angular-14:** working with angular 14 ([ccfa509](https://github.com/pazznetwork/ngx-chat/commit/ccfa509))
 * implemented new muc plugin functions on new page ([c940ef2](https://github.com/pazznetwork/ngx-chat/commit/c940ef2))
 * **multi-user-chat:** rework Occupant/banOccupant/unbanOccupant ([94d46d3](https://github.com/pazznetwork/ngx-chat/commit/94d46d3))
+* **ng-14:** new publish ([d1b5f9a](https://github.com/pazznetwork/ngx-chat/commit/d1b5f9a))
+* **ng-14:** preparing a new version ([fcf8eb8](https://github.com/pazznetwork/ngx-chat/commit/fcf8eb8))
 * **ng-14:** rebase on master ([7ae0166](https://github.com/pazznetwork/ngx-chat/commit/7ae0166))
 * **plugins:** reworking plugins for better stanze handling ([5040f1a](https://github.com/pazznetwork/ngx-chat/commit/5040f1a))
 
