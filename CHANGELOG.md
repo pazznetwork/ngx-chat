@@ -1,3 +1,13 @@
+<a name="0.14.13"></a>
+## [0.14.13](https://github.com/pazznetwork/ngx-chat/compare/v0.14.12...v0.14.13) (2022-10-21)
+
+
+### Features
+
+* **ng-14:** fixed typing errors ([1e7a035](https://github.com/pazznetwork/ngx-chat/commit/1e7a035))
+
+
+
 <a name="0.14.12"></a>
 ## [0.14.12](https://github.com/pazznetwork/ngx-chat/compare/v0.14.11...v0.14.12) (2022-10-20)
 
