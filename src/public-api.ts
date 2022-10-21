@@ -55,6 +55,7 @@ export * from './lib/services/adapters/xmpp/xmpp-response.error';
 export * from './lib/services/chat-background-notification.service';
 export * from './lib/services/chat-list-state.service';
 export * from './lib/services/chat-message-list-registry.service';
+export * from './lib/services/chat-style';
 export * from './lib/services/chat-service';
 export * from './lib/services/contact-factory.service';
 export * from './lib/services/log.service';

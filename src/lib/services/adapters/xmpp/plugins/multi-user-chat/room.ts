@@ -32,7 +32,7 @@ export class Room {
         this.messageStore = new MessageStore<RoomMessage>(logService);
     }
 
-    get nick(): string | undefined {
+    get nick(): string {
         return this.occupantJid?.resource;
     }
 
