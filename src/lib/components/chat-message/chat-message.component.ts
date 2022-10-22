@@ -95,10 +95,25 @@ export class ChatMessageComponent implements OnInit {
 
         if (this.showMessageReadState && this.messageStatePlugin && this.contact) {
             const date = this.message.datetime;
-            const states = this.messageStatePlugin.getContactMessageState(this.contact.jidBare.toString());
-            return this.getStateForDate(date, states);
+            const jid = this.contact.jidBare.toString();
+            const states = this.messageStatePlugin.getContactMessageState(jid);
+            const messageState = this.getStateForDate(date, states);
+            this.handleSendingStatus(messageState, jid);
+            return messageState;
         }
         return undefined;
+    }
+
+    private handleSendingStatus = (messageState: MessageState, jid: string) => {
+        if (messageState === MessageState.SENDING) {
+            this.messageStatePlugin.updateContactMessageState(
+                jid,
+                MessageState.SENT,
+            );
+        }
+        // run once per message
+        this.handleSendingStatus = () => {
+        };
     }
 
     private getStateForDate(date: Date, states: StateDate): MessageState | undefined {

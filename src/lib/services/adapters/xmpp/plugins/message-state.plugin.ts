@@ -92,10 +92,14 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         this.jidToMessageStateDate = new Map(results);
     }
 
-    private async persistContactMessageStates(): Promise<void> {
+    private async persistContactMessageStates(changes?: { jid: string; stateDate: StateDate }): Promise<void> {
         const messageStateElements =
             [...this.jidToMessageStateDate.entries()]
-                .map(([jid, stateDates]) =>
+                .map(([jid, stateDates]: [string, StateDate]) => {
+                        return (jid === changes.jid) ? [jid, changes.stateDate] : [jid, stateDates];
+                    }
+                )
+                .map(([jid, stateDates]: [string, StateDate]) =>
                     xml(nodeName, {
                         jid,
                         lastRecipientReceived: String(stateDates.lastRecipientReceived.getTime()),
@@ -122,14 +126,6 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
     }
 
     async afterSendMessage(message: Message, messageStanza: Element): Promise<void> {
-        const {type, to} = messageStanza.attrs;
-        if (type === 'chat') {
-            this.updateContactMessageState(
-                parseJid(to).bare().toString(),
-                MessageState.SENT,
-                new Date(await this.entityTimePlugin.getNow()));
-            delete message.state;
-        }
     }
 
     afterReceiveMessage(messageReceived: Message, stanza: MessageWithBodyStanza, messageReceivedEvent: MessageReceivedEvent): void {
@@ -183,8 +179,15 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
         this.updateContactMessageState(contact.jidBare.toString(), state, stateDate);
     }
 
-    private updateContactMessageState(contactJid: string, state: MessageState, stateDate: Date): void {
-        const current = this.getContactMessageState(contactJid);
+    public async updateContactMessageState(
+        contactJid: string,
+        state: MessageState,
+        stateDate?: Date
+    ): Promise<void> {
+        if (!stateDate) {
+            stateDate = new Date(await this.entityTimePlugin.getNow());
+        }
+        const current = Object.assign({}, this.getContactMessageState(contactJid));
         let changed = false;
         if (state === MessageState.RECIPIENT_RECEIVED && current.lastRecipientReceived < stateDate) {
             current.lastRecipientReceived = stateDate;
@@ -198,7 +201,10 @@ export class MessageStatePlugin extends AbstractXmppPlugin {
             changed = true;
         }
         if (changed) {
-            this.persistContactMessageStates().catch(err => this.logService.error('error persisting contact message states', err));
+            this.persistContactMessageStates({
+                jid: contactJid,
+                stateDate: current
+            }).catch(err => this.logService.error('error persisting contact message states', err));
         }
     }
 
