@@ -1,6 +1,6 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "0.14.13",
+  "version": "0.14.14",
   "license": "MIT",
   "scripts": {
     "ng": "ng",

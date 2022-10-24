@@ -1,3 +1,13 @@
+<a name="0.14.14"></a>
+## [0.14.14](https://github.com/pazznetwork/ngx-chat/compare/v0.14.13...v0.14.14) (2022-10-24)
+
+
+### Features
+
+* **ng-14:** fixed import path in chat-window-frame ([4a4b553](https://github.com/pazznetwork/ngx-chat/commit/4a4b553))
+
+
+
 <a name="0.14.13"></a>
 ## [0.14.13](https://github.com/pazznetwork/ngx-chat/compare/v0.14.12...v0.14.13) (2022-10-21)
 
