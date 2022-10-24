@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Inject, Optional, Output} from '@angular/core';
-import {ChatStyle, CHAT_STYLE_TOKEN } from 'src/lib/services/chat-style';
+import {ChatStyle, CHAT_STYLE_TOKEN } from '../../services/chat-style';
 
 @Component({
     selector: 'ngx-chat-window-frame',
