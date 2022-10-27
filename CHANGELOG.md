@@ -1,3 +1,13 @@
+<a name="0.14.15"></a>
+## [0.14.15](https://github.com/pazznetwork/ngx-chat/compare/v0.14.14...v0.14.15) (2022-10-27)
+
+
+### Bug Fixes
+
+* missing Sending status ([fe97333](https://github.com/pazznetwork/ngx-chat/commit/fe97333))
+
+
+
 <a name="0.14.14"></a>
 ## [0.14.14](https://github.com/pazznetwork/ngx-chat/compare/v0.14.13...v0.14.14) (2022-10-24)
 
