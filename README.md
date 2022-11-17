@@ -187,7 +187,7 @@ For clean and standardised commit messages we use commit lint, for the format se
 ### Releasing
 ```bash
 # increment version number in projects/pazznetwork/ngx-chat/package.json
-VERSION=0.12.1 # change accordingly
+VERSION=0.12.2 # change accordingly
 npm run changelog
 git add .
 git commit -m "docs: release $VERSION"
