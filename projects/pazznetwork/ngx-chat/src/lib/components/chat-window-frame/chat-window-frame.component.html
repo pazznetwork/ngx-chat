@@ -1,0 +1,15 @@
+<div class="window" [style.width]="chatStyle.windowFrame.windowWidth ?? '27em'">
+
+    <div (click)="headerClick.emit()" class="window-header">
+
+        <ng-content select=".window-header-content"></ng-content>
+
+        <div *ngIf="closeClick.observers.length > 0" class="window-close" (click)="closeClick.emit()">
+            &times;
+        </div>
+
+    </div>
+
+    <ng-content select=".window-content"></ng-content>
+
+</div>

@@ -1,0 +1,123 @@
+<div class="roster-drawer" (click)="toggleVisibility()" [@drawerVisibility]="rosterState">
+    <div class="roster-drawer__button" *ngIf="rosterState === 'shown'">&raquo;</div>
+    <div class="roster-drawer__button" *ngIf="rosterState === 'hidden'">&laquo;</div>
+</div>
+
+<div class="roster-list" [@rosterVisibility]="rosterState" [attr.data-ngx-chat-state]="chatService.state$ | async">
+
+    <div class="roster-header">
+        {{ chatService.translations.chat }}
+    </div>
+
+    <ng-container *ngIf="(multiUserChatPlugin.rooms$ | async) as rooms">
+        <ng-container *ngIf="rooms.length > 0">
+            <div class="roster-group-header">{{chatService.translations.rooms}}</div>
+
+            <div class="contact-list-wrapper">
+                <ngx-chat-roster-recipient
+                        *ngFor="let room of rooms"
+                        [recipient]="room"
+                        (click)="onClickRecipient(room)">
+                </ngx-chat-roster-recipient>
+            </div>
+        </ng-container>
+    </ng-container>
+
+    <ng-container *ngIf="(contacts | async).length > 0">
+        <div class="roster-group-header">{{chatService.translations.contacts}}</div>
+
+        <div class="contact-list-wrapper">
+
+            <ngx-chat-roster-recipient
+                    *ngFor="let contact of (contacts | async)"
+                    [recipient]="contact"
+                    (click)="onClickRecipient(contact)">
+            </ngx-chat-roster-recipient>
+
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="(contactRequestsReceived$ | async).length > 0">
+        <div class="roster-group-header">{{chatService.translations.contactRequestIn}}</div>
+        <div class="contact-list-wrapper">
+
+            <ngx-chat-roster-recipient
+                    *ngFor="let contact of (contactRequestsReceived$ | async)"
+                    [recipient]="contact"
+                    (click)="onClickRecipient(contact)">
+            </ngx-chat-roster-recipient>
+
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="(contactRequestsSent$ | async).length > 0">
+        <div class="roster-group-header">{{chatService.translations.contactRequestOut}}</div>
+        <div class="contact-list-wrapper">
+
+            <ngx-chat-roster-recipient
+                    *ngFor="let contact of (contactRequestsSent$ | async)"
+                    [recipient]="contact"
+                    (click)="onClickRecipient(contact)">
+            </ngx-chat-roster-recipient>
+
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="(contactsUnaffiliated$ | async).length > 0">
+        <div class="roster-group-header">{{chatService.translations.contactsUnaffiliated}}</div>
+        <div class="contact-list-wrapper">
+
+            <ng-container *ngFor="let contact of (contactsUnaffiliated$ | async)">
+                <ngx-chat-roster-recipient
+                        *ngIf="contact.messages.length > 0"
+                        [recipient]="contact"
+                        (click)="onClickRecipient(contact)">
+                </ngx-chat-roster-recipient>
+            </ng-container>
+
+        </div>
+    </ng-container>
+
+    <div class="roster-list__empty" *ngIf="hasNoContacts$ | async">
+        {{chatService.translations.noContacts}}
+    </div>
+
+    <ng-container *ngIf="chatService.enableDebugging">
+        <hr/>
+
+        <div class="contact-pending-request-received-wrapper">
+            debug contact requests in:
+            <div class="contact-pending-request-received" *ngFor="let request of (chatService.contactRequestsReceived$ | async)">
+                {{request.name}}
+            </div>
+        </div>
+
+        <hr/>
+
+        <div class="contact-pending-request-sent-wrapper">
+            debug contact requests out:
+            <div class="contact-pending-request-sent" *ngFor="let request of (chatService.contactRequestsSent$ | async)">
+                {{request.name}}
+            </div>
+        </div>
+
+        <hr/>
+
+        <p>
+            debug contacts (count: {{ (chatService.contacts$ | async).length }})<br/>
+        </p>
+        <p *ngFor="let contact of (chatService.contacts$|async)" style="margin-bottom: 1em">
+            <em>{{contact.name}}:</em><br/>
+            subscription={{contact.subscription$ | async}}<br/>
+            presence={{contact.presence$ | async}}<br/>
+            pendingIn={{contact.pendingIn$ | async}}<br/>
+            pendingOut={{contact.pendingOut$ | async}}
+        </p>
+        <p class="roster-debug-state">state: {{chatService.state$ | async}}</p>
+    </ng-container>
+
+    <!--
+    <div class="roster-footer">
+    </div>
+    -->
+</div>

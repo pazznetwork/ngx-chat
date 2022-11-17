@@ -1,0 +1,21 @@
+addons:
+  chrome: stable
+
+language: node_js
+node_js:
+  - "12"
+
+before_script:
+  - npm install -g @angular/cli
+  - "sudo chown root /opt/google/chrome/chrome-sandbox"
+  - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+
+script:
+  - npm run clean
+  - npm run build
+  - ng test @pazznetwork/ngx-chat --code-coverage --watch=false --browsers Chrome_ci
+  - ng lint @pazznetwork/ngx-chat
+  - webdriver-manager update --chrome --versions.chrome 78.0.3904.105
+  - ng e2e
+
+after_script: "cat ./coverage/ngx-chat/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
