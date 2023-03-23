@@ -1,0 +1,20 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+@import (reference) '../../colors';
+
+.roster-presence {
+  display: inline-block;
+  padding-top: 0.5em;
+  margin-left: 0.3em;
+
+  &.roster-presence--present {
+    color: @success;
+  }
+
+  &.roster-presence--away {
+    color: @warning;
+  }
+
+  &.roster-presence--unavailable {
+    color: transparent;
+  }
+}

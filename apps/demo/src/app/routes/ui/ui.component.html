@@ -1,0 +1,37 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<div class="container">
+  <a routerLink="/">Back to ngx-chat sample component</a>
+
+  <div class="example">
+    <p>Default theme (avatars)</p>
+    <div class="chat-message-list-wrapper">
+      <ngx-chat-history [recipient]="contact" [showAvatars]="true"></ngx-chat-history>
+    </div>
+  </div>
+
+  <div class="example">
+    <p>Default theme (no avatars)</p>
+    <div class="chat-message-list-wrapper">
+      <ngx-chat-history [recipient]="contact" [showAvatars]="false"></ngx-chat-history>
+    </div>
+  </div>
+
+  <div class="example">
+    <p>Simple chat message component used directly</p>
+    <div class="chat-message-list-wrapper simple-message-list">
+      <ngx-chat-message-out
+        [showAvatar]="true"
+        *ngFor="let outMessage of outMessages"
+        [message]="outMessage.message"
+        [contact]="outMessage.contact"
+      ></ngx-chat-message-out>
+    </div>
+  </div>
+
+  <div class="example">
+    <p>Mock for multi user chat room</p>
+    <div class="chat-message-list-wrapper">
+      <ngx-chat-history [recipient]="room"></ngx-chat-history>
+    </div>
+  </div>
+</div>

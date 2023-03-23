@@ -40,4 +40,13 @@ testem.log
 Thumbs.db
 
 documentation/
-.env
+libs/ngx-xmpp/src/.secrets-const.ts
+test-results/
+playwright-report/
+
+.angular
+
+# Playwright
+**/test-results
+**/playwright-report
+**/playwright/.cache

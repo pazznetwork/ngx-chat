@@ -1,0 +1,20 @@
+{
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.js"],
+      "extends": [
+        "plugin:rxjs/recommended"
+      ],
+      "parserOptions": {
+        "project": [
+          "libs/xmpp-adapter/tsconfig.*?.json"
+        ]
+      },
+      "extends": [
+        "plugin:rxjs/recommended"
+      ]
+    }
+  ]
+}

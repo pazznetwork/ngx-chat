@@ -1,0 +1,36 @@
+{
+  "name": "strophe-ts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/strophe-ts/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/strophe-ts",
+        "main": "libs/strophe-ts/src/index.ts",
+        "tsConfig": "libs/strophe-ts/tsconfig.lib.json",
+        "assets": ["libs/strophe-ts/*.md"]
+      }
+    },
+    "ts-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "tsc --build --force --verbose libs/strophe-ts/tsconfig.json"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/strophe-ts/src/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": ["scope:strophe-ts"]
+}

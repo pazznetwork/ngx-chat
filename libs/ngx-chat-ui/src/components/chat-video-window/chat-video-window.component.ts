@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import type { AttachableTrack } from '@pazznetwork/ngx-xmpp';
+import { CommonModule } from '@angular/common';
+import { ChatWindowFrameComponent } from '../chat-window-frame';
+
+@Component({
+  standalone: true,
+  imports: [CommonModule, ChatWindowFrameComponent],
+  selector: 'ngx-chat-video-window',
+  templateUrl: './chat-video-window.component.html',
+  styleUrls: ['./chat-video-window.component.less'],
+})
+export class ChatVideoWindowComponent implements AfterViewInit {
+  @ViewChild('video')
+  video!: ElementRef<HTMLVideoElement>;
+
+  @Input()
+  track?: AttachableTrack;
+
+  constructor() {}
+
+  ngAfterViewInit(): void {
+    this.track?.attach(this.video.nativeElement);
+  }
+}

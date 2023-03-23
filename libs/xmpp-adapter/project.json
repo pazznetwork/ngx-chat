@@ -1,0 +1,37 @@
+{
+  "name": "xmpp-adapter",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/xmpp-adapter/src",
+  "projectType": "library",
+  "namedInputs": {},
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/xmpp-adapter",
+        "main": "libs/xmpp-adapter/src/index.ts",
+        "tsConfig": "libs/xmpp-adapter/tsconfig.lib.json",
+        "assets": ["libs/xmpp-adapter/*.md"]
+      }
+    },
+    "ts-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "tsc --build --force --verbose libs/xmpp-adapter/tsconfig.lib.json"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/xmpp-adapter/src/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": []
+}

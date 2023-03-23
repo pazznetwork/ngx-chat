@@ -1,0 +1,48 @@
+{
+  "name": "ngx-chat",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/ngx-chat-ui/src",
+  "prefix": "ngx-chat",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "project": "libs/ngx-chat-ui/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.json"
+        },
+        "development": {
+          "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "ts-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "tsc --build --force --verbose libs/ngx-chat-ui/tsconfig.json"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["libs/ngx-chat-ui/**/*.ts", "libs/ngx-chat-ui/**/*.html"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/angular:karma",
+      "options": {
+        "lintFilePatterns": ["libs/ngx-chat-ui/**/*.ts", "libs/ngx-chat-ui/**/*.html"]
+      }
+    }
+  },
+  "tags": []
+}

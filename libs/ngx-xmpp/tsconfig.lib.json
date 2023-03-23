@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/libs/ngx-xmpp",
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "types": []
+  },
+  "exclude": ["src/**/*.spec.ts", "src/main.karma.ts", "src/xmpp-adapter-test.module.ts", "src/empty-service.component.ts", "src/polyfills.ts"],
+  "include": ["**/*.ts"]
+}

@@ -1,0 +1,37 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<ngx-chat-bubble>
+  <ng-container ngProjectAs="ngx-chat-message-text-area">
+    <span>{{ message$ | async }}</span>
+    <ul class="chat-presence-subscription-actions" *ngIf="isAffiliated$ | async">
+      <li
+        data-zid="accept-user"
+        [class.action-disabled]="isActionDisabled$ | async"
+        (click)="acceptSubscriptionRequest()"
+      >
+        <a href="javascript:;">{{ chatService.translations.acceptSubscriptionRequest }}</a>
+      </li>
+      <li
+        data-zid="deny-user"
+        [class.action-disabled]="isActionDisabled$ | async"
+        (click)="denySubscriptionRequest()"
+      >
+        <a href="javascript:;">{{ chatService.translations.denySubscriptionRequest }}</a>
+      </li>
+    </ul>
+    <ul class="deny-actions" *ngIf="showDenyActions$ | async">
+      <li data-zid="block-user" (click)="blockContact()">
+        <a href="javascript:;">{{ chatService.translations.block }}</a>
+      </li>
+      <li
+        *ngIf="reportUserService"
+        data-zid="block-and-report-user"
+        (click)="blockContactAndReport()"
+      >
+        <a href="javascript:;">{{ chatService.translations.blockAndReport }}</a>
+      </li>
+      <li data-zid="dismiss-block-message" (click)="dismissBlockOptions()">
+        <a href="javascript:;">{{ chatService.translations.dismiss }}</a>
+      </li>
+    </ul>
+  </ng-container>
+</ngx-chat-bubble>

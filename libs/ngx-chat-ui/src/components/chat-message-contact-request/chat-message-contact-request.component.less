@@ -1,0 +1,23 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+@import (reference) '../../colors';
+
+.chat-presence-subscription-actions,
+.deny-actions {
+  list-style: none;
+  padding: 0;
+  margin: 1em 0 0 0;
+
+  a,
+  a:visited {
+    color: @link;
+  }
+}
+
+.deny-actions {
+  margin-top: 1em;
+}
+
+.action-disabled {
+  color: @general-light;
+  pointer-events: none;
+}

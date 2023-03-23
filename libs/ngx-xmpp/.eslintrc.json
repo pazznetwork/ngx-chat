@@ -1,0 +1,37 @@
+{
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": [
+          "libs/ngx-xmpp/tsconfig.*?.json"
+        ]
+      },
+      "extends": [
+        "plugin:@nrwl/nx/angular",
+        "plugin:rxjs/recommended"
+      ],
+      "rules": {
+        "@angular-eslint/no-output-native": "error",
+        "decorator-position/decorator-position": [
+          "error",
+          {
+            "printWidth": 100,
+            "properties": "above",
+            "methods": "above"
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*.html"],
+      "parserOptions": {
+        "project": [
+          "libs/ngx-xmpp/tsconfig.*?.json"
+        ]
+      }
+    }
+  ]
+}

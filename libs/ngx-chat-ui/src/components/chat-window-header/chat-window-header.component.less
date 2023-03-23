@@ -1,0 +1,56 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+@import '../../colors';
+
+.window-header {
+  display: flex;
+  border-bottom: 1px solid @general-border-color;
+  cursor: pointer;
+  height: 2.5em;
+  align-items: center;
+  padding: 0.25em;
+
+  &:hover {
+    background-color: #efefef;
+  }
+
+  .chat-avatar-wrapper {
+    // min-{width,height} is necessary in addition to {width,height} to prevent squeezing of avatar in flex box,
+    // creating an egg form instead of a circle in some cases
+    min-width: 2em;
+    width: 2em;
+    min-height: 2em;
+    height: 2em;
+  }
+
+  .header-middle {
+    padding: 0 0.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 0.8em;
+
+    .chat-name-wrapper,
+    .chat-status-wrapper {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      display: block;
+
+      .has-click-handler:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .chat-status {
+      color: @general-light;
+    }
+  }
+
+  .window-close {
+    padding: 0.5em;
+    text-align: right;
+    color: #777;
+
+    &:hover {
+      color: #000;
+    }
+  }
+}
