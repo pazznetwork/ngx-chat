@@ -113,16 +113,17 @@ export class PublishSubscribePlugin implements StanzaHandlerChatPlugin {
   }
 
   async getOwnerSubscriptions(): Promise<Subscription[]> {
+    const service = await this.xmppChatAdapter.pluginMap.disco.findService('pubsub', 'pep');
     const subscriptions = await this.xmppChatAdapter.chatConnectionService
-      .$iq({ type: 'get' })
-      .c('query', { xmlns: nsPubSubOwner })
+      .$iq({ type: 'get', to: service.jid })
+      .c('pubsub', { xmlns: nsPubSubOwner })
       .c('subscriptions')
       .send();
     return this.fromElementToSubscription(subscriptions);
   }
 
   async getSubscriptions(): Promise<Subscription[]> {
-    const service = await this.xmppChatAdapter.pluginMap.disco.findService('pubsub', 'service');
+    const service = await this.xmppChatAdapter.pluginMap.disco.findService('pubsub', 'pep');
     const subscriptions = await this.xmppChatAdapter.chatConnectionService
       .$iq({ type: 'get', to: service.jid })
       .c('pubsub', { xmlns: nsPubSub })

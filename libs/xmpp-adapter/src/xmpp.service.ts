@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-import { combineLatest, firstValueFrom, from, Observable, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import type {
   AuthRequest,
   ChatService,
@@ -83,12 +83,14 @@ export class XmppService implements ChatService {
     await firstValueFrom(this.onOnline$);
     await this.pluginMap.disco.ensureServicesAreDiscovered(logInRequest.domain);
     await firstValueFrom(this.pluginMap.disco.servicesInitialized$);
+    // redundant because default type is available, but better for documentation purposes
+    await this.chatConnectionService.$pres({ type: 'available' }).sendResponseLess();
   }
 
   async logOut(): Promise<void> {
-    await firstValueFrom(
-      combineLatest([this.onOffline$, from(this.chatConnectionService.logOut())])
-    );
+    const offlinePromise = firstValueFrom(this.onOffline$);
+    await this.chatConnectionService.logOut();
+    await offlinePromise;
   }
 
   async reconnect(): Promise<void> {

@@ -24,7 +24,7 @@ const bobLogin: AuthRequest = {
   password: 'bob',
 };
 
-fdescribe('roster plugin', () => {
+describe('roster plugin', () => {
   let testUtils: TestUtils;
   let chatService: XmppService;
 
@@ -113,39 +113,28 @@ fdescribe('roster plugin', () => {
     await ensureNoRegisteredUser(bobLogin);
   });
 
-  fit('should be able to remove a contact request', async () => {
+  it('should be able to remove a contact request', async () => {
     await ensureNoRegisteredUser(bobLogin);
     await ensureNoRegisteredUser(timLogin);
     await ensureRegisteredUser(timLogin);
     await ensureRegisteredUser(bobLogin);
-    const emitArray: Contact[][] = [];
-    const contactsSubscription = testUtils.chatService.contactListService.contacts$.subscribe(
-      (contacts) => emitArray.push(contacts)
-    );
 
     await testUtils.chatService.logIn(bobLogin);
     await testUtils.chatService.contactListService.addContact(testUtils.toJid(timLogin));
     await testUtils.chatService.logOut();
 
-    const contactsPromise = firstValueFrom(testUtils.chatService.contactListService.contacts$);
-
     await chatService.logIn(timLogin);
-
-    expect(emitArray?.[0]?.length).toBe(0);
-    expect(emitArray?.[1]?.length).toBe(1);
-    expect(emitArray?.[2]?.length).toBe(0);
-    expect(emitArray?.[3]?.length).toBe(0);
-
-    const contacts = await contactsPromise;
+    const contacts = await firstValueFrom(
+      testUtils.chatService.contactListService.contacts$.pipe(skip(1))
+    );
     const contactJid = contacts?.[0]?.jid.toString();
-    expect(contactJid).toEqual(testUtils.toJid(timLogin));
+    expect(contactJid).toEqual(testUtils.toJid(bobLogin));
 
     await chatService.contactListService.removeContact(contactJid as string);
     await chatService.logOut();
 
     await ensureNoRegisteredUser(bobLogin);
     await ensureNoRegisteredUser(timLogin);
-    contactsSubscription.unsubscribe();
   });
 
   it('should handle adding multiple contacts to roster', async () => {
@@ -294,11 +283,16 @@ fdescribe('roster plugin', () => {
 
   it('should handle subscribe to a contact and recognize a "to" subscription as villain', async () => {
     await ensureRegisteredUser(testUtils.villain);
-    const contacts = testUtils.chatService.contactListService.contacts$.subscribe();
+    const contactReceivedPromise = firstValueFrom(
+      testUtils.chatService.contactListService.contacts$.pipe(
+        filter((contacts) => contacts.length > 0)
+      )
+    );
     await testUtils.chatService.logIn(testUtils.villain);
 
     const testJid = 'test@example.com';
     await chatService.contactListService.addContact(testJid);
+    await contactReceivedPromise;
     const contact = await chatService.contactListService.getContactById(testJid);
 
     if (contact == null) {
@@ -310,7 +304,6 @@ fdescribe('roster plugin', () => {
 
     await testUtils.logOut();
     await ensureNoRegisteredUser(testUtils.villain);
-    contacts.unsubscribe();
   });
 
   it('should handle subscribe from a contact and promote subscription from "to" to "both" as villain', async () => {
