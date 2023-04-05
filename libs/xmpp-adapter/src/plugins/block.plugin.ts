@@ -2,7 +2,8 @@
 import type { XmppService } from '../xmpp.service';
 import { firstValueFrom, map, merge, mergeMap, Observable, ReplaySubject, scan } from 'rxjs';
 import type { ChatPlugin } from '../core';
-import { shareReplay } from 'rxjs/operators';
+import { shareReplay, switchMap } from 'rxjs/operators';
+import { getUniqueId, NS } from '@pazznetwork/strophets';
 
 export const nsBlocking = 'urn:xmpp:blocking';
 
@@ -36,27 +37,34 @@ export class BlockPlugin implements ChatPlugin {
       scan((state, innerFun) => innerFun(state), new Set<string>()),
       shareReplay({ bufferSize: 1, refCount: false })
     );
+
+    xmppService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
+  }
+
+  async initializeHandler(): Promise<void> {
+    console.log('BlockPlugin.initializeHandler');
+    await this.xmppService.chatConnectionService.addHandler((stanza) => this.handlePush(stanza), {
+      ns: NS.CLIENT,
+      name: 'iq',
+      type: 'set',
+    });
   }
 
   async blockJid(jid: string): Promise<void> {
     const from = await firstValueFrom(this.xmppService.userJid$);
     await this.xmppService.chatConnectionService
-      .$iq({ type: 'set' })
+      .$iq({ type: 'set', id: getUniqueId('block') })
       .c('block', { xmlns: this.nameSpace })
       .c('item', { from, jid })
-      .send();
-
-    this.blockContactJIDSubject.next(jid);
+      .sendResponseLess();
   }
 
   async unblockJid(jid: string): Promise<void> {
     await this.xmppService.chatConnectionService
-      .$iq({ type: 'set' })
+      .$iq({ type: 'set', id: getUniqueId('block') })
       .c('unblock', { xmlns: this.nameSpace })
       .c('item', { jid })
-      .send();
-
-    this.unblockContactJIDSubject.next(jid);
+      .sendResponseLess();
   }
 
   private async requestBlockedJIDs(): Promise<Set<string>> {
@@ -76,5 +84,26 @@ export class BlockPlugin implements ChatPlugin {
       .filter((val) => val != null) as string[];
 
     return new Set<string>(blockedJids);
+  }
+
+  private handlePush(stanza: Element): boolean {
+    const unblock = stanza.querySelector('iq > unblock');
+    const block = stanza.querySelector('iq > block');
+    if (block) {
+      const jids = Array.from(block.querySelectorAll('item')).map(
+        (item) => item?.getAttribute('jid') as string
+      );
+      for (const jid of jids) {
+        this.blockContactJIDSubject.next(jid);
+      }
+    } else if (unblock) {
+      const jids = Array.from(unblock.querySelectorAll('item')).map(
+        (item) => item?.getAttribute('jid') as string
+      );
+      for (const jid of jids) {
+        this.unblockContactJIDSubject.next(jid);
+      }
+    }
+    return true;
   }
 }

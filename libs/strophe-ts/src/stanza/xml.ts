@@ -504,3 +504,125 @@ export function serialize(el: Element | Builder | { tree: () => Element }): stri
 export function parseToXml(data: string): Element {
   return new DOMParser().parseFromString(data, 'text/xml').documentElement;
 }
+
+/**
+ *  Generate a unique ID for use in <iq/> elements.
+ *
+ *  All <iq/> stanzas are required to have unique id attributes.  This
+ *  function makes creating these easy.  Each connection instance has
+ *  a counter which starts from zero, and the value of this counter
+ *  plus a colon followed by the suffix becomes the unique id. If no
+ *  suffix is supplied, the counter is used as the unique id.
+ *
+ *  Suffixes are used to make debugging easier when reading the stream
+ *  data, and their use is recommended.  The counter resets to 0 for
+ *  every new connection for the same reason.  For connections to the
+ *  same server that authenticate the same way, all the ids should be
+ *  the same, which makes it easy to see changes.  This is useful for
+ *  automated testing as well.
+ *
+ *    @param suffix - A optional suffix to append to the id.
+ *
+ *    @returns A unique string to be used for the id attribute.
+ */
+export function getUniqueId(suffix?: string | number): string {
+  const uuid: string = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+  if (suffix) {
+    return uuid + ':' + suffix.toString();
+  }
+
+  return uuid;
+}
+
+export function ensureHasId(stanza: Element, suffix: string): string {
+  const id = stanza.getAttribute('id');
+  if (id) {
+    return id;
+  }
+
+  const newId = getUniqueId(suffix);
+  stanza.setAttribute('id', newId);
+  return newId;
+}
+
+export function stanzaMatch(
+  stanza: Element,
+  identifier: {
+    id?: string;
+    name?: string;
+    ns?: string;
+    type?: string | string[];
+    from?: string | null;
+  },
+  options = { matchBareFromJid: false, ignoreNamespaceFragment: false }
+): boolean {
+  const { matchBareFromJid, ignoreNamespaceFragment } = options;
+
+  let from = stanza.getAttribute('from');
+  if (matchBareFromJid && from) {
+    from = getBareJidFromJid(from);
+  }
+  const elem_type = stanza.getAttribute('type');
+  let result =
+    namespaceMatch(stanza, identifier.ns, ignoreNamespaceFragment) &&
+    (!identifier.name || isTagEqual(stanza, identifier.name)) &&
+    (!identifier.id || stanza.getAttribute('id') === identifier.id) &&
+    (!identifier.from || from === identifier.from);
+
+  if (Array.isArray(identifier.type) && elem_type) {
+    result = result && (!identifier.type || identifier.type.indexOf(elem_type) !== -1);
+  } else {
+    result = result && (!identifier.type || elem_type === identifier.type);
+  }
+  return result;
+}
+
+/**
+ *  Tests if a stanza matches the namespace set for this Strophe.Handler.
+ *
+ *  Parameters:
+ *    (XMLElement) elem - The XML element to test.
+ *
+ *  Returns:
+ *    true if the stanza matches and false otherwise.
+ */
+function namespaceMatch(
+  elem: Element,
+  ns: string | undefined,
+  ignoreNamespaceFragment: boolean
+): boolean {
+  let nsMatch = false;
+  if (!ns) {
+    return true;
+  } else {
+    forEachChildMap(elem, null, (el) => {
+      if (getNamespace(el, ignoreNamespaceFragment) === ns) {
+        nsMatch = true;
+      }
+    });
+    return nsMatch || getNamespace(elem, ignoreNamespaceFragment) === ns;
+  }
+}
+
+/**
+ *  Returns the XML namespace attribute on an element.
+ *  If `ignoreNamespaceFragment` was passed in for this handler, then the
+ *  URL fragment will be stripped.
+ *
+ *  Parameters:
+ *    (XMLElement) elem - The XML element with the namespace.
+ *
+ *  Returns:
+ *    The namespace, with optionally the fragment stripped.
+ */
+function getNamespace(elem: Element, ignoreNamespaceFragment: boolean): string | null | undefined {
+  let elNamespace: string | null | undefined = elem.getAttribute('xmlns');
+  if (elNamespace && ignoreNamespaceFragment) {
+    elNamespace = elNamespace.split('#')[0];
+  }
+  return elNamespace;
+}

@@ -6,7 +6,7 @@ import { Finder, serializeToSubmitForm } from '../core';
 import type { XmppService } from '../xmpp.service';
 import { MUC_SUB_EVENT_TYPE, nsRSM } from './multi-user-chat';
 import { nsPubSubEvent } from './publish-subscribe.plugin';
-import type { HandlerAsync } from '@pazznetwork/strophets';
+import type { Handler } from '@pazznetwork/strophets';
 
 const nsMAM = 'urn:xmpp:mam:2';
 
@@ -19,7 +19,7 @@ export class MessageArchivePlugin implements ChatPlugin {
 
   private readonly mamMessageReceivedSubject = new Subject<void>();
 
-  private mamHandler?: HandlerAsync;
+  private mamHandler?: Handler;
 
   constructor(private readonly chatService: XmppService, private readonly logService: Log) {
     const setMamHandler$ = this.chatService.onOnline$.pipe(
@@ -27,7 +27,7 @@ export class MessageArchivePlugin implements ChatPlugin {
         if (this.mamHandler) {
           throw new Error('mamHandler already defined');
         }
-        this.mamHandler = await this.chatService.chatConnectionService.addHandlerAsync(
+        this.mamHandler = await this.chatService.chatConnectionService.addHandler(
           (stanza) => {
             if (
               !Finder.create(stanza).searchByTag('result') ||
@@ -49,7 +49,7 @@ export class MessageArchivePlugin implements ChatPlugin {
         if (!this.mamHandler) {
           throw new Error('mamHandler is undefined');
         }
-        this.mamHandler = await this.chatService.chatConnectionService.deleteHandlerAsync(
+        this.mamHandler = await this.chatService.chatConnectionService.deleteHandler(
           this.mamHandler
         );
       })

@@ -12,7 +12,7 @@
  *  will use Strophe.Connection.addHandler() and
  *  Strophe.Connection.deleteHandler().
  */
-import { forEachChildMap, getBareJidFromJid, isTagEqual } from './stanza/xml';
+import { getBareJidFromJid, stanzaMatch } from './stanza';
 import { handleError, StropheError } from './error';
 
 export class Handler {
@@ -31,7 +31,7 @@ export class Handler {
    * @param user whether the handler is a user handler or a system handler
    */
   constructor(
-    private readonly handler: (stanza: Element) => boolean,
+    private readonly handler: (stanza: Element) => boolean | Promise<boolean>,
     private readonly ns?: string,
     private readonly name?: string,
     private readonly type?: string | string[],
@@ -41,54 +41,6 @@ export class Handler {
     readonly user = true
   ) {
     this.from = options.matchBareFromJid && from ? getBareJidFromJid(from) ?? undefined : from;
-  }
-
-  /** PrivateFunction: getNamespace
-   *  Returns the XML namespace attribute on an element.
-   *  If `ignoreNamespaceFragment` was passed in for this handler, then the
-   *  URL fragment will be stripped.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - The XML element with the namespace.
-   *
-   *  Returns:
-   *    The namespace, with optionally the fragment stripped.
-   */
-  private getNamespace(elem: Element): string | null {
-    const elNamespace = elem.getAttribute('xmlns');
-
-    if (!elNamespace) {
-      return elNamespace;
-    }
-
-    if (elNamespace && !this.options.ignoreNamespaceFragment) {
-      return elNamespace;
-    }
-
-    return elNamespace.split('#')[0] ?? null;
-  }
-
-  /** PrivateFunction: namespaceMatch
-   *  Tests if a stanza matches the namespace set for this Strophe.Handler.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - The XML element to test.
-   *
-   *  Returns:
-   *    true if the stanza matches and false otherwise.
-   */
-  private namespaceMatch(elem: Element): boolean {
-    let nsMatch = false;
-    if (!this.ns) {
-      return true;
-    } else {
-      forEachChildMap(elem, null, (el) => {
-        if (this.getNamespace(el) === this.ns) {
-          nsMatch = true;
-        }
-      });
-      return nsMatch || this.getNamespace(elem) === this.ns;
-    }
   }
 
   /**
@@ -102,23 +54,17 @@ export class Handler {
    *    @returns true if the stanza matches and false otherwise.
    */
   isMatch(elem: Element): boolean {
-    let from = elem.getAttribute('from');
-    if (this.options.matchBareFromJid && from) {
-      from = getBareJidFromJid(from);
-    }
-    const elem_type = elem.getAttribute('type');
-    let result =
-      this.namespaceMatch(elem) &&
-      (!this.name || isTagEqual(elem, this.name)) &&
-      (!this.id || elem.getAttribute('id') === this.id) &&
-      (!this.from || from === this.from);
-
-    if (Array.isArray(this.type) && elem_type) {
-      result = result && (!this.type || this.type.indexOf(elem_type) !== -1);
-    } else {
-      result = result && (!this.type || elem_type === this.type);
-    }
-    return result;
+    return stanzaMatch(
+      elem,
+      {
+        ns: this.ns,
+        name: this.name,
+        type: this.type,
+        id: this.id,
+        from: this.from,
+      },
+      this.options
+    );
   }
 
   /**
@@ -132,7 +78,7 @@ export class Handler {
    *  Returns:
    *    @returns A boolean indicating if the handler should remain active.
    */
-  run(elem: Element): boolean {
+  run(elem: Element): boolean | Promise<boolean> {
     let result = null;
     try {
       result = this.handler(elem);

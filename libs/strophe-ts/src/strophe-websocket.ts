@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
 import type { Connection } from './connection';
-import { NS } from './stanza/namespace';
+import {
+  buildOpenStanza,
+  NS,
+  parseToXml,
+  presenceUnavailable,
+  serialize,
+  streamClose,
+} from './stanza';
 import { Status } from './status';
 import { error } from './log';
-import { parseToXml, serialize } from './stanza/xml';
 import type { ProtocolManager } from './protocol-manager';
 import { combineLatest, filter, firstValueFrom, mergeMap, ReplaySubject, Subject } from 'rxjs';
-import { buildOpenStanza, presenceUnavailable, streamClose } from './stanza/stanza.const';
 import { ErrorCondition } from './error';
 
 /**

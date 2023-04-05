@@ -26,15 +26,15 @@ import {
   Stanza,
   XmppService,
 } from '@pazznetwork/xmpp-adapter';
-import type { HandlerAsync } from '@pazznetwork/strophets';
 import { shareReplay } from 'rxjs/operators';
+import type { Handler } from '@pazznetwork/strophets';
 
 /**
  * Part of the XMPP Core Specification
  * see: https://datatracker.ietf.org/doc/rfc6120/
  */
 export class XmppMessageService implements MessageService {
-  private messageHandler?: HandlerAsync;
+  private messageHandler?: Handler;
   private readonly messageSubject = new Subject<Contact>();
   private readonly messageSentSubject: Subject<Recipient> = new Subject();
   readonly messageSent$ = this.messageSentSubject.asObservable();
@@ -59,7 +59,7 @@ export class XmppMessageService implements MessageService {
 
     const registerHandler$ = this.chatService.onOnline$.pipe(
       switchMap(async () => {
-        this.messageHandler = await this.chatService.chatConnectionService.addHandlerAsync(
+        this.messageHandler = await this.chatService.chatConnectionService.addHandler(
           (stanza) => {
             if (!Finder.create(stanza).searchByTag('body').result) {
               return Promise.resolve(false);
@@ -75,7 +75,7 @@ export class XmppMessageService implements MessageService {
         if (!this.messageHandler) {
           throw new Error('There was no messageHandler in message.service');
         }
-        this.messageHandler = await this.chatService.chatConnectionService.deleteHandlerAsync(
+        this.messageHandler = await this.chatService.chatConnectionService.deleteHandler(
           this.messageHandler
         );
       })

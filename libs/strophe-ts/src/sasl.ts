@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { SASLMechanism } from './sasl-mechanism';
 import type { Handler } from './handler';
-import type { HandlerAsync } from './handler-async';
 import { SASLAnonymous } from './sasl-anon';
 import { SASLExternal } from './sasl-external';
 import { SASLOAuthBearer } from './sasl-oauthbearer';
@@ -12,9 +11,15 @@ import { SASLSHA1 } from './sasl-sha1';
 import { SASLSHA256 } from './sasl-sha256';
 import { SASLSHA384 } from './sasl-sha384';
 import { SASLSHA512 } from './sasl-sha512';
-import { $build, $iq } from './stanza/builder-helper';
-import { NS } from './stanza/namespace';
-import { getBareJidFromJid, getNodeFromJid, getResourceFromJid, getText } from './stanza/xml';
+import {
+  $build,
+  $iq,
+  getBareJidFromJid,
+  getNodeFromJid,
+  getResourceFromJid,
+  getText,
+  NS,
+} from './stanza';
 import { info } from './log';
 import { Status } from './status';
 import type { Connection } from './connection';
@@ -30,9 +35,9 @@ export class Sasl {
   doSession = false;
   mechanism: Map<string, SASLMechanism> = new Map<string, SASLMechanism>();
 
-  saslSuccessHandler?: HandlerAsync;
+  saslSuccessHandler?: Handler;
   saslFailureHandler?: Handler;
-  saslChallengeHandler?: HandlerAsync;
+  saslChallengeHandler?: Handler;
   saslMechanism?: SASLMechanism;
 
   scramKeys: unknown;
@@ -171,7 +176,7 @@ export class Sasl {
         continue;
       }
       const saslChallengePromise = new Promise<void>((resolve, reject) => {
-        this.saslSuccessHandler = this.connection.handlerService.addSysHandlerPromise(
+        this.saslSuccessHandler = this.connection.handlerService.addSysHandler(
           (el) => this.saslSuccessCb(el, resolve, reject),
           NS.SASL,
           'success',
@@ -187,7 +192,7 @@ export class Sasl {
         );
       });
 
-      this.saslChallengeHandler = this.connection.handlerService.addSysHandlerPromise(
+      this.saslChallengeHandler = this.connection.handlerService.addSysHandler(
         (el) => this.saslChallengeCb(el),
         NS.SASL,
         'challenge',
@@ -314,7 +319,7 @@ export class Sasl {
     this.connection.handlerService.deleteHandler(this.saslFailureHandler);
     this.saslFailureHandler = undefined;
     if (this.saslChallengeHandler) {
-      this.connection.handlerService.deleteHandlerAsync(this.saslChallengeHandler);
+      this.connection.handlerService.deleteHandler(this.saslChallengeHandler);
       this.saslChallengeHandler = undefined;
     }
   }
@@ -358,11 +363,11 @@ export class Sasl {
   saslFailureCb(reject: (reason?: Error) => void, elem?: Element): boolean {
     // delete unneeded handlers
     if (this.saslSuccessHandler) {
-      this.connection.handlerService.deleteHandlerAsync(this.saslSuccessHandler);
+      this.connection.handlerService.deleteHandler(this.saslSuccessHandler);
       this.saslSuccessHandler = undefined;
     }
     if (this.saslChallengeHandler) {
-      this.connection.handlerService.deleteHandlerAsync(this.saslChallengeHandler);
+      this.connection.handlerService.deleteHandler(this.saslChallengeHandler);
       this.saslChallengeHandler = undefined;
     }
 

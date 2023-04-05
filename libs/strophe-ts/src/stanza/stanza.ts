@@ -17,3 +17,12 @@ export const streamClose = $build('close', { xmlns: NS.FRAMING }).tree();
 export function buildOpenStanza(to: string): Element {
   return $build('open', { xmlns: NS.FRAMING, to, version: '1.0' }).tree();
 }
+
+/**
+ * new DOMParser().parseFromString(html, 'text/xml').documentElement.matches('iq[xmlns="jabber:client"]:has(query[xmlns="jabber:iq:privacy"])')
+ * @param {Element} stanza
+ * @returns {boolean}
+ */
+export function isDeprecatedStanza(stanza: Element): boolean {
+  return stanza.querySelector('iq > query')?.getAttribute('xmlns') === NS.PRIVACY;
+}

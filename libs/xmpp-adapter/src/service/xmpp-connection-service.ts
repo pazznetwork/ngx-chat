@@ -4,7 +4,7 @@ import type { AuthRequest, Log } from '@pazznetwork/ngx-chat-shared';
 import { makeSafeJidString } from '@pazznetwork/ngx-chat-shared';
 import { StanzaBuilder } from '../stanza-builder';
 import { first, shareReplay } from 'rxjs/operators';
-import { $build, Connection, Handler, HandlerAsync } from '@pazznetwork/strophets';
+import { $build, Connection, Handler } from '@pazznetwork/strophets';
 
 /**
  * Implementation of the XMPP specification according to RFC 6121.
@@ -76,7 +76,7 @@ export class XmppConnectionService {
    * @param options matchBare match from and to Jid without resource part
    */
   async addHandler(
-    handler: (stanza: Element) => boolean,
+    handler: (stanza: Element) => boolean | Promise<boolean>,
     identifier?: { ns?: string; name?: string; type?: string; id?: string; from?: string },
     options?: { matchBareFromJid: boolean; ignoreNamespaceFragment: boolean }
   ): Promise<Handler> {
@@ -89,29 +89,9 @@ export class XmppConnectionService {
     return connection.handlerService.addHandler(handler, ns, name, type, id, from, options);
   }
 
-  async addHandlerAsync(
-    handler: (stanza: Element) => Promise<boolean>,
-    identifier?: { ns?: string; name?: string; type?: string; id?: string; from?: string },
-    options?: { matchBareFromJid: boolean; ignoreNamespaceFragment: boolean }
-  ): Promise<HandlerAsync> {
-    const connection = await firstValueFrom(this.connection$);
-    if (!identifier) {
-      return connection.handlerService.addHandlerAsync(handler);
-    }
-
-    const { ns, name, type, id, from } = identifier;
-    return connection.handlerService.addHandlerAsync(handler, ns, name, type, id, from, options);
-  }
-
   async deleteHandler(handlerRef: Handler): Promise<undefined> {
     const connection = await firstValueFrom(this.connection$);
     connection.handlerService.deleteHandler(handlerRef);
-    return undefined;
-  }
-
-  async deleteHandlerAsync(handlerRef: HandlerAsync): Promise<undefined> {
-    const connection = await firstValueFrom(this.connection$);
-    connection.handlerService.deleteHandlerAsync(handlerRef);
     return undefined;
   }
 

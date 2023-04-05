@@ -22,7 +22,7 @@ import {
   Subject,
 } from 'rxjs';
 import { filter, shareReplay, switchMap } from 'rxjs/operators';
-import { HandlerAsync, NS } from '@pazznetwork/strophets';
+import { NS } from '@pazznetwork/strophets';
 
 /**
  * Current @TODOS:
@@ -56,9 +56,6 @@ export class RosterPlugin implements ChatPlugin {
   readonly contactRequestsReceived$: Observable<Contact[]>;
   readonly contactRequestsSent$: Observable<Contact[]>;
   readonly contactsUnaffiliated$: Observable<Contact[]>;
-  private rosterPushHandler?: HandlerAsync;
-  private presenceStanzaHandler?: HandlerAsync;
-  private rosterXPushHandler?: HandlerAsync;
 
   constructor(private readonly chatService: XmppService) {
     this.contacts$ = merge(
@@ -94,55 +91,7 @@ export class RosterPlugin implements ChatPlugin {
       shareReplay({ bufferSize: 1, refCount: false })
     );
 
-    chatService.onOnline$
-      .pipe(
-        switchMap(async () => {
-          this.rosterPushHandler = await this.chatService.chatConnectionService.addHandlerAsync(
-            (stanza) => this.handleRosterPushStanza(stanza),
-            {
-              ns: NS.CLIENT,
-              name: 'iq',
-              type: 'set',
-            }
-          );
-
-          this.presenceStanzaHandler = await this.chatService.chatConnectionService.addHandlerAsync(
-            (stanza) => this.handlePresenceStanza(stanza),
-            {
-              name: 'presence',
-            }
-          );
-
-          this.rosterXPushHandler = await this.chatService.chatConnectionService.addHandlerAsync(
-            (stanza) => this.handleRosterXPush(stanza),
-            {
-              ns: nsRosterX,
-              name: 'message',
-            }
-          );
-        })
-      )
-      .subscribe();
-
-    chatService.onOffline$
-      .pipe(
-        switchMap(async () => {
-          if (this.presenceStanzaHandler) {
-            await this.chatService.chatConnectionService.deleteHandlerAsync(
-              this.presenceStanzaHandler
-            );
-          }
-          if (this.rosterPushHandler) {
-            await this.chatService.chatConnectionService.deleteHandlerAsync(this.rosterPushHandler);
-          }
-          if (this.rosterXPushHandler) {
-            await this.chatService.chatConnectionService.deleteHandlerAsync(
-              this.rosterXPushHandler
-            );
-          }
-        })
-      )
-      .subscribe();
+    chatService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
 
     const statedContacts$ = this.contacts$.pipe(
       switchMap((contacts) =>
@@ -183,6 +132,10 @@ export class RosterPlugin implements ChatPlugin {
 
   private async handleRosterPushStanza(stanza: Stanza): Promise<boolean> {
     const currentUser = await firstValueFrom(this.chatService.userJid$);
+    if (Finder.create(stanza).searchByTag('block').result) {
+      return true;
+    }
+
     const fromAttr = stanza.getAttribute('from');
     if (!fromAttr) {
       throw new Error(`from is undefined`);
@@ -205,7 +158,9 @@ export class RosterPlugin implements ChatPlugin {
     const id = stanza.getAttribute('id') ?? 'invalidId';
 
     if (!rosterItem) {
-      throw new Error('No valid rosterItem to acknowledge as roosterItem was undefined');
+      throw new Error(
+        'No valid rosterItem to acknowledge as roosterItem was undefined ' + stanza.outerHTML
+      );
     }
 
     // acknowledge the reception of the pushed roster stanza
@@ -251,6 +206,32 @@ export class RosterPlugin implements ChatPlugin {
 
         return this.createContactById(to as string, name, subscription);
       });
+  }
+
+  async initializeHandler(): Promise<void> {
+    await this.chatService.chatConnectionService.addHandler(
+      (stanza) => this.handleRosterPushStanza(stanza),
+      {
+        ns: NS.CLIENT,
+        name: 'iq',
+        type: 'set',
+      }
+    );
+
+    await this.chatService.chatConnectionService.addHandler(
+      (stanza) => this.handlePresenceStanza(stanza),
+      {
+        name: 'presence',
+      }
+    );
+
+    await this.chatService.chatConnectionService.addHandler(
+      (stanza) => this.handleRosterXPush(stanza),
+      {
+        ns: nsRosterX,
+        name: 'message',
+      }
+    );
   }
 
   private async handlePresenceStanza(stanza: PresenceStanza): Promise<boolean> {

@@ -6,6 +6,7 @@ import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { firstValueFrom } from 'rxjs';
 import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
+import { filter } from 'rxjs/operators';
 
 describe('block plugin', () => {
   let testUtils: TestUtils;
@@ -18,96 +19,107 @@ describe('block plugin', () => {
   });
 
   it('should be able to block a contact', async () => {
-    const contactsSubscription = testUtils.chatService.contactListService.contacts$.subscribe();
-    const blockedSubscription =
-      testUtils.chatService.contactListService.blockedContactJIDs$.subscribe();
-    await ensureRegisteredUser(testUtils.hero);
-
-    await testUtils.chatService.logIn(testUtils.hero);
-    await testUtils.chatService.contactListService.blockJid(testUtils.villain.jid);
-    const contacts = await firstValueFrom(testUtils.chatService.contactListService.contacts$);
-    const blocked = await firstValueFrom(
-      testUtils.chatService.contactListService.blockedContactJIDs$
+    const contactService = testUtils.chatService.contactListService;
+    const contactsPromise = firstValueFrom(contactService.contacts$);
+    const blockedPromise = firstValueFrom(
+      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 1))
     );
+    await ensureRegisteredUser(testUtils.hero);
+    await testUtils.chatService.logIn(testUtils.hero);
+
+    await contactService.blockJid(testUtils.villain.jid);
+    const contacts = await contactsPromise;
+    const blocked = await blockedPromise;
 
     expect(contacts.length).toEqual(0);
     expect(blocked.size).toEqual(1);
-    await testUtils.chatService.logOut();
 
+    await testUtils.chatService.logOut();
     await ensureNoRegisteredUser(testUtils.hero);
-    contactsSubscription.unsubscribe();
-    blockedSubscription.unsubscribe();
   });
 
   it('should be able to unblock a contact', async () => {
-    const contactsSubscription = testUtils.chatService.contactListService.contacts$.subscribe();
-    const blockedSubscription =
-      testUtils.chatService.contactListService.blockedContactJIDs$.subscribe();
+    const contactService = testUtils.chatService.contactListService;
+    const contactsPromise = firstValueFrom(contactService.contacts$);
+    const blockedPromise = firstValueFrom(
+      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 1))
+    );
     await ensureRegisteredUser(testUtils.hero);
     await testUtils.chatService.logIn(testUtils.hero);
 
-    await testUtils.chatService.contactListService.blockJid(testUtils.villain.jid);
-    const contacts = await firstValueFrom(testUtils.chatService.contactListService.contacts$);
-    const blocked = await firstValueFrom(
-      testUtils.chatService.contactListService.blockedContactJIDs$
-    );
+    await contactService.blockJid(testUtils.villain.jid);
+    const contacts = await contactsPromise;
+    const blocked = await blockedPromise;
 
     expect(contacts.length).toEqual(0);
     expect(blocked.size).toEqual(1);
-    const afterUnblock = firstValueFrom(
-      testUtils.chatService.contactListService.blockedContactJIDs$
+
+    const afterUnblockContactsPromise = firstValueFrom(
+      contactService.contacts$.pipe(filter((c) => c.length === 0))
     );
-    await testUtils.chatService.contactListService.unblockJid(testUtils.villain.jid);
-    expect(
-      (await firstValueFrom(testUtils.chatService.contactListService.contacts$)).length
-    ).toEqual(0);
-    expect((await afterUnblock).size).toEqual(0);
+    const afterUnblockBlockedPromise = firstValueFrom(
+      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 0))
+    );
+    await contactService.unblockJid(testUtils.villain.jid);
+
+    expect((await afterUnblockContactsPromise).length).toEqual(0);
+    expect((await afterUnblockBlockedPromise).size).toEqual(0);
 
     await testUtils.chatService.logOut();
     await ensureNoRegisteredUser(testUtils.hero);
-    contactsSubscription.unsubscribe();
-    blockedSubscription.unsubscribe();
   });
 
   it('should be able to load roster with blocked, unblocked and normal contacts', async () => {
-    const createContactsPromise = () =>
-      firstValueFrom(testUtils.chatService.contactListService.contacts$);
-    const createBlockedPromise = () =>
-      firstValueFrom(testUtils.chatService.contactListService.blockedContactJIDs$);
-
-    const contactsSubscription = testUtils.chatService.contactListService.contacts$.subscribe();
-    const blockedSubscription =
-      testUtils.chatService.contactListService.blockedContactJIDs$.subscribe();
     await ensureRegisteredUser(testUtils.hero);
+    const contactService = testUtils.chatService.contactListService;
+
+    const blockedPromiseAfterBlockingTwo = firstValueFrom(
+      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 2))
+    );
+    const blockedPromiseAfterUnblock = firstValueFrom(
+      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 1))
+    );
+
+    const blockedPromiseAfterLogout = firstValueFrom(
+      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 0))
+    );
+
+    const contactsPromiseAfterLogin = firstValueFrom(
+      contactService.contacts$.pipe(filter((c) => c.length === 1))
+    );
+    const blockedPromiseAfterLogin = firstValueFrom(
+      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 1))
+    );
+
     await testUtils.chatService.logIn(testUtils.hero);
 
-    await testUtils.chatService.contactListService.blockJid(testUtils.villain.jid);
-    await testUtils.chatService.contactListService.blockJid(testUtils.princess.jid);
+    await contactService.blockJid(testUtils.villain.jid);
+    await contactService.blockJid(testUtils.princess.jid);
 
-    expect((await createContactsPromise()).length).toEqual(0);
+    expect((await blockedPromiseAfterBlockingTwo).size).toEqual(2);
 
-    expect((await createBlockedPromise()).size).toEqual(2);
-    await testUtils.chatService.contactListService.addContact(testUtils.father.jid);
+    const contactsPromiseAfterAdd = firstValueFrom(
+      contactService.contacts$.pipe(filter((c) => c.length === 1))
+    );
 
-    expect((await createContactsPromise()).length).toEqual(1);
+    await contactService.addContact(testUtils.father.jid);
 
-    await testUtils.chatService.contactListService.unblockJid(testUtils.princess.jid);
-    expect((await createContactsPromise()).length).toEqual(1);
-    expect((await createBlockedPromise()).size).toEqual(1);
+    const contactsAfterAdd = await contactsPromiseAfterAdd;
+
+    expect(contactsAfterAdd.length).toEqual(1);
+
+    await contactService.unblockJid(testUtils.princess.jid);
+    expect((await blockedPromiseAfterUnblock).size).toEqual(1);
 
     await testUtils.chatService.logOut();
-    expect((await createContactsPromise()).length).toEqual(0);
-    expect((await createBlockedPromise()).size).toEqual(0);
+    expect((await blockedPromiseAfterLogout).size).toEqual(0);
 
     await testUtils.chatService.logIn(testUtils.hero);
-    expect((await createContactsPromise()).length).toEqual(1);
-    expect((await createBlockedPromise()).size).toEqual(1);
+    expect((await contactsPromiseAfterLogin).length).toEqual(1);
+    expect((await blockedPromiseAfterLogin).size).toEqual(1);
 
     await testUtils.chatService.logOut();
+
     await ensureNoRegisteredUser(testUtils.hero);
-    contactsSubscription.unsubscribe();
-    blockedSubscription.unsubscribe();
   });
-
-  xit('should not allow users in roster which are blocked');
 });

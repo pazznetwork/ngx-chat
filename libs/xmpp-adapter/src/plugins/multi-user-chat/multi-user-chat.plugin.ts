@@ -42,7 +42,7 @@ import {
 } from './multi-user-chat-constants';
 import { map, scan, shareReplay } from 'rxjs/operators';
 import type { XmppConnectionService } from '../../service';
-import type { Handler, HandlerAsync } from '@pazznetwork/strophets';
+import type { Handler } from '@pazznetwork/strophets';
 import type { StanzaBuilder } from '../../stanza-builder';
 import { OtherStatusCode } from './other-status-code';
 import { EnteringRoomStatusCode } from './entering-room-status-code';
@@ -101,7 +101,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  private handlers: { destroy?: Handler; presence?: HandlerAsync; message?: HandlerAsync } = {};
+  private handlers: { destroy?: Handler; presence?: Handler; message?: Handler } = {};
   constructor(
     private readonly xmppService: XmppService,
     private readonly logService: Log,
@@ -132,13 +132,13 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       { ns: nsMucUser, name: 'destroy' }
     );
 
-    this.handlers.presence = await connection.addHandlerAsync(
+    this.handlers.presence = await connection.addHandler(
       (stanza) => this.handleRoomPresenceStanza(stanza),
       { ns: nsMuc, name: 'presence' },
       { ignoreNamespaceFragment: true, matchBareFromJid: true }
     );
 
-    this.handlers.message = await connection.addHandlerAsync(
+    this.handlers.message = await connection.addHandler(
       (stanza) => this.handleRoomMessageStanza(stanza),
       { type: 'groupchat', name: 'message' }
     );
@@ -149,10 +149,10 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       await connection.deleteHandler(this.handlers.destroy);
     }
     if (this.handlers.presence) {
-      await connection.deleteHandlerAsync(this.handlers.presence);
+      await connection.deleteHandler(this.handlers.presence);
     }
     if (this.handlers.message) {
-      await connection.deleteHandlerAsync(this.handlers.message);
+      await connection.deleteHandler(this.handlers.message);
     }
   }
 

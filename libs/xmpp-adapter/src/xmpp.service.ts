@@ -79,8 +79,9 @@ export class XmppService implements ChatService {
       return;
     }
     this.lastLogInRequest = logInRequest;
+    const onOnlinePromise = firstValueFrom(this.onOnline$);
     await this.chatConnectionService.logIn(logInRequest);
-    await firstValueFrom(this.onOnline$);
+    await onOnlinePromise;
     await this.pluginMap.disco.ensureServicesAreDiscovered(logInRequest.domain);
     await firstValueFrom(this.pluginMap.disco.servicesInitialized$);
     // redundant because default type is available, but better for documentation purposes

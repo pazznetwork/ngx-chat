@@ -50,3 +50,11 @@ export function stringToArrayBuf(str: string): ArrayBufferLike {
   const bytes = new TextEncoder().encode(str);
   return bytes.buffer;
 }
+
+export function generateResource(): string {
+  return `/ngx-chat-${Math.floor(Math.random() * 139749528).toString()}`;
+}
+
+export function isValidJID(jid: string): boolean {
+  return jid.trim().split('@').length === 2 && !jid.startsWith('@') && !jid.endsWith('@');
+}

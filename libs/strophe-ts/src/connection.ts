@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: MIT
 import type { SASLMechanism } from './sasl-mechanism';
-import type { TimedHandler } from './timed-handler';
 import { Status } from './status';
-import type { Builder } from './stanza/builder';
-import { NS } from './stanza/namespace';
 import {
+  $iq,
+  type Builder,
+  ensureHasId,
   getBareJidFromJid,
   getDomainFromJid,
   getNodeFromJid,
   getResourceFromJid,
   getText,
-} from './stanza/xml';
+  NS,
+  presenceUnavailable,
+} from './stanza';
 import { ErrorCondition } from './error';
-import { $iq } from './stanza/builder-helper';
 import { info, log, LogLevel, warn } from './log';
 import { Bosh } from './bosh';
 import { StropheWebsocket } from './strophe-websocket';
@@ -40,7 +41,8 @@ import { map } from 'rxjs/operators';
 import { getConnectionsUrls } from './connection-urls';
 import { makeSafeJidString } from '@pazznetwork/ngx-chat-shared';
 import type { BoshOptions } from './bosh-options';
-import { presenceUnavailable } from './stanza/stanza.const';
+import { Handler } from './handler';
+import { isValidJID } from './utils';
 
 /**
  *  XMPP Connection manager.
@@ -73,14 +75,36 @@ export class Connection {
   private readonly stanzasInSubject = new Subject<Element>();
   readonly stanzasIn$ = this.stanzasInSubject.pipe(shareReplay({ bufferSize: 1, refCount: false }));
 
-  private readonly onOnlineSubject = new Subject<void>();
+  private readonly connectionStatusChangedSubject = new Subject<{
+    status: Status;
+    reason?: string;
+    elem?: Element;
+  }>();
+
+  readonly connectionStatusChanged$ = this.connectionStatusChangedSubject.pipe(
+    distinctUntilChanged((previous, current) => previous.status === current.status),
+    startWith({ status: Status.DISCONNECTED, reason: 'fresh instance' }),
+    shareReplay({ bufferSize: 1, refCount: false })
+  );
+
+  readonly onAuthenticating$ = this.connectionStatusChanged$.pipe(
+    filter(({ status }) => [Status.CONNECTING, Status.AUTHENTICATING].includes(status)),
+    map(() => {
+      return;
+    }),
+    share()
+  );
+
+  private readonly onOnlineStatus$ = this.connectionStatusChanged$.pipe(
+    filter(({ status }) => [Status.CONNECTED, Status.ATTACHED].includes(status))
+  );
   /**
    * Triggered after we disconnected from the XMPP server.
    */
   private readonly onOfflineSubject = new Subject<void>();
 
   readonly isOnline$ = merge(
-    this.onOnlineSubject.pipe(map(() => true)),
+    this.onOnlineStatus$.pipe(map(() => true)),
     this.onOfflineSubject.pipe(map(() => false))
   ).pipe(startWith(false), shareReplay({ bufferSize: 1, refCount: false }));
 
@@ -104,21 +128,6 @@ export class Connection {
     share()
   );
 
-  private readonly onAuthenticatingSubject = new Subject<void>();
-  readonly onAuthenticating$ = this.onAuthenticatingSubject.pipe(share());
-
-  private readonly connectionStatusChangedSubject = new Subject<{
-    status: Status;
-    reason?: string;
-    elem?: Element;
-  }>();
-
-  readonly connectionStatusChanged$ = this.connectionStatusChangedSubject.pipe(
-    distinctUntilChanged((previous, current) => previous.status === current.status),
-    startWith({ status: Status.DISCONNECTED, reason: 'fresh instance' }),
-    shareReplay({ bufferSize: 1, refCount: false })
-  );
-
   /**
    * The domain of the connected JID.
    */
@@ -136,11 +145,25 @@ export class Connection {
   protocolManager: ProtocolManager;
 
   idleTimeout: ReturnType<typeof setTimeout>;
-  private disconnectTimeout?: TimedHandler;
+  private disconnectTimeout?: ReturnType<typeof setTimeout>;
 
   readonly sasl = new Sasl(this, this.userJidSubject);
 
-  readonly handlerService = new HandlerService(this);
+  readonly handlerService = new HandlerService(
+    new Handler(
+      (iq) => {
+        const id = iq.getAttribute('id');
+        const attrs = id ? { type: 'error', id } : ({ type: 'error' } as Record<string, string>);
+        this.send(
+          $iq(attrs).c('error', { type: 'cancel' }).c('service-unavailable', { xmlns: NS.STANZAS })
+        );
+        return false;
+      },
+      undefined,
+      'iq',
+      ['get', 'set']
+    )
+  );
 
   private firstLoggedIn = true;
   private firstLoggedOut = true;
@@ -208,10 +231,6 @@ export class Connection {
 
     // Call onIdle callback every 1/10th of a second
     this.idleTimeout = setTimeout(() => this.onIdle(), 100);
-
-    this.connectionStatusChanged$.subscribe(({ status, reason }) =>
-      this.onConnectStatusChanged(status, reason)
-    );
   }
 
   /**
@@ -325,39 +344,6 @@ export class Connection {
   }
 
   /**
-   *  Generate a unique ID for use in <iq/> elements.
-   *
-   *  All <iq/> stanzas are required to have unique id attributes.  This
-   *  function makes creating these easy.  Each connection instance has
-   *  a counter which starts from zero, and the value of this counter
-   *  plus a colon followed by the suffix becomes the unique id. If no
-   *  suffix is supplied, the counter is used as the unique id.
-   *
-   *  Suffixes are used to make debugging easier when reading the stream
-   *  data, and their use is recommended.  The counter resets to 0 for
-   *  every new connection for the same reason.  For connections to the
-   *  same server that authenticate the same way, all the ids should be
-   *  the same, which makes it easy to see changes.  This is useful for
-   *  automated testing as well.
-   *
-   *    @param suffix - A optional suffix to append to the id.
-   *
-   *    @returns A unique string to be used for the id attribute.
-   */
-  getUniqueId(suffix?: string | number): string {
-    const uuid: string = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-    if (suffix) {
-      return uuid + ':' + suffix.toString();
-    }
-
-    return uuid;
-  }
-
-  /**
    *  Starts the connection process.
    *
    *  As the connection process proceeds, the connectionStatus$ emits the different status.
@@ -425,29 +411,6 @@ export class Connection {
   }
 
   /**
-   *  Send a stanza.
-   *
-   *  This function is called to push data onto the send queue to
-   *  go out over the wire.  Whenever a request is sent to the BOSH
-   *  server, all pending data is sent and the queue is flushed.
-   *
-   *  Parameters:
-   *
-   *  @param elem - The stanza to send.
-   */
-  send(elem: Element | Builder): void {
-    if (!elem) {
-      return;
-    }
-
-    if (!(elem instanceof Element)) {
-      return this.protocolManager.send(elem.tree());
-    }
-
-    return this.protocolManager.send(elem);
-  }
-
-  /**
    *  Immediately send any pending outgoing data.
    *
    *  Normally send() queues outgoing data until the next idle period
@@ -460,6 +423,25 @@ export class Connection {
     // immediately
     clearTimeout(this.idleTimeout);
     this.onIdle();
+  }
+
+  /**
+   *  Send a stanza.
+   *
+   *  This function is called to push data onto the send queue to
+   *  go out over the wire.  Whenever a request is sent to the BOSH
+   *  server, all pending data is sent and the queue is flushed.
+   *
+   *  Parameters:
+   *
+   *  @param elem - The stanza to send.
+   */
+  send(elem: Element | Builder): void {
+    if (!(elem instanceof Element)) {
+      return this.protocolManager.send(elem.tree());
+    }
+
+    return this.protocolManager.send(elem);
   }
 
   /**
@@ -477,49 +459,12 @@ export class Connection {
    *    @returns The id used to send the presence.
    */
   async sendPresence(el: Element | Builder, timeout?: number): Promise<Element> {
-    let timeoutHandler: TimedHandler;
     const elem = el instanceof Element ? el : el.tree();
 
-    let id = elem.getAttribute('id');
-    if (id == null) {
-      // inject id if not found
-      id = this.getUniqueId('sendPresence');
-      elem.setAttribute('id', id);
-    }
+    const id = ensureHasId(elem, 'sendPresence');
 
-    const promise = new Promise<Element>((callback, errback) => {
-      const handler = this.handlerService.addHandler(
-        (stanza) => {
-          // remove timeout handler if there is one
-          if (timeoutHandler) {
-            this.handlerService.deleteTimedHandler(timeoutHandler);
-          }
-          if (stanza.getAttribute('type') === 'error') {
-            errback(stanza);
-          } else {
-            callback(stanza);
-          }
-          return false;
-        },
-        undefined,
-        'presence',
-        undefined,
-        id as string
-      );
-
-      // if timeout specified, set up a timeout handler.
-      if (timeout) {
-        timeoutHandler = this.handlerService.addTimedHandler(timeout, () => {
-          // get rid of normal handler
-          this.handlerService.deleteHandler(handler);
-          // call err back on timeout with null stanza
-          errback(null);
-          return false;
-        });
-      }
-    });
     this.send(elem);
-    return promise;
+    return this.createStanzaResponsePromise(id, timeout);
   }
 
   /**
@@ -537,55 +482,46 @@ export class Connection {
   async sendIQ(el: Element | Builder, timeout?: number): Promise<Element> {
     const elem = el instanceof Element ? el : el.tree();
 
-    let id = elem.getAttribute('id');
-    if (!id) {
-      // inject id if not found
-      id = this.getUniqueId('sendIQ');
-      elem.setAttribute('id', id);
-    }
+    const id = ensureHasId(elem, 'sendIQ');
 
-    let timeoutHandler: TimedHandler;
-    const promise = new Promise<Element>((callback, errback) => {
+    this.send(elem);
+    return this.createStanzaResponsePromise(id, timeout);
+  }
+
+  private createStanzaResponsePromise(id: string, timeout?: number): Promise<Element> {
+    let timeoutHandler: ReturnType<typeof setTimeout>;
+
+    return new Promise<Element>((callback, errback) => {
       const handler = this.handlerService.addHandler(
         (stanza) => {
           // remove timeout handler if there is one
           if (timeoutHandler) {
-            this.handlerService.deleteTimedHandler(timeoutHandler);
+            clearTimeout(timeoutHandler);
           }
-          const iqType = stanza.getAttribute('type');
-          if (iqType === 'result') {
-            callback(stanza);
-          } else if (iqType === 'error') {
+          if (stanza.getAttribute('type') === 'error') {
             errback(stanza);
           } else {
-            if (!iqType) {
-              throw new Error(`iqType is undefined`);
-            }
-            const stropheError = new Error(`Got bad IQ type of ${iqType}`);
-            stropheError.name = 'StropheError';
-            throw stropheError;
+            callback(stanza);
           }
           return false;
         },
         undefined,
-        'iq',
-        ['error', 'result'],
-        id as string
+        undefined,
+        undefined,
+        id
       );
 
       // if timeout specified, set up a timeout handler.
       if (timeout) {
-        timeoutHandler = this.handlerService.addTimedHandler(timeout, () => {
+        timeoutHandler = setTimeout(() => {
           // get rid of normal handler
           this.handlerService.deleteHandler(handler);
-          // call errback on timeout with null stanza
+          // call err back on timeout with null stanza
           errback(null);
           return false;
-        });
+        }, timeout);
       }
     });
-    this.send(elem);
-    return promise;
   }
 
   /**
@@ -614,9 +550,9 @@ export class Connection {
 
     // setup timeout handler
     const timeOut = this.disconnectionTimeout ?? 3000;
-    this.disconnectTimeout = this.handlerService.addSysTimedHandler(timeOut, () =>
-      this.onDisconnectTimeout()
-    );
+    this.disconnectTimeout = setTimeout(() => {
+      this.onDisconnectTimeout();
+    }, timeOut);
     this.disconnecting = true;
     await this.protocolManager.disconnect(this.authenticated);
   }
@@ -631,15 +567,11 @@ export class Connection {
 
     // Cancel Disconnect Timeout
     if (this.disconnectTimeout != null) {
-      this.handlerService.deleteTimedHandler(this.disconnectTimeout);
+      clearTimeout(this.disconnectTimeout);
       this.disconnectTimeout = undefined;
     }
 
-    // this.onAuthenticatingSubject.next(false);
     this.disconnecting = false;
-
-    // delete handlers
-    this.handlerService.resetHandlers();
 
     // tell the parent we disconnected
     this.connectionStatusChangedSubject.next({ status: Status.DISCONNECTED, reason });
@@ -812,18 +744,18 @@ export class Connection {
       '_bind_auth_2'
     );
 
-    const sendWithoutRessource: () => void = () =>
+    const sendWithoutResource: () => void = () =>
       this.send($iq({ type: 'set', id: '_bind_auth_2' }).c('bind', { xmlns: NS.BIND }).tree());
 
     if (!this.jid) {
-      sendWithoutRessource();
+      sendWithoutResource();
       return;
     }
 
     const resource = getResourceFromJid(this.jid);
 
     if (!resource) {
-      sendWithoutRessource();
+      sendWithoutResource();
       return;
     }
 
@@ -923,14 +855,14 @@ export class Connection {
    * @returns false to remove the handler.
    */
   onSessionResultIQ(elem: Element): false {
-    if (elem.getAttribute('type') === 'result') {
+    const type = elem.getAttribute('type');
+    if (type === 'result') {
       this.authenticated = true;
       this.connectionStatusChangedSubject.next({ status: Status.CONNECTED });
-    } else if (elem.getAttribute('type') === 'error') {
+    } else if (type === 'error') {
       // this.onAuthenticatingSubject.next(false);
       warn('Session creation failed.');
       this.connectionStatusChangedSubject.next({ status: Status.AUTHFAIL, elem });
-      return false;
     }
     return false;
   }
@@ -1019,7 +951,8 @@ export class Connection {
 
     if (elem.getAttribute('type') !== 'terminate') {
       // send each incoming stanza through the handler chain
-      return this.handlerService.checkHandlerChain(elem);
+      await this.handlerService.checkHandlerChain(elem);
+      return;
     }
 
     // an error occurred
@@ -1039,10 +972,6 @@ export class Connection {
    *  are ready and keep poll requests going.
    */
   onIdle(): void {
-    this.handlerService.addTimedHandlersScheduledForAddition();
-    this.handlerService.removeTimedHandlersScheduledForDeletion();
-    this.handlerService.callReadyTimedHandlers(this.authenticated);
-
     clearTimeout(this.idleTimeout);
     if (this.protocolManager instanceof Bosh) {
       this.protocolManager.onIdle();
@@ -1053,47 +982,6 @@ export class Connection {
     }
     // reactivate the timer only if connected
     this.idleTimeout = setTimeout(() => this.onIdle(), 100);
-  }
-
-  /**
-   *  This handler is used to process the initial connection request
-   *  response from the BOSH server. It is used to set up authentication
-   *  handlers and start the authentication process.
-   *
-   *  SASL authentication will be attempted if available, otherwise
-   *  the code will fall back to legacy authentication.
-   *
-   *  @param bosh - The current bosh connection.
-   *  @param requestElement - The current request.
-   *  @param skipAuthentication - skip authentication.
-   */
-  connectCallbackBosh(bosh: Bosh, requestElement: BoshRequest, skipAuthentication: boolean): void {
-    this.connected = true;
-
-    let wrappedBody: Element | undefined;
-    try {
-      wrappedBody = bosh.reqToData(requestElement);
-    } catch (e) {
-      if ((e as Error).name !== ErrorCondition.BAD_FORMAT) {
-        throw e;
-      }
-      this.connectionStatusChangedSubject.next({
-        status: Status.CONNFAIL,
-        reason: ErrorCondition.BAD_FORMAT,
-      });
-      this.disconnectFinally(ErrorCondition.BAD_FORMAT);
-    }
-
-    if (skipAuthentication || !wrappedBody) {
-      return;
-    }
-
-    const matched = this.getMatchedAuthentications(bosh, wrappedBody);
-    if (matched.length > 0) {
-      void this.sasl.authenticate(matched);
-    }
-
-    bosh.noAuthReceived();
   }
 
   static async create(
@@ -1189,7 +1077,7 @@ export class Connection {
       // https://github.com/microsoft/TypeScript/issues/34550
       const creds = await navigator.credentials.get({ password: true } as CredentialRequestOptions);
 
-      if (creds?.type !== 'password' || !Connection.isValidJID(creds.id)) {
+      if (creds?.type !== 'password' || !isValidJID(creds.id)) {
         return null;
       }
 
@@ -1201,19 +1089,11 @@ export class Connection {
     return null;
   }
 
-  private static isValidJID(jid: string): boolean {
-    return jid.trim().split('@').length === 2 && !jid.startsWith('@') && !jid.endsWith('@');
-  }
-
   async getLoginCredentials(): Promise<Credentials | null> {
     if ('credentials' in navigator) {
       return this.getLoginCredentialsFromBrowser();
     }
     return null;
-  }
-
-  static generateResource(): string {
-    return `/ngx-chat-${Math.floor(Math.random() * 139749528).toString()}`;
   }
 
   /**
@@ -1289,81 +1169,7 @@ export class Connection {
     this.protocolManager.disconnectFinally();
   }
 
-  /**
-   * Callback method called by Strophe as the Connection goes
-   * through various states while establishing or tearing down a connection.
-   *
-   * @param status
-   * @param reason
-   */
-  onConnectStatusChanged(status: Status, reason: string | undefined): void {
-    this.connectionStatusChangedSubject.next({ status, reason });
-    switch (status) {
-      case Status.REDIRECT:
-      case Status.CONNTIMEOUT:
-      case Status.RECONNECTING:
-      case Status.DISCONNECTING:
-        break;
-      case Status.REGIFAIL:
-      case Status.REGISTER:
-      case Status.REGISTERED:
-      case Status.CONFLICT:
-      case Status.NOTACCEPTABLE:
-        break;
-      case Status.CONNECTING:
-      case Status.AUTHENTICATING:
-        this.onAuthenticatingSubject.next();
-        break;
-      case Status.ERROR:
-      case Status.CONNFAIL:
-      case Status.ATTACHFAIL:
-        break;
-      case Status.AUTHFAIL:
-      case Status.DISCONNECTED:
-        break;
-      case Status.CONNECTED:
-      case Status.ATTACHED:
-        // Solves problem of returned PubSub BOSH response not received by browser
-        this.flush();
-        this.onOnlineSubject.next();
-        break;
-      case Status.BINDREQUIRED:
-        break;
-      default:
-        throw new Error('Unknown connection state');
-    }
-  }
-
   clearSession(): void {
     this.protocolManager = this.createProtocolManager();
-  }
-
-  private getMatchedAuthentications(
-    protocolManager: ProtocolManager,
-    element: Element
-  ): SASLMechanism[] {
-    if (!element) {
-      return [];
-    }
-
-    this.xmlInput?.(element);
-
-    const connectionCheck = protocolManager.connectionStatusCheck(element);
-
-    if (connectionCheck === Status.CONNFAIL) {
-      return [];
-    }
-
-    const hasFeatures = element.getAttribute('xmlns:stream') === NS.STREAM;
-
-    if (!hasFeatures && this.protocolManager instanceof Bosh) {
-      (protocolManager as Bosh).noAuthReceived();
-      return [];
-    }
-
-    return Array.from(element.getElementsByTagName('mechanism'))
-      .filter((m) => !m.textContent)
-      .map((m) => this.sasl.mechanism.get(m.textContent as string) as SASLMechanism)
-      .filter((m) => m);
   }
 }

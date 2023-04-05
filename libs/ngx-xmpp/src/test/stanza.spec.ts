@@ -1000,9 +1000,16 @@ test("nextValidRid is called after connection reset", (assert) => {
 
 */
 
-import { $build, NS, serialize } from '@pazznetwork/strophets';
+import {
+  $build,
+  isDeprecatedStanza,
+  NS,
+  parseToXml,
+  serialize,
+  stanzaMatch,
+} from '@pazznetwork/strophets';
 
-describe('ensure xml serialization', () => {
+describe('ensure functional stanza handling', () => {
   it('serialize should return correct string for open element', () => {
     const version = '1.0';
     const to = 'xmpp-lover.org';
@@ -1016,5 +1023,28 @@ describe('ensure xml serialization', () => {
     expect(serialized).toContain(version);
     expect(serialized).toContain(to);
     expect(serialized).toContain(version);
+  });
+
+  it('is deprecated should be true for matching elements', () => {
+    const privacyStanza = `<iq xmlns="jabber:client" to="hero@local-jabber.entenhausen.pazz.de/48651415211979962235330"
+    from="hero@local-jabber.entenhausen.pazz.de" type="set" id="push374907648000301432">
+    <query xmlns="jabber:iq:privacy">
+    <list name="Blocked contacts"></list>
+      </query>
+      </iq>`;
+
+    expect(isDeprecatedStanza(parseToXml(privacyStanza))).toBeTruthy();
+  });
+
+  it('is block stanza matched by block handler', () => {
+    const blockStanza = `<iq xmlns='jabber:client' to='hero@local-jabber.entenhausen.pazz.de/951176775127228108312099' from='hero@local-jabber.entenhausen.pazz.de' type='set' id='push2258576569238938350'><block xmlns='urn:xmpp:blocking'><item jid='villain@local-jabber.entenhausen.pazz.de'/></block></iq>`;
+
+    expect(
+      stanzaMatch(parseToXml(blockStanza), {
+        ns: NS.CLIENT,
+        name: 'iq',
+        type: 'set',
+      })
+    ).toBeTruthy();
   });
 });

@@ -11,6 +11,8 @@ import type { ProtocolManager } from './protocol-manager';
 import { filter, firstValueFrom, share, Subject, switchMap, takeUntil } from 'rxjs';
 import type { Builder } from './stanza/builder';
 import type { BoshOptions } from './bosh-options';
+import { ErrorCondition } from './error';
+import type { SASLMechanism } from './sasl-mechanism';
 
 /**
  *  The Bosh class is used internally by the Connection class to encapsulate BOSH sessions.
@@ -136,8 +138,7 @@ export class Bosh implements ProtocolManager {
           body.tree(),
           (req) => {
             this.onRequestStateChange(
-              (requestElement) =>
-                this.connection.connectCallbackBosh(this, requestElement, skipAuthentication),
+              (requestElement) => this.connectCallbackBosh(requestElement, skipAuthentication),
               req
             );
             resolve();
@@ -324,11 +325,7 @@ export class Bosh implements ProtocolManager {
     const body = this.buildBody();
     const rid = Number.parseInt(body.tree().getAttribute('rid') as string, 10);
     this.requests.push(
-      new BoshRequest(
-        body.tree(),
-        (req) => this.connection.connectCallbackBosh(this, req, false),
-        rid
-      )
+      new BoshRequest(body.tree(), (req) => this.connectCallbackBosh(req, false), rid)
     );
     this.throttledRequestHandler();
   }
@@ -688,5 +685,71 @@ export class Bosh implements ProtocolManager {
        */
       this.notAbleToResumeBOSHSessionSubject.next();
     }
+  }
+
+  /**
+   *  This handler is used to process the initial connection request
+   *  response from the BOSH server. It is used to set up authentication
+   *  handlers and start the authentication process.
+   *
+   *  SASL authentication will be attempted if available, otherwise
+   *  the code will fall back to legacy authentication.
+   *
+   *  @param requestElement - The current request.
+   *  @param skipAuthentication - skip authentication.
+   */
+  connectCallbackBosh(requestElement: BoshRequest, skipAuthentication: boolean): void {
+    this.connection.connected = true;
+
+    let wrappedBody: Element | undefined;
+    try {
+      wrappedBody = this.reqToData(requestElement);
+    } catch (e) {
+      if ((e as Error).name !== ErrorCondition.BAD_FORMAT) {
+        throw e;
+      }
+      this.connectionStatusSubject.next({
+        status: Status.CONNFAIL,
+        reason: ErrorCondition.BAD_FORMAT,
+      });
+      this.connection.disconnectFinally(ErrorCondition.BAD_FORMAT);
+    }
+
+    if (skipAuthentication || !wrappedBody) {
+      return;
+    }
+
+    const matched = this.getMatchedAuthentications(wrappedBody);
+    if (matched.length > 0) {
+      void this.connection.sasl.authenticate(matched);
+    }
+
+    this.noAuthReceived();
+  }
+
+  private getMatchedAuthentications(element: Element): SASLMechanism[] {
+    if (!element) {
+      return [];
+    }
+
+    this.connection.xmlInput?.(element);
+
+    const connectionCheck = this.connectionStatusCheck(element);
+
+    if (connectionCheck === Status.CONNFAIL) {
+      return [];
+    }
+
+    const hasFeatures = element.getAttribute('xmlns:stream') === NS.STREAM;
+
+    if (!hasFeatures) {
+      this.noAuthReceived();
+      return [];
+    }
+
+    return Array.from(element.getElementsByTagName('mechanism'))
+      .filter((m) => !m.textContent)
+      .map((m) => this.connection.sasl.mechanism.get(m.textContent as string) as SASLMechanism)
+      .filter((m) => m);
   }
 }
