@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { LogLevel } from '@pazznetwork/ngx-chat-shared';
-import { LogService } from '../services/log.service';
+import { LogService } from '../services/';
 
 describe('log service', () => {
   let logService: LogService;
@@ -83,21 +83,16 @@ describe('log service', () => {
   it('should not log anything if logging is disabled', () => {
     logService.logLevel = LogLevel.Disabled;
 
-    spyOn(logService.writer, 'debug').and.callFake(() => {
-      fail();
-    });
-    spyOn(logService.writer, 'info').and.callFake(() => {
-      fail();
-    });
-    spyOn(logService.writer, 'warn').and.callFake(() => {
-      fail();
-    });
-    spyOn(logService.writer, 'error').and.callFake(() => {
-      fail();
-    });
+    const debugSpy = spyOn(logService.writer, 'debug');
+    const warnSpy = spyOn(logService.writer, 'warn');
+    const errorSpy = spyOn(logService.writer, 'error');
 
     logService.debug('debug');
     logService.warn('warn');
     logService.error('error');
+
+    expect(debugSpy).not.toHaveBeenCalled();
+    expect(warnSpy).not.toHaveBeenCalled();
+    expect(errorSpy).not.toHaveBeenCalled();
   });
 });

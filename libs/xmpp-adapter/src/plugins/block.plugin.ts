@@ -42,7 +42,6 @@ export class BlockPlugin implements ChatPlugin {
   }
 
   async initializeHandler(): Promise<void> {
-    console.log('BlockPlugin.initializeHandler');
     await this.xmppService.chatConnectionService.addHandler((stanza) => this.handlePush(stanza), {
       ns: NS.CLIENT,
       name: 'iq',
@@ -51,20 +50,27 @@ export class BlockPlugin implements ChatPlugin {
   }
 
   async blockJid(jid: string): Promise<void> {
+    const blockPromise = firstValueFrom(this.blockContactJIDSubject);
+
     const from = await firstValueFrom(this.xmppService.userJid$);
     await this.xmppService.chatConnectionService
       .$iq({ type: 'set', id: getUniqueId('block') })
       .c('block', { xmlns: this.nameSpace })
       .c('item', { from, jid })
       .sendResponseLess();
+
+    await blockPromise;
   }
 
   async unblockJid(jid: string): Promise<void> {
+    const unblockPromise = firstValueFrom(this.unblockContactJIDSubject);
+
     await this.xmppService.chatConnectionService
       .$iq({ type: 'set', id: getUniqueId('block') })
       .c('unblock', { xmlns: this.nameSpace })
       .c('item', { jid })
       .sendResponseLess();
+    await unblockPromise;
   }
 
   private async requestBlockedJIDs(): Promise<Set<string>> {

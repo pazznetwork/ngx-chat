@@ -4,7 +4,7 @@ import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
 import { filter } from 'rxjs/operators';
 
@@ -77,18 +77,30 @@ describe('block plugin', () => {
       contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 2))
     );
     const blockedPromiseAfterUnblock = firstValueFrom(
-      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 1))
+      contactService.blockedContactJIDs$.pipe(
+        filter((b) => b.size === 1),
+        map((b) => b.size)
+      )
     );
 
     const blockedPromiseAfterLogout = firstValueFrom(
-      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 0))
+      contactService.blockedContactJIDs$.pipe(
+        filter((b) => b.size === 0),
+        map((b) => b.size)
+      )
     );
 
     const contactsPromiseAfterLogin = firstValueFrom(
-      contactService.contacts$.pipe(filter((c) => c.length === 1))
+      contactService.contacts$.pipe(
+        filter((c) => c.length === 1),
+        map((c) => c.length)
+      )
     );
     const blockedPromiseAfterLogin = firstValueFrom(
-      contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 1))
+      contactService.blockedContactJIDs$.pipe(
+        filter((b) => b.size === 1),
+        map((b) => b.size)
+      )
     );
 
     await testUtils.chatService.logIn(testUtils.hero);
@@ -99,24 +111,24 @@ describe('block plugin', () => {
     expect((await blockedPromiseAfterBlockingTwo).size).toEqual(2);
 
     const contactsPromiseAfterAdd = firstValueFrom(
-      contactService.contacts$.pipe(filter((c) => c.length === 1))
+      contactService.contacts$.pipe(
+        filter((c) => c.length === 1),
+        map((c) => c.length)
+      )
     );
 
     await contactService.addContact(testUtils.father.jid);
-
-    const contactsAfterAdd = await contactsPromiseAfterAdd;
-
-    expect(contactsAfterAdd.length).toEqual(1);
+    expect(await contactsPromiseAfterAdd).toEqual(1);
 
     await contactService.unblockJid(testUtils.princess.jid);
-    expect((await blockedPromiseAfterUnblock).size).toEqual(1);
+    expect(await blockedPromiseAfterUnblock).toEqual(1);
 
     await testUtils.chatService.logOut();
-    expect((await blockedPromiseAfterLogout).size).toEqual(0);
+    expect(await blockedPromiseAfterLogout).toEqual(0);
 
     await testUtils.chatService.logIn(testUtils.hero);
-    expect((await contactsPromiseAfterLogin).length).toEqual(1);
-    expect((await blockedPromiseAfterLogin).size).toEqual(1);
+    expect(await contactsPromiseAfterLogin).toEqual(1);
+    expect(await blockedPromiseAfterLogin).toEqual(1);
 
     await testUtils.chatService.logOut();
 

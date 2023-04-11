@@ -132,7 +132,10 @@ export class RosterPlugin implements ChatPlugin {
 
   private async handleRosterPushStanza(stanza: Stanza): Promise<boolean> {
     const currentUser = await firstValueFrom(this.chatService.userJid$);
-    if (Finder.create(stanza).searchByTag('block').result) {
+    if (
+      Finder.create(stanza).searchByTag('block').result ||
+      Finder.create(stanza).searchByTag('unblock').result
+    ) {
       return true;
     }
 

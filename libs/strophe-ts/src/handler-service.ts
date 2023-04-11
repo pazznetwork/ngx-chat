@@ -11,7 +11,6 @@ export class HandlerService {
   constructor(private readonly iqFallbackHandler: Handler) {}
 
   resetHandlers(): void {
-    console.log('resetHandlers()', this.handlers);
     this.handlers = [];
     this.removeHandlers = [];
     this.addHandlers = [];
@@ -44,16 +43,10 @@ export class HandlerService {
       }
     }
 
-    this.handlers = keptHandlers;
-
-    console.log(matches);
-
     // If no handler was fired for an incoming IQ with type="set",
     // then we return an IQ error stanza with service-unavailable.
     if (matches === 0 && this.iqFallbackHandler.isMatch(child)) {
-      this.iqFallbackHandler.run(child);
-      console.log('No handler', child);
-      console.log(this.handlers);
+      await this.iqFallbackHandler.run(child);
     }
   }
 
