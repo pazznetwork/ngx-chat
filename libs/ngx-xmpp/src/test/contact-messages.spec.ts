@@ -2,19 +2,19 @@
 import { Contact, Direction } from '@pazznetwork/ngx-chat-shared';
 
 describe('contact', () => {
-  it('#equalsBareJid should return true if bare jids match', () => {
+  it('#equalsJid should return true if comparing bare jids match', () => {
     const contact1 = new Contact('test@example.com/resource', 'john doe');
     const contact2 = new Contact('test@example.com/some-other-resource', 'jane dane');
-    expect(contact1.equalsJid(contact2)).toBeTruthy();
+    expect(contact1.jid.bare().equals(contact2.jid.bare())).toBeTruthy();
   });
 
-  it('#equalsBareJid should return false if local parts of jid do not match', () => {
+  it('#equalsJid should return false if local parts of jid do not match', () => {
     const contact1 = new Contact('test1@example.com/resource', 'john doe');
     const contact2 = new Contact('test2@example.com/some-other-resource', 'jane dane');
     expect(contact1.equalsJid(contact2)).toBeFalsy();
   });
 
-  it('#equalsBareJid should return false if host part of jids do not match', () => {
+  it('#equalsJid should return false if host part of jids do not match', () => {
     const contact1 = new Contact('test@example1.com/resource', 'john doe');
     const contact2 = new Contact('test@example2.com/some-other-resource', 'jane dane');
     expect(contact1.equalsJid(contact2)).toBeFalsy();

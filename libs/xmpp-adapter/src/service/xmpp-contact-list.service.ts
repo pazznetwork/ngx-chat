@@ -60,21 +60,21 @@ export class XmppContactListService implements ContactListService {
   }
 
   getOrCreateContactById(
-    jidPlain: string,
+    jid: string,
     name?: string,
     subscription?: ContactSubscription,
     avatar?: string
   ): Promise<Contact> {
-    return this.rosterPlugin.getOrCreateContactById(jidPlain, name, subscription, avatar);
+    return this.rosterPlugin.getOrCreateContactById(jid, name, subscription, avatar);
   }
 
   createContactById(
-    jidPlain: string,
+    jid: string,
     name?: string,
     subscription?: ContactSubscription,
     avatar?: string
   ): Contact {
-    return this.rosterPlugin.createContactById(jidPlain, name, subscription, avatar);
+    return this.rosterPlugin.createContactById(jid, name, subscription, avatar);
   }
 
   async addContact(jid: string): Promise<void> {

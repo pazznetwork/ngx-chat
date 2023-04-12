@@ -1,129 +1,64 @@
 // SPDX-License-Identifier: MIT
-/*
 import { TestBed } from '@angular/core/testing';
-import { Client, jid as parseJid, xml } from '@xmpp/client';
-import { parse } from 'ltx';
-import { first } from 'rxjs/operators';
-import { Direction } from '../../../../core/message';
-import { testLogService } from '../../../../test/log-service';
-import { MockClientFactory } from '../../../../test/mock-connection.service';
-import { ContactFactoryService } from '../service/contact-factory.service';
-import { LogService } from '../service/log.service';
-import { XmppChatAdapter } from '../../xmpp.service';
-import {CHAT_CONNECTION_SERVICE_TOKEN, ChatConnection} from '../interface/chat-connection';
-import { XmppClientFactoryService } from '../xmpp-client-factory.service';
-import { MessageCarbonsPlugin } from './message-carbons.plugin';
-import {XmppChatConnectionService} from '../service/xmpp-chat-connection.service';
+import { TestUtils } from './helpers/test-utils';
+import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
+import type { XmppService } from '@pazznetwork/xmpp-adapter';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
+import { ensureRegisteredUser } from './helpers/admin-actions';
+import { firstValueFrom } from 'rxjs';
+import { Direction } from '@pazznetwork/ngx-chat-shared';
+import { filter } from 'rxjs/operators';
 
 describe('message carbons plugin', () => {
+  let testUtils: TestUtils;
 
-    let xmppClientMock: jasmine.SpyObj<Client>;
-    let xmppChatAdapter: XmppChatAdapter;
-    let messageCarbonsPlugin: MessageCarbonsPlugin;
-
-    beforeEach(() => {
-        const mockClientFactory = new MockClientFactory();
-        xmppClientMock = mockClientFactory.clientInstance;
-
-        TestBed.configureTestingModule({
-            providers: [
-                {provide: CHAT_CONNECTION_SERVICE_TOKEN, useClass: XmppChatConnectionService},
-                {provide: XmppClientFactoryService, useValue: mockClientFactory},
-                XmppChatAdapter,
-                {provide: LogService, useValue: testLogService()},
-                ContactFactoryService
-            ]
-        });
-
-        // const chatConnectionService = TestBed.inject(ChatConnectionService);
-        // chatConnectionService.client = xmppClientMock;
-
-        xmppChatAdapter = TestBed.inject(XmppChatAdapter);
-        // xmppChatAdapter.chatConnectionService.userJid = parseJid('romeo@montague.example/home');
-        messageCarbonsPlugin = new MessageCarbonsPlugin(xmppChatAdapter);
+  beforeEach(() => {
+    const testBed = TestBed.configureTestingModule({
+      imports: [XmppAdapterTestModule],
     });
+    testUtils = new TestUtils(testBed.inject<XmppService>(CHAT_SERVICE_TOKEN));
+  });
 
-    const validIncomingCarbonMessage = parse(`
+  it('should add the message to the contact', async () => {
+    const validIncomingCarbonMessage = `
             <message xmlns='jabber:client'
-                     from='romeo@montague.example'
-                     to='romeo@montague.example/home'
+                     from='${testUtils.hero.jid}'
+                     to='${testUtils.hero.jid}/home'
                      type='chat'>
               <received xmlns='urn:xmpp:carbons:2'>
                 <forwarded xmlns='urn:xmpp:forward:0'>
                   <message xmlns='jabber:client'
                            from='juliet@capulet.example/balcony'
-                           to='romeo@montague.example/garden'
+                           to='${testUtils.hero.jid}/garden'
                            type='chat'>
                     <body>What man art thou that, thus bescreen'd in night, so stumblest on my counsel?</body>
                     <thread>0e3141cd80894871a68e6fe6b1ec56fa</thread>
                   </message>
                 </forwarded>
               </received>
-            </message>`);
+            </message>`;
 
-    const validSentCarbonMessage = parse(`
-            <message xmlns='jabber:client'
-                     from='romeo@montague.example'
-                     to='romeo@montague.example/home'
-                     type='chat'>
-              <sent xmlns='urn:xmpp:carbons:2'>
-                <forwarded xmlns='urn:xmpp:forward:0'>
-                  <message xmlns='jabber:client'
-                           from='romeo@montague.example/garden'
-                           to='juliet@capulet.example/balcony'
-                           type='chat'>
-                    <body>What man art thou that, thus bescreen'd in night, so stumblest on my counsel?</body>
-                    <thread>0e3141cd80894871a68e6fe6b1ec56fa</thread>
-                  </message>
-                </forwarded>
-              </sent>
-            </message>`);
+    await ensureRegisteredUser(testUtils.hero);
+    const contactsPromise = firstValueFrom(
+      testUtils.chatService.contactListService.contacts$.pipe(
+        filter((contacts) => contacts.length > 0)
+      )
+    );
+    await testUtils.logIn.hero();
 
+    await testUtils.fakeWebsocketInStanza(validIncomingCarbonMessage);
 
-    it('should accept carbon-copy message stanzas', () => {
-        expect(messageCarbonsPlugin.registerHandler(validIncomingCarbonMessage)).toBeTruthy();
-    });
+    const contacts = await contactsPromise;
+    const firstContact = contacts[0];
+    const messages = contacts?.[0]?.messageStore.messages;
+    expect(messages?.length).toEqual(1);
+    const savedMessage = messages?.[0];
+    expect(firstContact?.jid?.toString()).toEqual('juliet@capulet.example/balcony');
+    expect(savedMessage?.body).toEqual(
+      "What man art thou that, thus bescreen'd in night, so stumblest on my counsel?"
+    );
+    expect(savedMessage?.direction).toEqual(Direction.in);
 
-    it('should not accept non-carbon-copy message stanzas', () => {
-        const invalidMessage = xml('message');
-        expect(messageCarbonsPlugin.registerHandler(invalidMessage)).toBeFalsy();
-    });
-
-    it('should add the message to the contact', () => {
-        messageCarbonsPlugin.registerHandler(validIncomingCarbonMessage);
-        expect(xmppChatAdapter.getContactByIdSync('juliet@capulet.example').messages.length).toEqual(1);
-        const savedMessage = xmppChatAdapter.getContactByIdSync('juliet@capulet.example').messages[0];
-        expect(savedMessage as any).toEqual(jasmine.objectContaining({
-            body: 'What man art thou that, thus bescreen\'d in night, so stumblest on my counsel?',
-            direction: Direction.in,
-            datetime: jasmine.any(Date),
-            delayed: false
-        }));
-    });
-
-    it('should raise an event when receiving an incoming carbon copy', () => {
-        return new Promise<void>((resolve) => {
-            let emitted = false;
-            xmppChatAdapter.message$.pipe(first()).subscribe(() => emitted = true);
-            messageCarbonsPlugin.registerHandler(validIncomingCarbonMessage);
-            setTimeout(() => {
-                expect(emitted).toBeTruthy();
-                resolve();
-            }, 500);
-        });
-    });
-
-    it('should not raise an event when receiving a sent copy', () => {
-        return new Promise<void>((resolve) => {
-            let emitted = false;
-            xmppChatAdapter.message$.pipe(first()).subscribe(() => emitted = true);
-            messageCarbonsPlugin.registerHandler(validSentCarbonMessage);
-            setTimeout(() => {
-                expect(emitted).toBeFalsy();
-                resolve();
-            }, 500);
-        });
-    });
-
+    await testUtils.logOut();
+  });
 });
-*/

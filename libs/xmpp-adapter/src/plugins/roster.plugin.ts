@@ -342,24 +342,23 @@ export class RosterPlugin implements ChatPlugin {
   }
 
   async getOrCreateContactById(
-    jidPlain: string,
+    jid: string,
     name?: string,
     subscription?: ContactSubscription,
     avatar?: string
   ): Promise<Contact> {
     return (
-      (await this.getContactById(jidPlain)) ??
-      this.createContactById(jidPlain, name, subscription, avatar)
+      (await this.getContactById(jid)) ?? this.createContactById(jid, name, subscription, avatar)
     );
   }
 
   createContactById(
-    jidPlain: string,
-    name = jidPlain,
+    jid: string,
+    name = jid,
     subscription?: ContactSubscription,
     avatar?: string
   ): Contact {
-    const contact = new Contact(jidPlain, name, avatar, subscription);
+    const contact = new Contact(jid, name, avatar, subscription);
     this.newContactSubject.next(contact);
     return contact;
   }

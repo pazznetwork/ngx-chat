@@ -8,4 +8,3 @@ export * from './plugin-map';
 export * from './stanza-handler-chat-plugin';
 export * from './stanza';
 export * from './xmpp-response.error';
-export * from './message-received-event';

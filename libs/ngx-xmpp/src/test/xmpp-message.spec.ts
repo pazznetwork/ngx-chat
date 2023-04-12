@@ -54,8 +54,8 @@ describe('message plugin', () => {
       return;
     }
 
-    expect(someContact.equalsJid(parseJid(someUserJid))).toBeTrue();
-    expect(someContact).toBe(messageContact);
+    expect(someContact.jid.toString()).toEqual(someUserJid);
+    expect(someContact.jid.equals(messageContact.jid)).toBeTruthy();
 
     const messages = someContact.messageStore.messages;
     expect(messages.length).toBe(1);

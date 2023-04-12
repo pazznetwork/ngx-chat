@@ -38,7 +38,10 @@ export class HandlerService {
       } catch (e) {
         // if the handler throws an exception, we consider it as false
         throw new Error(
-          'Removing Strophe handlers due to uncaught exception: ' + (e as Error).message
+          'Removing Strophe handler ' +
+            handler.toString() +
+            ' due to uncaught exception: ' +
+            (e as Error).message
         );
       }
     }

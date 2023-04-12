@@ -1,175 +1,132 @@
 // SPDX-License-Identifier: MIT
-/*
 import { TestBed } from '@angular/core/testing';
-import { Client, jid as parseJid, xml } from '@xmpp/client';
-import { Contact } from '../../../../core/contact';
-import { Direction } from '../../../../core/message';
-import { testLogService } from '../../../../test/log-service';
-import { MockClientFactory } from '../../../../test/mock-connection.service';
-import { ContactFactoryService } from '../service/contact-factory.service';
-import { LogService } from '../service/log.service';
-import { XmppChatAdapter } from '../../xmpp.service';
-import {CHAT_CONNECTION_SERVICE_TOKEN, ChatConnection} from '../interface/chat-connection';
-import { XmppClientFactoryService } from '../xmpp-client-factory.service';
-import { MessageArchivePlugin } from './message-archive.plugin';
-import { MessagePlugin } from './message.plugin';
-import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
-import { MultiUserChatPlugin } from './multi-user-chat/multi-user-chat.plugin';
-import { Room } from '../../../../core/room';
-import {XmppChatConnectionService} from '../service/xmpp-chat-connection.service';
+import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
+import { TestUtils } from './helpers/test-utils';
+import type { XmppService } from '@pazznetwork/xmpp-adapter';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
+import { $msg } from '@pazznetwork/strophets';
+import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
+import { Direction } from '@pazznetwork/ngx-chat-shared';
+import { firstValueFrom } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 describe('message archive plugin', () => {
+  let testUtils: TestUtils;
 
-    let chatConnectionService: ChatConnection;
-    let chatAdapter: XmppChatAdapter;
-    let contactFactory: ContactFactoryService;
-    let xmppClientMock: SpyObj<Client>;
-    let otherContact: Contact;
-    const otherContactJid = parseJid('someone@else.com');
-    const userJid = parseJid('me@example.com/myresource');
-    const roomJid = parseJid('someroom@conference.example.com/mynick');
+  const from = 'conference.local-jabber.entenhausen.pazz.de';
+  const userJid = 'me@example.com/myresource';
+  const roomJidBare = 'someroom@conference.example.com';
 
-    const chatArchiveStanza =
-        xml('message', {},
-            xml('result', {xmlns: 'urn:xmpp:mam:2'},
-                xml('forwarded', {},
-                    xml('delay', {stamp: '2018-07-18T08:47:44.233057Z'}),
-                    xml('message', {from: userJid.toString(), to: otherContactJid.toString(), type: 'chat'},
-                        xml('origin-id', {id: 'id'}),
-                        xml('body', {}, 'message text')))));
-
-    const groupChatArchiveStanza =
-        xml('message', {},
-            xml('result', {xmlns: 'urn:xmpp:mam:2'},
-                xml('forwarded', {},
-                    xml('delay', {stamp: '2021-08-17T15:33:25.375401Z'}),
-                    xml('message', {from: roomJid.bare().toString() + '/othernick', type: 'groupchat'},
-                        xml('body', {}, 'group chat!')))));
-
-    const mucSubArchiveStanza =
-        xml('message', {},
-            xml('result', {xmlns: 'urn:xmpp:mam:2'},
-                xml('forwarded', {},
-                    xml('delay', {stamp: '2021-08-17T15:33:25.375401Z'}),
-                    xml('message', {},
-                        xml('event', {xmlns: 'http://jabber.org/protocol/pubsub#event'},
-                            xml('items', {node: 'urn:xmpp:mucsub:nodes:messages'},
-                                xml('item', {},
-                                    xml('message', {from: roomJid.bare().toString() + '/othernick', type: 'groupchat'},
-                                        xml('body', {}, 'group chat!'))))))))); // see: https://xkcd.com/297/
-
-    beforeEach(() => {
-        const mockClientFactory = new MockClientFactory();
-        xmppClientMock = mockClientFactory.clientInstance;
-
-        TestBed.configureTestingModule({
-            providers: [
-                {provide: CHAT_CONNECTION_SERVICE_TOKEN, useValue: XmppChatConnectionService},
-                {provide: XmppClientFactoryService, useValue: mockClientFactory},
-                XmppChatAdapter,
-                {provide: LogService, useValue: testLogService()},
-                ContactFactoryService,
-            ],
-        });
-
-        // chatConnectionService = TestBed.inject(ChatConnectionService);
-        // chatConnectionService.client = xmppClientMock;
-
-        contactFactory = TestBed.inject(ContactFactoryService);
-        chatAdapter = TestBed.inject(XmppChatAdapter);
-        otherContact = contactFactory.createContact(otherContactJid.toString(), 'jon doe');
+  beforeEach(() => {
+    const testBed = TestBed.configureTestingModule({
+      imports: [XmppAdapterTestModule],
     });
+    testUtils = new TestUtils(testBed.inject<XmppService>(CHAT_SERVICE_TOKEN));
+  });
 
-    it('should handle chat messages from archive by creating contacts and adding messages to contacts', () => {
-        const serviceDiscoveryPlugin = {
-            supportsFeature() {
-                return Promise.resolve(false);
-            },
-        } as any as ServiceDiscoveryPlugin;
-        const messagePlugin = new MessagePlugin(chatAdapter, testLogService());
-        const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, serviceDiscoveryPlugin, null, testLogService(), messagePlugin);
-        chatAdapter.addPlugins([messageArchivePlugin]);
-        // chatConnectionService.onOnline(userJid);
+  it('should handle chat messages from archive by creating contacts and adding messages to contacts', async () => {
+    const chatArchiveStanza = $msg({ from, to: testUtils.hero.jid })
+      .c('result', { xmlns: 'urn:xmpp:mam:2' })
+      .c('forwarded')
+      .c('delay', { stamp: '2018-07-18T08:47:44.233057Z' })
+      .up()
+      .c('message', { from: userJid.toString(), to: testUtils.hero.jid, type: 'chat' })
+      .c('origin-id', { id: 'id' })
+      .up()
+      .c('body', {}, 'message text');
 
-        // chatConnectionService.onStanzaReceived(chatArchiveStanza);
+    await ensureRegisteredUser(testUtils.hero);
 
-        const contacts = chatAdapter.contacts$.getValue();
-        expect(contacts.length).toBe(1);
-        expect(contacts[0].jidBare).toEqual(otherContact.jidBare);
+    const contactsPromise = firstValueFrom(
+      testUtils.chatService.contactListService.contacts$.pipe(
+        filter((contacts) => contacts.length > 0)
+      )
+    );
+    await testUtils.logIn.hero();
 
-        const messages = contacts[0].messages;
-        expect(messages.length).toBe(1);
-        expect(messages[0].body).toBe('message text');
-        expect(messages[0].direction).toBe(Direction.out);
-        expect(messages[0].datetime).toEqual(new Date('2018-07-18T08:47:44.233057Z'));
-        expect(messages[0].fromArchive).toBe(true);
-    });
+    await testUtils.fakeWebsocketInStanza(chatArchiveStanza.toString());
 
-    it('should handle group chat messages by adding them to appropriate rooms', () => {
-        const serviceDiscoveryPlugin = {
-            supportsFeature() {
-                return Promise.resolve(false);
-            },
-        } as unknown as ServiceDiscoveryPlugin;
-        const logService = testLogService();
-        const multiUserChatPlugin = new MultiUserChatPlugin(chatAdapter, logService, null);
-        const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, serviceDiscoveryPlugin, multiUserChatPlugin, logService, null);
-        chatAdapter.addPlugins([messageArchivePlugin, multiUserChatPlugin]);
-        // chatConnectionService.onOnline(userJid);
-        const room = new Room(roomJid, logService);
-        room.nick = roomJid.resource;
-        multiUserChatPlugin.rooms$.next([room]);
+    const contacts = await contactsPromise;
+    expect(contacts.length).toBe(1);
+    expect(contacts[0]?.jid.toString()).toEqual(userJid);
 
-        // chatConnectionService.onStanzaReceived(groupChatArchiveStanza);
+    const messages = contacts[0]?.messageStore.messages;
+    expect(messages?.length).toBe(1);
+    expect(messages?.[0]?.body).toBe('message text');
+    expect(messages?.[0]?.direction).toBe(Direction.in);
+    expect(messages?.[0]?.datetime).toEqual(new Date('2018-07-18T08:47:44.233057Z'));
+    expect(messages?.[0]?.fromArchive).toBe(true);
 
-        const roomMessages = multiUserChatPlugin.rooms$.getValue()[0].messages;
+    await testUtils.logOut();
 
-        expect(roomMessages.length).toBe(1);
+    await ensureNoRegisteredUser(testUtils.hero);
+  });
 
-        const roomMessage = roomMessages[0];
+  xit('should handle group chat messages by adding them to appropriate rooms', async () => {
+    const groupChatArchiveStanza = $msg({ from, to: testUtils.hero.jid })
+      .c('result', { xmlns: 'urn:xmpp:mam:2' })
+      .c('forwarded')
+      .c('delay', { stamp: '2021-08-17T15:33:25.375401Z' })
+      .c('message', { from: roomJidBare + '/othernick', type: 'groupchat' })
+      .c('body', {}, 'group chat!');
 
-        expect(roomMessage.body).toBe('group chat!');
-        expect(roomMessage.datetime).toEqual(new Date('2021-08-17T15:33:25.375401Z'));
-        expect(roomMessage.direction).toBe(Direction.in);
-        expect(roomMessage.fromArchive).toBe(true);
-    });
+    await ensureRegisteredUser(testUtils.hero);
 
-    it('should handle MUC/Sub archive stanzas correctly', () => {
-        const serviceDiscoveryPlugin = {
-            supportsFeature() {
-                return Promise.resolve(false);
-            },
-        } as unknown as ServiceDiscoveryPlugin;
-        const logService = testLogService();
-        const multiUserChatPlugin = new MultiUserChatPlugin(chatAdapter, logService, null);
-        const messageArchivePlugin = new MessageArchivePlugin(chatAdapter, serviceDiscoveryPlugin, multiUserChatPlugin, logService, null);
-        chatAdapter.addPlugins([messageArchivePlugin, multiUserChatPlugin]);
-        // chatConnectionService.onOnline(userJid);
-        const room = new Room(roomJid, logService);
-        room.nick = roomJid.resource;
-        multiUserChatPlugin.rooms$.next([room]);
+    const contactsPromise = firstValueFrom(testUtils.chatService.contactListService.contacts$);
+    await testUtils.logIn.hero();
 
-        // chatConnectionService.onStanzaReceived(mucSubArchiveStanza);
+    await testUtils.fakeWebsocketInStanza(groupChatArchiveStanza.toString());
 
-        const roomMessages = multiUserChatPlugin.rooms$.getValue()[0].messages;
+    const contacts = await contactsPromise;
+    const roomMessages = contacts?.[0]?.messageStore.messages;
 
-        expect(roomMessages.length).toBe(1);
+    expect(roomMessages?.length).toBe(1);
 
-        const roomMessage = roomMessages[0];
+    const roomMessage = roomMessages?.[0];
 
-        expect(roomMessage.body).toBe('group chat!');
-        expect(roomMessage.datetime).toEqual(new Date('2021-08-17T15:33:25.375401Z'));
-        expect(roomMessage.direction).toBe(Direction.in);
-        expect(roomMessage.fromArchive).toBe(true);
-    });
+    expect(roomMessage?.body).toBe('group chat!');
+    expect(roomMessage?.datetime).toEqual(new Date('2021-08-17T15:33:25.375401Z'));
+    expect(roomMessage?.direction).toBe(Direction.in);
+    expect(roomMessage?.fromArchive).toBe(true);
 
-    it('should not request messages if message archive plugin is not set ', () => {
-        // chatConnectionService.onOnline(userJid);
+    await testUtils.logOut();
 
-        // chatConnectionService.onStanzaReceived(chatArchiveStanza);
+    await ensureNoRegisteredUser(testUtils.hero);
+  });
 
-        expect(chatAdapter.contacts$.getValue()).toEqual([]);
-    });
+  xit('should handle MUC/Sub archive stanzas correctly', async () => {
+    const mucSubArchiveStanza = $msg({ from, to: testUtils.hero.jid })
+      .c('result', { xmlns: 'urn:xmpp:mam:2' })
+      .c('forwarded')
+      .c('delay', { stamp: '2021-08-17T15:33:25.375401Z' })
+      .c('message')
+      .c('event', { xmlns: 'http://jabber.org/protocol/pubsub#event' })
+      .c('items', { node: 'urn:xmpp:mucsub:nodes:messages' })
+      .c('item')
+      .c('message', { from: roomJidBare + '/othernick', type: 'groupchat' })
+      .c('body', {}, 'group chat!');
 
+    await ensureRegisteredUser(testUtils.hero);
+
+    const contactsPromise = firstValueFrom(testUtils.chatService.contactListService.contacts$);
+    await testUtils.logIn.hero();
+
+    await testUtils.fakeWebsocketInStanza(mucSubArchiveStanza.toString());
+
+    const contacts = await contactsPromise;
+    const roomMessages = contacts?.[0]?.messageStore.messages;
+
+    expect(roomMessages?.length).toBe(1);
+
+    const roomMessage = roomMessages?.[0];
+
+    expect(roomMessage?.body).toBe('group chat!');
+    expect(roomMessage?.datetime).toEqual(new Date('2021-08-17T15:33:25.375401Z'));
+    expect(roomMessage?.direction).toBe(Direction.in);
+    expect(roomMessage?.fromArchive).toBe(true);
+
+    await testUtils.logOut();
+
+    await ensureNoRegisteredUser(testUtils.hero);
+  });
 });
-*/

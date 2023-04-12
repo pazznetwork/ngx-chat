@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Observable } from 'rxjs';
-import type { Contact } from './contact';
 import type { Recipient } from './recipient';
 import type { JidToNumber } from './jid-to-number';
 import type { Message, MessageState } from './message';
@@ -9,12 +8,7 @@ export interface MessageService {
   /**
    * Will emit the corresponding contact when a new message arrive.
    */
-  message$: Observable<Contact>;
-
-  /**
-   * Will emit the corresponding contact to which a message was sent.
-   */
-  messageSent$: Observable<Recipient>;
+  message$: Observable<Recipient>;
 
   /**
    * emits as soon as the unread message count changes, you might want to debounce it with e.g. half a second, as

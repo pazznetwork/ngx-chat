@@ -22,14 +22,7 @@ import {
   XmlSchemaForm,
 } from '@pazznetwork/ngx-chat-shared';
 import type { IqResponseStanza, Stanza, StanzaHandlerChatPlugin } from '../../core';
-import {
-  Finder,
-  getField,
-  MessageReceivedEvent,
-  parseForm,
-  serializeToSubmitForm,
-  setFieldValue,
-} from '../../core';
+import { Finder, getField, parseForm, serializeToSubmitForm, setFieldValue } from '../../core';
 import type { XmppService } from '../../xmpp.service';
 import { nsDiscoInfo, nsDiscoItems, ServiceDiscoveryPlugin } from '../service-discovery.plugin';
 import {
@@ -821,16 +814,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         delayed: !!delayElement,
         fromArchive: archiveDelayElement != null,
       };
-
-      const messageReceivedEvent = new MessageReceivedEvent();
-      /*this.xmppService.pluginMap.messageState.afterReceiveMessage(
-        message,
-        stanza,
-        messageReceivedEvent
-      );*/
-      if (!messageReceivedEvent.discard) {
-        room.messageStore.addMessage(message);
-      }
+      room.messageStore.addMessage(message);
 
       if (!message.delayed) {
         this.messageSubject.next(room);

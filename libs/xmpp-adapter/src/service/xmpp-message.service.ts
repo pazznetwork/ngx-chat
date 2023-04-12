@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 import {
-  Contact,
   Direction,
   Invitation,
   JidToNumber,
@@ -19,7 +18,6 @@ import type {
   UnreadMessageCountService,
 } from '@pazznetwork/xmpp-adapter';
 import {
-  Finder,
   MessageWithBodyStanza,
   nsConference,
   nsMucUser,
@@ -27,19 +25,16 @@ import {
   XmppService,
 } from '@pazznetwork/xmpp-adapter';
 import { shareReplay } from 'rxjs/operators';
-import type { Handler } from '@pazznetwork/strophets';
 
 /**
  * Part of the XMPP Core Specification
  * see: https://datatracker.ietf.org/doc/rfc6120/
  */
 export class XmppMessageService implements MessageService {
-  private messageHandler?: Handler;
-  private readonly messageSubject = new Subject<Contact>();
+  private readonly messageSubject = new Subject<Recipient>();
   private readonly messageSentSubject: Subject<Recipient> = new Subject();
-  readonly messageSent$ = this.messageSentSubject.asObservable();
   readonly jidToUnreadCount$: Observable<JidToNumber>;
-  readonly message$: Observable<Contact>;
+  readonly message$: Observable<Recipient>;
   readonly unreadMessageCountSum$: Observable<number>;
 
   constructor(
@@ -50,37 +45,23 @@ export class XmppMessageService implements MessageService {
     messageCarbonPlugin: MessageCarbonsPlugin,
     unreadMessageCount: UnreadMessageCountService
   ) {
-    this.message$ = merge(this.messageSubject, messageCarbonPlugin.message$).pipe(
-      shareReplay({ bufferSize: 1, refCount: false })
-    );
+    this.message$ = merge(
+      this.messageSubject,
+      this.messageSentSubject,
+      messageCarbonPlugin.message$
+    ).pipe(shareReplay({ bufferSize: 1, refCount: false }));
 
     this.jidToUnreadCount$ = unreadMessageCount.jidToUnreadCount$;
     this.unreadMessageCountSum$ = unreadMessageCount.unreadMessageCountSum$;
 
-    const registerHandler$ = this.chatService.onOnline$.pipe(
-      switchMap(async () => {
-        this.messageHandler = await this.chatService.chatConnectionService.addHandler(
-          (stanza) => {
-            if (!Finder.create(stanza).searchByTag('body').result) {
-              return Promise.resolve(false);
-            }
-            return this.handleMessageStanza(stanza);
-          },
-          { name: 'message' }
-        );
-      })
+    this.chatService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
+  }
+
+  async initializeHandler(): Promise<void> {
+    await this.chatService.chatConnectionService.addHandler(
+      (stanza) => this.handleMessageStanza(stanza),
+      { name: 'message' }
     );
-    const unregisterHandler$ = this.chatService.onOffline$.pipe(
-      switchMap(async () => {
-        if (!this.messageHandler) {
-          throw new Error('There was no messageHandler in message.service');
-        }
-        this.messageHandler = await this.chatService.chatConnectionService.deleteHandler(
-          this.messageHandler
-        );
-      })
-    );
-    merge(registerHandler$, unregisterHandler$).subscribe();
   }
 
   async loadCompleteHistory(): Promise<void> {
@@ -130,8 +111,6 @@ export class XmppMessageService implements MessageService {
       fromArchive: false,
       state: MessageState.SENDING,
     };
-    //const messageStanza = messageBuilder.tree();
-    // this.chatService.pluginMap.messageState.beforeSendMessage(message, messageStanza);
 
     // TODO: on rejection mark message that it was not sent successfully
     try {
@@ -141,7 +120,6 @@ export class XmppMessageService implements MessageService {
         ...message,
       };
       recipient.messageStore.addMessage(sendMessage);
-      // await this.chatService.pluginMap.messageState.afterSendMessage(sendMessage, messageStanza);
     } catch (rej) {
       throw new Error(
         `rejected message; message=${JSON.stringify(message)}, rejection=${JSON.stringify(rej)}`
@@ -158,6 +136,11 @@ export class XmppMessageService implements MessageService {
     messageStanza: MessageWithBodyStanza,
     archiveDelayElement?: Stanza
   ): Promise<boolean> {
+    // result as first child comes from mam should call directly from there with the archive delay
+    // received as first child comes from carbons should call directly from there with the archive delay
+    if (messageStanza.querySelector('result') || messageStanza.querySelector('received')) {
+      return true;
+    }
     const me = await firstValueFrom(this.chatService.chatConnectionService.userJid$);
     const to = messageStanza.getAttribute('to');
     if (!to) {

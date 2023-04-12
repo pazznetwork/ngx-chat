@@ -37,13 +37,12 @@ export class Contact implements Recipient {
   readonly pendingRoomInvite$ = this.pendingRoomInviteSubject.asObservable();
 
   constructor(
-    jidPlain: string,
+    jid: string,
     public name: string,
     public avatar: string = '',
     subscription = ContactSubscription.none
   ) {
-    const jid = parseJid(jidPlain);
-    this.jid = jid.bare();
+    this.jid = parseJid(jid);
     this.subscriptionSubject.next(subscription);
   }
 

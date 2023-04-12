@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
-import { merge, Subject, switchMap } from 'rxjs';
+import { mergeMap, Subject } from 'rxjs';
 import type { Contact, Log, Recipient, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
 import type { ChatPlugin, Stanza } from '../core';
 import { Finder, serializeToSubmitForm } from '../core';
 import type { XmppService } from '../xmpp.service';
 import { MUC_SUB_EVENT_TYPE, nsRSM } from './multi-user-chat';
 import { nsPubSubEvent } from './publish-subscribe.plugin';
-import type { Handler } from '@pazznetwork/strophets';
 
 const nsMAM = 'urn:xmpp:mam:2';
 
@@ -19,47 +18,19 @@ export class MessageArchivePlugin implements ChatPlugin {
 
   private readonly mamMessageReceivedSubject = new Subject<void>();
 
-  private mamHandler?: Handler;
-
   constructor(private readonly chatService: XmppService, private readonly logService: Log) {
-    const setMamHandler$ = this.chatService.onOnline$.pipe(
-      switchMap(async () => {
-        if (this.mamHandler) {
-          throw new Error('mamHandler already defined');
-        }
-        this.mamHandler = await this.chatService.chatConnectionService.addHandler(
-          (stanza) => {
-            if (
-              !Finder.create(stanza).searchByTag('result') ||
-              !Finder.create(stanza).searchByNamespace(this.nameSpace)
-            ) {
-              return Promise.resolve(false);
-            }
-            return this.handleMamMessageStanza(stanza);
-          },
-          { name: 'message' }
-        );
-      })
-    );
-
-    // this.chatService.onOnline$.pipe(mergeMap(() => this.requestNewestMessages())).subscribe(); // todo check if needed
-
-    const unsetMamHandler$ = this.chatService.onOffline$.pipe(
-      switchMap(async () => {
-        if (!this.mamHandler) {
-          throw new Error('mamHandler is undefined');
-        }
-        this.mamHandler = await this.chatService.chatConnectionService.deleteHandler(
-          this.mamHandler
-        );
-      })
-    );
-
-    merge(setMamHandler$, unsetMamHandler$).subscribe();
+    this.chatService.onOnline$
+      .pipe(
+        mergeMap(async () => {
+          await this.requestNewestMessages();
+          await this.chatService.chatConnectionService.addHandler((stanza) =>
+            this.handleMamMessageStanza(stanza)
+          );
+        })
+      )
+      .subscribe();
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   private async requestNewestMessages(): Promise<void> {
     await this.chatService.chatConnectionService
       .$iq({ type: 'set' })

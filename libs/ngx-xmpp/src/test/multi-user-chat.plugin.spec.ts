@@ -7,7 +7,7 @@ import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { ensureNoRegisteredUser } from './helpers/admin-actions';
+import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
 
 xdescribe('multi user chat plugin', () => {
   let testUtils: TestUtils;
@@ -23,7 +23,7 @@ xdescribe('multi user chat plugin', () => {
   describe('room creation', () => {
     it('should throw if user tries to create the same room multiple times', async () => {
       console.log('room test');
-      await testUtils.register.hero();
+      await ensureRegisteredUser(testUtils.hero);
       console.log('after register hero');
       try {
         await testUtils.create.room.hero();
@@ -36,7 +36,7 @@ xdescribe('multi user chat plugin', () => {
       }
 
       await testUtils.destroy.room.hero();
-      await testUtils.unregister.hero();
+      await ensureNoRegisteredUser(testUtils.hero);
     });
 
     it('should throw if another user already created the room', async () => {

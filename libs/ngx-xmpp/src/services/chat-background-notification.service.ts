@@ -3,15 +3,19 @@ import { Inject, Injectable } from '@angular/core';
 import type { ChatService, Contact, JID, Room } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN } from '../injection-token';
 import { mergeMap } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Injectable()
 export class ChatBackgroundNotificationService {
   private enabled = false;
 
   constructor(@Inject(CHAT_SERVICE_TOKEN) protected chatService: ChatService) {
-    chatService.messageService.message$.subscribe((msg): void => {
-      this.receivedDirectMessage(msg);
-    });
+    chatService.messageService.message$
+      .pipe(filter((message) => message.recipientType === 'contact'))
+      .subscribe((msg): void => {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        this.receivedDirectMessage(msg as Contact);
+      });
     chatService.roomService.groupMessage$
       .pipe(mergeMap((room): Promise<void> => this.receivedGroupMessage(room)))
       .subscribe();

@@ -92,22 +92,6 @@ export class TestUtils {
     friend: () => this.chatService.logIn(this.friend),
   };
 
-  readonly register = {
-    hero: () => this.chatService.register(this.hero),
-    villain: () => this.chatService.register(this.villain),
-    princess: () => this.chatService.register(this.princess),
-    father: () => this.chatService.register(this.father),
-    friend: () => this.chatService.register(this.friend),
-  };
-
-  readonly unregister = {
-    hero: () => this.chatService.unregister(this.hero),
-    villain: () => this.chatService.unregister(this.villain),
-    princess: () => this.chatService.unregister(this.princess),
-    father: () => this.chatService.unregister(this.father),
-    friend: () => this.chatService.unregister(this.friend),
-  };
-
   readonly create = {
     room: {
       hero: () => this.chatService.roomService.createRoom(this.heroRoom),
