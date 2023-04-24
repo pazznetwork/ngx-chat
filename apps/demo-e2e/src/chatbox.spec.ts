@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { test } from '@playwright/test';
 import { AppPage } from './page-objects/app.po';
+import { EjabberdAdminPage } from './page-objects/ejabberd-admin.po';
+import {
+  devXmppDomain,
+  devXmppJid,
+  devXmppPassword,
+} from '../../../libs/ngx-xmpp/src/.secrets-const';
 
 const fooUser = 'foouser';
 const barUser = 'baruser';
@@ -10,20 +16,26 @@ const barUserJid = barUser + 'local-jabber.entenhausen.pazz.de';
 
 test.describe('ngx-chat', () => {
   let appPage: AppPage;
+  let ejabberdAdminPage: EjabberdAdminPage;
 
-  test.beforeAll(async ({ browser }) => {
-    const page = await browser.newPage();
-    appPage = new AppPage(page);
+  test.beforeAll(async ({ browser, playwright }) => {
+    appPage = new AppPage(await browser.newPage());
+    ejabberdAdminPage = await EjabberdAdminPage.create(
+      playwright,
+      devXmppDomain,
+      devXmppJid,
+      devXmppPassword
+    );
+    await ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin();
 
-    await appPage.register(fooUser, testPassword);
-    await appPage.addContact(barUserJid);
-    await appPage.register(barUser, testPassword);
-    await appPage.addContact(fooUserJid);
-    await appPage.logOut();
+    await ejabberdAdminPage.register(fooUser, testPassword);
+    await ejabberdAdminPage.register(barUser, testPassword);
   });
 
   test('should be able to submit message with enter key and button', async () => {
     await appPage.logIn(fooUser, testPassword);
+    await appPage.addContact(barUserJid);
+    await appPage.addContact(fooUserJid);
 
     const buttonSubmitMessage = 'message submitted with button';
     const enterKeySubmitMessage = 'message submitted with enter key';
@@ -39,6 +51,4 @@ test.describe('ngx-chat', () => {
 
     await appPage.logOut();
   });
-
-  // todo: also add test for text area clearing after successful sending of a message
 });

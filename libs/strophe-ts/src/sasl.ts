@@ -184,7 +184,11 @@ export class Sasl {
           undefined
         );
         this.saslFailureHandler = this.connection.handlerService.addSysHandler(
-          (el) => this.saslFailureCb(reject, el),
+          async () => {
+            reject(new Error('Failed in SASL challenge  Status.AUTHFAIL'));
+            await this.onSaslFailed();
+            return false;
+          },
           NS.SASL,
           'failure',
           undefined,
@@ -264,7 +268,8 @@ export class Sasl {
       if (serverSignature !== this.saslData.serverSignature) {
         this.removeOldHandlers();
         this.saslData = {};
-        this.saslFailureCb(reject);
+        await this.onSaslFailed();
+        reject();
         return false;
       }
     }
@@ -342,6 +347,7 @@ export class Sasl {
     }
 
     if (!this.doBind) {
+      void this.connection.disconnect();
       this.connection.changeConnectStatus(Status.AUTHFAIL);
       return false;
     } else {
@@ -360,7 +366,7 @@ export class Sasl {
    *  Returns:
    *    false to remove the handler.
    */
-  saslFailureCb(reject: (reason?: Error) => void, elem?: Element): boolean {
+  async onSaslFailed(): Promise<void> {
     // delete unneeded handlers
     if (this.saslSuccessHandler) {
       this.connection.handlerService.deleteHandler(this.saslSuccessHandler);
@@ -374,9 +380,8 @@ export class Sasl {
     if (this.saslMechanism) {
       this.saslMechanism.onFailure();
     }
-    this.connection.changeConnectStatus(Status.AUTHFAIL, undefined, elem);
-    reject(new Error('Failed in SASL challenge  Status.AUTHFAIL'));
-    return false;
+    await this.connection.disconnect();
+    this.connection.changeConnectStatus(Status.AUTHFAIL);
   }
 
   setVariables(
@@ -531,8 +536,8 @@ export class Sasl {
       this.connection.changeConnectStatus(Status.CONNECTED);
       resolve();
     } else if (elem.getAttribute('type') === 'error') {
-      this.connection.changeConnectStatus(Status.AUTHFAIL, undefined, elem);
       void this.connection.disconnect();
+      this.connection.changeConnectStatus(Status.AUTHFAIL, undefined, elem);
       reject(new Error('Status.AUTHFAIL'));
     }
     return false;

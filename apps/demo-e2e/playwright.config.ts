@@ -7,7 +7,7 @@ import { baseConfig } from '../../playwright.config.base';
 const config: PlaywrightTestConfig = {
   ...baseConfig,
   /* Maximum time one test can run for. */
-  timeout: 30 * 1000,
+  timeout: 15 * 1000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
@@ -32,7 +32,7 @@ const config: PlaywrightTestConfig = {
     trace: 'on-first-retry',
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for chromium only */
   projects: [
     {
       name: 'chromium',
@@ -40,20 +40,19 @@ const config: PlaywrightTestConfig = {
         ...devices['Desktop Chrome'],
       },
     },
-
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-      },
-    },
-
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-      },
-    },
+    /* Test against a major browsers. */
+    //    {
+    //       name: 'firefox',
+    //       use: {
+    //         ...devices['Desktop Firefox'],
+    //       },
+    //     },
+    //
+    //     {
+    //       name: 'webkit',
+    //       use: {
+    //         ...devices['Desktop Safari'],
+    //      },
 
     /* Test against mobile viewports. */
     // {

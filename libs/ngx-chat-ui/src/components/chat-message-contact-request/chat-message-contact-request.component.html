@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <ngx-chat-bubble>
-  <ng-container ngProjectAs="ngx-chat-message-text-area">
+  <ng-container ngProjectAs="ngx-chat-message-text-area" data-zid="contact-request">
     <span>{{ message$ | async }}</span>
     <ul class="chat-presence-subscription-actions" *ngIf="isAffiliated$ | async">
       <li

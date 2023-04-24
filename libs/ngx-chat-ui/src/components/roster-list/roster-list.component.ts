@@ -9,7 +9,7 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { combineLatest, filter, Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN, ChatListStateService, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
@@ -75,9 +75,6 @@ export class RosterListComponent implements OnInit {
   contactRequestsReceived$?: Observable<Contact[]>;
 
   @Input()
-  contactRequestsSent$?: Observable<Contact[]>;
-
-  @Input()
   contactsUnaffiliated$?: Observable<Contact[]>;
 
   hasNoContacts$?: Observable<boolean>;
@@ -91,30 +88,18 @@ export class RosterListComponent implements OnInit {
   ngOnInit(): void {
     this.contacts$ = this.contacts$ ?? this.chatService.contactListService.contactsSubscribed$;
     this.contactRequestsReceived$ =
-      this.contactRequestsReceived$ ??
-      this.chatService.contactListService.contactRequestsReceived$.pipe(
-        filter((contacts) => contacts.length > 0)
-      );
-    this.contactRequestsSent$ =
-      this.contactRequestsSent$ ??
-      this.chatService.contactListService.contactRequestsSent$.pipe(
-        filter((contacts) => contacts.length > 0)
-      );
+      this.contactRequestsReceived$ ?? this.chatService.contactListService.contactRequestsReceived$;
     this.contactsUnaffiliated$ =
-      this.contactsUnaffiliated$ ??
-      this.chatService.contactListService.contactsUnaffiliated$.pipe(
-        filter((contacts) => contacts.length > 0)
-      );
+      this.contactsUnaffiliated$ ?? this.chatService.contactListService.contactsUnaffiliated$;
 
     this.hasNoContacts$ = combineLatest([
       this.contacts$,
       this.contactRequestsReceived$,
-      this.contactRequestsSent$,
       this.contactsUnaffiliated$,
     ]).pipe(
       map(
-        ([contacts, received, sent, unaffiliated]) =>
-          contacts.length + received.length + sent.length + unaffiliated.length === 0
+        ([contacts, received, unaffiliated]) =>
+          contacts?.length + received?.length + unaffiliated?.length === 0
       )
     );
   }

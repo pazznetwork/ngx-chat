@@ -27,7 +27,8 @@ export class MessageStore {
 
   addMessage(message: Message): void {
     if (this.messageIdToMessage.has(message.id)) {
-      throw Error(`message with id ${message.id} already exists`);
+      // eslint-disable-next-line no-console
+      console.warn(`message with id ${message.id} already exists`);
     }
     if (this.mostRecentMessage?.datetime && message.datetime > this.mostRecentMessage?.datetime) {
       this.messages.push(message);

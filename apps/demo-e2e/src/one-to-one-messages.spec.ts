@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { test } from '@playwright/test';
 import { AppPage } from './page-objects/app.po';
-import { devXmppDomain } from '../../../libs/ngx-xmpp/src/.secrets-const';
+import {
+  devXmppDomain,
+  devXmppJid,
+  devXmppPassword,
+} from '../../../libs/ngx-xmpp/src/.secrets-const';
+import { EjabberdAdminPage } from './page-objects/ejabberd-admin.po';
 
 const fooUser = 'foouser';
 const barUser = 'baruser';
@@ -11,28 +16,34 @@ const barUserJid = barUser + devXmppDomain;
 
 test.describe('ngx-chat', () => {
   let appPage: AppPage;
+  let ejabberdAdminPage: EjabberdAdminPage;
 
-  test.beforeAll(async ({ browser }) => {
-    const page = await browser.newPage();
-    appPage = new AppPage(page);
+  test.beforeAll(async ({ browser, playwright }) => {
+    appPage = new AppPage(await browser.newPage());
+    ejabberdAdminPage = await EjabberdAdminPage.create(
+      playwright,
+      devXmppDomain,
+      devXmppJid,
+      devXmppPassword
+    );
+    await ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin();
 
-    await appPage.register(fooUser, testPassword);
-    await appPage.addContact(barUserJid);
-    await appPage.register(barUser, testPassword);
-    await appPage.addContact(fooUserJid);
-    await appPage.logOut();
+    await ejabberdAdminPage.register(fooUser, testPassword);
+    await ejabberdAdminPage.register(barUser, testPassword);
   });
 
   test('connected user1Jid and user2Jid should be able to write and receive their messages', async () => {
     const messageFrom1To2 = 'hello mister 2';
 
     await appPage.logIn(fooUser, testPassword);
+    await appPage.addContact(barUserJid);
     let chatWindow = await appPage.selectChatWithContact(barUserJid);
     await chatWindow.open();
     await chatWindow.write(messageFrom1To2);
     await appPage.logOut();
 
     await appPage.logIn(barUser, testPassword);
+    await appPage.addContact(fooUserJid);
     chatWindow = await appPage.selectChatWithContact(fooUserJid);
     await chatWindow.open();
     await chatWindow.assertLastMessage(messageFrom1To2, 'incoming');

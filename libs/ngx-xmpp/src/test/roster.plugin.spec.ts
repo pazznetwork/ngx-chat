@@ -9,7 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
-import { filter, shareReplay } from 'rxjs/operators';
+import { filter, shareReplay, take, toArray } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 
 const timLogin: AuthRequest = {
@@ -388,5 +388,32 @@ describe('roster plugin', () => {
     await testUtils.logOut();
     await ensureNoRegisteredUser(testUtils.villain);
     contactsSubscription.unsubscribe();
+  });
+
+  it('should have only one contact if switching between 2 users from which one made a contact request', async () => {
+    await ensureNoRegisteredUser(testUtils.friend);
+    await ensureRegisteredUser(testUtils.friend);
+    await ensureNoRegisteredUser(testUtils.hero);
+    await ensureRegisteredUser(testUtils.hero);
+    const contactCountPromise = firstValueFrom(
+      testUtils.chatService.contactListService.contacts$.pipe(
+        map((c) => c.length),
+        take(5),
+        toArray()
+      )
+    );
+
+    await testUtils.chatService.logIn(testUtils.hero);
+
+    await chatService.contactListService.addContact(testUtils.friend.jid);
+    await testUtils.logOut();
+
+    await testUtils.chatService.logIn(testUtils.friend);
+    await testUtils.logOut();
+
+    expect(await contactCountPromise).toEqual([0, 0, 1, 0, 0]);
+
+    await ensureNoRegisteredUser(testUtils.hero);
+    await ensureNoRegisteredUser(testUtils.friend);
   });
 });

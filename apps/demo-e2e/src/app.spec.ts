@@ -2,6 +2,12 @@
 import { expect, test } from '@playwright/test';
 import { AppPage } from './page-objects/app.po';
 import type { AuthRequest } from '@pazznetwork/ngx-chat-shared';
+import {
+  devXmppDomain,
+  devXmppJid,
+  devXmppPassword,
+} from '../../../libs/ngx-xmpp/src/.secrets-const';
+import { EjabberdAdminPage } from './page-objects/ejabberd-admin.po';
 
 /**
  * Current features:
@@ -21,11 +27,10 @@ import type { AuthRequest } from '@pazznetwork/ngx-chat-shared';
  *   * unread messages count
  *   * image link preview
  */
-test.describe('ngx-chat', () => {
-  const domain = process.env['XMPP_DOMAIN'] as string;
-  const jid = process.env['XMPP_JID'] as string;
-  const username = jid?.split('@')[0] as string;
-  const password = process.env['XMPP_PASSWORD'] as string;
+test.describe.serial('ngx-chat', () => {
+  const domain = devXmppDomain;
+  const username = devXmppJid?.split('@')[0] as string;
+  const password = devXmppPassword;
 
   const adminLogin: AuthRequest = {
     domain,
@@ -49,117 +54,101 @@ test.describe('ngx-chat', () => {
   const huntsman = 'Huntsman';
 
   let appPage: AppPage;
+  let ejabberdAdminPage: EjabberdAdminPage;
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeAll(async ({ browser, playwright }) => {
     appPage = new AppPage(await browser.newPage());
-  });
-
-  test('should be able to delete all existing users besides the admin', async () => {
-    const users = await appPage.getAllJabberUsersBesidesAdmin(
-      adminLogin.username,
+    ejabberdAdminPage = await EjabberdAdminPage.create(
+      playwright,
+      adminLogin.domain,
+      devXmppJid,
       adminLogin.password
     );
-    // eslint-disable-next-line no-console
-    console.log('deleting users on ejabberd server: ' + users.join(', '));
-    await appPage.deleteUsers(adminLogin.username, adminLogin.password, users);
+    await ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin();
   });
 
   test('should be able to log in', async () => {
     await appPage.navigateToIndex();
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const { domain, service, username, password } = adminLogin;
-    await appPage.setDomain(domain);
-    await appPage.setService(service as string);
-    await appPage.logIn(username, password);
-    expect(appPage.isUserOnline()).toBeTruthy();
+    await appPage.setDomain(adminLogin.domain);
+    await appPage.setService(adminLogin.service as string);
+    await appPage.logIn(adminLogin.username, adminLogin.password);
+    expect(await appPage.getOnlineStateText()).toContain('online');
   });
 
   test('should be able to log out', async () => {
     await appPage.logOut();
-    await appPage.waitForOffline();
-    expect(await appPage.isUserOnline()).toBeFalsy();
+    expect(await appPage.getOfflineStateText()).toContain('offline');
   });
 
   test('should be able to register SnowWhite', async () => {
-    await appPage.register(snowWhite, snowWhite);
-    expect(appPage.isRegistrationForUserSuccessful(snowWhite)).toBeTruthy();
+    await ejabberdAdminPage.register(snowWhite, snowWhite);
   });
 
   test('should be able to register the 7 dwarves', async () => {
-    await appPage.register(dwarfs.doc, dwarfs.doc);
-    expect(appPage.isRegistrationForUserSuccessful(dwarfs.doc)).toBeTruthy();
-    await appPage.register(dwarfs.grumpy, dwarfs.grumpy);
-    expect(appPage.isRegistrationForUserSuccessful(dwarfs.grumpy)).toBeTruthy();
-    await appPage.register(dwarfs.happy, dwarfs.happy);
-    expect(appPage.isRegistrationForUserSuccessful(dwarfs.happy)).toBeTruthy();
-    await appPage.register(dwarfs.sleepy, dwarfs.sleepy);
-    expect(appPage.isRegistrationForUserSuccessful(dwarfs.sleepy)).toBeTruthy();
-    await appPage.register(dwarfs.bashful, dwarfs.bashful);
-    expect(appPage.isRegistrationForUserSuccessful(dwarfs.bashful)).toBeTruthy();
-    await appPage.register(dwarfs.sneezy, dwarfs.sneezy);
-    expect(appPage.isRegistrationForUserSuccessful(dwarfs.sneezy)).toBeTruthy();
-    await appPage.register(dwarfs.dopey, dwarfs.dopey);
-    expect(appPage.isRegistrationForUserSuccessful(dwarfs.dopey)).toBeTruthy();
+    await ejabberdAdminPage.register(dwarfs.doc, dwarfs.doc);
+    await ejabberdAdminPage.register(dwarfs.grumpy, dwarfs.grumpy);
+    await ejabberdAdminPage.register(dwarfs.happy, dwarfs.happy);
+    await ejabberdAdminPage.register(dwarfs.sleepy, dwarfs.sleepy);
+    await ejabberdAdminPage.register(dwarfs.bashful, dwarfs.bashful);
+    await ejabberdAdminPage.register(dwarfs.sneezy, dwarfs.sneezy);
+    await ejabberdAdminPage.register(dwarfs.dopey, dwarfs.dopey);
   });
 
   test('should be able to register the Huntsman', async () => {
-    await appPage.register(huntsman, huntsman);
-    expect(appPage.isRegistrationForUserSuccessful(huntsman)).toBeTruthy();
+    await ejabberdAdminPage.register(huntsman, huntsman);
   });
 
   test('should be able to login as SnowWhite', async () => {
     await appPage.logIn(snowWhite, snowWhite);
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const toJid = (username: string) => `${username}@${adminLogin.domain}`;
   test('should be able to add the 7 dwarves as SnowWhite contacts', async () => {
-    await appPage.addContact(toJid(dwarfs.doc));
-    await appPage.addContact(toJid(dwarfs.grumpy));
-    await appPage.addContact(toJid(dwarfs.happy));
-    await appPage.addContact(toJid(dwarfs.sleepy));
-    await appPage.addContact(toJid(dwarfs.bashful));
-    await appPage.addContact(toJid(dwarfs.sneezy));
-    await appPage.addContact(toJid(dwarfs.dopey));
+    await appPage.addContact(dwarfs.doc);
+    await appPage.addContact(dwarfs.grumpy);
+    await appPage.addContact(dwarfs.happy);
+    await appPage.addContact(dwarfs.sleepy);
+    await appPage.addContact(dwarfs.bashful);
+    await appPage.addContact(dwarfs.sneezy);
+    await appPage.addContact(dwarfs.dopey);
   });
 
   test('should be able to write to Sleepy and Grumpy', async () => {
     const sleepyMessage = 'Please wake up we have it is time for the mines';
-    const snowWhiteChatWithSleepy = await appPage.openChatWith(toJid(dwarfs.sleepy));
+    const snowWhiteChatWithSleepy = await appPage.openChatWith(dwarfs.sleepy);
     await snowWhiteChatWithSleepy.write(sleepyMessage);
     await snowWhiteChatWithSleepy.close();
 
     const grumpyMessage = 'Grump Grump Grump';
-    const snowWhiteChatWithGrumpy = await appPage.openChatWith(toJid(dwarfs.grumpy));
+    const snowWhiteChatWithGrumpy = await appPage.openChatWith(dwarfs.grumpy);
     await snowWhiteChatWithGrumpy.write(grumpyMessage);
     await snowWhiteChatWithGrumpy.close();
 
     await appPage.logOut(); // log out Snow White
 
     await appPage.logIn(dwarfs.sleepy, dwarfs.sleepy);
-    const sleepyChatWithSnowWhite = await appPage.openChatWith(toJid(snowWhite));
+    const sleepyChatWithSnowWhite = await appPage.openChatWith(snowWhite);
     expect(await sleepyChatWithSnowWhite.getNthMessage(0)).toEqual(sleepyMessage);
     await appPage.logOut();
 
     await appPage.logIn(dwarfs.grumpy, dwarfs.grumpy);
-    const grumpyChatWithSnowWhite = await appPage.openChatWith(toJid(snowWhite));
+    const grumpyChatWithSnowWhite = await appPage.openChatWith(snowWhite);
     expect(await grumpyChatWithSnowWhite.getNthMessage(0)).toEqual(grumpyMessage);
     await appPage.logOut();
   });
 
   test('should be able to write as the EvilQueen to SnowWhite', async () => {
-    await appPage.register(evilQueen, evilQueen);
+    await ejabberdAdminPage.register(evilQueen, evilQueen);
     expect(appPage.isRegistrationForUserSuccessful(evilQueen)).toBeTruthy();
 
     const queenMessage = 'Do you like apples?';
     await appPage.logIn(evilQueen, evilQueen);
-    const evilQueenChatWithSnowWhite = await appPage.openChatWith(toJid(snowWhite));
+    const evilQueenChatWithSnowWhite = await appPage.openChatWith(snowWhite);
     await evilQueenChatWithSnowWhite.write(queenMessage);
     await evilQueenChatWithSnowWhite.close();
   });
 
   test('should be able to send click able link and a image with preview as well', async () => {
-    const evilQueenChatWithSnowWhite = await appPage.openChatWith(toJid(snowWhite));
+    const evilQueenChatWithSnowWhite = await appPage.openChatWith(snowWhite);
 
     const imageLink = 'https://pixabay.com/images/id-1475977/';
     await evilQueenChatWithSnowWhite.write(imageLink);
@@ -175,71 +164,71 @@ test.describe('ngx-chat', () => {
 
   test('should be able to block the EvilQueen as SnowWhite', async () => {
     await appPage.logIn(snowWhite, snowWhite);
-    expect(appPage.isContactInRoster(toJid(evilQueen))).toBeTruthy();
-    const snowWhiteChatWithEvilQueen = await appPage.openChatWith(toJid(evilQueen));
+    expect(appPage.isContactInRoster(evilQueen)).toBeTruthy();
+    const snowWhiteChatWithEvilQueen = await appPage.openChatWith(evilQueen);
     await snowWhiteChatWithEvilQueen.block();
-    expect(await appPage.isContactNotInRoster(toJid(evilQueen))).toBeTruthy();
+    expect(await appPage.isContactNotInRoster(evilQueen)).toBeTruthy();
     await appPage.logOut();
   });
 
   test('should no longer be able to write as the EvilQueen to SnowWhite', async () => {
     const message = 'ANSWER ME!';
     await appPage.logIn(evilQueen, evilQueen);
-    const chat = await appPage.openChatWith(toJid(snowWhite));
+    const chat = await appPage.openChatWith(snowWhite);
     await chat.write(message);
     await appPage.logOut();
     await appPage.logIn(snowWhite, snowWhite);
-    expect(await appPage.isContactNotInRoster(toJid(evilQueen))).toBeTruthy();
+    expect(await appPage.isContactNotInRoster(evilQueen)).toBeTruthy();
     await appPage.logOut();
   });
 
   test('should be able to unblock the EvilQueen as SnowWhite', async () => {
     await appPage.logIn(snowWhite, snowWhite);
-    await appPage.unblockContact(toJid(evilQueen));
-    expect(await appPage.isContactInRoster(toJid(evilQueen))).toBeTruthy();
+    await appPage.unblockContact(evilQueen);
+    expect(await appPage.isContactInRoster(evilQueen)).toBeTruthy();
     await appPage.logOut();
   });
 
   test('should be able to write as the Huntsman to SnowWhite', async () => {
     const queenMessage = 'Do NOT eat any apples!!11elf!';
-    await appPage.register(huntsman, huntsman);
+    await ejabberdAdminPage.register(huntsman, huntsman);
     await appPage.logIn(huntsman, huntsman);
-    const huntsmanChatWithSnowWhite = await appPage.openChatWith(toJid(snowWhite));
+    const huntsmanChatWithSnowWhite = await appPage.openChatWith(snowWhite);
     await huntsmanChatWithSnowWhite.write(queenMessage);
     await appPage.logOut();
   });
 
   test('should be able to block the Huntsman as SnowWhite', async () => {
     await appPage.logIn(snowWhite, snowWhite);
-    expect(await appPage.isContactInRoster(toJid(huntsman))).toBeTruthy();
-    const snowWhiteChatWithHuntsman = await appPage.openChatWith(toJid(huntsman));
+    expect(await appPage.isContactInRoster(huntsman)).toBeTruthy();
+    const snowWhiteChatWithHuntsman = await appPage.openChatWith(huntsman);
     await snowWhiteChatWithHuntsman.block();
-    expect(await appPage.isContactInRoster(toJid(huntsman))).toBeFalsy();
+    expect(await appPage.isContactInRoster(huntsman)).toBeFalsy();
   });
 
   test('should no longer be able to write as the Huntsman to SnowWhite', async () => {
     const message = 'Hello? :(';
     await appPage.logIn(huntsman, huntsman);
-    const chat = await appPage.openChatWith(toJid(snowWhite));
+    const chat = await appPage.openChatWith(snowWhite);
     await chat.write(message);
     await appPage.logOut();
     await appPage.logIn(snowWhite, snowWhite);
-    expect(await appPage.isContactInRoster(toJid(huntsman))).toBeFalsy();
+    expect(await appPage.isContactInRoster(huntsman)).toBeFalsy();
     await appPage.logOut();
   });
 
   test('should be able to unblock the Huntsman as SnowWhite', async () => {
     await appPage.logIn(snowWhite, snowWhite);
-    await appPage.unblockContact(toJid(huntsman));
-    expect(await appPage.isContactInRoster(toJid(huntsman))).toBeTruthy();
+    await appPage.unblockContact(huntsman);
+    expect(await appPage.isContactInRoster(huntsman)).toBeTruthy();
     await appPage.logOut();
   });
 
   test('should be able to accept the Huntsman request as SnowWhite', async () => {
     await appPage.logIn(snowWhite, snowWhite);
-    await appPage.addContact(toJid(huntsman));
-    expect(await appPage.isContactInRoster(toJid(huntsman))).toBeTruthy();
-    const chat = await appPage.openChatWith(toJid(huntsman));
+    await appPage.addContact(huntsman);
+    expect(await appPage.isContactInRoster(huntsman)).toBeTruthy();
+    const chat = await appPage.openChatWith(huntsman);
     await chat.denyContactRequest();
     await chat.hasBlockLink();
     await chat.isAcceptDisabled();
@@ -247,11 +236,5 @@ test.describe('ngx-chat', () => {
     await chat.dismiss();
     await chat.acceptContactRequest();
     await appPage.logOut();
-  });
-
-  test('should be able to delete all created users', async () => {
-    const users = [snowWhite, ...Object.values(dwarfs), huntsman, evilQueen];
-    await appPage.deleteUsers(adminLogin.username, adminLogin.password, users);
-    test.expect(appPage.errorLogs.length).toBe(0);
   });
 });

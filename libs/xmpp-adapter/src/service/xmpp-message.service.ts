@@ -136,9 +136,19 @@ export class XmppMessageService implements MessageService {
     messageStanza: MessageWithBodyStanza,
     archiveDelayElement?: Stanza
   ): Promise<boolean> {
+    if (messageStanza.querySelector('error')) {
+      // The recipient's account does not exist on the server.
+      // The recipient is offline and the server is not configured to store offline messages for later delivery.
+      // The recipient's client or server has some temporary issue that prevents message delivery.
+      return true;
+    }
     // result as first child comes from mam should call directly from there with the archive delay
     // received as first child comes from carbons should call directly from there with the archive delay
-    if (messageStanza.querySelector('result') || messageStanza.querySelector('received')) {
+    if (
+      messageStanza.querySelector('result') ||
+      messageStanza.querySelector('received') ||
+      messageStanza.querySelector('forwarded')
+    ) {
       return true;
     }
     const me = await firstValueFrom(this.chatService.chatConnectionService.userJid$);

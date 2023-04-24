@@ -58,7 +58,11 @@
           "browserTarget": "demo:build:production"
         },
         "development": {
-          "browserTarget": "demo:build:development"
+          "browserTarget": "demo:build:development",
+          "host": "local.entenhausen.pazz.de",
+          "ssl": true,
+          "sslKey": "apps/demo/src/local.entenhausen.pazz.de-key.pem",
+          "sslCert": "apps/demo/src/local.entenhausen.pazz.de.pem"
         }
       },
       "defaultConfiguration": "development"

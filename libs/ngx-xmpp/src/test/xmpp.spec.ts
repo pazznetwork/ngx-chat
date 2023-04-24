@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { filter, switchMap } from 'rxjs/operators';
+import { filter, switchMap, take, toArray } from 'rxjs/operators';
 import { TestUtils } from './helpers/test-utils';
 import { firstValueFrom, map } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
@@ -206,10 +206,11 @@ describe('XmppChatAdapter', () => {
       await ensureRegisteredUser(testUtils.hero);
 
       const contactsLength$ = testUtils.chatService.contactListService.contacts$.pipe(
-        map((c) => c.length)
+        map((c) => c.length),
+        take(8),
+        toArray()
       );
-
-      const contactsPromise = firstValueFrom(contactsLength$.pipe(filter((c) => c === 3)));
+      const contactsLengthPromise = firstValueFrom(contactsLength$);
 
       await testUtils.logIn.hero();
 
@@ -217,23 +218,12 @@ describe('XmppChatAdapter', () => {
       await testUtils.chatService.contactListService.addContact(testUtils.father.jid.toString());
       await testUtils.chatService.contactListService.addContact(testUtils.friend.jid.toString());
 
-      expect(await contactsPromise).toEqual(3);
-
-      const contactsPromiseAfterLogout = firstValueFrom(
-        contactsLength$.pipe(filter((c) => c === 0))
-      );
       await testUtils.logOut();
 
-      expect(await contactsPromiseAfterLogout).toEqual(0);
-
-      const contactsPromiseAfterLogin = firstValueFrom(
-        contactsLength$.pipe(filter((c) => c === 3))
-      );
       await testUtils.logIn.hero();
 
-      expect(await contactsPromiseAfterLogin).toEqual(3);
-
       await testUtils.logOut();
+      expect(await contactsLengthPromise).toEqual([0, 0, 1, 2, 3, 0, 3, 0]);
 
       await ensureNoRegisteredUser(testUtils.princess);
       await ensureNoRegisteredUser(testUtils.father);

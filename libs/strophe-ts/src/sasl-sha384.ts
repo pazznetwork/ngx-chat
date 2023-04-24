@@ -16,7 +16,9 @@ export class SASLSHA384 extends SASLMechanismBase {
   }
 
   async onChallenge(sasl: Sasl, challenge?: string): Promise<string> {
-    return (await scramResponse(sasl, challenge, 'SHA-384', 384)).toString();
+    return (
+      await scramResponse(sasl, () => sasl.onSaslFailed(), challenge, 'SHA-384', 384)
+    ).toString();
   }
 
   override async clientChallenge(sasl: Sasl, testCnonce: string): Promise<string> {

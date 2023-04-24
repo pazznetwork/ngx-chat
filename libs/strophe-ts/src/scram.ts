@@ -154,6 +154,7 @@ function generateCnonce(): string {
  */
 export async function scramResponse(
   sasl: Sasl,
+  onSaslFailed: () => Promise<void>,
   challenge: string | undefined,
   hashName: string,
   hashBits: number
@@ -164,16 +165,15 @@ export async function scramResponse(
   }
   const challengeData = scramParseChallenge(challenge);
 
-  // The RFC requires that we verify the (server) nonce has the client
-  // nonce as an initial substring.
-  if (!challengeData && (challengeData as any)?.nonce.slice(0, cnonce.length) !== cnonce) {
-    warn('Failing SCRAM authentication because server supplied incorrect nonce.');
-    sasl.saslData = {};
-    return sasl.saslFailureCb(() => {}, undefined);
-  }
-
   if (!challengeData) {
     throw new Error('challengeData cannot be undefined');
+  }
+
+  // The RFC requires that we verify the (server) nonce has the client
+  // nonce as an initial substring.
+  if (challengeData?.nonce.slice(0, cnonce.length) !== cnonce) {
+    await onSaslFailed();
+    throw new Error('Failing SCRAM authentication because server supplied incorrect nonce.');
   }
 
   let clientKey;
@@ -199,11 +199,16 @@ export async function scramResponse(
     clientKey = keys.ck;
     serverKey = keys.sk;
   } else {
-    sasl.saslFailureCb(() => {}, undefined);
-    return new Error('SASL SCRAM ERROR');
+    await onSaslFailed();
+    throw new Error('SASL SCRAM ERROR');
   }
 
   const clientFirstMessageBare = sasl.saslData.clientFirstMessageBare;
+
+  if (!clientFirstMessageBare) {
+    throw new Error('clientFirstMessageBare cannot be undefined');
+  }
+
   const serverFirstMessage = challenge;
   const clientFinalMessageBare = `c=biws,r=${challengeData.nonce}`;
 
@@ -226,6 +231,9 @@ export async function scramResponse(
 
 // Returns a string containing the client first message
 export function clientChallenge(sasl: Sasl, testCnonce: string): string {
+  if (!sasl.authcid) {
+    throw new Error('authcid cannot be undefined');
+  }
   const cnonce = testCnonce || generateCnonce();
   const clientFirstMessageBare = `n=${sasl.authcid},r=${cnonce}`;
   sasl.saslData.cnonce = cnonce;

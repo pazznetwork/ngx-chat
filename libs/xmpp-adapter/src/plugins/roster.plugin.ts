@@ -11,11 +11,13 @@ import { Finder } from '../core';
 import type { XmppService } from '../xmpp.service';
 import { nsMuc } from './multi-user-chat';
 import {
+  combineLatest,
   firstValueFrom,
   map,
   merge,
   mergeMap,
   Observable,
+  OperatorFunction,
   pairwise,
   scan,
   startWith,
@@ -94,39 +96,35 @@ export class RosterPlugin implements ChatPlugin {
     chatService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
 
     const statedContacts$ = this.contacts$.pipe(
-      switchMap((contacts) =>
-        contacts.map((contact) =>
-          contact.subscription$.pipe(
-            map((sub) => ({
-              from: sub === ContactSubscription.from,
-              to: sub === ContactSubscription.to,
-              both: sub === ContactSubscription.both,
-              none: sub === ContactSubscription.none,
-              contact,
-            }))
-          )
+      mergeMap((contacts) =>
+        combineLatest(
+          contacts.map((contact) => contact.subscription$.pipe(map((sub) => ({ contact, sub }))))
         )
       ),
-      mergeMap((contact$) => contact$),
-      scan((acc, value) => {
-        acc.set(value.contact.jid.toString(), value);
-        return acc;
-      }, new Map<string, { from?: boolean; to?: boolean; both?: boolean; none?: boolean; contact: Contact }>()),
-      map((acc) => Array.from(acc.values())),
       shareReplay({ bufferSize: 1, refCount: false })
     );
 
+    const mapToContactByFilter = (
+      predicate: (sub: ContactSubscription) => boolean
+    ): OperatorFunction<{ contact: Contact; sub: ContactSubscription }[], Contact[]> =>
+      map((statedContacts) =>
+        statedContacts.filter(({ sub }) => predicate(sub)).map(({ contact }) => contact)
+      );
+
     this.contactsSubscribed$ = statedContacts$.pipe(
-      map((contacts) => contacts.filter((c) => c.to || c.both).map((c) => c.contact))
+      mapToContactByFilter(
+        (sub) => sub === ContactSubscription.both || sub === ContactSubscription.to
+      )
     );
+
     this.contactRequestsReceived$ = statedContacts$.pipe(
-      map((contacts) => contacts.filter((c) => c.from).map((c) => c.contact))
+      mapToContactByFilter((sub) => sub === ContactSubscription.from)
     );
     this.contactRequestsSent$ = statedContacts$.pipe(
-      map((contacts) => contacts.filter((c) => c.to).map((c) => c.contact))
+      mapToContactByFilter((sub) => sub === ContactSubscription.to)
     );
     this.contactsUnaffiliated$ = statedContacts$.pipe(
-      map((contacts) => contacts.filter((c) => c.none).map((c) => c.contact))
+      mapToContactByFilter((sub) => sub === ContactSubscription.none)
     );
   }
 
@@ -171,7 +169,16 @@ export class RosterPlugin implements ChatPlugin {
       .$iq({ from: fromAttr, id, type: 'result' })
       .sendResponseLess();
 
-    this.rosterQueryResultToContacts(stanza);
+    const contacts = this.rosterQueryResultToContacts(stanza);
+    for (const contact of contacts) {
+      // We need to check if the contact is already in the roster
+      await this.getOrCreateContactById(
+        contact.jid.toString(),
+        contact.name,
+        await firstValueFrom(contact.subscription$),
+        contact.avatar
+      );
+    }
     return true;
   }
 
@@ -200,14 +207,19 @@ export class RosterPlugin implements ChatPlugin {
       .searchByTag('query')
       .searchByTag('item')
       .results.map((rosterItem) => {
-        const to = rosterItem.getAttribute('jid');
-        const name = rosterItem.getAttribute('name') ?? to?.split('@')[0];
+        const to = rosterItem.getAttribute('jid') as string;
+        const attrName = rosterItem.getAttribute('name') ?? to;
+        const name = attrName.includes('@') ? (attrName?.split('@')?.[0] as string) : attrName;
+
         // The default is to because there is no subscription attribute on roster items,
         // we assume that the user has subscribed to the contact
         // when adding him to the roster as does our code
+        // The ask attribute in the roster item element is an optional attribute used to indicate an outstanding subscription request.
+        // I can have only the value 'subscribe'.
+        // This value indicates that a subscription request is pending and has been sent to the contact specified by the 'jid' attribute.
         const subscription = ContactSubscription.to;
 
-        return this.createContactById(to as string, name, subscription);
+        return new Contact(to, name, undefined, subscription);
       });
   }
 
@@ -343,24 +355,18 @@ export class RosterPlugin implements ChatPlugin {
 
   async getOrCreateContactById(
     jid: string,
-    name?: string,
-    subscription?: ContactSubscription,
-    avatar?: string
-  ): Promise<Contact> {
-    return (
-      (await this.getContactById(jid)) ?? this.createContactById(jid, name, subscription, avatar)
-    );
-  }
-
-  createContactById(
-    jid: string,
     name = jid,
     subscription?: ContactSubscription,
     avatar?: string
-  ): Contact {
-    const contact = new Contact(jid, name, avatar, subscription);
-    this.newContactSubject.next(contact);
-    return contact;
+  ): Promise<Contact> {
+    const definedName = name?.includes('@') ? (name?.split('@')?.[0] as string) : name;
+    const contact = await this.getContactById(jid);
+    if (contact) {
+      return contact;
+    }
+    const newContact = new Contact(jid, definedName, avatar, subscription);
+    this.newContactSubject.next(newContact);
+    return newContact;
   }
 
   async addContact(jid: string): Promise<void> {

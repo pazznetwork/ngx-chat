@@ -62,6 +62,44 @@ describe('message archive plugin', () => {
     await ensureNoRegisteredUser(testUtils.hero);
   });
 
+  it('should handle chat messages from a users sending a message to 2 offline users', async () => {
+    await ensureRegisteredUser(testUtils.hero);
+    await ensureRegisteredUser(testUtils.friend);
+    await ensureRegisteredUser(testUtils.father);
+    const contactsPromise = firstValueFrom(
+      testUtils.chatService.contactListService.contacts$.pipe(filter((c) => c.length === 2))
+    );
+    const messagesPromise = firstValueFrom(testUtils.chatService.messageService.message$);
+
+    await testUtils.logIn.hero();
+    await testUtils.chatService.contactListService.addContact(testUtils.friend.jid);
+    await testUtils.chatService.contactListService.addContact(testUtils.father.jid);
+
+    const [friend, father] = await contactsPromise;
+
+    if (!friend || !father) {
+      throw new Error('friend or father not found');
+    }
+
+    const friendMessage = 'message to friend';
+    await testUtils.chatService.messageService.sendMessage(friend, friendMessage);
+    await testUtils.chatService.messageService.sendMessage(father, 'message to father');
+    await testUtils.logOut();
+
+    await testUtils.logIn.friend();
+    const recipient = await messagesPromise;
+    expect(recipient.messageStore.messages.length).toBe(1);
+    expect(recipient.messageStore.messages[0]?.body).toBe(friendMessage);
+    await testUtils.logOut();
+
+    await testUtils.logIn.friend();
+    await testUtils.logOut();
+
+    await ensureNoRegisteredUser(testUtils.hero);
+    await ensureNoRegisteredUser(testUtils.friend);
+    await ensureNoRegisteredUser(testUtils.father);
+  });
+
   xit('should handle group chat messages by adding them to appropriate rooms', async () => {
     const groupChatArchiveStanza = $msg({ from, to: testUtils.hero.jid })
       .c('result', { xmlns: 'urn:xmpp:mam:2' })

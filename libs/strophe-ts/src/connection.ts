@@ -788,6 +788,7 @@ export class Connection {
         reason = ErrorCondition.CONFLICT;
       }
       resolve();
+      void this.disconnect();
       this.connectionStatusChangedSubject.next({ status: Status.AUTHFAIL, reason, elem });
       return false;
     }
@@ -807,6 +808,7 @@ export class Connection {
       return true;
     } else {
       warn('Resource binding failed.');
+      void this.disconnect();
       this.connectionStatusChangedSubject.next({ status: Status.AUTHFAIL, elem });
       resolve();
       return false;
@@ -862,6 +864,7 @@ export class Connection {
     } else if (type === 'error') {
       // this.onAuthenticatingSubject.next(false);
       warn('Session creation failed.');
+      void this.disconnect();
       this.connectionStatusChangedSubject.next({ status: Status.AUTHFAIL, elem });
     }
     return false;

@@ -39,12 +39,19 @@ export class MessageCarbonsPlugin implements ChatPlugin {
    */
   async enableCarbons(): Promise<void> {
     await this.chatService.chatConnectionService
-      .$iq({ type: 'set' })
+      .$iq({ type: 'set', id: 'enable_carbons' })
       .c('enable', { xmlns: nsCarbons })
       .sendResponseLess();
   }
 
   private async handleCarbonMessageStanza(element: Element): Promise<boolean> {
+    if (
+      !element.querySelector('sent')?.getAttribute('xmlns')?.includes(nsCarbons) &&
+      !element.querySelector('received')?.getAttribute('xmlns')?.includes(nsCarbons)
+    ) {
+      return true;
+    }
+
     const forwarded = Finder.create(element).searchByTag('forwarded').searchByNamespace(nsForward);
     const messageElement = forwarded.searchByTag('message').searchByNamespace(nsClient).result;
     const direction = element.querySelector('received') ? Direction.in : Direction.out;

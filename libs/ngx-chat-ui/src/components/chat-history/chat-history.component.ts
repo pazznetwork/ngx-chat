@@ -122,7 +122,10 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
 
     if (this.recipient instanceof Contact) {
       this.pendingRequest$ = this.recipient.subscription$.pipe(
-        map((subscription) => subscription !== ContactSubscription.both)
+        map(
+          (subscription) =>
+            ![ContactSubscription.both, ContactSubscription.to].includes(subscription)
+        )
       );
     } else {
       this.pendingRequest$ = of(false);

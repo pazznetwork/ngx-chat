@@ -41,7 +41,8 @@ export class ChatMessageOutComponent {
 
   // TODO: check if message.state can be ensured so this method can be removed
   getMessageState(): MessageState {
-    if (this.message?.state) {
+    return MessageState.UNKNOWN;
+    /*if (this.message?.state) {
       return this.message.state;
     } else if (this.contact && this.message) {
       return this.chatService.messageService.getContactMessageState(
@@ -49,6 +50,6 @@ export class ChatMessageOutComponent {
         this.contact.jid.toString()
       );
     }
-    return MessageState.HIDDEN;
+    return MessageState.HIDDEN;*/
   }
 }

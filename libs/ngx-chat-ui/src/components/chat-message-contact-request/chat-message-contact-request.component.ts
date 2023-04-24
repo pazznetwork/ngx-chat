@@ -50,7 +50,7 @@ export class ChatMessageContactRequestComponent implements OnInit {
     this.subscriptionAction$ = merge(
       this.contact.subscription$.pipe(
         map((subscription) => {
-          if (subscription === ContactSubscription.to) {
+          if (subscription === ContactSubscription.from) {
             return SubscriptionAction.PENDING_REQUEST;
           } else if (subscription === ContactSubscription.none) {
             return SubscriptionAction.BLOCK_FOR_UNAFFILIATED;
@@ -95,7 +95,6 @@ export class ChatMessageContactRequestComponent implements OnInit {
     }
 
     await this.chatService.contactListService.addContact(this.contact.jid.toString());
-    this.subscriptionActionSubject.next(SubscriptionAction.NO_PENDING_ACTION);
   }
 
   async denySubscriptionRequest(): Promise<void> {
@@ -106,13 +105,11 @@ export class ChatMessageContactRequestComponent implements OnInit {
     }
 
     await this.chatService.contactListService.removeContact(this.contact.jid.toString());
-    this.subscriptionActionSubject.next(SubscriptionAction.SHOW_BLOCK_ACTIONS);
   }
 
   async blockContact(): Promise<void> {
     await this.chatService.contactListService.blockJid(this.contact.jid.toString());
     this.chatListService.closeChat(this.contact);
-    this.subscriptionActionSubject.next(SubscriptionAction.NO_PENDING_ACTION);
   }
 
   async blockContactAndReport(): Promise<void> {

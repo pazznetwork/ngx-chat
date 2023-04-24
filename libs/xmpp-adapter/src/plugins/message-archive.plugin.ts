@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-import { mergeMap, Subject } from 'rxjs';
+import { mergeMap } from 'rxjs';
 import type { Contact, Log, Recipient, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
 import type { ChatPlugin, Stanza } from '../core';
 import { Finder, serializeToSubmitForm } from '../core';
@@ -16,15 +16,14 @@ const nsMAM = 'urn:xmpp:mam:2';
 export class MessageArchivePlugin implements ChatPlugin {
   readonly nameSpace = nsMAM;
 
-  private readonly mamMessageReceivedSubject = new Subject<void>();
-
   constructor(private readonly chatService: XmppService, private readonly logService: Log) {
     this.chatService.onOnline$
       .pipe(
         mergeMap(async () => {
           await this.requestNewestMessages();
-          await this.chatService.chatConnectionService.addHandler((stanza) =>
-            this.handleMamMessageStanza(stanza)
+          await this.chatService.chatConnectionService.addHandler(
+            (stanza) => this.handleMamMessageStanza(stanza),
+            { name: 'message' }
           );
         })
       )
@@ -133,7 +132,7 @@ export class MessageArchivePlugin implements ChatPlugin {
 
     if (itemsNode !== MUC_SUB_EVENT_TYPE.messages) {
       this.logService.warn(
-        `Handling of MUC/Sub message types other than ${MUC_SUB_EVENT_TYPE.messages} isn't implemented yet!`
+        `Handling of MUC/Sub message types other than ${MUC_SUB_EVENT_TYPE.messages} isn't implemented yet! Stanza was ${stanza.outerHTML}`
       );
       return false;
     }
@@ -160,7 +159,6 @@ export class MessageArchivePlugin implements ChatPlugin {
     const type = messageElement.getAttribute('type');
     if (type === 'chat') {
       await this.chatService.messageService.handleMessageStanza(messageElement, delayElement);
-      this.mamMessageReceivedSubject.next();
       return true;
     } else if (
       type === 'groupchat' ||

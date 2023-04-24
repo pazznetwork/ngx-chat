@@ -16,7 +16,7 @@ export class SASLSHA1 extends SASLMechanismBase {
   }
 
   async onChallenge(sasl: Sasl, challenge?: string): Promise<string> {
-    const result = await scramResponse(sasl, challenge, 'SHA-1', 160);
+    const result = await scramResponse(sasl, () => sasl.onSaslFailed(), challenge, 'SHA-1', 160);
     return result.toString();
   }
 
