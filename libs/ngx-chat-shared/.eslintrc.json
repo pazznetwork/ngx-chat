@@ -1,0 +1,15 @@
+{
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": [
+          "libs/ngx-chat-shared/tsconfig.*?.json"
+        ]
+      },
+      "extends": ["plugin:rxjs/recommended"]
+    }
+  ]
+}

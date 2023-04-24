@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.lib.prod.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ],
+  "compilerOptions": {
+    "target": "es2020",
+    "importsNotUsedAsValues": "remove",
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+  },
+  "angularCompilerOptions": {
+    "skipTemplateCodegen": true,
+    "strictMetadataEmit": true,
+    "enableResourceInlining": true,
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true
+  },
+}

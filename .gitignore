@@ -40,4 +40,20 @@ testem.log
 Thumbs.db
 
 documentation/
-.env
+libs/ngx-xmpp/src/.secrets-const.ts
+test-results/
+playwright-report/
+
+.angular
+
+# Playwright
+**/test-results
+**/playwright-report
+**/playwright/.cache
+
+# Certificates
+*.pem
+**/**/*.pem
+apps/demo/src/*.pem
+apps/demo/src/local.entenhausen.pazz.de-key.pem
+apps/demo/src/local.entenhausen.pazz.de.pem

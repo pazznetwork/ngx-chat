@@ -1,0 +1,8 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<ng-container [ngSwitch]="messageState">
+  <ng-container *ngSwitchCase="MessageState.SENT">✓</ng-container>
+  <ng-container *ngSwitchCase="MessageState.RECIPIENT_RECEIVED">✓✓</ng-container>
+  <ng-container *ngSwitchCase="MessageState.RECIPIENT_SEEN"
+    ><span class="state--seen">✓✓</span>
+  </ng-container>
+</ng-container>

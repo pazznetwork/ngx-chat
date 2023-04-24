@@ -1,0 +1,80 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<div class="roster-drawer" (click)="toggleVisibility()" [@drawerVisibility]="rosterState">
+  <div class="roster-drawer__button" *ngIf="rosterState === 'shown'">&raquo;</div>
+  <div class="roster-drawer__button" *ngIf="rosterState === 'hidden'">&laquo;</div>
+</div>
+
+<div
+  class="roster-list"
+  data-zid="roster-list-visible"
+  [@rosterVisibility]="rosterState"
+>
+  <div class="roster-header">
+    {{ chatService.translations.chat }}
+  </div>
+
+  <ng-container *ngIf="chatService.roomService.rooms$ | async as rooms">
+    <ng-container *ngIf="rooms.length > 0">
+      <div class="roster-group-header">{{ chatService.translations.rooms }}</div>
+
+      <div class="contact-list-wrapper">
+        <ngx-chat-roster-recipient
+          *ngFor="let room of rooms"
+          [recipient]="room"
+          (click)="onClickRecipient(room)"
+        >
+        </ngx-chat-roster-recipient>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="contacts$ | async as contacts">
+    <ng-container *ngIf="contacts.length > 0">
+      <div class="roster-group-header">{{ chatService.translations.contacts }}</div>
+
+      <div class="contact-list-wrapper">
+        <ngx-chat-roster-recipient
+          *ngFor="let contact of contacts"
+          [recipient]="contact"
+          (click)="onClickRecipient(contact)"
+        >
+          <ngx-chat-roster-recipient-presence
+            [contact]="contact"
+          ></ngx-chat-roster-recipient-presence>
+        </ngx-chat-roster-recipient>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="contactRequestsReceived$ | async as contactRequestsReceived">
+    <ng-container *ngIf="contactRequestsReceived.length > 0">
+      <div class="roster-group-header">{{ chatService.translations.contactRequestIn }}</div>
+      <div class="contact-list-wrapper">
+        <ngx-chat-roster-recipient
+          *ngFor="let contact of contactRequestsReceived"
+          [recipient]="contact"
+          (click)="onClickRecipient(contact)"
+        >
+        </ngx-chat-roster-recipient>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="contactsUnaffiliated$ | async as contactsUnaffiliated">
+    <ng-container *ngIf="contactsUnaffiliated.length > 0">
+      <div class="roster-group-header">{{ chatService.translations.contactsUnaffiliated }}</div>
+      <div class="contact-list-wrapper">
+        <ngx-chat-roster-recipient
+          *ngFor="let contact of contactsUnaffiliated"
+          [recipient]="contact"
+          (click)="onClickRecipient(contact)"
+        >
+        </ngx-chat-roster-recipient>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <div class="roster-list__empty" *ngIf="hasNoContacts$ | async">
+    {{ chatService.translations.noContacts }}
+  </div>
+</div>

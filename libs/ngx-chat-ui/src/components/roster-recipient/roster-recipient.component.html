@@ -1,0 +1,17 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<div class="roster-recipient" [title]="recipient?.name">
+  <div class="roster-recipient-avatar">
+    <ngx-chat-avatar [imageUrl]="recipient?.avatar"></ngx-chat-avatar>
+  </div>
+
+  <div class="roster-recipient-name">
+    {{ recipient?.name }}
+  </div>
+
+  <div class="roster-recipient-status">
+    <ng-container *ngIf="unreadCount$ | async as count">
+      <div class="unread-message-badge" *ngIf="count > 0">{{ count }}</div>
+    </ng-container>
+    <ng-content select="ngx-chat-roster-recipient-presence"></ng-content>
+  </div>
+</div>

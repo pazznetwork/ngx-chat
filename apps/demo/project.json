@@ -1,0 +1,78 @@
+{
+  "name": "demo",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/demo/src",
+  "prefix": "app",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:browser",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/demo",
+        "index": "apps/demo/src/index.html",
+        "main": "apps/demo/src/main.ts",
+        "polyfills": "apps/demo/src/polyfills.ts",
+        "tsConfig": "apps/demo/tsconfig.app.json",
+        "assets": ["apps/demo/src/favicon.ico", "apps/demo/src/assets"],
+        "styles": ["apps/demo/src/styles.css"],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "fileReplacements": [
+            {
+              "replace": "apps/demo/src/environments/environment.ts",
+              "with": "apps/demo/src/environments/environment.prod.ts"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "browserTarget": "demo:build:production"
+        },
+        "development": {
+          "browserTarget": "demo:build:development",
+          "host": "local.entenhausen.pazz.de",
+          "ssl": true,
+          "sslKey": "apps/demo/src/local.entenhausen.pazz.de-key.pem",
+          "sslCert": "apps/demo/src/local.entenhausen.pazz.de.pem"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["apps/demo/**/*.ts", "apps/demo/**/*.html"]
+      }
+    }
+  },
+  "tags": []
+}

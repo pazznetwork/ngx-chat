@@ -1,0 +1,17 @@
+{
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.js"],
+      "parserOptions": {
+        "project": [
+          "libs/strophe-ts/tsconfig.*?.json"
+        ]
+      },
+      "extends": [
+        "plugin:rxjs/recommended"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<div class="chat-input-container">
+  <textarea
+    class="chat-input"
+    data-zid="chat-input"
+    #chatInput
+    [(ngModel)]="message"
+    (keydown.enter)="onKeydownEnter($event)"
+    cdkTextareaAutosize
+    cdkAutosizeMinRows="1"
+    cdkAutosizeMaxRows="5"
+    placeholder="{{ chatService.translations.placeholder }}"
+  >
+  </textarea>
+  <div class="chat-action chat-window-send" (click)="onSendMessage()">&raquo;</div>
+</div>

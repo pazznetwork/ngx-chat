@@ -1,0 +1,13 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<ngx-chat-message-in>
+  <ng-container ngProjectAs="[ngx-chat-message-text-area]">
+    <ul>
+      <li>
+        <a (click)="acceptRoomInvite($event)" href="#">Join</a>
+      </li>
+      <li>
+        <a (click)="declineRoomInvite($event)" href="#">Decline</a>
+      </li>
+    </ul>
+  </ng-container>
+</ngx-chat-message-in>

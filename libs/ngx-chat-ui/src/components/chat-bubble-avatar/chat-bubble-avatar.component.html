@@ -1,0 +1,9 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<div *ngIf="avatar" class="chat-message-avatar">
+  <ngx-chat-avatar
+    [class.has-click-handler]="avatarClickable"
+    (click)="onContactClick()"
+    [imageUrl]="avatar"
+  >
+  </ngx-chat-avatar>
+</div>

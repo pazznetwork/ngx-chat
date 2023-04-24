@@ -1,0 +1,11 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<div class="chat-message">
+  <div class="chat-message-text-wrapper">
+    <ng-content select="ngx-chat-bubble-avatar"></ng-content>
+    <div class="chat-message-text">
+      <ng-content select="ngx-chat-message-text-area"></ng-content>
+    </div>
+  </div>
+  <ng-content select="ngx-chat-message-image"></ng-content>
+  <ng-content select="ngx-chat-bubble-footer"></ng-content>
+</div>

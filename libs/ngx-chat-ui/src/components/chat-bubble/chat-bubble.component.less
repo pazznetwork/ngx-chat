@@ -1,0 +1,21 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+@import (reference) '../../spaces';
+
+.chat-message {
+  border-radius: 0;
+  margin: @msg-half-spacing;
+  box-sizing: content-box;
+  background-color: #fff;
+  box-shadow: 0 3px 10px #dededecc;
+
+  .chat-message-text-wrapper {
+    display: flex;
+    flex-direction: row;
+
+    .chat-message-text {
+      min-width: 0;
+      padding: @msg-full-spacing;
+      word-break: break-word;
+    }
+  }
+}

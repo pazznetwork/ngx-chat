@@ -1,0 +1,22 @@
+{
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "printWidth": 100,
+  "overrides": [
+    {
+      "files": ["*.json", "*.md"],
+      "options": {
+        "tabWidth": 2
+      }
+    },
+    {
+      "files": ["*.html"],
+      "options": {
+        "parser": "angular",
+        "htmlWhitespaceSensitivity": "css",
+        "singleQuote": false,
+        "tabWidth": 2
+      }
+    }
+  ]
+}

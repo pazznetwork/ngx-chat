@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/apps/demo-spec",
+    "module": "commonjs",
+    "types": ["jest", "node"]
+  },
+  "files": ["src/test-setup.ts"],
+  "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
+}

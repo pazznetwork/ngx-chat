@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": false,
+    "outDir": "../../dist/apps/demo-e2e",
+    "allowJs": true,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts", "**/*.js"]
+}

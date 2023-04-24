@@ -1,0 +1,147 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+import type { Locator } from 'playwright-core';
+import { ChatWindowPage } from './chat-window.po';
+import type { Page } from '@playwright/test';
+
+export class AppPage {
+  readonly errorLogs: string[] = [];
+
+  private readonly connectionStateSelector = '[data-zid="chat-connection-state"]';
+
+  private readonly domainInput: Locator;
+  private readonly serviceInput: Locator;
+  private readonly usernameInput: Locator;
+  private readonly passwordInput: Locator;
+  private readonly loginButton: Locator;
+  private readonly logoutButton: Locator;
+  private readonly contactJid: Locator;
+
+  private readonly addContactButton: Locator;
+  private readonly removeContactButton: Locator;
+  private readonly blockContactButton: Locator;
+  private readonly unblockContactButton: Locator;
+  private readonly openChatButton: Locator;
+  private readonly rosterList: Locator;
+
+  private readonly createRoosterEntrySelector: (jid: string) => string;
+  private readonly createRoosterEntryLocator: (jid: string) => Locator;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  private readonly createChatBoxInputLocator: (jid: string) => Locator;
+
+  constructor(private readonly page: Page) {
+    this.domainInput = page.locator('[name=domain]');
+    this.serviceInput = page.locator('[name=service]');
+    this.usernameInput = page.locator('[name=username]');
+    this.passwordInput = page.locator('[name=password]');
+    this.loginButton = page.locator('[name=login]');
+    this.logoutButton = page.locator('[name=logout]');
+    this.contactJid = page.locator('[data-zid="contact-jid"]');
+
+    this.addContactButton = page.locator('[data-zid="add-contact"]');
+    this.removeContactButton = page.locator('[data-zid="remove-contact"]');
+    this.blockContactButton = page.locator('[data-zid="block-contact"]');
+    this.unblockContactButton = page.locator('[data-zid="unblock-contact"]');
+    this.openChatButton = page.locator('[data-zid="open-chat"]');
+    this.rosterList = page.locator('[data-zid="roster-list-visible"]');
+
+    this.createRoosterEntrySelector = (jid) => `.roster-recipient[title="${jid.toLowerCase()}"]`;
+    this.createRoosterEntryLocator = (jid) => page.locator(this.createRoosterEntrySelector(jid));
+    this.createChatBoxInputLocator = (username) =>
+      page.locator(`[data-zid=chat-input-${username.toLowerCase()}]`);
+
+    page.on('console', (message) => {
+      if (message.type() === 'error') {
+        this.errorLogs.push(message.text());
+      }
+    });
+    page.on('pageerror', (err) => {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    });
+  }
+
+  async pause(): Promise<void> {
+    await this.page.pause();
+  }
+
+  async navigateToIndex(): Promise<void> {
+    await this.page.goto('/');
+  }
+
+  async setDomain(domain: string): Promise<void> {
+    await this.domainInput.fill(domain);
+  }
+
+  async setService(service: string): Promise<void> {
+    await this.serviceInput.fill(service);
+  }
+
+  async logIn(username: string, password: string): Promise<void> {
+    await this.usernameInput.fill(username);
+    await this.passwordInput.fill(password);
+    await this.loginButton.click();
+  }
+
+  async logOut(): Promise<void> {
+    await this.logoutButton.click();
+  }
+
+  async addContact(jid: string): Promise<void> {
+    await this.contactJid.fill(jid);
+    await this.addContactButton.click();
+  }
+
+  async removeContact(jid: string): Promise<void> {
+    await this.contactJid.fill(jid);
+    await this.removeContactButton.click();
+  }
+
+  async blockContact(jid: string): Promise<void> {
+    await this.contactJid.fill(jid);
+    await this.blockContactButton.click();
+  }
+
+  async unblockContact(jid: string): Promise<void> {
+    await this.page.pause();
+    await this.contactJid.fill(jid);
+    await this.unblockContactButton.click();
+  }
+
+  async isRegistrationForUserSuccessful(username: string): Promise<boolean> {
+    const selector = `[data-zid="registration-success"]:has-text("${username.toLowerCase()}")`;
+    await this.page.waitForSelector(selector);
+    return (await this.page.locator(selector).count()) > 0;
+  }
+
+  async getOfflineStateText(): Promise<string | null> {
+    const locator = this.page.locator(this.connectionStateSelector, { hasText: 'offline' });
+    return locator.textContent();
+  }
+
+  async getOnlineStateText(): Promise<string | null> {
+    const locator = this.page.locator(this.connectionStateSelector, { hasText: 'online' });
+    return locator.textContent();
+  }
+
+  async isContactInRoster(jid: string): Promise<boolean> {
+    const foundCount = await this.createRoosterEntryLocator(jid).count();
+    return foundCount > 0;
+  }
+
+  async isContactNotInRoster(jid: string): Promise<boolean> {
+    await this.page.waitForSelector(this.createRoosterEntrySelector(jid), { state: 'detached' });
+    return true;
+  }
+
+  async selectChatWithContact(jid: string): Promise<ChatWindowPage> {
+    const locator = this.createRoosterEntryLocator(jid);
+    await locator.click();
+    return new ChatWindowPage(this.page, jid);
+  }
+
+  async openChatWith(jid: string): Promise<ChatWindowPage> {
+    await this.rosterList.getByText(jid).click();
+    return new ChatWindowPage(this.page, jid);
+  }
+}

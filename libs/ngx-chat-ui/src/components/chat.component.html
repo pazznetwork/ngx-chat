@@ -1,0 +1,13 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<ngx-chat-bar-windows *ngIf="chatService.isOnline$ | async" [rosterState]="rosterState">
+</ngx-chat-bar-windows>
+<ngx-chat-roster-list
+  *ngIf="chatService.isOnline$ | async"
+  [rosterState]="rosterState"
+  [contacts$]="contacts$"
+  [contactRequestsReceived$]="contactRequestsReceived$"
+  [contactRequestsSent$]="contactRequestsSent$"
+  [contactsUnaffiliated$]="contactsUnaffiliated$"
+  (rosterStateChanged)="onRosterStateChanged($event)"
+>
+</ngx-chat-roster-list>

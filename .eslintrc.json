@@ -1,0 +1,227 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": false
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "eslint-plugin-jsdoc",
+    "eslint-plugin-import",
+    "eslint-plugin-prefer-arrow",
+    "eslint-plugin-rxjs",
+    "rxjs-angular",
+    "decorator-position"
+  ],
+  "ignorePatterns": ["dist/*"],
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "extends": [
+        "plugin:@nrwl/nx/typescript",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:eslint-comments/recommended",
+        "plugin:prettier/recommended"
+      ],
+
+      "rules": {
+        "@typescript-eslint/array-type": [
+          "error",
+          {
+            "default": "array",
+            "readonly": "array-simple"
+          }
+        ],
+        "@typescript-eslint/ban-types": "error",
+        "@typescript-eslint/consistent-type-assertions": "error",
+        "@typescript-eslint/consistent-type-definitions": "error",
+        "@typescript-eslint/dot-notation": "off",
+        "@typescript-eslint/explicit-function-return-type": [
+          "warn",
+          {
+            "allowConciseArrowFunctionExpressionsStartingWithVoid": true,
+            "allowDirectConstAssertionInArrowFunctions": true,
+            "allowExpressions": true,
+            "allowHigherOrderFunctions": true
+          }
+        ],
+        "@typescript-eslint/explicit-member-accessibility": [
+          "error",
+          {
+            "accessibility": "no-public"
+          }
+        ],
+        "@typescript-eslint/member-delimiter-style": "error",
+        "@typescript-eslint/member-ordering": [
+          "warn",
+          {
+            "classes": [
+              "decorated-field",
+              ["decorated-get", "decorated-set"],
+              "field",
+              ["get", "set"],
+              "constructor",
+              "method"
+            ]
+          }
+        ],
+        "@typescript-eslint/naming-convention": [
+          "warn",
+          {
+            "selector": "default",
+            "format": ["camelCase"]
+          },
+          {
+            "selector": "variable",
+            "format": ["camelCase", "UPPER_CASE", "snake_case"]
+          },
+          {
+            "selector": "parameter",
+            "format": ["camelCase", "snake_case"],
+            "leadingUnderscore": "allow"
+          },
+          {
+            "selector": "memberLike",
+            "modifiers": ["public"],
+            "format": null,
+            "leadingUnderscore": "forbid"
+          },
+          {
+            "selector": "memberLike",
+            "modifiers": ["protected"],
+            "format": ["camelCase"],
+            "leadingUnderscore": "allow"
+          },
+          {
+            "selector": "memberLike",
+            "modifiers": ["private"],
+            "format": ["camelCase", "UPPER_CASE", "PascalCase"],
+            "leadingUnderscore": "allow"
+          },
+          {
+            "selector": "typeLike",
+            "format": ["PascalCase"]
+          },
+          {
+            "selector": "enumMember",
+            "format": ["UPPER_CASE"]
+          }
+        ],
+        "@typescript-eslint/no-namespace": "error",
+        "@typescript-eslint/no-shadow": "error",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_"
+          }
+        ],
+        "@typescript-eslint/prefer-for-of": "error",
+        "@typescript-eslint/require-await": "warn",
+        "@typescript-eslint/return-await": "error",
+        "@typescript-eslint/unbound-method": [
+          "error",
+          {
+            "ignoreStatic": true
+          }
+        ],
+        "curly": "error",
+        "eslint-comments/disable-enable-pair": [
+          "error",
+          {
+            "allowWholeFile": true
+          }
+        ],
+        "eslint-comments/no-unused-disable": "error",
+        "id-blacklist": "off",
+        "id-match": "off",
+        "import/no-deprecated": "warn",
+        "jsdoc/check-alignment": "error",
+        "jsdoc/newline-after-description": "error",
+        "no-console": ["error", {}],
+        "no-trailing-spaces": "off",
+        "no-underscore-dangle": "off",
+        "space-before-function-paren" : "off",
+        "object-shorthand": "error",
+        "prefer-arrow/prefer-arrow-functions": "off",
+        "rxjs/finnish": [
+          "warn",
+          {
+            "functions": false,
+            "methods": false,
+            "strict": true,
+            "types": {
+              "^EventEmitter$": false,
+              "Subject$": false
+            }
+          }
+        ],
+        "rxjs/no-async-subscribe": "warn",
+        "rxjs/no-compat": "error",
+        "rxjs/no-exposed-subjects": [
+          "warn",
+          {
+            "allowProtected": true
+          }
+        ],
+        "rxjs/no-ignored-observable": "error",
+        "rxjs/no-internal": "error",
+        "rxjs/no-nested-subscribe": "warn",
+        "rxjs/no-unsafe-takeuntil": "error",
+        "rxjs/suffix-subjects": "warn",
+        "rxjs/throw-error": "error",
+        "rxjs-angular/prefer-takeuntil": [
+          "error",
+          {
+            "alias": ["first", "take"],
+            "checkComplete": false,
+            "checkDecorators": ["Component"],
+            "checkDestroy": false
+          }
+        ],
+        "prettier/prettier": [
+          "error",
+          {
+            "printWidth": 100
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*.html"],
+      "extends": ["plugin:@nrwl/nx/angular-template"],
+      "rules": {
+        "@angular-eslint/template/eqeqeq": [
+          "error",
+          {
+            "allowNullOrUndefined": true
+          }
+        ],
+        "@angular-eslint/template/no-negated-async": "error"
+      }
+    },
+    {
+      "files": ["*.js"],
+      "parserOptions": {
+        "ecmaVersion": "latest"
+      },
+      "extends": [
+        "plugin:@nrwl/nx/javascript",
+        "plugin:eslint-comments/recommended",
+        "plugin:prettier/recommended"
+      ],
+      "rules": {
+        "eslint-comments/disable-enable-pair": [
+          "error",
+          {
+            "allowWholeFile": true
+          }
+        ],
+        "eslint-comments/no-unused-disable": "error",
+        "strict": "error"
+      }
+    }
+  ]
+}

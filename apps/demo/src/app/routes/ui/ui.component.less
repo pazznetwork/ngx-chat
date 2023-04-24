@@ -1,0 +1,27 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+.chat-message-list-wrapper {
+  border: 1px solid #e3e3e3;
+}
+
+.example {
+  margin-bottom: 2em;
+}
+
+.simple-message-list {
+  display: flex;
+  flex-direction: column;
+
+  ngx-chat-message-out,
+  ngx-chat-message-in {
+    max-width: 76%;
+  }
+
+  ngx-chat-message-in {
+    align-self: flex-start;
+  }
+
+  ngx-chat-message-out {
+    align-self: flex-end;
+  }
+}

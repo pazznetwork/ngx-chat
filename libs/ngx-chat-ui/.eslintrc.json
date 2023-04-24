@@ -1,0 +1,56 @@
+{
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": [
+          "libs/ngx-chat-ui/tsconfig.*?.json"
+        ]
+      },
+      "extends": [
+        "plugin:@nrwl/nx/angular",
+        "plugin:@angular-eslint/template/process-inline-templates",
+        "plugin:@angular-eslint/ng-cli-compat",
+        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
+        "plugin:rxjs/recommended"
+      ],
+      "rules": {
+        "@angular-eslint/directive-selector": [
+          "error",
+          {
+            "type": "attribute",
+            "prefix": "ngxChat",
+            "style": "camelCase"
+          }
+        ],
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "ngx-chat",
+            "style": "kebab-case"
+          }
+        ],
+        "@angular-eslint/no-output-native": "error",
+        "decorator-position/decorator-position": [
+          "error",
+          {
+            "printWidth": 100,
+            "properties": "above",
+            "methods": "above"
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*.html"],
+      "parserOptions": {
+        "project": [
+          "libs/ngx-chat-ui/tsconfig.*?.json"
+        ]
+      }
+    }
+  ]
+}

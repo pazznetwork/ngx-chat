@@ -1,0 +1,47 @@
+{
+  "name": "ngx-xmpp",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/ngx-xmpp/src",
+  "prefix": "ngx-chat",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "project": "libs/ngx-xmpp/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/ngx-xmpp/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/ngx-xmpp/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@angular-devkit/build-angular:karma",
+      "options": {
+        "tsConfig": "libs/ngx-xmpp/tsconfig.spec.json",
+        "karmaConfig": "libs/ngx-xmpp/karma.conf.js",
+        "polyfills": "libs/ngx-xmpp/src/polyfills.ts",
+        "main": "libs/ngx-xmpp/src/main.karma.ts",
+        "styles": [],
+        "scripts": [],
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/ngx-xmpp/**/*.ts",
+          "libs/ngx-xmpp/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}
