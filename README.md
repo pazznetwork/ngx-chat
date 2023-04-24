@@ -31,6 +31,7 @@ application.
   - Build the plugin
   - Run the plugin tests
   - Releasing
+  - Contributing
 - Licensing
 
 ## Get Started
@@ -215,6 +216,10 @@ git tag v$VERSION
 git push origin master --tags
 ./push-release.sh
 ```
+
+### Contributing
+
+If you want to contribute to this project, please read the [contribution guidelines](CONTRIBUTING.md).
 
 ## Licensing
 
