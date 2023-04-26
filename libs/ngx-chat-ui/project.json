@@ -13,7 +13,7 @@
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.json"
+          "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.prod.json"
         },
         "development": {
           "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.json"

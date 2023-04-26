@@ -39,7 +39,6 @@ import { HandlerService } from './handler-service';
 import type { BoshRequest } from './bosh-request';
 import { map } from 'rxjs/operators';
 import { getConnectionsUrls } from './connection-urls';
-import { makeSafeJidString } from '@pazznetwork/ngx-chat-shared';
 import type { BoshOptions } from './bosh-options';
 import { Handler } from './handler';
 import { isValidJID } from './utils';
@@ -1133,7 +1132,7 @@ export class Connection {
     const onOnlinePromise = firstValueFrom(this.onOnline$);
     const onAuthenticatingPromise = firstValueFrom(this.onAuthenticating$);
     const bareUsername = jid.includes('@') ? (jid.split('@')[0] as string) : jid;
-    const safeJid = makeSafeJidString(jid, domain);
+    const safeJid = bareUsername + '@' + domain;
     // anonymous connection
     await this.connectAnonymous(domain);
     await onAuthenticatingPromise;
