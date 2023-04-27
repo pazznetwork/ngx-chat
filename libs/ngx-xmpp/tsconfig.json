@@ -12,6 +12,8 @@
     "target": "es2020",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "declaration": true,
+    "declarationMap": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,

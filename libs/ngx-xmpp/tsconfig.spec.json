@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/libs/xmpp-adapter-spec",
+    "outDir": "../../dist/libs/ngx-xmpp-spec",
     "types": ["jasmine", "node"]
   },
   "include": ["**/*.spec.ts", "**/*.d.ts", "src/polyfills.ts", "src/main.karma.ts", "src/index.ts"]

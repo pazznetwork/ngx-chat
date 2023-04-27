@@ -16,11 +16,13 @@
     "target": "es2020",
     "importsNotUsedAsValues": "remove",
     "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
     "strict": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
   },
   "angularCompilerOptions": {
     "skipTemplateCodegen": true,

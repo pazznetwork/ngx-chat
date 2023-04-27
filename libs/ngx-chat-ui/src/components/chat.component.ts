@@ -47,13 +47,6 @@ export class ChatComponent implements OnInit, OnChanges {
   contactRequestsReceived$?: Observable<Contact[]>;
 
   /**
-   * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your outgoing contact
-   * requests list.
-   */
-  @Input()
-  contactRequestsSent$?: Observable<Contact[]>;
-
-  /**
    * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your unaffiliated contact
    * list.
    */
