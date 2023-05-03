@@ -1,3 +1,7 @@
 {
-  "name": "@pazznetwork/ngx-chat-shared"
+  "version": "1.14.1",
+  "name": "@pazznetwork/ngx-chat-shared",
+  "publishConfig": {
+    "access": "public"
+  }
 }

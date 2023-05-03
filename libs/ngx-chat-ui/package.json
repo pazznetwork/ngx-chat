@@ -1,6 +1,6 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "0.14.12",
+  "version": "1.14.1-beta",
   "license": "MIT",
   "peerDependencies": {
     "@angular/cdk": "^14.2.0",
@@ -32,5 +32,8 @@
   "bugs": {
     "url": "https://github.com/pazznetwork/ngx-chat/issues"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
 }

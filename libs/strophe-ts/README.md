@@ -94,3 +94,10 @@ const conn = await Connection.create('wss://service.top-level-domain', domain);
 await conn.login(myJid, 'very-secret-password-now!');
 ```
 
+### Authentication
+
+The SHA Authentications are in general the default authentication method for XMPP. It is used for SASL authentication after negotiating the supported mechanism.
+
+As the implementation of the SHA-1 to SHA-512 algorithms is based on the WebCrypto API, it is not available in all browsers. Also in some browsers it is not available in a WebWorker context or a Unsafe Context.
+
+Meaning if the Chat is not used in a SSL context one has no access to the web crypto and we have to fall back to plain and the other authentication methods.

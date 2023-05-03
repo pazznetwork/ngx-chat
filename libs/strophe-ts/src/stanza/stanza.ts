@@ -2,12 +2,13 @@
 import { $build, $pres } from './builder-helper';
 import { NS } from './namespace';
 
-export const presenceUnavailable = $pres({
-  xmlns: NS.CLIENT,
-  type: 'unavailable',
-}).tree();
+export const presenceUnavailable = (): Element =>
+  $pres({
+    xmlns: NS.CLIENT,
+    type: 'unavailable',
+  }).tree();
 
-export const streamClose = $build('close', { xmlns: NS.FRAMING }).tree();
+export const streamClose = (): Element => $build('close', { xmlns: NS.FRAMING }).tree();
 
 /**
  *  Generates the <open> start tag for WebSocket stream
@@ -20,6 +21,7 @@ export function buildOpenStanza(to: string): Element {
 
 /**
  * new DOMParser().parseFromString(html, 'text/xml').documentElement.matches('iq[xmlns="jabber:client"]:has(query[xmlns="jabber:iq:privacy"])')
+ *
  * @param {Element} stanza
  * @returns {boolean}
  */

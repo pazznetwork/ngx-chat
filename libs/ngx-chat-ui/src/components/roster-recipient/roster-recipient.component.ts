@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, InjectionToken, Input, OnInit } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import type { Recipient } from '@pazznetwork/ngx-chat-shared';
+import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatAvatarComponent } from '../chat-avatar';
 import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
@@ -20,7 +20,7 @@ export class RosterRecipientComponent implements OnInit {
 
   unreadCount$?: Observable<number>;
 
-  readonly chatService = inject(CHAT_SERVICE_TOKEN);
+  readonly chatService = inject(CHAT_SERVICE_TOKEN as any as InjectionToken<ChatService>);
 
   ngOnInit(): void {
     if (!this.recipient) {
