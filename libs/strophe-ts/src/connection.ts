@@ -989,6 +989,7 @@ export class Connection {
   static async create(
     domain: string,
     service?: string,
+    saslMechanisms?: string[],
     authenticationMode = AuthenticationMode.LOGIN,
     prebindUrl?: string,
     credentialsUrl?: string
@@ -1012,7 +1013,7 @@ export class Connection {
       credentialsUrl
     );
 
-    connection.sasl.registerSASLMechanisms();
+    connection.sasl.registerSASLMechanisms(saslMechanisms);
     return connection;
   }
 
@@ -1162,7 +1163,7 @@ export class Connection {
   }
 
   async unregister(): Promise<void> {
-    this.protocolManager.send(presenceUnavailable);
+    this.protocolManager.send(presenceUnavailable());
     await this.sendIQ(
       $iq({ type: 'set' }).c('query', { xmlns: this.nsRegister }).c('remove').tree()
     );

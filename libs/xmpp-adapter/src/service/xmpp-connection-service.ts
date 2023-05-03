@@ -15,12 +15,15 @@ import { $build, Connection, Handler } from '@pazznetwork/strophets';
  */
 export class XmppConnectionService {
   private readonly createConnectionSubject = new Subject<{
-    service: undefined | string;
     domain: string;
+    service?: string;
+    saslMechanisms?: string[];
   }>();
   readonly connection$: Observable<Connection> = this.createConnectionSubject.pipe(
     first(),
-    switchMap(({ domain, service }) => Connection.create(domain, service)),
+    switchMap(({ domain, service, saslMechanisms }) =>
+      Connection.create(domain, service, saslMechanisms)
+    ),
     shareReplay({
       bufferSize: 1,
       refCount: false,
@@ -42,8 +45,14 @@ export class XmppConnectionService {
 
   constructor(protected readonly logService: Log) {}
 
-  async register({ username, password, service, domain }: AuthRequest): Promise<void> {
-    this.createConnectionSubject.next({ service, domain });
+  async register({
+    username,
+    password,
+    service,
+    domain,
+    saslMechanisms,
+  }: AuthRequest): Promise<void> {
+    this.createConnectionSubject.next({ service, domain, saslMechanisms });
     const connection = await firstValueFrom(this.connection$);
     await connection.register(username, password, domain);
   }
@@ -54,8 +63,8 @@ export class XmppConnectionService {
     await connection.unregister();
   }
 
-  async logIn({ username, password, service, domain }: AuthRequest): Promise<void> {
-    this.createConnectionSubject.next({ service, domain });
+  async logIn({ username, password, service, domain, saslMechanisms }: AuthRequest): Promise<void> {
+    this.createConnectionSubject.next({ service, domain, saslMechanisms });
     const jid = makeSafeJidString(username, domain);
     const connection = await firstValueFrom(this.connection$);
     await connection.login(jid, password);

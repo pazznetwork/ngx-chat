@@ -5,13 +5,14 @@ import {
   Component,
   EventEmitter,
   inject,
+  InjectionToken,
   Input,
   OnInit,
   Output,
 } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
+import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN, ChatListStateService, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
 import { RosterRecipientComponent } from '../roster-recipient';
@@ -82,7 +83,7 @@ export class RosterListComponent implements OnInit {
   @Output()
   rosterStateChanged = new EventEmitter<'hidden' | 'shown'>();
 
-  readonly chatService = inject(CHAT_SERVICE_TOKEN);
+  readonly chatService = inject(CHAT_SERVICE_TOKEN as any as InjectionToken<ChatService>);
   private readonly chatListService = inject(ChatListStateService);
 
   ngOnInit(): void {
