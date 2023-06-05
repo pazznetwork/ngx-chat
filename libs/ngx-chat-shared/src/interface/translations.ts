@@ -10,6 +10,7 @@ export interface Translations {
   contactRequestOut: string;
   contacts: string;
   contactsUnaffiliated: string;
+  contactsBlocked: string;
   dateFormat: string;
   denySubscriptionRequest: string;
   dismiss: string;

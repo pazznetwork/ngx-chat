@@ -8,7 +8,7 @@
     "url": "git://github.com/pazznetwork/strophets"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   },
   "keywords": [
     "xmpp",

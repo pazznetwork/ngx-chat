@@ -50,7 +50,7 @@ const presenceMapping = {
 export class RosterPlugin implements ChatPlugin {
   readonly nameSpace = NS.ROSTER;
 
-  private readonly newContactSubject = new Subject<Contact>();
+  private readonly getContactRequestSubject = new Subject<Contact>();
   private readonly removeContactByJIDSubject = new Subject<JID>();
 
   readonly contacts$: Observable<Contact[]>;
@@ -61,9 +61,14 @@ export class RosterPlugin implements ChatPlugin {
 
   constructor(private readonly chatService: XmppService) {
     this.contacts$ = merge(
-      this.newContactSubject.pipe(
+      this.getContactRequestSubject.pipe(
         map((contact) => (state: Map<string, Contact>) => {
-          state.set(contact.jid.toString(), contact);
+          console.log('newContactSubject contact', contact);
+          const key = contact.jid.toString();
+          if (state.has(key)) {
+            return state;
+          }
+          state.set(key, contact);
           return state;
         })
       ),
@@ -360,13 +365,9 @@ export class RosterPlugin implements ChatPlugin {
     avatar?: string
   ): Promise<Contact> {
     const definedName = name?.includes('@') ? (name?.split('@')?.[0] as string) : name;
-    const contact = await this.getContactById(jid);
-    if (contact) {
-      return contact;
-    }
     const newContact = new Contact(jid, definedName, avatar, subscription);
-    this.newContactSubject.next(newContact);
-    return newContact;
+    this.getContactRequestSubject.next(newContact);
+    return (await this.getContactById(jid)) as Contact;
   }
 
   async addContact(jid: string): Promise<void> {

@@ -12,6 +12,7 @@ export function defaultTranslations(): Translations {
     contactRequestOut: 'Outgoing contact requests',
     contacts: 'Contacts',
     contactsUnaffiliated: 'Unknown',
+    contactsBlocked: 'Blocked',
     dateFormat: 'EEEE, MM/dd/yyyy',
     denySubscriptionRequest: 'Deny',
     dismiss: 'Dismiss',

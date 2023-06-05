@@ -43,8 +43,8 @@ export class XmppService implements ChatService {
   roomService: XmppRoomService;
   contactListService: XmppContactListService;
 
-  constructor(logService: Log, openChatsService: OpenChatsService, httpClient: HttpClient) {
-    this.chatConnectionService = new XmppConnectionService(logService);
+  constructor(readonly log: Log, openChatsService: OpenChatsService, httpClient: HttpClient) {
+    this.chatConnectionService = new XmppConnectionService(log);
 
     this.onAuthenticating$ = this.chatConnectionService.onAuthenticating$;
     this.onOnline$ = this.chatConnectionService.onOnline$;
@@ -53,7 +53,7 @@ export class XmppService implements ChatService {
     this.isOffline$ = this.chatConnectionService.isOffline$;
     this.userJid$ = this.chatConnectionService.userJid$;
 
-    this.pluginMap = createPluginMap(this, httpClient, logService, openChatsService);
+    this.pluginMap = createPluginMap(this, httpClient, log, openChatsService);
 
     this.messageService = new XmppMessageService(
       this,

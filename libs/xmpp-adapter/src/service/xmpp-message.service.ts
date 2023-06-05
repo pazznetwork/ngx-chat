@@ -18,13 +18,15 @@ import type {
   UnreadMessageCountService,
 } from '@pazznetwork/xmpp-adapter';
 import {
+  Finder,
   MessageWithBodyStanza,
   nsConference,
   nsMucUser,
-  Stanza,
+  nsPubSubEvent,
   XmppService,
 } from '@pazznetwork/xmpp-adapter';
 import { shareReplay } from 'rxjs/operators';
+import { getUniqueId } from '@pazznetwork/strophets';
 
 /**
  * Part of the XMPP Core Specification
@@ -41,7 +43,6 @@ export class XmppMessageService implements MessageService {
     private readonly chatService: XmppService,
     private readonly messageArchivePlugin: MessageArchivePlugin,
     private readonly multiUserPlugin: MultiUserChatPlugin,
-    // private readonly messageState: MessageStatePlugin,
     messageCarbonPlugin: MessageCarbonsPlugin,
     unreadMessageCount: UnreadMessageCountService
   ) {
@@ -104,6 +105,7 @@ export class XmppMessageService implements MessageService {
       .t(body);
 
     const message = {
+      id: getUniqueId('msg-' + recipient.jid.toString() + '-'),
       direction: Direction.out,
       body,
       datetime: new Date(await firstValueFrom(this.chatService.pluginMap.entityTime.getNow())),
@@ -114,12 +116,8 @@ export class XmppMessageService implements MessageService {
 
     // TODO: on rejection mark message that it was not sent successfully
     try {
-      const sendMessageStanza = await messageBuilder.send();
-      const sendMessage: Message = {
-        id: sendMessageStanza.getAttribute('id') as string,
-        ...message,
-      };
-      recipient.messageStore.addMessage(sendMessage);
+      await messageBuilder.send();
+      recipient.messageStore.addMessage(message);
     } catch (rej) {
       throw new Error(
         `rejected message; message=${JSON.stringify(message)}, rejection=${JSON.stringify(rej)}`
@@ -129,75 +127,115 @@ export class XmppMessageService implements MessageService {
 
   /**
    *
-   * @param messageStanza messageStanza to handle from connection, mam or other message extending plugins
-   * @param archiveDelayElement only provided by MAM
+   * @param stanza message to handle from connection, mam or other message extending plugins
    */
-  async handleMessageStanza(
-    messageStanza: MessageWithBodyStanza,
-    archiveDelayElement?: Stanza
-  ): Promise<boolean> {
-    if (messageStanza.querySelector('error')) {
+  async handleMessageStanza(stanza: MessageWithBodyStanza): Promise<boolean> {
+    if (stanza.querySelector('error')) {
       // The recipient's account does not exist on the server.
       // The recipient is offline and the server is not configured to store offline messages for later delivery.
       // The recipient's client or server has some temporary issue that prevents message delivery.
       return true;
     }
-    // result as first child comes from mam should call directly from there with the archive delay
-    // received as first child comes from carbons should call directly from there with the archive delay
-    if (
-      messageStanza.querySelector('result') ||
-      messageStanza.querySelector('received') ||
-      messageStanza.querySelector('forwarded')
-    ) {
-      return true;
-    }
+
+    const messageElement = Finder.create(stanza)
+      .searchByTag('result')
+      .searchByTag('forwarded')
+      .searchByTag('message').result;
+
+    const delayElement = Finder.create(stanza)
+      .searchByTag('result')
+      .searchByTag('forwarded')
+      .searchByTag('delay').result;
+
+    const eventElement = Finder.create(stanza)
+      .searchByTag('result')
+      .searchByTag('forwarded')
+      .searchByTag('message')
+      .searchByTag('event')
+      .searchByNamespace(nsPubSubEvent).result;
+
+    const messageFromArchive = !!delayElement;
+    // if is from archive get the inner message with type attribute
+    const messageStanza = messageFromArchive
+      ? (stanza.querySelector('message') as Element)
+      : stanza;
+
     const me = await firstValueFrom(this.chatService.chatConnectionService.userJid$);
     const to = messageStanza.getAttribute('to');
     if (!to) {
       throw new Error('"to" cannot be undefined');
     }
+    const from = messageElement?.getAttribute('from');
     const isAddressedToMe = parseJid(me).bare().equals(parseJid(to).bare());
     const messageDirection = isAddressedToMe ? Direction.in : Direction.out;
-
-    const messageFromArchive = archiveDelayElement != null;
-
-    const delayElement = archiveDelayElement ?? messageStanza.querySelector('delay');
     const stamp = delayElement?.getAttribute('stamp');
     const datetime = stamp
       ? new Date(stamp)
       : new Date(await firstValueFrom(this.chatService.pluginMap.entityTime.getNow()));
 
-    const message = {
-      id: messageStanza.querySelector('stanza-id')?.id as string,
-      body: messageStanza.querySelector('body')?.textContent?.trim() as string,
-      direction: messageDirection,
-      datetime,
-      delayed: !!delayElement,
-      fromArchive: messageFromArchive,
-    };
+    // result as first child comes from mam should call directly from there with the archive delay
+    // received as first child comes from carbons should call directly from there with the archive delay
+    if (messageStanza.querySelector('received')) {
+      if (!messageElement) {
+        return true;
+      }
+      // body can be missing on type=chat messageElements
+      const body = messageElement.querySelector('body')?.textContent?.trim() ?? '';
 
-    const contactJid = isAddressedToMe
-      ? messageStanza.getAttribute('from')
-      : messageStanza.getAttribute('to');
-    const contact = await this.chatService.contactListService.getOrCreateContactById(
-      contactJid as string
-    );
-
-    contact.messageStore.addMessage(message);
-
-    const invites = Array.from(messageStanza.querySelectorAll('x'));
-    const isRoomInviteMessage =
-      invites.find((el) => el.getAttribute('xmlns') === nsMucUser) ||
-      invites.find((el) => el.getAttribute('xmlns') === nsConference);
-
-    if (isRoomInviteMessage) {
-      contact.newRoomInvitation(this.extractInvitationFromMessage(messageStanza));
-    }
-
-    if (messageDirection === Direction.in && !messageFromArchive) {
+      const message: Message = {
+        id: messageElement.querySelector('stanza-id')?.id as string,
+        body,
+        direction: messageDirection,
+        datetime,
+        delayed: false,
+        fromArchive: false,
+      };
+      const contactJid = messageDirection === Direction.in ? from : to;
+      const contact = await this.chatService.contactListService.getOrCreateContactById(
+        contactJid as string
+      );
+      contact.messageStore.addMessage(message);
       this.messageSubject.next(contact);
+
+      return true;
     }
-    return true;
+
+    if (messageFromArchive && eventElement) {
+      const itemsElement = eventElement?.querySelector('items');
+
+      if (!itemsElement) {
+        throw new Error('No itemsElement to handle from archive');
+      }
+
+      const itemElements = Array.from(itemsElement.querySelectorAll('item'));
+      const messagesHandled = await Promise.all(
+        itemElements.reduce((acc: Promise<boolean>[], itemEl) => {
+          const message = itemEl.querySelector('message');
+          if (message && delayElement) {
+            acc.push(
+              this.handleMessage(
+                message,
+                messageDirection,
+                datetime,
+                messageFromArchive,
+                messageFromArchive
+              )
+            );
+          }
+
+          return acc;
+        }, [])
+      );
+      return messagesHandled.every((val) => val);
+    }
+
+    return this.handleMessage(
+      messageStanza,
+      messageDirection,
+      datetime,
+      messageFromArchive,
+      messageFromArchive
+    );
   }
 
   private extractInvitationFromMessage(messageStanza: MessageWithBodyStanza): Invitation {
@@ -226,5 +264,53 @@ export class XmppMessageService implements MessageService {
     }
 
     throw new Error(`unknown invitation format: ${messageStanza.toString()}`);
+  }
+
+  private async handleMessage(
+    messageStanza: Element,
+    direction: Direction,
+    datetime: Date,
+    delayed: boolean,
+    messageFromArchive: boolean
+  ): Promise<boolean> {
+    const type = messageStanza.getAttribute('type');
+    if (type === 'chat') {
+      const message = {
+        id: messageStanza.querySelector('stanza-id')?.id as string,
+        body: messageStanza.querySelector('body')?.textContent?.trim() as string,
+        direction,
+        datetime,
+        delayed,
+        fromArchive: messageFromArchive,
+      };
+
+      const contactJid =
+        direction === Direction.in
+          ? messageStanza.getAttribute('from')
+          : messageStanza.getAttribute('to');
+      const contact = await this.chatService.contactListService.getOrCreateContactById(
+        contactJid as string
+      );
+
+      contact.messageStore.addMessage(message);
+
+      const invites = Array.from(messageStanza.querySelectorAll('x'));
+      const isRoomInviteMessage =
+        invites.find((el) => el.getAttribute('xmlns') === nsMucUser) ||
+        invites.find((el) => el.getAttribute('xmlns') === nsConference);
+
+      if (isRoomInviteMessage) {
+        contact.newRoomInvitation(this.extractInvitationFromMessage(messageStanza));
+      }
+
+      if (direction === Direction.in && !messageFromArchive) {
+        this.messageSubject.next(contact);
+      }
+      return true;
+    } else if (type === 'groupchat' || this.multiUserPlugin.isRoomInvitationStanza(messageStanza)) {
+      return this.multiUserPlugin.handleRoomMessageStanza(messageStanza);
+    } else {
+      throw new Error(`unknown archived message type: ${String(type)}`);
+    }
   }
 }

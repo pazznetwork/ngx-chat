@@ -4,10 +4,9 @@ import { MessageStore } from './message-store';
 import { isJid, Recipient } from './recipient';
 import type { OccupantChange } from './occupant-change';
 import { JID, parseJid } from '../jid';
-import { inject } from '@angular/core';
 import type { XmlSchemaForm } from './xml-schema-form';
-import { LOG_SERVICE_TOKEN } from '../log.token';
 import type { RoomOccupant } from './room-occupant';
+import type { Log } from './log';
 
 // noinspection SpellCheckingInspection
 export const dummyAvatarRoom =
@@ -33,8 +32,6 @@ export class Room implements Recipient {
   readonly occupants$ = this.occupantsSubject.asObservable();
   private _name?: string;
 
-  private readonly logService = inject(LOG_SERVICE_TOKEN);
-
   get nick(): string | undefined {
     return this.occupantJid?.resource;
   }
@@ -55,7 +52,7 @@ export class Room implements Recipient {
     this._name = name != null ? name : this.jid.local;
   }
 
-  constructor(roomJid: JID, name?: string) {
+  constructor(private readonly logService: Log, roomJid: JID, name?: string) {
     this.jid = roomJid.bare();
     this.name = name;
   }

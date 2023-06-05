@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
   Contact,
   Direction,
   JID,
+  Log,
+  LOG_SERVICE_TOKEN,
   MessageState,
   parseJid,
   Room,
@@ -83,9 +85,11 @@ export class UiComponent implements OnInit {
     // </ngx-chat-message-out>
   ];
 
+  constructor(@Inject(LOG_SERVICE_TOKEN) readonly logService: Log) {}
+
   ngOnInit(): void {
     this.contact = new Contact(this.otherContactJid.toString(), 'chat partner name');
-    this.room = new Room(this.myJid);
+    this.room = new Room(this.logService, this.myJid);
 
     this.add({
       body: 'This is an incoming example message',

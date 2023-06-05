@@ -53,7 +53,7 @@ export function createPluginMap(
     block,
     bookmark: new BookmarkPlugin(xmppService),
     entityTime,
-    mam: new MessageArchivePlugin(xmppService, logService),
+    mam: new MessageArchivePlugin(xmppService),
     messageCarbon: new MessageCarbonsPlugin(xmppService),
     /*    messageState: new MessageStatePlugin(
       publishSubscribePlugin,

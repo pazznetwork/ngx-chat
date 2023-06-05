@@ -4,13 +4,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  inject,
-  InjectionToken,
+  Inject,
   Input,
   OnInit,
   Output,
 } from '@angular/core';
-import { combineLatest, Observable } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN, ChatListStateService, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
@@ -78,13 +77,18 @@ export class RosterListComponent implements OnInit {
   @Input()
   contactsUnaffiliated$?: Observable<Contact[]>;
 
+  @Input()
+  blocked$?: Observable<Contact[]>;
+
   hasNoContacts$?: Observable<boolean>;
 
   @Output()
   rosterStateChanged = new EventEmitter<'hidden' | 'shown'>();
 
-  readonly chatService = inject(CHAT_SERVICE_TOKEN as any as InjectionToken<ChatService>);
-  private readonly chatListService = inject(ChatListStateService);
+  constructor(
+    @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
+    private readonly chatListService: ChatListStateService
+  ) {}
 
   ngOnInit(): void {
     this.contacts$ = this.contacts$ ?? this.chatService.contactListService.contactsSubscribed$;
@@ -92,17 +96,14 @@ export class RosterListComponent implements OnInit {
       this.contactRequestsReceived$ ?? this.chatService.contactListService.contactRequestsReceived$;
     this.contactsUnaffiliated$ =
       this.contactsUnaffiliated$ ?? this.chatService.contactListService.contactsUnaffiliated$;
+    this.blocked$ = this.blocked$ ?? this.chatService.contactListService.blockedContacts$;
 
-    this.hasNoContacts$ = combineLatest([
+    this.hasNoContacts$ = merge(
       this.contacts$,
       this.contactRequestsReceived$,
       this.contactsUnaffiliated$,
-    ]).pipe(
-      map(
-        ([contacts, received, unaffiliated]) =>
-          contacts?.length + received?.length + unaffiliated?.length === 0
-      )
-    );
+      this.blocked$
+    ).pipe(map((arr) => arr.length === 0));
   }
 
   onClickRecipient(recipient: Recipient): void {

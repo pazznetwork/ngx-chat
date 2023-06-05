@@ -81,6 +81,8 @@ export class BlockPlugin implements ChatPlugin {
 
     const blockListItems = blockListResponse.querySelector('blocklist')?.querySelectorAll('item');
 
+    console.log('requestBlockedJIDs');
+
     if (blockListItems == null) {
       return new Set<string>();
     }

@@ -4,10 +4,8 @@ import type {
   ContactListService,
   ContactSubscription,
 } from '@pazznetwork/ngx-chat-shared';
-import type { Observable } from 'rxjs';
-import { combineLatest, partition, scan } from 'rxjs';
+import { combineLatest, map, Observable, startWith } from 'rxjs';
 import type { BlockPlugin, RosterPlugin } from '@pazznetwork/xmpp-adapter';
-import { switchMap } from 'rxjs/operators';
 
 export class XmppContactListService implements ContactListService {
   readonly blockedContactJIDs$: Observable<Set<string>>;
@@ -28,22 +26,30 @@ export class XmppContactListService implements ContactListService {
     this.contactRequestsReceived$ = rosterPlugin.contactRequestsReceived$;
     this.contactRequestsSent$ = rosterPlugin.contactRequestsSent$;
     this.contactsUnaffiliated$ = rosterPlugin.contactsUnaffiliated$;
-
     this.blockedContactJIDs$ = blockPlugin.blockedContactJIDs$;
 
-    const [blocked$, notBlocked$] = partition(
-      combineLatest([
-        this.contacts$.pipe(switchMap((contacts) => contacts)),
-        this.blockedContactJIDs$,
-      ]),
-      ([contact, blockedJIDs]) => blockedJIDs.has(contact.jid.toString())
+    const contactsWithBlockedPair$ = combineLatest([this.contacts$, this.blockedContactJIDs$]).pipe(
+      map(([contacts, blockedJIDs]) => {
+        const blocked: Contact[] = [];
+        const notBlocked: Contact[] = [];
+        for (const contact of contacts) {
+          if (blockedJIDs.has(contact.jid.toString())) {
+            blocked.push(contact);
+          } else {
+            notBlocked.push(contact);
+          }
+        }
+        return { blocked, notBlocked };
+      })
     );
 
-    this.blockedContacts$ = blocked$.pipe(
-      scan((acc, [contact]): Contact[] => [contact, ...acc], [] as Contact[])
+    this.blockedContacts$ = contactsWithBlockedPair$.pipe(
+      map(({ blocked }) => blocked),
+      startWith([])
     );
-    this.notBlockedContacts$ = notBlocked$.pipe(
-      scan((acc, [contact]): Contact[] => [contact, ...acc], [] as Contact[])
+    this.notBlockedContacts$ = contactsWithBlockedPair$.pipe(
+      map(({ notBlocked }) => notBlocked),
+      startWith([])
     );
   }
 

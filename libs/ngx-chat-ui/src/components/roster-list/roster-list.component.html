@@ -74,6 +74,21 @@
     </ng-container>
   </ng-container>
 
+  <ng-container *ngIf="blocked$ | async as blocked">
+    <ng-container *ngIf="blocked.length > 0">
+      <div class="roster-group-header">{{ chatService.translations.contactsBlocked }}</div>
+      <div class="contact-list-wrapper">
+        <ngx-chat-roster-recipient
+          *ngFor="let contact of blocked"
+          [recipient]="contact"
+          (click)="onClickRecipient(contact)"
+        >
+        </ngx-chat-roster-recipient>
+      </div>
+    </ng-container>
+  </ng-container>
+
+
   <div class="roster-list__empty" *ngIf="hasNoContacts$ | async">
     {{ chatService.translations.noContacts }}
   </div>

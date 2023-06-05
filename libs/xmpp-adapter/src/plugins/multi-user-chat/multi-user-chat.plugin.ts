@@ -94,7 +94,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  private handlers: { destroy?: Handler; presence?: Handler; message?: Handler } = {};
+  private handlers: { destroy?: Handler; presence?: Handler } = {};
   constructor(
     private readonly xmppService: XmppService,
     private readonly logService: Log,
@@ -130,11 +130,6 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       { ns: nsMuc, name: 'presence' },
       { ignoreNamespaceFragment: true, matchBareFromJid: true }
     );
-
-    this.handlers.message = await connection.addHandler(
-      (stanza) => this.handleRoomMessageStanza(stanza),
-      { type: 'groupchat', name: 'message' }
-    );
   }
 
   async unregisterHandler(connection: XmppConnectionService): Promise<void> {
@@ -143,9 +138,6 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     }
     if (this.handlers.presence) {
       await connection.deleteHandler(this.handlers.presence);
-    }
-    if (this.handlers.message) {
-      await connection.deleteHandler(this.handlers.message);
     }
   }
 
@@ -348,7 +340,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     return [...members.values()];
   }
 
-  async sendMessage(roomJid: string, body: string, thread?: string): Promise<void> {
+  async sendMessage(roomJid: string, body: string, thread?: string): Promise<Element> {
     const from = await firstValueFrom(this.xmppService.chatConnectionService.userJid$);
     const roomMessageBuilder = thread
       ? this.xmppService.chatConnectionService
@@ -360,7 +352,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
           .$msg({ from, to: roomJid, type: 'groupchat' })
           .c('body', {}, body);
 
-    await roomMessageBuilder.send();
+    return roomMessageBuilder.send();
   }
 
   /**
@@ -663,7 +655,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     const createdRoom = statusCodes.includes(EnteringRoomStatusCode.NewRoomCreated);
 
     if (isCurrentUser && createdRoom) {
-      this.createdRoomSubject.next(new Room(occupantJid.bare()));
+      this.createdRoomSubject.next(new Room(this.logService, occupantJid.bare()));
       return true;
     }
 
@@ -733,7 +725,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     roomJid = roomJid.bare();
     let room = await firstValueFrom(this.getRoomByJid(roomJid));
     if (!room) {
-      room = new Room(roomJid);
+      room = new Room(this.logService, roomJid);
       this.createdRoomSubject.next(room);
     }
     return room;
@@ -778,16 +770,13 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         const jid = item.getAttribute('jid') as string;
         const name = item.getAttribute('name') as string;
 
-        acc.push(new Room(parseJid(jid), name));
+        acc.push(new Room(this.logService, parseJid(jid), name));
 
         return acc;
       }, []);
   }
 
-  private async handleRoomMessageStanza(
-    stanza: Stanza,
-    archiveDelayElement?: Stanza
-  ): Promise<boolean> {
+  async handleRoomMessageStanza(stanza: Stanza, archiveDelayElement?: Stanza): Promise<boolean> {
     if (stanza?.querySelector('body')?.textContent?.trim()) {
       const delayElement = archiveDelayElement ?? stanza.querySelector('delay');
       const stamp = delayElement?.getAttribute('stamp');
@@ -835,7 +824,8 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         return true;
       }
 
-      const room = await firstValueFrom(this.getRoomByJid(roomJid));
+      // should be 'await firstValueFrom(this.getRoomByJid(roomJid))' and we should ensure Room exists with the presence handler
+      const room = await this.getOrCreateRoom(roomJid);
 
       if (!room) {
         throw new Error('Can not handle message for undefined room');
