@@ -196,6 +196,21 @@ A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-
 
 The source code for ngx-chat can be found in the `libs/ngx-chat-ui` folder. The demo application is in the `apps/demo` folder.
 
+Create a ```.secrets-const.ts``` in the `libs/ngx-xmpp/src` directory providing the following constants:
+
+```ts
+export const devXmppDomain = '<YourDomain>';
+export const devXmppJid = '<YourAdminJid>';
+export const devXmppPassword = '<YourAdminXmppPassword>';
+```
+
+Copy the key and .pem file you use for your local ejabberd server to the following paths:
+```
+apps/demo/src/local.entenhausen.pazz.de-key.pem
+apps/demo/src/local.entenhausen.pazz.de.pem
+```
+
+
 ```bash
 # clone this repository
 git clone git@github.com:pazznetwork/ngx-chat.git
