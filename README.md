@@ -50,23 +50,25 @@ application.
 
 ### Installation and usage
 
-These instructions require Angular 12.
+These instructions require Angular 14.
 
 First install ngx-chat and its dependencies via npm:
 
 ```bash
-npm install --save @pazznetwork/ngx-chat @pazznetwork/strophets rxjs@7.5.7
+npm install --save @pazznetwork/strophets @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat rxjs@7.5.7
 ```
-
-After that, import ngx-chat in your root module:
+or via yarn:
+```bash
+yarn add @pazznetwork/strophets @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat
+```
+After that, import ngx-chat in the layer from which you want to use it:
 
 ```
 @NgModule({
     ...
     imports: [
         ...
-        NgxChatModule.forRoot(),
-        BrowserAnimationsModule, // alternatively NoopAnimationsModule
+        NgxChatModule,
     ],
     ...
 })
@@ -78,6 +80,56 @@ Add the `ngx-chat`-component at the end of your root component template:
 <ngx-chat></ngx-chat>
 ```
 
+Or create a wrapping component like this:
+
+```ts
+import { Component } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+
+@Component({
+    selector: 'custom-chat',
+    template: `
+        <ngx-chat
+            id="ngx-chat"
+            [translations]="{
+                acceptSubscriptionRequest: 'chat.acceptSubscriptionRequest' | translate,
+                block: 'chat.block' | translate,
+                blockAndReport: 'chat.blockAndReport' | translate,
+                contactRequestIn: 'chat.contactRequestIn' | translate,
+                contactRequestOut: 'chat.contactRequestOut' | translate,
+                contacts: 'chat.contacts' | translate,
+                contactsUnaffiliated: 'chat.contactsUnaffiliated' | translate,
+                dateFormat: 'general.dateFormat' | translate,
+                denySubscriptionRequest: 'chat.denySubscriptionRequest' | translate,
+                dismiss: 'chat.dismiss' | translate,
+                dropMessage: 'chat.dropMessage' | translate,
+                locale: translateService.currentLang,
+                noContacts: 'chat.noContacts' | translate,
+                noMessages: 'chat.noMessages' | translate,
+                placeholder: 'chat.placeholder' | translate,
+                presence: {
+                    present: 'chat.presence.present' | translate,
+                    unavailable: 'chat.presence.unavailable' | translate,
+                    away: 'chat.presence.away' | translate
+                },
+                rooms: 'chat.rooms' | translate,
+                subscriptionRequestMessage: 'chat.subscriptionRequestMessage' | translate,
+                timeFormat: 'general.timeFormat' | translate
+            }"
+            [rosterState]="isThisMobile ? 'shown' : 'hidden'
+            "
+            class="responsive-medium-or-greater-block"
+        >
+        </ngx-chat>
+    `,
+})
+export class CustomChatComponent {
+    readonly isThisMobile = window?.innerWidth < 768;
+    constructor(public readonly translateService: TranslateService) {}
+}
+
+```
+
 You are now ready to go. You will not see anything until you log in. Log in via `ngx-chat` wherever you want (e.g. in a component or a
 service)
 by injecting `ChatService` and calling `login`:
@@ -86,20 +138,10 @@ by injecting `ChatService` and calling `login`:
 constructor(@Inject(CHAT_SERVICE_TOKEN) chatService: ChatService) {
     chatService.logIn({
         domain: 'ngx-chat.example',
-        service: 'wss://ngx-chat.example:5280/websocket',
-        password: 'password',
         username: 'someuser',
+        password: 'password'
     });
 }
-```
-
-Add the following to polyfills.ts:
-
-```
-/***************************************************************************************************
- * APPLICATION IMPORTS
- */
-(window as any).global = window;
 ```
 
 _Optional_: body padding when roster list is expanded
@@ -141,8 +183,8 @@ A: Yes, if the following criteria are met:
 - the common name (CN) matches the uri of the service you are connecting to
 
 **Q: Can ngx-chat be used without the UI?**  
-A: Yes. Inject the chat service via `@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService`, login via `logIn` and start sending
-messages via the `sendMessage` method.
+A: Yes. Use the  @pazznetwork/ngx-xmpp angular package directly and leave out the import and installation of @pazznetwork/ngx-chat.
+If you don't need an angular package, you can also use @pazznetwork/xmpp-adapter directly.
 
 **Q: My question is not answered**  
 A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-chat/issues/new).
@@ -150,21 +192,9 @@ A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-
 ## Get Involved
 
 ### Development
-
-**Recommended Tools**
-Local Proxy:
-For MacOs proxyman. Install with `brew install --cask proxyman` needs permission as system proxy, sets one self in connection as webproxy
-on unexpected shutdown one should reset the settings oneself.
-
-**WARNING**
-Pay attention to your imports in the testing app:
-`'@pazznetwork/ngx-chat'` instead
-of `'../../../projects/pazznetwork/ngx-chat/src/lib/services/adapters/xmpp/plugins/multi-user-chat.plugin'`
-
 **Pull requests are welcome!**
 
-The source code for ngx-chat can be found in the `projects/pazznetwork/ngx-chat` folder. The demo application is in the `src` folder in the
-project root.
+The source code for ngx-chat can be found in the `libs/ngx-chat-ui` folder. The demo application is in the `apps/demo` folder.
 
 ```bash
 # clone this repository
@@ -174,47 +204,35 @@ cd ngx-chat
 # install dependencies
 npm install
 
-# build the library continuously
-ng build @pazznetwork/ngx-chat --watch
+# build the library
+npm run build:all
 
-# (in another terminal) build the sample app continuously
-# will run the demo application on
+# Build the sample app continuously and run the demo application on
 # http://localhost:4200
-ng serve
+npm start
 ```
 
-### Build the plugin
+### Testing
 
-`npm run build-lib`
+To test the XMPP implementation run the karma tests in the `libs/ngx-xmpp` folder from the root folder:
 
-### Test the integration of your project with the plugin
+```bash
+ng test ngx-xmpp
+```
 
-`$fileOutDirPath` is your `npm run build` out-dir path
+To test the ngx-chat angular components run the demo e2e project from the root folder:
 
-`npm install $fileOutDirPath`
-
-### Run the plugin tests
-
-`npm run test:once`
+```bash
+ng e2e demo-e2e
+```
 
 ### Committing
 
 For clean and standardised commit messages we use commit lint, for the format see: https://www.conventionalcommits.org/en/v1.0.0/.
 
 ### Releasing
-
-`npm run build-lib` is necessary because otherwise creates a package with ngcc and throws on publish the following error:  
-`trying to publish a package that has been compiled by ngcc`
-
 ```bash
-# increment version number in projects/pazznetwork/ngx-chat/package.json
-VERSION=0.14.0 # change accordingly
-npm run changelog
-git add .
-git commit -m "docs: release $VERSION"
-git tag v$VERSION
-git push origin master --tags
-./push-release.sh
+npm run publish:all
 ```
 
 ### Contributing

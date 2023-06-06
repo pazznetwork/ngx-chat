@@ -2,8 +2,8 @@
 
 ## Introduction
 
-This file documents design choices which may lead to missing edge case implementattions or other decisions differing from
-the standard or the original strophejs library choices or goals.
+This file documents design choices which may lead to missing edge case implementations or other decisions differing from
+the standard or the original StropheJs library choices or goals.
 
 ## 1.1 No route attribute for BOSH XML element
 

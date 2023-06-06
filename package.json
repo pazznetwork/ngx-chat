@@ -12,7 +12,13 @@
     "publish:internal:shared": "cd dist/libs/ngx-chat-shared && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/; cd .. && cd .. && cd ..",
     "publish:internal:adapter": "cd dist/libs/xmpp-adapter && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/; cd .. && cd .. && cd ..",
     "publish:internal:xmpp": "cd dist/libs/ngx-xmpp && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/; cd .. && cd .. && cd ..",
-    "publish:internal:ui": "cd dist/libs/ngx-chat-ui && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/; cd .. && cd .. && cd .."
+    "publish:internal:ui": "cd dist/libs/ngx-chat-ui && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/; cd .. && cd .. && cd ..",
+    "publish:all": "npm run build:all && npm run publish:strophe && npm run publish:shared && npm run publish:adapter && npm run publish:xmpp && npm run publish:ui",
+    "publish:strophe": "cd dist/libs/strophe-ts && npm version patch && npm publish; cd .. && cd .. && cd ..",
+    "publish:shared": "cd dist/libs/ngx-chat-shared && npm version patch && npm publish; cd .. && cd .. && cd ..",
+    "publish:adapter": "cd dist/libs/xmpp-adapter && npm version patch && npm publish; cd .. && cd .. && cd ..",
+    "publish:xmpp": "cd dist/libs/ngx-xmpp && npm version patch && npm publish; cd .. && cd .. && cd ..",
+    "publish:ui": "cd dist/libs/ngx-chat-ui && npm version patch && npm publish; cd .. && cd .. && cd .."
   },
   "dependencies": {
     "rxjs": "7.5.7",
