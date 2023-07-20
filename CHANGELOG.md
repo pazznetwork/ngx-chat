@@ -1,3 +1,13 @@
+<a name="0.15.0"></a>
+# [0.15.0](https://github.com/pazznetwork/ngx-chat/compare/v0.14.14...v0.15.0) (2023-07-20)
+
+
+### Features
+
+* upgrade to angular 15 ([4881945](https://github.com/pazznetwork/ngx-chat/commit/4881945))
+
+
+
 <a name="0.14.14"></a>
 ## [0.14.14](https://github.com/pazznetwork/ngx-chat/compare/v0.14.13...v0.14.14) (2022-10-24)
 
