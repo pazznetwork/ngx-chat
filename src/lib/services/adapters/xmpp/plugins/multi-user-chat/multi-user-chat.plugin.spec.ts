@@ -18,7 +18,7 @@ import { Affiliation } from './affiliation';
 import { Role } from './role';
 import { OccupantNickChange } from './occupant-change';
 import { Invitation } from './invitation';
-import { mucNs, mucAdminNs, mucRoomConfigFormNs, mucUserNs } from './multi-user-chat-constants';
+import { mucAdminNs, mucNs, mucRoomConfigFormNs, mucUserNs } from './multi-user-chat-constants';
 import { ServiceDiscoveryPlugin } from '../service-discovery.plugin';
 
 const defaultRoomConfiguration = {
@@ -83,7 +83,7 @@ describe('multi user chat plugin', () => {
                             xml('error', {by: 'me@example.com', type: 'cancel'},
                                 xml('item-not-found', {xmlns: XmppResponseError.ERROR_ELEMENT_NS}),
                             ),
-                        ),
+                        ) as Stanza,
                     );
                 } else if (stanza.name === 'presence') {
                     chatConnectionService.onStanzaReceived(
@@ -93,7 +93,7 @@ describe('multi user chat plugin', () => {
                                 xml('not-allowed', {xmlns: XmppResponseError.ERROR_ELEMENT_NS}),
                                 xml('text', {xmlns: XmppResponseError.ERROR_ELEMENT_NS}, `Not allowed for user ${stanza.attrs.from}!`),
                             ),
-                        ),
+                        ) as Stanza,
                     );
                 } else {
                     throw new Error(`Unexpected stanza: ${stanza.toString()}`);
@@ -113,14 +113,14 @@ describe('multi user chat plugin', () => {
 
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
                 if (stanza.name === 'iq' && stanza.getChild('query')) {
-                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza) as Stanza);
                 } else {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: stanza.attrs.to, to: stanza.attrs.from, id: stanza.attrs.id},
                             xml('x', {xmlns: mucUserNs},
                                 xml('item', {affiliation: Affiliation.none, role: Role.visitor}),
                             ),
-                        ),
+                        ) as Stanza,
                     );
                 }
             });
@@ -145,7 +145,7 @@ describe('multi user chat plugin', () => {
                                 xml('status', {code: '110'}),
                                 xml('status', {code: '201'}),
                             ),
-                        ),
+                        ) as Stanza,
                     );
                 } else if (stanza.name === 'iq') {
                     chatConnectionService.onStanzaReceived(
@@ -156,7 +156,7 @@ describe('multi user chat plugin', () => {
                                 id: stanza.attrs.id,
                             },
                             xml('query', {xmlns: 'http://jabber.org/protocol/muc#owner'}),
-                        ),
+                        ) as Stanza,
                     );
                 } else {
                     fail('unexpected stanza: ' + stanza.toString());
@@ -176,7 +176,7 @@ describe('multi user chat plugin', () => {
         it('should handle room configurations correctly', async () => {
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
                 if (stanza.name === 'presence') {
-                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza) as Stanza);
                 } else if (stanza.name === 'iq' && stanza.attrs.type === 'get') {
                     chatConnectionService.onStanzaReceived(
                         xml('iq', {
@@ -192,7 +192,7 @@ describe('multi user chat plugin', () => {
                                     ),
                                 ),
                             ),
-                        ),
+                        ) as Stanza,
                     );
                 } else if (stanza.name === 'iq' && stanza.attrs.type === 'set') {
                     chatConnectionService.onStanzaReceived(
@@ -200,7 +200,7 @@ describe('multi user chat plugin', () => {
                             xml('error', {type: 'modify'},
                                 xml('not-acceptable', {xmlns: XmppResponseError.ERROR_ELEMENT_NS}),
                             ),
-                        ),
+                        ) as Stanza,
                     );
                 } else {
                     fail('unexpected stanza: ' + stanza.toString());
@@ -220,11 +220,11 @@ describe('multi user chat plugin', () => {
 
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
                 if (stanza.name === 'presence') {
-                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza) as Stanza);
                 } else if (stanza.name === 'iq' && stanza.attrs.type === 'get') {
-                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza) as Stanza);
                 } else if (stanza.name === 'iq' && stanza.attrs.type === 'set') {
-                    const configurationList = stanza.getChild('query').getChild('x');
+                    const configurationList = stanza.getChild('query').getChild('x') as Stanza;
                     expectConfigurationOption(configurationList, 'muc#roomconfig_publicroom', 'false');
                     expectConfigurationOption(configurationList, 'muc#roomconfig_whois', 'anyone');
                     expectConfigurationOption(configurationList, 'muc#roomconfig_membersonly', 'true');
@@ -235,7 +235,7 @@ describe('multi user chat plugin', () => {
                             to: stanza.attrs.from,
                             type: 'result',
                             id: stanza.attrs.id,
-                        }),
+                        }) as Stanza,
                     );
                 } else {
                     fail('unexpected stanza: ' + stanza.toString());
@@ -253,9 +253,9 @@ describe('multi user chat plugin', () => {
 
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
                 if (stanza.name === 'iq') {
-                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza) as Stanza);
                 } else {
-                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza) as Stanza);
                 }
             });
 
@@ -280,7 +280,7 @@ describe('multi user chat plugin', () => {
                         type: 'groupchat',
                     },
                     xml('body', {}, 'message content here'),
-                ),
+                ) as Stanza,
             );
 
         });
@@ -304,12 +304,12 @@ describe('multi user chat plugin', () => {
                             },
                             xml('body', {}, 'message body'),
                             xml('origin-id', {id: stanza.getChild('origin-id').attrs.id}),
-                        ),
+                        ) as Stanza,
                     );
                 } else if (stanza.name === 'presence') {
-                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza) as Stanza);
                 } else if (stanza.name === 'iq') {
-                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza) as Stanza);
                 }
 
             });
@@ -338,7 +338,7 @@ describe('multi user chat plugin', () => {
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
                 if (stanza.name === 'iq') {
                     if (stanza.attrs.type === 'get') {
-                        chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
+                        chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza) as Stanza);
                     } else if (stanza.attrs.type === 'set') {
                         chatConnectionService.onStanzaReceived(
                             xml('presence', {
@@ -351,11 +351,11 @@ describe('multi user chat plugin', () => {
                                     xml('status', {code: '307'}),
                                     xml('status', {code: '110'}),
                                 ),
-                            ),
+                            ) as Stanza,
                         );
                     }
                 } else {
-                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza) as Stanza);
                 }
             });
 
@@ -381,7 +381,7 @@ describe('multi user chat plugin', () => {
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
                 if (stanza.name === 'iq') {
                     if (stanza.attrs.type === 'get' && stanza.getChild('query', 'http://jabber.org/protocol/disco#info')) {
-                        chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
+                        chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza) as Stanza);
                     } else if (stanza.attrs.type === 'get') {
                         const affiliation = stanza.getChild('query')?.getChild('item')?.attrs.affiliation;
                         if (affiliation && affiliation === Affiliation.member) {
@@ -400,7 +400,7 @@ describe('multi user chat plugin', () => {
                                             nick: otherOccupantJid.resource,
                                         }),
                                     ),
-                                ),
+                                ) as Stanza,
                             );
                         } else {
                             chatConnectionService.onStanzaReceived(
@@ -411,7 +411,7 @@ describe('multi user chat plugin', () => {
                                         type: 'result',
                                     },
                                     xml('query', {xmlns: mucAdminNs}),
-                                ),
+                                ) as Stanza,
                             );
                         }
                     } else if (stanza.attrs.type === 'set') {
@@ -429,11 +429,11 @@ describe('multi user chat plugin', () => {
                                     }),
                                     xml('status', {code: '301'}),
                                 ),
-                            ),
+                            ) as Stanza,
                         );
                     }
                 } else if (stanza.name === 'presence') {
-                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza) as Stanza);
                 }
             });
 
@@ -471,7 +471,7 @@ describe('multi user chat plugin', () => {
                                 }),
                                 xml('status', {code: '301'}),
                             ),
-                        ),
+                        ) as Stanza,
                     );
                 } else if (stanza.name === 'iq') {
                     if (stanza.attrs.type === 'get') { // get ban list
@@ -485,7 +485,7 @@ describe('multi user chat plugin', () => {
                                 xml('query', {xmlns: mucAdminNs},
                                     bannedOccupantItem,
                                 ),
-                            ),
+                            ) as Stanza,
                         );
                     } else if (stanza.attrs.type === 'set') { // unban
                         chatConnectionService.onStanzaReceived(
@@ -498,7 +498,7 @@ describe('multi user chat plugin', () => {
                                 xml('query', {xmlns: mucAdminNs},
                                     xml('item', {affiliation: 'none', jid: otherOccupantJid}),
                                 ),
-                            ),
+                            ) as Stanza,
                         );
                     }
                 }
@@ -530,7 +530,7 @@ describe('multi user chat plugin', () => {
                             xml('invite', {from: stanza.attrs.from},
                                 xml('reason', {}, 'reason')),
                         ),
-                    ),
+                    ) as Stanza,
                 );
             });
 
@@ -547,9 +547,9 @@ describe('multi user chat plugin', () => {
         it('should be able to change nick', async (resolve) => {
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
                 if (stanza.getChild('x', mucNs)) {
-                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza) as Stanza);
                 } else if (stanza.name === 'iq') {
-                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza) as Stanza);
                 } else {
                     chatConnectionService.onStanzaReceived(
                         xml('presence', {from: myOccupantJid.toString(), to: stanza.attrs.from, type: 'unavailable'},
@@ -561,7 +561,7 @@ describe('multi user chat plugin', () => {
                                 xml('status', {code: '303'}),
                                 xml('status', {code: '110'}),
                             ),
-                        ),
+                        ) as Stanza,
                     );
                 }
             });
@@ -583,9 +583,9 @@ describe('multi user chat plugin', () => {
         it('should be able to change room topic', async () => {
             xmppClientMock.send.and.callFake((stanza: Stanza) => {
                 if (stanza.name === 'iq') {
-                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockRoomInfoStanza(stanza) as Stanza);
                 } else if (stanza.name === 'presence') {
-                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza));
+                    chatConnectionService.onStanzaReceived(mockJoinPresenceStanza(stanza) as Stanza);
                 } else if (stanza.name === 'message') {
                     chatConnectionService.onStanzaReceived(
                         xml('message', {
@@ -595,7 +595,7 @@ describe('multi user chat plugin', () => {
                                 type: 'groupchat',
                             },
                             xml('subject', {}, stanza.getChildText('subject')),
-                        ),
+                        ) as Stanza,
                     );
                 }
             });

@@ -10,11 +10,12 @@ import { XmppChatAdapter } from '../xmpp-chat-adapter.service';
 import { XmppChatConnectionService } from '../xmpp-chat-connection.service';
 import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessageArchivePlugin } from './message-archive.plugin';
-import SpyObj = jasmine.SpyObj;
 import { MessagePlugin } from './message.plugin';
 import { ServiceDiscoveryPlugin } from './service-discovery.plugin';
 import { MultiUserChatPlugin } from './multi-user-chat/multi-user-chat.plugin';
 import { Room } from './multi-user-chat/room';
+import { Stanza } from '../../../../core/stanza';
+import SpyObj = jasmine.SpyObj;
 
 describe('message archive plugin', () => {
 
@@ -89,7 +90,7 @@ describe('message archive plugin', () => {
         chatAdapter.addPlugins([messageArchivePlugin]);
         chatConnectionService.onOnline(userJid);
 
-        chatConnectionService.onStanzaReceived(chatArchiveStanza);
+        chatConnectionService.onStanzaReceived(chatArchiveStanza as Stanza);
 
         const contacts = chatAdapter.contacts$.getValue();
         expect(contacts.length).toBe(1);
@@ -118,7 +119,7 @@ describe('message archive plugin', () => {
         room.nick = roomJid.resource;
         multiUserChatPlugin.rooms$.next([room]);
 
-        chatConnectionService.onStanzaReceived(groupChatArchiveStanza);
+        chatConnectionService.onStanzaReceived(groupChatArchiveStanza as Stanza);
 
         const roomMessages = multiUserChatPlugin.rooms$.getValue()[0].messages;
 
@@ -147,7 +148,7 @@ describe('message archive plugin', () => {
         room.nick = roomJid.resource;
         multiUserChatPlugin.rooms$.next([room]);
 
-        chatConnectionService.onStanzaReceived(mucSubArchiveStanza);
+        chatConnectionService.onStanzaReceived(mucSubArchiveStanza as Stanza);
 
         const roomMessages = multiUserChatPlugin.rooms$.getValue()[0].messages;
 
@@ -164,7 +165,7 @@ describe('message archive plugin', () => {
     it('should not request messages if message archive plugin is not set ', () => {
         chatConnectionService.onOnline(userJid);
 
-        chatConnectionService.onStanzaReceived(chatArchiveStanza);
+        chatConnectionService.onStanzaReceived(chatArchiveStanza as Stanza);
 
         expect(chatAdapter.contacts$.getValue()).toEqual([]);
     });

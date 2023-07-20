@@ -11,7 +11,7 @@ import {MucComponent} from './routes/muc/muc.component';
             {path: 'ui', component: UiComponent},
             {path: 'muc', component: MucComponent},
             {path: '**', redirectTo: '/'},
-        ], {relativeLinkResolution: 'legacy'}),
+        ], {}),
     ],
     exports: [
         RouterModule,

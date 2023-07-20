@@ -12,8 +12,9 @@ import { XmppClientFactoryService } from '../xmpp-client-factory.service';
 import { MessagePlugin, MessageReceivedEvent } from './message.plugin';
 import { Direction } from '../../../../core/message';
 import { AbstractXmppPlugin } from './abstract-xmpp-plugin';
-import Spy = jasmine.Spy;
 import { EMPTY } from 'rxjs';
+import { Stanza } from '../../../../core/stanza';
+import Spy = jasmine.Spy;
 
 describe('message plugin', () => {
     let chatAdapter: XmppChatAdapter;
@@ -53,8 +54,11 @@ describe('message plugin', () => {
 
         const contactFromMessageObservablePromise = chatAdapter.message$.pipe(first()).toPromise();
 
-        const messageStanza = xml('message', {from: someUserJid.toString(), to: chatConnectionService.userJid.toString()},
-            xml('body', {}, 'message text'));
+        const messageStanza = xml('message', {
+              from: someUserJid.toString(),
+              to: chatConnectionService.userJid.toString()
+          },
+          xml('body', {}, 'message text')) as Stanza;
         await chatConnectionService.onStanzaReceived(messageStanza);
 
         const contactFromMessageObservable = await contactFromMessageObservablePromise;
@@ -84,9 +88,9 @@ describe('message plugin', () => {
         const someUserJid = parseJid('someone@example.com');
 
         await chatConnectionService.onStanzaReceived(
-            xml('message', {from: someUserJid.toString(), to: chatConnectionService.userJid.toString()},
-                xml('delay', {stamp: delay}),
-                xml('body', {}, 'message text')));
+          xml('message', { from: someUserJid.toString(), to: chatConnectionService.userJid.toString() },
+            xml('delay', { stamp: delay }),
+            xml('body', {}, 'message text')) as Stanza);
 
         const someContact = chatAdapter.contacts$.getValue()[0];
         expect(someContact.jidBare.equals(someUserJid)).toBeTrue();
@@ -103,8 +107,11 @@ describe('message plugin', () => {
 
         spyOn(messagePlugin, 'handleStanza').and.callThrough();
 
-        const messageStanza = xml('message', {from: someUserJid.toString(), to: chatConnectionService.userJid.toString()},
-            xml('body', {}, 'message text'));
+        const messageStanza = xml('message', {
+              from: someUserJid.toString(),
+              to: chatConnectionService.userJid.toString()
+          },
+          xml('body', {}, 'message text')) as Stanza;
 
         spyOn(dummyPlugin, 'afterReceiveMessage').and.callFake((message, stanza, event) => {
             if (stanza === messageStanza) {
@@ -135,7 +142,7 @@ describe('message plugin', () => {
             xml('body', {}, 'message text'));
 
         chatConnectionService.stanzaUnknown$.pipe(first()).subscribe((unhandledStanza) => {
-            expect(unhandledStanza).toBe(groupChatStanza);
+            expect(unhandledStanza).toBe(groupChatStanza as Stanza);
             expect(messagePlugin.handleStanza).toHaveBeenCalledOnceWith(unhandledStanza);
             expect((messagePlugin.handleStanza as Spy<typeof messagePlugin.handleStanza>).calls.mostRecent().returnValue).toBeFalse();
             expect(dummyPlugin.afterReceiveMessage).not.toHaveBeenCalled();
@@ -143,7 +150,7 @@ describe('message plugin', () => {
             done();
         });
 
-        await chatConnectionService.onStanzaReceived(groupChatStanza);
+        await chatConnectionService.onStanzaReceived(groupChatStanza as Stanza);
     });
 
     it('should process archived messages but don\'t add them to new chatAdapter.message$ observable', async () => {
@@ -155,10 +162,13 @@ describe('message plugin', () => {
             .pipe(timeoutWith(50, EMPTY), isEmpty())
             .toPromise();
 
-        const messageStanza = xml('message', {from: someUserJid.toString(), to: chatConnectionService.userJid.toString()},
-            xml('body', {}, 'message text'));
+        const messageStanza = xml('message', {
+              from: someUserJid.toString(),
+              to: chatConnectionService.userJid.toString()
+          },
+          xml('body', {}, 'message text')) as Stanza;
 
-        const handled = messagePlugin.handleStanza(messageStanza, xml('delay', {stamp: delay}));
+        const handled = messagePlugin.handleStanza(messageStanza, xml('delay', {stamp: delay}) as Stanza);
 
         expect(handled).toBeTrue();
         expect(await messagesObservableIsEmpty).toBeTrue();
