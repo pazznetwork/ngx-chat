@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 export class JID {
+  /**
+   *
+   * @param local can be undefined for example for conference room node (it than a bare jid)
+   * @param domain never undefined
+   * @param resource can be undefined
+   */
   constructor(
-    readonly local: string,
+    readonly local: string | undefined,
     readonly domain: string,
     readonly resource: string | undefined
   ) {}
 
-  [Symbol.toPrimitive](hint: 'number' | 'string' | 'boolean') {
+  [Symbol.toPrimitive](hint: 'number' | 'string' | 'boolean'): number | string | boolean {
     if (hint === 'number') {
       return NaN;
     }
@@ -35,7 +41,7 @@ export class JID {
    * Comparison function
    * */
   equals(
-    other: { local: string; domain: string; resource: string | undefined } | undefined
+    other: { local: string | undefined; domain: string; resource: string | undefined } | undefined
   ): boolean {
     if (!other) {
       return false;
@@ -66,9 +72,6 @@ export function parseJid(jid: string): JID {
     jid = jid.slice(atStart + 1);
   }
 
-  if (!local) {
-    throw new Error(`could not resolve local`);
-  }
   return new JID(local, jid, resource);
 }
 

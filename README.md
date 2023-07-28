@@ -57,13 +57,16 @@ First install ngx-chat and its dependencies via npm:
 ```bash
 npm install --save @pazznetwork/strophets @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat rxjs@7.5.7
 ```
+
 or via yarn:
+
 ```bash
 yarn add @pazznetwork/strophets @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat
 ```
+
 After that, import ngx-chat in the layer from which you want to use it:
 
-```
+```ts
 @NgModule({
     ...
     imports: [
@@ -134,7 +137,7 @@ You are now ready to go. You will not see anything until you log in. Log in via 
 service)
 by injecting `ChatService` and calling `login`:
 
-```
+```ts
 constructor(@Inject(CHAT_SERVICE_TOKEN) chatService: ChatService) {
     chatService.logIn({
         domain: 'ngx-chat.example',
@@ -192,6 +195,7 @@ A: [No problem, feel free to raise an issue](https://github.com/pazznetwork/ngx-
 ## Get Involved
 
 ### Development
+
 **Pull requests are welcome!**
 
 The source code for ngx-chat can be found in the `libs/ngx-chat-ui` folder. The demo application is in the `apps/demo` folder.
@@ -205,11 +209,11 @@ export const devXmppPassword = '<YourAdminXmppPassword>';
 ```
 
 Copy the key and .pem file you use for your local ejabberd server to the following paths:
-```
+
+```bash
 apps/demo/src/local.entenhausen.pazz.de-key.pem
 apps/demo/src/local.entenhausen.pazz.de.pem
 ```
-
 
 ```bash
 # clone this repository
@@ -229,6 +233,12 @@ npm start
 
 ### Testing
 
+Install first the browsers for playwright:
+  
+```bash
+npm run install:browsers
+```
+
 To test the XMPP implementation run the karma tests in the `libs/ngx-xmpp` folder from the root folder:
 
 ```bash
@@ -243,9 +253,10 @@ ng e2e demo-e2e
 
 ### Committing
 
-For clean and standardised commit messages we use commit lint, for the format see: https://www.conventionalcommits.org/en/v1.0.0/.
+For clean and standardised commit messages we use commit lint, for the format see: <https://www.conventionalcommits.org/en/v1.0.0/>.
 
 ### Releasing
+
 ```bash
 npm run publish:all
 ```
@@ -256,4 +267,4 @@ If you want to contribute to this project, please read the [contribution guideli
 
 ## Licensing
 
-If you wish to use this software for commercial purposes or require a different license, please contact Pazz GmbH at info@pazz.com to obtain a commercial license or discuss alternative licensing options.
+If you wish to use this software for commercial purposes or require a different license, please contact Pazz GmbH at <info@pazz.com> to obtain a commercial license or discuss alternative licensing options.

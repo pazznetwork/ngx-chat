@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { filter, switchMap, take, toArray } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 import { TestUtils } from './helpers/test-utils';
 import { firstValueFrom, map } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
@@ -200,30 +200,66 @@ describe('XmppChatAdapter', () => {
 
   describe('states', () => {
     it('should clear contacts when logging out', async () => {
+      await ensureNoRegisteredUser(testUtils.princess);
+      await ensureNoRegisteredUser(testUtils.father);
+      await ensureNoRegisteredUser(testUtils.friend);
+      await ensureNoRegisteredUser(testUtils.hero);
       await ensureRegisteredUser(testUtils.princess);
       await ensureRegisteredUser(testUtils.father);
       await ensureRegisteredUser(testUtils.friend);
       await ensureRegisteredUser(testUtils.hero);
 
-      const contactsLength$ = testUtils.chatService.contactListService.contacts$.pipe(
-        map((c) => c.length),
-        take(8),
-        toArray()
-      );
-      const contactsLengthPromise = firstValueFrom(contactsLength$);
+      const promiseContactsWithLength = (length: number): Promise<string[]> =>
+        firstValueFrom(
+          testUtils.chatService.contactListService.contacts$.pipe(
+            filter((c) => c.length === length),
+            map((contacts) => contacts.map((c) => c.jid.toString()))
+          )
+        );
+
+      const zeroAfterLoginPromise = promiseContactsWithLength(0);
+      const oneAfterAddPromise = promiseContactsWithLength(1);
+      const twoAfterAddPromise = promiseContactsWithLength(2);
+      const threeAfterAddPromise = promiseContactsWithLength(3);
 
       await testUtils.logIn.hero();
 
-      await testUtils.chatService.contactListService.addContact(testUtils.princess.jid.toString());
-      await testUtils.chatService.contactListService.addContact(testUtils.father.jid.toString());
-      await testUtils.chatService.contactListService.addContact(testUtils.friend.jid.toString());
+      expect((await zeroAfterLoginPromise).length).toBe(0);
 
+      const princessJid = testUtils.princess.jid.toString();
+      const fatherJid = testUtils.father.jid.toString();
+      const friendJid = testUtils.friend.jid.toString();
+
+      await testUtils.chatService.contactListService.addContact(princessJid);
+      const one = await oneAfterAddPromise;
+      expect(one.length).toBe(1);
+      expect(one[0]).toBe(princessJid);
+
+      await testUtils.chatService.contactListService.addContact(fatherJid);
+      const two = await twoAfterAddPromise;
+      expect(two.length).toBe(2);
+      expect(two).toContain(princessJid);
+      expect(two).toContain(fatherJid);
+
+      await testUtils.chatService.contactListService.addContact(friendJid);
+      const three = await threeAfterAddPromise;
+      expect(three.length).toBe(3);
+      expect(three).toContain(princessJid);
+      expect(three).toContain(fatherJid);
+      expect(three).toContain(friendJid);
+
+      const zeroAfterLogoutPromise = promiseContactsWithLength(0);
       await testUtils.logOut();
+      expect((await zeroAfterLogoutPromise).length).toBe(0);
+
+      const threeAfterReLoginPromise = promiseContactsWithLength(3);
 
       await testUtils.logIn.hero();
+      expect((await threeAfterReLoginPromise).length).toBe(3);
+      const zeroAfterReLogoutPromise = promiseContactsWithLength(0);
 
       await testUtils.logOut();
-      expect(await contactsLengthPromise).toEqual([0, 0, 1, 2, 3, 0, 3, 0]);
+      expect((await zeroAfterReLogoutPromise).length).toEqual(0);
 
       await ensureNoRegisteredUser(testUtils.princess);
       await ensureNoRegisteredUser(testUtils.father);

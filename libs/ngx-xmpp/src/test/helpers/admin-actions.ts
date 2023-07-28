@@ -4,7 +4,7 @@ import type { AuthRequest } from '@pazznetwork/ngx-chat-shared';
 
 export async function userIsRegistered(auth: AuthRequest): Promise<boolean> {
   const users = await registeredUsers();
-  return users.includes(auth.username);
+  return users ? users.includes(auth.username) : false;
 }
 
 export async function ensureNoRegisteredUser(auth: AuthRequest): Promise<void> {

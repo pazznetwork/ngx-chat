@@ -18,12 +18,28 @@
     "resolveJsonModule": true,
     "exactOptionalPropertyTypes": false,
     "paths": {
-      "@pazznetwork/ngx-chat": ["libs/ngx-chat-ui/src/index.ts"],
-      "@pazznetwork/ngx-xmpp": ["libs/ngx-xmpp/src/index.ts"],
-      "@pazznetwork/ngx-chat-shared": ["libs/ngx-chat-shared/src/index.ts"],
-      "@pazznetwork/xmpp-adapter": ["libs/xmpp-adapter/src/index.ts"],
-      "@pazznetwork/strophets": ["libs/strophe-ts/src/index.ts"]
+      "@pazznetwork/ngx-chat": [
+        "libs/ngx-chat-ui/src/index.ts"
+      ],
+      "@pazznetwork/ngx-xmpp": [
+        "libs/ngx-xmpp/src/index.ts"
+      ],
+      "@pazznetwork/ngx-chat-shared": [
+        "libs/ngx-chat-shared/src/index.ts"
+      ],
+      "@pazznetwork/xmpp-adapter": [
+        "libs/xmpp-adapter/src/index.ts"
+      ],
+      "@pazznetwork/strophets": [
+        "libs/strophe-ts/src/index.ts"
+      ]
     }
   },
-  "exclude": ["node_modules", "tmp", ".angular"]
+  "exclude": [
+    "node_modules",
+    "tmp",
+    ".angular",
+    "karma.conf.js",
+    "libs/ngx-xmpp/karma.conf.js"
+  ]
 }

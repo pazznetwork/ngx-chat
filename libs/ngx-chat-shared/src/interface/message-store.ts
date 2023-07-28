@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { ReplaySubject } from 'rxjs';
-import { Direction, Message } from './message';
+import { Direction, type Message } from './message';
 import { findLast, insertSortedLast } from '../utils-array';
 
 export class MessageStore {
@@ -27,8 +27,7 @@ export class MessageStore {
 
   addMessage(message: Message): void {
     if (this.messageIdToMessage.has(message.id)) {
-      // eslint-disable-next-line no-console
-      console.warn(`message with id ${message.id} already exists`);
+      throw new Error(`message with id ${message.id} already exists`);
     }
     if (this.mostRecentMessage?.datetime && message.datetime > this.mostRecentMessage?.datetime) {
       this.messages.push(message);

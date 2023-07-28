@@ -63,7 +63,6 @@ export class RosterPlugin implements ChatPlugin {
     this.contacts$ = merge(
       this.getContactRequestSubject.pipe(
         map((contact) => (state: Map<string, Contact>) => {
-          console.log('newContactSubject contact', contact);
           const key = contact.jid.toString();
           if (state.has(key)) {
             return state;

@@ -19,6 +19,7 @@ describe('block plugin', () => {
   });
 
   it('should be able to block a contact', async () => {
+    await ensureNoRegisteredUser(testUtils.hero);
     const contactService = testUtils.chatService.contactListService;
     const contactsPromise = firstValueFrom(contactService.contacts$);
     const blockedPromise = firstValueFrom(

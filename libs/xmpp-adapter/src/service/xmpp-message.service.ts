@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 import {
   Direction,
-  Invitation,
-  JidToNumber,
-  Message,
-  MessageService,
+  type Invitation,
+  type JidToNumber,
+  type Message,
+  type MessageService,
   MessageState,
   parseJid,
-  Recipient,
+  type Recipient,
 } from '@pazznetwork/ngx-chat-shared';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, merge, Subject, switchMap } from 'rxjs';
@@ -19,7 +19,7 @@ import type {
 } from '@pazznetwork/xmpp-adapter';
 import {
   Finder,
-  MessageWithBodyStanza,
+  type MessageWithBodyStanza,
   nsConference,
   nsMucUser,
   nsPubSubEvent,
@@ -137,15 +137,12 @@ export class XmppMessageService implements MessageService {
       return true;
     }
 
+    // can be wrapped in result from a query, or in a message received carbons
     const messageElement = Finder.create(stanza)
-      .searchByTag('result')
       .searchByTag('forwarded')
       .searchByTag('message').result;
 
-    const delayElement = Finder.create(stanza)
-      .searchByTag('result')
-      .searchByTag('forwarded')
-      .searchByTag('delay').result;
+    const delayElement = Finder.create(stanza).searchByTag('delay').result;
 
     const eventElement = Finder.create(stanza)
       .searchByTag('result')
@@ -154,11 +151,16 @@ export class XmppMessageService implements MessageService {
       .searchByTag('event')
       .searchByNamespace(nsPubSubEvent).result;
 
-    const messageFromArchive = !!delayElement;
     // if is from archive get the inner message with type attribute
-    const messageStanza = messageFromArchive
-      ? (stanza.querySelector('message') as Element)
-      : stanza;
+    const archiveMessage = Finder.create(stanza)
+      .searchByTag('forwarded')
+      .searchByTag('message').result;
+
+    // delayed message can be from another device (carbon XEP) or archive
+    const delayed = !!delayElement;
+    const messageFromArchive = !!archiveMessage;
+
+    const messageStanza = archiveMessage ?? stanza;
 
     const me = await firstValueFrom(this.chatService.chatConnectionService.userJid$);
     const to = messageStanza.getAttribute('to');
@@ -213,13 +215,7 @@ export class XmppMessageService implements MessageService {
           const message = itemEl.querySelector('message');
           if (message && delayElement) {
             acc.push(
-              this.handleMessage(
-                message,
-                messageDirection,
-                datetime,
-                messageFromArchive,
-                messageFromArchive
-              )
+              this.handleMessage(message, messageDirection, datetime, delayed, messageFromArchive)
             );
           }
 
@@ -233,7 +229,7 @@ export class XmppMessageService implements MessageService {
       messageStanza,
       messageDirection,
       datetime,
-      messageFromArchive,
+      delayed,
       messageFromArchive
     );
   }
@@ -274,43 +270,44 @@ export class XmppMessageService implements MessageService {
     messageFromArchive: boolean
   ): Promise<boolean> {
     const type = messageStanza.getAttribute('type');
-    if (type === 'chat') {
-      const message = {
-        id: messageStanza.querySelector('stanza-id')?.id as string,
-        body: messageStanza.querySelector('body')?.textContent?.trim() as string,
-        direction,
-        datetime,
-        delayed,
-        fromArchive: messageFromArchive,
-      };
-
-      const contactJid =
-        direction === Direction.in
-          ? messageStanza.getAttribute('from')
-          : messageStanza.getAttribute('to');
-      const contact = await this.chatService.contactListService.getOrCreateContactById(
-        contactJid as string
-      );
-
-      contact.messageStore.addMessage(message);
-
-      const invites = Array.from(messageStanza.querySelectorAll('x'));
-      const isRoomInviteMessage =
-        invites.find((el) => el.getAttribute('xmlns') === nsMucUser) ||
-        invites.find((el) => el.getAttribute('xmlns') === nsConference);
-
-      if (isRoomInviteMessage) {
-        contact.newRoomInvitation(this.extractInvitationFromMessage(messageStanza));
-      }
-
-      if (direction === Direction.in && !messageFromArchive) {
-        this.messageSubject.next(contact);
-      }
-      return true;
-    } else if (type === 'groupchat' || this.multiUserPlugin.isRoomInvitationStanza(messageStanza)) {
+    if (type === 'groupchat' || this.multiUserPlugin.isRoomInvitationStanza(messageStanza)) {
       return this.multiUserPlugin.handleRoomMessageStanza(messageStanza);
-    } else {
-      throw new Error(`unknown archived message type: ${String(type)}`);
     }
+
+    // The type attribute can be one of several values including "chat", "error", "groupchat", "headline", or "normal".
+    // If no type is provided, it should be treated as if it were a "normal" message. Each type has its own specific usage context and meaning.
+
+    const message = {
+      id: messageStanza.querySelector('stanza-id')?.id as string,
+      body: messageStanza.querySelector('body')?.textContent?.trim() as string,
+      direction,
+      datetime,
+      delayed,
+      fromArchive: messageFromArchive,
+    };
+
+    const contactJid =
+      direction === Direction.in
+        ? messageStanza.getAttribute('from')
+        : messageStanza.getAttribute('to');
+    const contact = await this.chatService.contactListService.getOrCreateContactById(
+      contactJid as string
+    );
+
+    contact.messageStore.addMessage(message);
+
+    const invites = Array.from(messageStanza.querySelectorAll('x'));
+    const isRoomInviteMessage =
+      invites.find((el) => el.getAttribute('xmlns') === nsMucUser) ||
+      invites.find((el) => el.getAttribute('xmlns') === nsConference);
+
+    if (isRoomInviteMessage) {
+      contact.newRoomInvitation(this.extractInvitationFromMessage(messageStanza));
+    }
+
+    if (direction === Direction.in && !messageFromArchive) {
+      this.messageSubject.next(contact);
+    }
+    return true;
   }
 }
