@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { APIRequestContext, expect, Page } from '@playwright/test';
+import {
+  devXmppDomain,
+  devXmppJid,
+  devXmppPassword,
+} from '../../../../libs/ngx-xmpp/src/.secrets-const';
 
+const devUserName = devXmppJid?.split('@')[0] as string;
 export class EjabberdAdminPage {
   private constructor(private readonly host: string, private readonly context: APIRequestContext) {}
   static async getAllJabberUsersBesidesAdmin(
     page: Page,
-    adminUsername: string,
-    adminPassword: string
+    adminUsername = devUserName,
+    adminPassword = devXmppPassword
   ): Promise<string[]> {
     const adminBase =
       'https://' + adminUsername + ':' + adminPassword + '@local-jabber.entenhausen.pazz.de:5280';
@@ -21,8 +27,8 @@ export class EjabberdAdminPage {
 
   static async deleteUsers(
     page: Page,
-    adminUsername: string,
-    adminPassword: string,
+    adminUsername = devUserName,
+    adminPassword = devXmppPassword,
     users: string[]
   ): Promise<void> {
     const adminBase = `https://${adminUsername}:${adminPassword}@local-jabber.entenhausen.pazz.de:5280`;
@@ -69,10 +75,10 @@ export class EjabberdAdminPage {
   }
 
   static async create(
-    playwright: typeof import('playwright-core'),
-    host: string,
-    adminUserName: string,
-    adminPassword: string
+    playwright: typeof import('playwright'),
+    host = devXmppDomain,
+    adminUserName = devUserName,
+    adminPassword = devXmppPassword
   ): Promise<EjabberdAdminPage> {
     return new EjabberdAdminPage(
       host,

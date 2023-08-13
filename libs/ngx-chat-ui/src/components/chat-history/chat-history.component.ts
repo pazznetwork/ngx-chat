@@ -15,8 +15,8 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { map, mergeMap, Observable, of, Subject } from 'rxjs';
-import { debounceTime, filter, takeUntil } from 'rxjs/operators';
+import { map, mergeMap, Observable, of, Subject, tap } from 'rxjs';
+import { debounceTime, filter, shareReplay, takeUntil } from 'rxjs/operators';
 import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { Contact, ContactSubscription, Direction, Message } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
@@ -65,7 +65,8 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
   private bottomLeftAt = 0;
   private oldestVisibleMessageBeforeLoading?: Message;
 
-  messagesGroupedByDate$?: Observable<{ date: Date; messages: Message[] }[]>;
+  // for unexplainable reasons does not work as a observable with the AsyncPipe, waisted time 5h
+  messagesGroupedByDate?: { date: Date; messages: Message[] }[];
   noMessages$!: Observable<boolean>;
   pendingRequest$!: Observable<boolean>;
 
@@ -96,47 +97,57 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
       return;
     }
 
-    this.messagesGroupedByDate$ = this.recipient.messageStore.messages$.pipe(
-      map((messages) => {
-        messages.sort((a, b) => a?.datetime?.getTime() - b?.datetime?.getTime());
-        const messageMap = new Map<string, Message[]>();
-        for (const message of messages) {
-          const key = message.datetime.toDateString();
-          if (messageMap.has(key)) {
-            messageMap.get(key)?.push(message);
-          } else {
-            messageMap.set(key, [message]);
+    this.recipient.messageStore.messages$
+      .pipe(
+        map((messages) => {
+          console.log('messages', messages);
+          messages.sort((a, b) => a?.datetime?.getTime() - b?.datetime?.getTime());
+          const messageMap = new Map<string, Message[]>();
+          for (const message of messages) {
+            const key = message.datetime.toDateString();
+            if (messageMap.has(key)) {
+              messageMap.get(key)?.push(message);
+            } else {
+              messageMap.set(key, [message]);
+            }
           }
-        }
 
-        const returnArray = new Array<{ date: Date; messages: Message[] }>();
+          const returnArray = new Array<{ date: Date; messages: Message[] }>();
 
-        for (const [key, mapMessages] of messageMap) {
-          returnArray.push({ date: new Date(key), messages: mapMessages });
-        }
+          for (const [key, mapMessages] of messageMap) {
+            returnArray.push({ date: new Date(key), messages: mapMessages });
+          }
 
-        return returnArray;
-      }),
-      takeUntil(this.ngDestroySubject)
-    );
+          console.log('return Array', returnArray);
+          return returnArray;
+        }),
+        shareReplay({ bufferSize: 1, refCount: true }),
+        takeUntil(this.ngDestroySubject)
+      )
+      .subscribe((array) => {
+        this.messagesGroupedByDate = array;
+        this.changeDetectorRef.detectChanges();
+      });
 
     if (this.recipient instanceof Contact) {
       this.pendingRequest$ = this.recipient.subscription$.pipe(
+        tap((sub) => console.log('sub for pendingRequest boolean', sub)),
         map(
           (subscription) =>
             ![ContactSubscription.both, ContactSubscription.to].includes(subscription)
-        )
+        ),
+        tap((pendingRequest) => console.log('pendingRequest', pendingRequest))
       );
+      this.pendingRequest$
+        .pipe(
+          filter((val) => val),
+          takeUntil(this.ngDestroySubject)
+        )
+        .subscribe(() => this.scheduleScrollToLastMessage());
+      this.changeDetectorRef.detectChanges();
     } else {
       this.pendingRequest$ = of(false);
     }
-
-    this.pendingRequest$
-      .pipe(
-        filter((val) => val),
-        takeUntil(this.ngDestroySubject)
-      )
-      .subscribe(() => this.scheduleScrollToLastMessage());
 
     this.noMessages$ = this.recipient.messageStore.messages$.pipe(
       map((messages) => messages.length === 0)

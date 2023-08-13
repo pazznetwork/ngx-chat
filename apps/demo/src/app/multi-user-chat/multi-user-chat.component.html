@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <div>
   <h2>Chat rooms:</h2>
-  <div *ngIf="(chatService.isOnline$ | async); else offline">
+  <div *ngIf="chatService.isOnline$ | async; else offline">
     <div *ngFor="let room of chatService.roomService.rooms$ | async">
       {{ room.jid.bare().toString() }}:
       <button (click)="selectedRoom = room">Select</button>
@@ -49,7 +49,7 @@
 
     <br />
     <ng-container *ngIf="roomUserList.length > 0">
-      <div>Members of room: {{ occupantJid?.bare().toString() }}</div>
+      <div>Members of room: {{ occupantJid?.bare()?.toString() }}</div>
       <table>
         <thead>
           <tr>
@@ -68,7 +68,7 @@
             <td>{{ member.role }}</td>
             <td>
               <button (click)="kick(member)">
-                Kick ({{ findIdWithNick(member)?.nick || "[unknown]" }})
+                Kick ({{ findIdWithNick(member).nick || "[unknown]" }})
               </button>
               <button (click)="banOrUnban(member)">Ban/Unban</button>
             </td>
@@ -78,7 +78,7 @@
     </ng-container>
 
     <ng-container *ngIf="(roomConfiguration?.fields?.length || 0) > 0">
-      <p>Configuration of room: {{ occupantJid?.bare().toString() }}</p>
+      <p>Configuration of room: {{ occupantJid?.bare()?.toString() }}</p>
       <table>
         <thead>
           <tr>
@@ -88,7 +88,7 @@
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let field of roomConfiguration.fields">
+          <ng-container *ngFor="let field of roomConfiguration?.fields">
             <tr *ngIf="field.type !== 'hidden'">
               <td>{{ field.variable }}</td>
               <td>{{ field.value }}</td>
@@ -115,7 +115,7 @@
             </tr>
           </thead>
           <tbody>
-            <ng-container *ngFor="let field of room.info.fields">
+            <ng-container *ngFor="let field of room.info?.fields">
               <tr *ngIf="field.type !== 'hidden'">
                 <td>{{ field.variable }}</td>
                 <td>{{ field.value }}</td>
@@ -192,6 +192,6 @@
   <hr />
 
   <ng-template #offline>
-    <span *ngIf="(chatService.isOffline$ | async)">You need to be online.</span>
+    <span *ngIf="chatService.isOffline$ | async">You need to be online.</span>
   </ng-template>
 </div>

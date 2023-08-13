@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { expect, test } from '@playwright/test';
 import { AppPage } from './page-objects/app.po';
-import type { AuthRequest } from '@pazznetwork/ngx-chat-shared';
+
+import { EjabberdAdminPage } from './page-objects/ejabberd-admin.po';
 import {
   devXmppDomain,
   devXmppJid,
   devXmppPassword,
 } from '../../../libs/ngx-xmpp/src/.secrets-const';
-import { EjabberdAdminPage } from './page-objects/ejabberd-admin.po';
 
 /**
  * Current features:
@@ -28,17 +28,6 @@ import { EjabberdAdminPage } from './page-objects/ejabberd-admin.po';
  *   * image link preview
  */
 test.describe.serial('ngx-chat', () => {
-  const domain = devXmppDomain;
-  const username = devXmppJid?.split('@')[0] as string;
-  const password = devXmppPassword;
-
-  const adminLogin: AuthRequest = {
-    domain,
-    username,
-    password,
-    service: `wss://${domain}:5280/websocket`,
-  };
-
   const dwarfs = {
     doc: 'Doc',
     grumpy: 'Grumpy',
@@ -60,18 +49,16 @@ test.describe.serial('ngx-chat', () => {
     appPage = new AppPage(await browser.newPage());
     ejabberdAdminPage = await EjabberdAdminPage.create(
       playwright,
-      adminLogin.domain,
+      devXmppDomain,
       devXmppJid,
-      adminLogin.password
+      devXmppPassword
     );
     await ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin();
   });
 
   test('should be able to log in', async () => {
-    await appPage.navigateToIndex();
-    await appPage.setDomain(adminLogin.domain);
-    await appPage.setService(adminLogin.service as string);
-    await appPage.logIn(adminLogin.username, adminLogin.password);
+    await appPage.setupForTest();
+    await appPage.loginAdmin();
     expect(await appPage.getOnlineStateText()).toContain('online');
   });
 
@@ -231,9 +218,6 @@ test.describe.serial('ngx-chat', () => {
     const chat = await appPage.openChatWith(huntsman);
     await chat.denyContactRequest();
     await chat.hasBlockLink();
-    await chat.isAcceptDisabled();
-    await chat.isDenyDisabled();
-    await chat.dismiss();
     await chat.acceptContactRequest();
     await appPage.logOut();
   });

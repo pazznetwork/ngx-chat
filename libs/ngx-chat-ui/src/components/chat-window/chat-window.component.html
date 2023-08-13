@@ -6,6 +6,6 @@
     [chatWindowState]="chatWindowState"
   ></ngx-chat-window-header>
 
-  <ngx-chat-window-content *ngIf="isWindowOpen$ | async" [recipient]="chatWindowState?.recipient">
+  <ngx-chat-window-content *ngIf="isWindowOpen$ | async" [recipient]="chatWindowState.recipient">
   </ngx-chat-window-content>
 </ngx-chat-window-frame>

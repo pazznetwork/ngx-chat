@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { firstValueFrom, map, merge, Observable, Subject } from 'rxjs';
+import { map, merge, Observable, Subject } from 'rxjs';
 import {
   CHAT_SERVICE_TOKEN,
   ChatListStateService,
@@ -17,7 +17,7 @@ enum SubscriptionAction {
   PENDING_REQUEST,
   SHOW_BLOCK_ACTIONS,
   // There is no contact request on both sites but only a message
-  BLOCK_FOR_UNAFFILIATED,
+  UNAFFILIATED,
   NO_PENDING_ACTION,
 }
 
@@ -36,9 +36,8 @@ export class ChatMessageContactRequestComponent implements OnInit {
   subscriptionAction$!: Observable<SubscriptionAction>;
   message$!: Observable<string>;
 
-  showDenyActions$!: Observable<boolean>;
-  isActionDisabled$!: Observable<boolean>;
-  isAffiliated$!: Observable<boolean>;
+  showAccept$!: Observable<boolean>;
+  showAdd$!: Observable<boolean>;
 
   constructor(
     public chatListService: ChatListStateService,
@@ -50,10 +49,11 @@ export class ChatMessageContactRequestComponent implements OnInit {
     this.subscriptionAction$ = merge(
       this.contact.subscription$.pipe(
         map((subscription) => {
+          console.log('subscription Action sub:', subscription);
           if (subscription === ContactSubscription.from) {
             return SubscriptionAction.PENDING_REQUEST;
           } else if (subscription === ContactSubscription.none) {
-            return SubscriptionAction.BLOCK_FOR_UNAFFILIATED;
+            return SubscriptionAction.UNAFFILIATED;
           }
           return SubscriptionAction.NO_PENDING_ACTION;
         })
@@ -63,61 +63,36 @@ export class ChatMessageContactRequestComponent implements OnInit {
 
     this.message$ = this.subscriptionAction$.pipe(
       map((sub) => {
-        if (sub === SubscriptionAction.BLOCK_FOR_UNAFFILIATED) {
+        if (sub === SubscriptionAction.UNAFFILIATED) {
           return this.chatService.translations.unaffiliatedMessage;
         }
         return this.chatService.translations.subscriptionRequestMessage;
       })
     );
 
-    this.showDenyActions$ = this.subscriptionAction$.pipe(
-      map((sub) =>
-        [SubscriptionAction.SHOW_BLOCK_ACTIONS, SubscriptionAction.BLOCK_FOR_UNAFFILIATED].includes(
-          sub
-        )
-      )
+    this.showAccept$ = this.subscriptionAction$.pipe(
+      map((sub) => sub === SubscriptionAction.PENDING_REQUEST)
     );
-
-    this.isActionDisabled$ = this.subscriptionAction$.pipe(
-      map((sub) => sub === SubscriptionAction.SHOW_BLOCK_ACTIONS)
-    );
-
-    this.isAffiliated$ = this.subscriptionAction$.pipe(
-      map((sub) => sub !== SubscriptionAction.BLOCK_FOR_UNAFFILIATED)
+    this.showAdd$ = this.subscriptionAction$.pipe(
+      map((sub) => sub === SubscriptionAction.UNAFFILIATED)
     );
   }
 
   async acceptSubscriptionRequest(): Promise<void> {
-    const sub = await firstValueFrom(this.subscriptionAction$);
-
-    if (sub !== SubscriptionAction.PENDING_REQUEST) {
-      return;
-    }
-
     await this.chatService.contactListService.addContact(this.contact.jid.toString());
   }
 
-  async denySubscriptionRequest(): Promise<void> {
-    const sub = await firstValueFrom(this.subscriptionAction$);
-
-    if (sub !== SubscriptionAction.PENDING_REQUEST) {
-      return;
-    }
-
+  async removeContact(): Promise<void> {
     await this.chatService.contactListService.removeContact(this.contact.jid.toString());
   }
 
-  async blockContact(): Promise<void> {
+  async blockUser(): Promise<void> {
     await this.chatService.contactListService.blockJid(this.contact.jid.toString());
     this.chatListService.closeChat(this.contact);
   }
 
-  async blockContactAndReport(): Promise<void> {
+  async blockUserAndReport(): Promise<void> {
     this.reportUserService.reportUser(this.contact);
-    await this.blockContact();
-  }
-
-  dismissBlockOptions(): void {
-    this.subscriptionActionSubject.next(SubscriptionAction.NO_PENDING_ACTION);
+    await this.blockUser();
   }
 }

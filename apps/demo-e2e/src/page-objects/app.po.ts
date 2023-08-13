@@ -1,7 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import type { Locator } from 'playwright-core';
+import type { Locator, Page } from 'playwright';
 import { ChatWindowPage } from './chat-window.po';
-import type { Page } from '@playwright/test';
+import type { AuthRequest } from '@pazznetwork/ngx-chat-shared';
+import {
+  devXmppDomain,
+  devXmppJid,
+  devXmppPassword,
+} from '../../../../libs/ngx-xmpp/src/.secrets-const';
+
+const adminLogin: AuthRequest = {
+  domain: devXmppDomain,
+  username: devXmppJid?.split('@')[0] as string,
+  password: devXmppPassword,
+  service: `wss://${devXmppDomain}:5280/websocket`,
+};
 
 export class AppPage {
   readonly errorLogs: string[] = [];
@@ -13,6 +25,7 @@ export class AppPage {
   private readonly usernameInput: Locator;
   private readonly passwordInput: Locator;
   private readonly loginButton: Locator;
+  private readonly registerButton: Locator;
   private readonly logoutButton: Locator;
   private readonly contactJid: Locator;
 
@@ -35,6 +48,7 @@ export class AppPage {
     this.usernameInput = page.locator('[name=username]');
     this.passwordInput = page.locator('[name=password]');
     this.loginButton = page.locator('[name=login]');
+    this.registerButton = page.locator('[name=register]');
     this.logoutButton = page.locator('[name=logout]');
     this.contactJid = page.locator('[data-zid="contact-jid"]');
 
@@ -65,6 +79,16 @@ export class AppPage {
     await this.page.pause();
   }
 
+  async setupForTest(): Promise<void> {
+    await this.navigateToIndex();
+    await this.setDomain(adminLogin.domain);
+    await this.setService(adminLogin.service as string);
+  }
+
+  async loginAdmin(): Promise<void> {
+    await this.logIn(adminLogin.username, adminLogin.password);
+  }
+
   async navigateToIndex(): Promise<void> {
     await this.page.goto('/');
   }
@@ -81,6 +105,7 @@ export class AppPage {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
+    await this.rosterList.isVisible();
   }
 
   async logOut(): Promise<void> {
@@ -136,12 +161,32 @@ export class AppPage {
 
   async selectChatWithContact(jid: string): Promise<ChatWindowPage> {
     const locator = this.createRoosterEntryLocator(jid);
-    await locator.click();
+    await locator.nth(0).click();
+    return this.getChatWindow(jid);
+  }
+
+  getChatWindow(jid: string): ChatWindowPage {
     return new ChatWindowPage(this.page, jid);
+  }
+
+  async openChatWithUnaffiliatedContact(jid: string): Promise<ChatWindowPage> {
+    await this.contactJid.fill(jid);
+    await this.openChatButton.click();
+    return this.getChatWindow(jid);
   }
 
   async openChatWith(jid: string): Promise<ChatWindowPage> {
     await this.rosterList.getByText(jid).click();
-    return new ChatWindowPage(this.page, jid);
+    return this.getChatWindow(jid);
+  }
+
+  async reload(): Promise<void> {
+    await this.page.reload();
+  }
+
+  async register(username: string, password: string): Promise<void> {
+    await this.usernameInput.fill(username);
+    await this.passwordInput.fill(password);
+    await this.registerButton.click();
   }
 }

@@ -42,7 +42,7 @@ export class MultiUserChatComponent {
     }
   }
 
-  async joinRoom(occupantJid: JID): Promise<void> {
+  async joinRoom(occupantJid: JID | undefined | null): Promise<void> {
     if (!occupantJid) {
       throw new Error(`occupantJid is undefined`);
     }
@@ -51,7 +51,7 @@ export class MultiUserChatComponent {
     this.occupantJidText = occupantJid.toString();
   }
 
-  async subscribeWithMucSub(occupantJid: JID): Promise<void> {
+  async subscribeWithMucSub(occupantJid: JID | undefined | null): Promise<void> {
     if (!occupantJid) {
       throw new Error(`occupantJid is undefined`);
     }
@@ -60,7 +60,7 @@ export class MultiUserChatComponent {
     ]);
   }
 
-  async unsubscribeFromMucSub(occupantJid: JID): Promise<void> {
+  async unsubscribeFromMucSub(occupantJid: JID | undefined | null): Promise<void> {
     if (!occupantJid) {
       throw new Error(`occupantJid is undefined`);
     }
@@ -71,7 +71,7 @@ export class MultiUserChatComponent {
     this.mucSubSubscriptions = await this.chatService.roomService.retrieveRoomSubscriptions();
   }
 
-  async queryUserList(occupantJid: JID): Promise<void> {
+  async queryUserList(occupantJid: JID | undefined | null): Promise<void> {
     if (!occupantJid) {
       throw new Error(`occupantJid is undefined`);
     }
@@ -80,7 +80,7 @@ export class MultiUserChatComponent {
     );
   }
 
-  async getRoomConfiguration(occupantJid: JID): Promise<void> {
+  async getRoomConfiguration(occupantJid: JID | undefined | null): Promise<void> {
     if (!occupantJid) {
       throw new Error(`occupantJid is undefined`);
     }
@@ -177,7 +177,10 @@ export class MultiUserChatComponent {
     );
   }
 
-  async leaveRoom(roomJid: JID): Promise<void> {
+  async leaveRoom(roomJid: JID | undefined): Promise<void> {
+    if (!roomJid) {
+      throw new Error('roomJid was undefined for leaveRoom call');
+    }
     if (roomJid.equals(this.occupantJid?.bare())) {
       this.occupantJidText = '';
       this.occupantJid = null;

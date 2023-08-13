@@ -14,7 +14,7 @@ import { CONTACT_CLICK_HANDLER_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx
 })
 export class ChatBubbleAvatarComponent {
   @Input()
-  avatar?: string;
+  avatar: string | undefined;
 
   @Input()
   avatarClickable = false;

@@ -48,6 +48,7 @@ export type FormField =
 export interface FixedFormField {
   type: 'fixed';
   variable?: string;
+  label?: string;
   value: string;
 }
 

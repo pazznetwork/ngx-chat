@@ -27,7 +27,7 @@
       },
       "configurations": {
         "production": {
-          "devServerTarget": "demo:serve:production"
+          "devServerTarget": "demo:serve:development"
         }
       }
     },

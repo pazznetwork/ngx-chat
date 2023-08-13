@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import type { Locator } from 'playwright-core';
-import { expect, Page } from '@playwright/test';
+import type { Locator, Page } from 'playwright';
+import { expect } from '@playwright/test';
 
 type ChatMessageSubmitMethod = 'button' | 'enter';
 type MessageDirection = 'incoming' | 'outgoing';
 
 export class ChatWindowPage {
   private readonly windowLocator: Locator;
+  private readonly windowTitleLocator: Locator;
   private readonly closeChatButton: Locator;
 
   private readonly acceptLink: Locator;
   private readonly denyLink: Locator;
   private readonly blockLink: Locator;
   // private readonly blockAndReportLink: Locator; todo needed?
-  private readonly dismissLink: Locator;
+  private readonly addLink: Locator;
 
   private readonly inMessage: Locator;
   private readonly outMessage: Locator;
@@ -22,6 +23,7 @@ export class ChatWindowPage {
 
   constructor(page: Page, jid: string) {
     this.windowLocator = page.locator(`.window`, { hasText: jid.toLowerCase() });
+    this.windowTitleLocator = page.getByTestId(jid).getByText(jid.split('@')?.[0] ?? jid);
     this.closeChatButton = this.windowLocator.locator('[data-zid="close-chat"]');
     this.inMessage = this.windowLocator.locator('ngx-chat-message-in ngx-chat-message-text-area');
     this.outMessage = this.windowLocator.locator('ngx-chat-message-out ngx-chat-message-text-area');
@@ -30,7 +32,7 @@ export class ChatWindowPage {
     this.denyLink = this.windowLocator.locator('a[data-zid="deny-user"]');
     this.blockLink = this.windowLocator.locator('a[data-zid="block-user"]');
     // this.blockAndReportLink = this.windowLocator.locator('a[data-zid="block-and-report-user"]'); todo needed?
-    this.dismissLink = this.windowLocator.locator('a[data-zid="dismiss-block-message"]');
+    this.addLink = this.windowLocator.locator('a[data-zid="add-user"]');
 
     this.chatInput = this.windowLocator.locator(`[data-zid="chat-input"]`);
     this.messageSubmitButton = this.windowLocator.locator('.chat-window-send');
@@ -73,10 +75,8 @@ export class ChatWindowPage {
     expect(lastMessage).toBe(expectedMessage);
   }
 
-  async assertIsOpen(): Promise<void> {
-    const chatWindowContent = this.windowLocator.locator('ngx-chat-window-content');
-
-    expect(chatWindowContent.isVisible()).toBeTruthy();
+  assertIsOpen(): void {
+    expect(this.windowTitleLocator.isVisible()).toBeTruthy();
   }
 
   async getNthMessage(
@@ -112,21 +112,12 @@ export class ChatWindowPage {
     await this.denyLink.click();
   }
 
-  async hasBlockLink(): Promise<boolean> {
-    const found = await this.blockLink.count();
-    return found > 0;
+  hasBlockLink(): Promise<boolean> {
+    return this.blockLink.isVisible();
   }
 
-  async isAcceptDisabled(): Promise<boolean> {
-    return this.acceptLink.isDisabled();
-  }
-
-  async isDenyDisabled(): Promise<boolean> {
-    return this.denyLink.isDisabled();
-  }
-
-  async dismiss(): Promise<void> {
-    await this.dismissLink.click();
+  async add(): Promise<void> {
+    await this.addLink.click();
   }
 
   async acceptContactRequest(): Promise<void> {

@@ -32,10 +32,10 @@ export class ChatMessageOutComponent {
   showAvatar = true;
 
   @Input()
-  message?: Message;
+  message: Message | undefined;
 
   @Input()
-  contact?: Recipient;
+  contact: Recipient | undefined;
 
   constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
 

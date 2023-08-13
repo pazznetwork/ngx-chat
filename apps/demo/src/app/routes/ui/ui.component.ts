@@ -2,6 +2,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import {
   Contact,
+  type Recipient,
+  type Message,
   Direction,
   JID,
   Log,
@@ -26,15 +28,24 @@ export class UiComponent implements OnInit {
   room?: Room;
   private myJid: JID = parseJid('me@example.com');
   private otherContactJid: JID = parseJid('other@example.com');
-  outMessages = [
+  outMessages: { contact: Recipient; message: Message }[] = [
     {
-      contact: {
-        avatar: this.dummyAvatarContact,
-        nick: 'chat partner',
+      // Object were made fast against error may not be in correct state
+      contact: new Contact(this.myJid.toString(), 'chat partner', this.dummyAvatarContact),
+      message: {
+        id: '1',
+        from: this.myJid,
+        direction: Direction.in,
+        body: '',
+        datetime: new Date(),
+        delayed: false,
+        fromArchive: false,
+        /**
+         * if no explicit state is set for the message, use implicit contact message states instead.
+         */
+        state: MessageState.SENT,
       },
-      message: {},
     },
-    {},
     // <ngx-chat-message-out class="chat-message--out"
     //     [avatar]="dummyAvatarContact"
     // formattedDate="2020-06-04 18:35"
@@ -158,7 +169,7 @@ export class UiComponent implements OnInit {
     });
   }
 
-  private add(message: { body: string; datetime: Date; direction: Direction }) {
+  private add(message: { body: string; datetime: Date; direction: Direction }): void {
     let startIndex = 0;
     this.contact?.messageStore.addMessage({
       ...message,

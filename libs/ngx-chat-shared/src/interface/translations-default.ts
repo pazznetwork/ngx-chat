@@ -4,6 +4,7 @@ import type { Translations } from './translations';
 
 export function defaultTranslations(): Translations {
   return {
+    addUser: 'Add Contact',
     acceptSubscriptionRequest: 'Accept',
     block: 'Block',
     blockAndReport: 'Block & report',
@@ -14,7 +15,7 @@ export function defaultTranslations(): Translations {
     contactsUnaffiliated: 'Unknown',
     contactsBlocked: 'Blocked',
     dateFormat: 'EEEE, MM/dd/yyyy',
-    denySubscriptionRequest: 'Deny',
+    removeContact: 'Remove Contact',
     dismiss: 'Dismiss',
     dropMessage: 'Drop your file to send it',
     locale: undefined,

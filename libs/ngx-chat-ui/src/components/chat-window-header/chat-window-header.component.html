@@ -24,8 +24,8 @@
       class="chat-status-wrapper"
       *ngIf="!chatWindowState?.isCollapsed && isContactInWindow(chatWindowState)"
     >
-      <span class="chat-status">
-        {{ chatService.translations.presence[recipientAsContact.presence$ | async]! }}
+      <span class="chat-status" *ngIf="recipientAsContact.presence$ | async as presence">
+        {{ chatService.translations.presence[presence] }}
       </span>
     </div>
   </div>

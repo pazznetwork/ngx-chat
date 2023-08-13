@@ -35,7 +35,7 @@ export class ChatWindowInputComponent {
 
   constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
 
-  async onKeydownEnter($event: KeyboardEvent): Promise<void> {
+  async onKeydownEnter($event: Event): Promise<void> {
     $event?.preventDefault();
     await this.onSendMessage();
   }

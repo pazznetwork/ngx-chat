@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build",
+			"detail": "nx build"
+		},
+		{
+			"type": "npm",
+			"script": "install",
+			"group": "none",
+			"problemMatcher": [],
+			"label": "npm: install",
+			"detail": "install dependencies from package"
+		}
+	]
+}

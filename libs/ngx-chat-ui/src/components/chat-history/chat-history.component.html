@@ -1,11 +1,11 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <div class="chat-messages" #messageArea>
   <div class="chat-messages-start" (ngxChatIntersectionObserver)="onTop($event)"></div>
-  <ng-container *ngFor="let entry of messagesGroupedByDate$ | async">
+  <ng-container *ngFor="let entry of messagesGroupedByDate">
     <div class="chat-messages-date-group">
       {{
         entry.date
-          | date: chatService.translations.dateFormat:undefined:chatService.translations.locale
+          | date : chatService.translations.dateFormat : undefined : chatService.translations.locale
       }}
     </div>
     <ng-container *ngFor="let message of entry.messages">
@@ -14,7 +14,11 @@
         </ngx-chat-message-in>
       </ng-container>
       <ng-container *ngIf="message.direction === Direction.out">
-        <ngx-chat-message-out [showAvatar]="!!showAvatars" [message]="message" [contact]="recipient">
+        <ngx-chat-message-out
+          [showAvatar]="!!showAvatars"
+          [message]="message"
+          [contact]="recipient"
+        >
         </ngx-chat-message-out>
       </ng-container>
     </ng-container>
