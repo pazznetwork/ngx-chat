@@ -15,7 +15,7 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { map, mergeMap, Observable, of, Subject, tap } from 'rxjs';
+import { combineLatest, map, mergeMap, Observable, of, Subject, tap } from 'rxjs';
 import { debounceTime, filter, shareReplay, takeUntil } from 'rxjs/operators';
 import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { Contact, ContactSubscription, Direction, Message } from '@pazznetwork/ngx-chat-shared';
@@ -130,12 +130,21 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
       });
 
     if (this.recipient instanceof Contact) {
-      this.pendingRequest$ = this.recipient.subscription$.pipe(
+      this.pendingRequest$ = combineLatest([
+        this.chatService.contactListService.blockedContacts$,
+        this.recipient.subscription$,
+      ]).pipe(
         tap((sub) => console.log('sub for pendingRequest boolean', sub)),
-        map(
-          (subscription) =>
-            ![ContactSubscription.both, ContactSubscription.to].includes(subscription)
-        ),
+        map(([blockedContacts, subscription]) => {
+          const isNotBlocked = !blockedContacts.find((b) =>
+            b.jid.bare().equals(this.recipient?.jid.bare())
+          );
+          const isNotContact = ![(ContactSubscription.both, ContactSubscription.to)].includes(
+            subscription
+          );
+
+          return isNotBlocked && isNotContact;
+        }),
         tap((pendingRequest) => console.log('pendingRequest', pendingRequest))
       );
       this.pendingRequest$
@@ -144,7 +153,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
           takeUntil(this.ngDestroySubject)
         )
         .subscribe(() => this.scheduleScrollToLastMessage());
-      this.changeDetectorRef.detectChanges();
     } else {
       this.pendingRequest$ = of(false);
     }

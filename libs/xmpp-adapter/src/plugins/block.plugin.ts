@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 import type { XmppService } from '../xmpp.service';
-import { firstValueFrom, map, merge, mergeMap, Observable, ReplaySubject, scan } from 'rxjs';
+import { firstValueFrom, map, merge, mergeMap, Observable, ReplaySubject, scan, tap } from 'rxjs';
 import type { ChatPlugin } from '../core';
 import { shareReplay, switchMap } from 'rxjs/operators';
 import { getUniqueId, NS } from '@pazznetwork/strophets';
+import { parseJid } from '@pazznetwork/ngx-chat-shared';
 
 export const nsBlocking = 'urn:xmpp:blocking';
 
@@ -24,7 +25,7 @@ export class BlockPlugin implements ChatPlugin {
         mergeMap(() => this.requestBlockedJIDs()),
         map((blocked) => () => {
           const state = new Set<string>();
-          blocked.forEach((b) => state.add(b));
+          blocked.forEach((b) => state.add(parseJid(b).bare().toString()));
           return state;
         })
       ),
@@ -35,6 +36,7 @@ export class BlockPlugin implements ChatPlugin {
       xmppService.onOffline$.pipe(map(() => () => new Set<string>()))
     ).pipe(
       scan((state, innerFun) => innerFun(state), new Set<string>()),
+      tap((blockedSet) => console.log('BlockedSet tap', blockedSet)),
       shareReplay({ bufferSize: 1, refCount: false })
     );
 
@@ -95,6 +97,7 @@ export class BlockPlugin implements ChatPlugin {
   }
 
   private handlePush(stanza: Element): boolean {
+    console.log('handlePush for Block', stanza);
     const unblock = stanza.querySelector('iq > unblock');
     const block = stanza.querySelector('iq > block');
     if (block) {

@@ -25,10 +25,10 @@
   </ng-container>
 
   <ngx-chat-message-empty *ngIf="noMessages$ | async"></ngx-chat-message-empty>
-
+<ng-container *ngIf="pendingRequest$ | async">
   <ngx-chat-message-contact-request
-    *ngIf="pendingRequest$ | async"
     [contact]="recipientAsContact"
   ></ngx-chat-message-contact-request>
+</ng-container>
   <div class="chat-messages-end" (ngxChatIntersectionObserver)="onBottom($event)"></div>
 </div>

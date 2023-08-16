@@ -28,12 +28,19 @@ export class XmppContactListService implements ContactListService {
     this.contactsUnaffiliated$ = rosterPlugin.contactsUnaffiliated$;
     this.blockedContactJIDs$ = blockPlugin.blockedContactJIDs$;
 
-    const contactsWithBlockedPair$ = combineLatest([this.contacts$, this.blockedContactJIDs$]).pipe(
+    const contactsWithBlockedPair$ = combineLatest([
+      this.contacts$,
+      this.blockPlugin.blockedContactJIDs$,
+    ]).pipe(
       map(([contacts, blockedJIDs]) => {
+        console.log('Contacts in create blockedContacts', contacts);
+        console.log('blockedJIDs in create blockedContacts', contacts);
         const blocked: Contact[] = [];
         const notBlocked: Contact[] = [];
         for (const contact of contacts) {
-          if (blockedJIDs.has(contact.jid.toString())) {
+          console.log('BlockedJids', blockedJIDs);
+          console.log('Checked contact', contact.jid.bare().toString());
+          if (blockedJIDs.has(contact.jid.bare().toString())) {
             blocked.push(contact);
           } else {
             notBlocked.push(contact);

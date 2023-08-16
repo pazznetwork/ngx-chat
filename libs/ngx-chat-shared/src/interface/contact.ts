@@ -126,4 +126,8 @@ export class Contact implements Recipient {
         return subscription;
     }
   }
+
+  newSubscription(subscription: ContactSubscription): void {
+    this.subscriptionSubject.next(subscription);
+  }
 }

@@ -22,6 +22,7 @@ import {
   scan,
   startWith,
   Subject,
+  tap,
 } from 'rxjs';
 import { filter, shareReplay, switchMap } from 'rxjs/operators';
 import { NS } from '@pazznetwork/strophets';
@@ -50,7 +51,10 @@ const presenceMapping = {
 export class RosterPlugin implements ChatPlugin {
   readonly nameSpace = NS.ROSTER;
 
-  private readonly getContactRequestSubject = new Subject<Contact>();
+  private readonly getContactRequestSubject = new Subject<{
+    contact: Contact;
+    subscription?: ContactSubscription;
+  }>();
   private readonly removeContactByJIDSubject = new Subject<JID>();
 
   readonly contacts$: Observable<Contact[]>;
@@ -62,9 +66,16 @@ export class RosterPlugin implements ChatPlugin {
   constructor(private readonly chatService: XmppService) {
     this.contacts$ = merge(
       this.getContactRequestSubject.pipe(
-        map((contact) => (state: Map<string, Contact>) => {
-          const key = contact.jid.toString();
+        map((contactRequestObject) => (state: Map<string, Contact>) => {
+          const { contact, subscription } = contactRequestObject;
+          const key = contact.jid.bare().toString();
           if (state.has(key)) {
+            const existingContact = state.get(key) as Contact;
+            if (subscription) {
+              existingContact.newSubscription(subscription);
+              state.set(key, existingContact);
+              return state;
+            }
             return state;
           }
           state.set(key, contact);
@@ -73,21 +84,24 @@ export class RosterPlugin implements ChatPlugin {
       ),
       this.removeContactByJIDSubject.pipe(
         map((jid) => (state: Map<string, Contact>) => {
+          console.log('removeContactByJIDSubject roster');
           state.delete(jid.toString());
           return state;
         })
       ),
       this.chatService.onOffline$.pipe(
         map(() => (state: Map<string, Contact>) => {
+          console.log('onOffline$ roster');
           state.clear();
           return state;
         })
       ),
       this.chatService.onOnline$.pipe(
         mergeMap(() => this.getRosterContacts()),
-        map((contacts) => () => {
-          const state = new Map<string, Contact>();
-          contacts.forEach((c) => state.set(c.jid.toString(), c));
+        map((contacts) => (state: Map<string, Contact>) => {
+          console.log('onOnline$ roster contacts', contacts);
+          contacts.forEach((c) => state.set(c.jid.bare().toString(), c));
+          console.log('onOnline$ roster state', state);
           return state;
         })
       )
@@ -100,6 +114,7 @@ export class RosterPlugin implements ChatPlugin {
     chatService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
 
     const statedContacts$ = this.contacts$.pipe(
+      tap((contacts) => console.log('All Contacts', contacts)),
       mergeMap((contacts) =>
         combineLatest(
           contacts.map((contact) => contact.subscription$.pipe(map((sub) => ({ contact, sub }))))
@@ -365,7 +380,7 @@ export class RosterPlugin implements ChatPlugin {
   ): Promise<Contact> {
     const definedName = name?.includes('@') ? (name?.split('@')?.[0] as string) : name;
     const newContact = new Contact(jid, definedName, avatar, subscription);
-    this.getContactRequestSubject.next(newContact);
+    this.getContactRequestSubject.next({ contact: newContact, subscription });
     return (await this.getContactById(jid)) as Contact;
   }
 

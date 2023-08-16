@@ -26,9 +26,10 @@ export class MessageStore {
   }
 
   addMessage(message: Message): void {
-    if (this.messageIdToMessage.has(message.id)) {
-      throw new Error(`message with id ${message.id} already exists`);
-    }
+    // TODO: Will be ensured later
+    // if (this.messageIdToMessage.has(message.id)) {
+    //   throw new Error(`message with id ${message.id} already exists`);
+    // }
     if (this.mostRecentMessage?.datetime && message.datetime > this.mostRecentMessage?.datetime) {
       this.messages.push(message);
     } else {

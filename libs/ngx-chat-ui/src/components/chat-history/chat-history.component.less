@@ -46,14 +46,19 @@ ngx-chat-message-contact-request {
   animation-duration: 1500ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
+ngx-chat-message-in {
+  align-self: flex-start;
+}
 
 ngx-chat-message-in:last-child, ngx-chat-message-contact-request {
-  align-self: flex-start;
   animation-name: ngx-chat-message-in;
 }
 
-ngx-chat-message-out:last-child {
+ngx-chat-message-in {
   align-self: flex-end;
+}
+
+ngx-chat-message-out:last-child {
   animation-name: ngx-chat-message-out;
 }
 
