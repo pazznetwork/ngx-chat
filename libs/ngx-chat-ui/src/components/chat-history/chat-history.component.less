@@ -42,17 +42,17 @@
 ngx-chat-message-in,
 ngx-chat-message-out,
 ngx-chat-message-contact-request {
-  max-width: 76%;
+  max-width: 80%;
   animation-duration: 1500ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-ngx-chat-message-in, ngx-chat-message-contact-request {
+ngx-chat-message-in:last-child, ngx-chat-message-contact-request {
   align-self: flex-start;
   animation-name: ngx-chat-message-in;
 }
 
-ngx-chat-message-out {
+ngx-chat-message-out:last-child {
   align-self: flex-end;
   animation-name: ngx-chat-message-out;
 }

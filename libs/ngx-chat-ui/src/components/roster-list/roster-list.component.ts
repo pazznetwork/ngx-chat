@@ -10,7 +10,7 @@ import {
   Output,
 } from '@angular/core';
 import { merge, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN, ChatListStateService, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
@@ -91,12 +91,26 @@ export class RosterListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.contacts$ = this.contacts$ ?? this.chatService.contactListService.contactsSubscribed$;
+    this.contacts$ =
+      this.contacts$ ??
+      this.chatService.contactListService.contactsSubscribed$.pipe(
+        tap((c) => console.log('contactsSubscribed=', c))
+      );
     this.contactRequestsReceived$ =
-      this.contactRequestsReceived$ ?? this.chatService.contactListService.contactRequestsReceived$;
+      this.contactRequestsReceived$ ??
+      this.chatService.contactListService.contactRequestsReceived$.pipe(
+        tap((c) => console.log('contactRequestsReceived=', c))
+      );
     this.contactsUnaffiliated$ =
-      this.contactsUnaffiliated$ ?? this.chatService.contactListService.contactsUnaffiliated$;
-    this.blocked$ = this.blocked$ ?? this.chatService.contactListService.blockedContacts$;
+      this.contactsUnaffiliated$ ??
+      this.chatService.contactListService.contactsUnaffiliated$.pipe(
+        tap((c) => console.log('contactsUnaffiliated=', c))
+      );
+    this.blocked$ =
+      this.blocked$ ??
+      this.chatService.contactListService.blockedContacts$.pipe(
+        tap((c) => console.log('blockedContacts=', c))
+      );
 
     this.hasNoContacts$ = merge(
       this.contacts$,

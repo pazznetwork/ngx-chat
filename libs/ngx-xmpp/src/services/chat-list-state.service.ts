@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
+import { pairwise, filter, map, startWith } from 'rxjs/operators';
+import type { ChatService, Recipient, Contact } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN } from '../injection-token';
 
 export class ChatWindowState {
@@ -27,11 +28,20 @@ export class ChatListStateService {
       this.openChatsSubject.next([]);
     });
 
-    this.chatService.contactListService.contactRequestsReceived$.subscribe((contacts) => {
-      for (const contact of contacts) {
-        this.openChat(contact);
-      }
-    });
+    this.chatService.contactListService.contacts$
+      .pipe(
+        startWith(new Array<Contact>()),
+        pairwise(),
+        filter(([prev, next]) => prev.length < next.length),
+        map(([prev, next]) =>
+          next.filter((nc) => !prev.find((pc) => pc.jid.local === nc.jid.local))
+        )
+      )
+      .subscribe((contacts) => {
+        for (const contact of contacts) {
+          this.openChat(contact);
+        }
+      });
   }
 
   openChat(recipient: Recipient, collapsedWindow = false): void {
@@ -66,12 +76,20 @@ export class ChatListStateService {
   }
 
   private findChatWindowStateIndexByRecipient(recipient: Recipient): number {
+    // TODO: Multiple domain and ressource compatibilty
+    // We check only for local part as we don't test currently against multiple domain and ressource compatibilty
+    // the presence handling with the subscription info lacks the ressource only a follow up presence element from the server shares it
     return this.openChatsSubject
       .getValue()
-      .findIndex((chatWindowState) => chatWindowState.recipient.equalsJid(recipient));
+      .findIndex((chatWindowState) => chatWindowState.recipient.jid.local === recipient.jid.local);
   }
 
   private findChatWindowStateByRecipient(recipient: Recipient): ChatWindowState | undefined {
-    return this.openChatsSubject.getValue().find((chat) => chat.recipient.equalsJid(recipient));
+    // TODO: Multiple domain and ressource compatibilty
+    // We check only for local part as we don't test currently against multiple domain and ressource compatibilty
+    // the presence handling with the subscription info lacks the ressource only a follow up presence element from the server shares it
+    return this.openChatsSubject
+      .getValue()
+      .find((chat) => chat.recipient.jid.local === recipient.jid.local);
   }
 }

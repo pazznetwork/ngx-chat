@@ -178,7 +178,7 @@ export class Room implements Recipient {
 
     this.logService.debug(
       `occupant changed nick: from=${
-        occupant.nick
+        occupant.nick ?? 'undefined nick'
       }, to=${newNick}, occupantJid=${occupant.jid.toString()}, roomJid=${this.jid.toString()}`
     );
     this.onOccupantChangeSubject.next({ change: 'changedNick', occupant, newNick, isCurrentUser });
