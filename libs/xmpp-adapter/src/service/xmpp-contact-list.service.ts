@@ -30,7 +30,7 @@ export class XmppContactListService implements ContactListService {
 
     const contactsWithBlockedPair$ = combineLatest([
       this.contacts$,
-      this.blockPlugin.blockedContactJIDs$,
+      this.blockPlugin.blockedContactJIDs$.pipe(startWith(new Set<string>())),
     ]).pipe(
       map(([contacts, blockedJIDs]) => {
         console.log('Contacts in create blockedContacts', contacts);
