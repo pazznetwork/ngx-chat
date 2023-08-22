@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 import type { XmppService } from '../xmpp.service';
-import { firstValueFrom, map, merge, mergeMap, Observable, ReplaySubject, scan, tap } from 'rxjs';
+import { firstValueFrom, map, merge, mergeMap, Observable, ReplaySubject, scan } from 'rxjs';
 import type { ChatPlugin } from '../core';
 import { shareReplay, switchMap } from 'rxjs/operators';
 import { getUniqueId, NS } from '@pazznetwork/strophets';
@@ -36,7 +36,6 @@ export class BlockPlugin implements ChatPlugin {
       xmppService.onOffline$.pipe(map(() => () => new Set<string>()))
     ).pipe(
       scan((state, innerFun) => innerFun(state), new Set<string>()),
-      tap((blockedSet) => console.log('BlockedSet tap', blockedSet)),
       shareReplay({ bufferSize: 1, refCount: false })
     );
 

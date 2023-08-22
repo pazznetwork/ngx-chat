@@ -33,13 +33,9 @@ export class XmppContactListService implements ContactListService {
       this.blockPlugin.blockedContactJIDs$.pipe(startWith(new Set<string>())),
     ]).pipe(
       map(([contacts, blockedJIDs]) => {
-        console.log('Contacts in create blockedContacts', contacts);
-        console.log('blockedJIDs in create blockedContacts', contacts);
         const blocked: Contact[] = [];
         const notBlocked: Contact[] = [];
         for (const contact of contacts) {
-          console.log('BlockedJids', blockedJIDs);
-          console.log('Checked contact', contact.jid.bare().toString());
           if (blockedJIDs.has(contact.jid.bare().toString())) {
             blocked.push(contact);
           } else {

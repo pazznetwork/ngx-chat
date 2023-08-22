@@ -296,11 +296,11 @@ export class RosterPlugin implements ChatPlugin {
       return false;
     }
 
-    const fromContact = await this.getOrCreateContactById(
-      fromJid,
-      fromJid,
-      ContactSubscription.from
-    );
+    const fromContact = await this.getOrCreateContactById(fromJid, fromJid);
+    const isSubscribed = await firstValueFrom(fromContact.isSubscribed());
+    if (!isSubscribed) {
+      fromContact.newSubscription(ContactSubscription.from);
+    }
 
     const show = Finder.create(stanza).searchByTag('show')?.result?.textContent;
     const handleShowAsDefault = show == null || !Object.keys(presenceMapping).includes(show);
@@ -321,7 +321,7 @@ export class RosterPlugin implements ChatPlugin {
     }
 
     if (type === 'subscribe') {
-      if (await firstValueFrom(fromContact.isSubscribed())) {
+      if (isSubscribed) {
         // subscriber is already a contact of us, approve subscription
         await this.sendApprovalSubscription(fromJid);
         await fromContact.updateSubscriptionOnReceived();

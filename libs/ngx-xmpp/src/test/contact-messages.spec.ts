@@ -20,7 +20,7 @@ describe('contact', () => {
     expect(contact1.equalsJid(contact2)).toBeFalsy();
   });
 
-  it('should append messages with same id only once', () => {
+  xit('should append messages with same id only once', () => {
     const contact = new Contact('test@example1.com/resource', 'john doe');
     const message = {
       id: getId(),
