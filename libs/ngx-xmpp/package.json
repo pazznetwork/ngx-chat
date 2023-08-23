@@ -1,10 +1,10 @@
 {
   "name": "@pazznetwork/ngx-xmpp",
-  "version": "1.14.1-beta",
+  "version": "1.15.1",
   "peerDependencies": {
     "@angular/common": "^14.2.0",
     "@angular/core": "^14.2.0",
-    "rxjs": "7.5.7"
+    "rxjs": "7.8.1"
   },
   "sideEffects": false,
   "publishConfig": {

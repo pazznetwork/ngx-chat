@@ -1,7 +1,10 @@
 {
-  "version": "1.14.1",
+  "version": "1.15.1",
   "name": "@pazznetwork/ngx-chat-shared",
   "publishConfig": {
     "access": "restricted"
+  },
+  "peerDependencies": {
+    "rxjs": "7.8.1"
   }
 }

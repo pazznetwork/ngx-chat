@@ -1,6 +1,6 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "0.14.11",
+  "version": "0.15.11",
   "license": "MIT",
   "scripts": {
     "postinstall": "node ./decorate-angular-cli.js",
@@ -23,10 +23,6 @@
     "publish:adapter": "cd dist/libs/xmpp-adapter && npm version patch && npm publish; cd .. && cd .. && cd ..",
     "publish:xmpp": "cd dist/libs/ngx-xmpp && npm version patch && npm publish; cd .. && cd .. && cd ..",
     "publish:ui": "cd dist/libs/ngx-chat-ui && npm version patch && npm publish; cd .. && cd .. && cd .."
-  },
-  "dependencies": {
-    "rxjs": "7.5.7",
-    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "15.2.9",
@@ -88,7 +84,9 @@
     "typescript": "~4.8.4",
     "webpack-bundle-analyzer": "^4.8.0",
     "zone.js": "0.13.1",
-    "postcss-preset-env" : "9.1.1"
+    "postcss-preset-env" : "9.1.1",
+    "tslib": "^2.6.2",
+    "rxjs": "7.8.1"
   },
   "keywords": [
     "ngx-chat",

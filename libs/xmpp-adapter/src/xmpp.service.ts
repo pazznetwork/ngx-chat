@@ -18,6 +18,7 @@ import {
 } from './service';
 import type { PluginMap } from './core';
 import { createPluginMap } from './core';
+import { NgZone } from '@angular/core';
 
 export class XmppService implements ChatService {
   readonly chatConnectionService: XmppConnectionService;
@@ -43,7 +44,12 @@ export class XmppService implements ChatService {
   roomService: XmppRoomService;
   contactListService: XmppContactListService;
 
-  constructor(readonly log: Log, openChatsService: OpenChatsService, httpClient: HttpClient) {
+  constructor(
+    readonly zone: NgZone,
+    readonly log: Log,
+    openChatsService: OpenChatsService,
+    httpClient: HttpClient
+  ) {
     this.chatConnectionService = new XmppConnectionService(log);
 
     this.onAuthenticating$ = this.chatConnectionService.onAuthenticating$;
@@ -78,37 +84,48 @@ export class XmppService implements ChatService {
     if (await firstValueFrom(this.isOnline$)) {
       return;
     }
-    this.lastLogInRequest = logInRequest;
-    const onOnlinePromise = firstValueFrom(this.onOnline$);
-    await this.chatConnectionService.logIn(logInRequest);
-    await onOnlinePromise;
-    await this.pluginMap.disco.ensureServicesAreDiscovered(logInRequest.domain);
-    await firstValueFrom(this.pluginMap.disco.servicesInitialized$);
-    // redundant because default type is available, but better for documentation purposes
-    await this.chatConnectionService.$pres({ type: 'available' }).sendResponseLess();
+
+    await this.zone.runOutsideAngular(async () => {
+      this.lastLogInRequest = logInRequest;
+      const onOnlinePromise = firstValueFrom(this.onOnline$);
+      await this.chatConnectionService.logIn(logInRequest);
+      await onOnlinePromise;
+      await this.pluginMap.disco.ensureServicesAreDiscovered(logInRequest.domain);
+      await firstValueFrom(this.pluginMap.disco.servicesInitialized$);
+      // redundant because default type is available, but better for documentation purposes
+      await this.chatConnectionService.$pres({ type: 'available' }).sendResponseLess();
+    });
   }
 
   async logOut(): Promise<void> {
-    const offlinePromise = firstValueFrom(this.onOffline$);
-    await this.chatConnectionService.logOut();
-    await offlinePromise;
+    await this.zone.runOutsideAngular(async () => {
+      const offlinePromise = firstValueFrom(this.onOffline$);
+      await this.chatConnectionService.logOut();
+      await offlinePromise;
+    });
   }
 
   async reconnect(): Promise<void> {
-    if (!this.lastLogInRequest) {
-      return;
-    }
-    return this.logIn(this.lastLogInRequest);
+    return this.zone.runOutsideAngular(async () => {
+      if (!this.lastLogInRequest) {
+        return;
+      }
+      return this.logIn(this.lastLogInRequest);
+    });
   }
 
   async register(authRequest: AuthRequest): Promise<void> {
-    const onOnlinePromise = firstValueFrom(this.onOnline$);
-    await this.chatConnectionService.register(authRequest);
-    await onOnlinePromise;
-    await this.pluginMap.disco.ensureServicesAreDiscovered(authRequest.domain);
+    return this.zone.runOutsideAngular(async () => {
+      const onOnlinePromise = firstValueFrom(this.onOnline$);
+      await this.chatConnectionService.register(authRequest);
+      await onOnlinePromise;
+      await this.pluginMap.disco.ensureServicesAreDiscovered(authRequest.domain);
+    });
   }
 
   async unregister(authRequest: Pick<AuthRequest, 'service' | 'domain'>): Promise<void> {
-    await this.chatConnectionService.unregister(authRequest);
+    return this.zone.runOutsideAngular(async () => {
+      await this.chatConnectionService.unregister(authRequest);
+    });
   }
 }

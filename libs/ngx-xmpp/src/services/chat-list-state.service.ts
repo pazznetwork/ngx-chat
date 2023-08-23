@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, mergeAll, windowTime } from 'rxjs';
 import { filter, map, pairwise, startWith } from 'rxjs/operators';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
@@ -23,27 +23,29 @@ export class ChatListStateService {
   openChats$ = this.openChatsSubject.asObservable();
   openTracks$ = this.openTracksSubject.asObservable();
 
-  constructor(@Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService) {
+  constructor(@Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService, readonly zone: NgZone) {
     this.chatService.onOffline$.subscribe(() => {
       this.openChatsSubject.next([]);
     });
 
-    this.chatService.contactListService.contacts$
-      .pipe(
-        startWith(new Array<Contact>()),
-        pairwise(),
-        filter(([prev, next]) => prev.length < next.length),
-        map(([prev, next]) =>
-          next.filter((nc) => !prev.find((pc) => pc.jid.local === nc.jid.local))
-        ),
-        windowTime(500),
-        mergeAll(3)
-      )
-      .subscribe((contacts) => {
-        for (const contact of contacts) {
-          this.openChat(contact);
-        }
-      });
+    this.zone.runOutsideAngular(() => {
+      this.chatService.contactListService.contacts$
+        .pipe(
+          startWith(new Array<Contact>()),
+          pairwise(),
+          filter(([prev, next]) => prev.length < next.length),
+          map(([prev, next]) =>
+            next.filter((nc) => !prev.find((pc) => pc.jid.local === nc.jid.local))
+          ),
+          windowTime(500),
+          mergeAll(3)
+        )
+        .subscribe((contacts) => {
+          for (const contact of contacts) {
+            this.openChat(contact);
+          }
+        });
+    });
   }
 
   openChat(recipient: Recipient, collapsedWindow = false): void {
