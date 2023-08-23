@@ -212,7 +212,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
   }
 
   scheduleScrollToLastMessage(): void {
-    setTimeout(() => this.scrollToLastMessage(), 0);
+    this.scrollToLastMessage();
   }
 
   async loadOlderMessagesBeforeViewport(): Promise<void> {

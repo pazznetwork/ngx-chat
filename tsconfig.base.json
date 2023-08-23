@@ -11,7 +11,7 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2020",
+    "target": "es2022",
     "noEmitHelpers": true,
     "suppressImplicitAnyIndexErrors": true,
     "preserveSymlinks": true,

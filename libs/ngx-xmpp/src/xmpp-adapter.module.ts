@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { NgModule } from '@angular/core';
+import { NgModule, NgZone } from '@angular/core';
 import {
   ChatBackgroundNotificationService,
   ChatListStateService,
@@ -31,7 +31,7 @@ import {
     },
     {
       provide: CHAT_SERVICE_TOKEN,
-      deps: [OPEN_CHAT_SERVICE_TOKEN, HttpClient, LOG_SERVICE_TOKEN],
+      deps: [NgZone, HttpClient, OPEN_CHAT_SERVICE_TOKEN, LOG_SERVICE_TOKEN],
       useFactory: XmppAdapterModule.xmppServiceFactory,
     },
     {
@@ -47,10 +47,13 @@ export class XmppAdapterModule {
   }
 
   private static xmppServiceFactory(
-    chatMessageListRegistryService: ChatMessageListRegistryService,
+    zone: NgZone,
     httpClient: HttpClient,
+    chatMessageListRegistryService: ChatMessageListRegistryService,
     logService: Log
   ): XmppService {
-    return new XmppService(logService, chatMessageListRegistryService, httpClient);
+    return zone.runOutsideAngular(
+      () => new XmppService(logService, chatMessageListRegistryService, httpClient)
+    );
   }
 }
