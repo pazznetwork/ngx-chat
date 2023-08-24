@@ -22,7 +22,6 @@ import {
   scan,
   startWith,
   Subject,
-  tap,
 } from 'rxjs';
 import { filter, shareReplay, switchMap } from 'rxjs/operators';
 import { NS } from '@pazznetwork/strophets';
@@ -84,14 +83,12 @@ export class RosterPlugin implements ChatPlugin {
       ),
       this.removeContactByJIDSubject.pipe(
         map((jid) => (state: Map<string, Contact>) => {
-          console.log('removeContactByJIDSubject roster');
           state.delete(jid.toString());
           return state;
         })
       ),
       this.chatService.onOffline$.pipe(
         map(() => (state: Map<string, Contact>) => {
-          console.log('onOffline$ roster');
           state.clear();
           return state;
         })
@@ -99,9 +96,7 @@ export class RosterPlugin implements ChatPlugin {
       this.chatService.onOnline$.pipe(
         mergeMap(() => this.getRosterContacts()),
         map((contacts) => (state: Map<string, Contact>) => {
-          console.log('onOnline$ roster contacts', contacts);
           contacts.forEach((c) => state.set(c.jid.bare().toString(), c));
-          console.log('onOnline$ roster state', state);
           return state;
         })
       )
@@ -114,7 +109,6 @@ export class RosterPlugin implements ChatPlugin {
     chatService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
 
     const statedContacts$ = this.contacts$.pipe(
-      tap((contacts) => console.log('All Contacts', contacts)),
       mergeMap((contacts) =>
         combineLatest(
           contacts.map((contact) => contact.subscription$.pipe(map((sub) => ({ contact, sub }))))

@@ -49,7 +49,6 @@ export class ChatMessageContactRequestComponent implements OnInit {
     this.subscriptionAction$ = merge(
       this.contact.subscription$.pipe(
         map((subscription) => {
-          console.log('subscription Action sub:', subscription);
           if (subscription === ContactSubscription.from) {
             return SubscriptionAction.PENDING_REQUEST;
           } else if (subscription === ContactSubscription.none) {

@@ -21,6 +21,8 @@ import { createPluginMap } from './core';
 import { NgZone } from '@angular/core';
 
 export class XmppService implements ChatService {
+  static instance: XmppService;
+
   readonly chatConnectionService: XmppConnectionService;
 
   readonly onAuthenticating$: Observable<void>;
@@ -44,12 +46,14 @@ export class XmppService implements ChatService {
   roomService: XmppRoomService;
   contactListService: XmppContactListService;
 
-  constructor(
+  private constructor(
     readonly zone: NgZone,
     readonly log: Log,
     openChatsService: OpenChatsService,
     httpClient: HttpClient
   ) {
+    console.trace('XmppService.constructor()');
+
     this.chatConnectionService = new XmppConnectionService(log);
 
     this.onAuthenticating$ = this.chatConnectionService.onAuthenticating$;
@@ -78,6 +82,19 @@ export class XmppService implements ChatService {
     this.fileUploadHandler = this.pluginMap.xmppFileUpload;
 
     this.onOffline$.subscribe(() => this.pluginMap.disco.clearDiscovered());
+  }
+
+  static create(
+    zone: NgZone,
+    log: Log,
+    openChatsService: OpenChatsService,
+    httpClient: HttpClient
+  ): XmppService {
+    if (XmppService.instance) {
+      return XmppService.instance;
+    }
+    XmppService.instance = new XmppService(zone, log, openChatsService, httpClient);
+    return XmppService.instance;
   }
 
   async logIn(logInRequest: AuthRequest): Promise<void> {

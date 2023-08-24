@@ -82,8 +82,6 @@ export class BlockPlugin implements ChatPlugin {
 
     const blockListItems = blockListResponse.querySelector('blocklist')?.querySelectorAll('item');
 
-    console.log('requestBlockedJIDs');
-
     if (blockListItems == null) {
       return new Set<string>();
     }
@@ -96,7 +94,6 @@ export class BlockPlugin implements ChatPlugin {
   }
 
   private handlePush(stanza: Element): boolean {
-    console.log('handlePush for Block', stanza);
     const unblock = stanza.querySelector('iq > unblock');
     const block = stanza.querySelector('iq > block');
     if (block) {

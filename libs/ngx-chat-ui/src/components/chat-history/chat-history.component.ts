@@ -15,7 +15,7 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { combineLatest, map, mergeMap, Observable, of, Subject, tap } from 'rxjs';
+import { combineLatest, map, mergeMap, Observable, of, Subject } from 'rxjs';
 import { debounceTime, filter, shareReplay, takeUntil } from 'rxjs/operators';
 import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { Contact, ContactSubscription, Direction, Message } from '@pazznetwork/ngx-chat-shared';
@@ -100,7 +100,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
     this.recipient.messageStore.messages$
       .pipe(
         map((messages) => {
-          console.log('messages', messages);
           messages.sort((a, b) => a?.datetime?.getTime() - b?.datetime?.getTime());
           const messageMap = new Map<string, Message[]>();
           for (const message of messages) {
@@ -118,7 +117,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
             returnArray.push({ date: new Date(key), messages: mapMessages });
           }
 
-          console.log('return Array', returnArray);
           return returnArray;
         }),
         shareReplay({ bufferSize: 1, refCount: true }),
@@ -134,7 +132,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
         this.chatService.contactListService.blockedContacts$,
         this.recipient.subscription$,
       ]).pipe(
-        tap((sub) => console.log('sub for pendingRequest boolean', sub)),
         map(([blockedContacts, subscription]) => {
           const isNotBlocked = !blockedContacts.find((b) =>
             b.jid.bare().equals(this.recipient?.jid.bare())
@@ -144,8 +141,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy, OnChanges, After
           );
 
           return isNotBlocked && isNotContact;
-        }),
-        tap((pendingRequest) => console.log('pendingRequest', pendingRequest))
+        })
       );
       this.pendingRequest$
         .pipe(

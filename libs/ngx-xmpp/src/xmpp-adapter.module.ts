@@ -52,8 +52,8 @@ export class XmppAdapterModule {
     chatMessageListRegistryService: ChatMessageListRegistryService,
     logService: Log
   ): XmppService {
-    return zone.runOutsideAngular(
-      () => new XmppService(zone, logService, chatMessageListRegistryService, httpClient)
+    return zone.runOutsideAngular(() =>
+      XmppService.create(zone, logService, chatMessageListRegistryService, httpClient)
     );
   }
 }

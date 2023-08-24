@@ -63,7 +63,7 @@ export class ChatFileDropComponent {
         continue;
       }
 
-      this.fileUpload.emit();
+      this.fileUpload.emit(file);
     }
   }
 }
