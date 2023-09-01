@@ -75,6 +75,16 @@ export async function unregister({
   if (!(await checkAccountExists(user, host))) {
     return;
   }
+  await unregisterUnsafe({ username: user, domain: host });
+}
+
+export async function unregisterUnsafe({
+  username: user,
+  domain: host,
+}: {
+  username: string;
+  domain: string;
+}): Promise<void> {
   await executeRequest('unregister', {
     user,
     host,

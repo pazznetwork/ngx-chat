@@ -34,7 +34,7 @@ import { getUniqueId } from '@pazznetwork/strophets';
  */
 export class XmppMessageService implements MessageService {
   private readonly messageSubject = new Subject<Recipient>();
-  private readonly messageSentSubject: Subject<Recipient> = new Subject();
+  private readonly messageSentSubject = new Subject<Recipient>();
   readonly jidToUnreadCount$: Observable<JidToNumber>;
   readonly message$: Observable<Recipient>;
   readonly unreadMessageCountSum$: Observable<number>;

@@ -8,6 +8,7 @@
     "build": "nx build",
     "build:all": "rm -rf dist && ng build --prod",
     "test": "nx test ngx-xmpp",
+    "test:headless": "DEBUG=true nx test ngx-xmpp",
     "e2e": "nx e2e demo-e2e",
     "e2e:debug": "nx e2e-debug demo-e2e",
     "install:browsers": "npx playwright install",
@@ -76,17 +77,18 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
+    "karma-spec-reporter": "^0.0.36",
     "ng-packagr": "15.2.2",
     "nx": "15.9.5",
+    "postcss-preset-env": "9.1.1",
     "prettier": "^2.7.1",
     "puppeteer": "^20.9.0",
+    "rxjs": "7.8.1",
     "ts-node": "10.9.1",
+    "tslib": "^2.6.2",
     "typescript": "~4.8.4",
     "webpack-bundle-analyzer": "^4.8.0",
-    "zone.js": "0.13.1",
-    "postcss-preset-env" : "9.1.1",
-    "tslib": "^2.6.2",
-    "rxjs": "7.8.1"
+    "zone.js": "0.13.1"
   },
   "keywords": [
     "ngx-chat",
@@ -108,4 +110,3 @@
   },
   "sideEffects": false
 }
-

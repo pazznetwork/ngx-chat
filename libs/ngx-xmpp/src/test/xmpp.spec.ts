@@ -6,7 +6,11 @@ import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
+import {
+  ensureNoRegisteredUser,
+  ensureRegisteredUser,
+  unregisterAllBesidesAdmin,
+} from './helpers/admin-actions';
 
 describe('XmppChatAdapter', () => {
   let testUtils: TestUtils;
@@ -104,13 +108,19 @@ describe('XmppChatAdapter', () => {
           map((c) => c.length)
         )
       );
-      const messageContactPromise = firstValueFrom(testUtils.chatService.messageService.message$);
+
+      const villainMessage = 'I will destroy you HERO!!!';
+      const messageContactPromise = firstValueFrom(
+        testUtils.chatService.messageService.message$.pipe(
+          filter((recipient) => recipient.messageStore.mostRecentMessage?.body === villainMessage)
+        )
+      );
       await testUtils.logIn.villain();
 
       const recipient = await testUtils.chatService.contactListService.getOrCreateContactById(
         testUtils.hero.jid
       );
-      const villainMessage = 'I will destroy you HERO!!!';
+
       await testUtils.chatService.messageService.sendMessage(recipient, villainMessage);
       expect(await contactsPromise).toEqual(1);
       const contact = await messageContactPromise;
@@ -121,9 +131,7 @@ describe('XmppChatAdapter', () => {
       expect(contact.messageStore.messages?.[0]?.direction).toEqual(testUtils.direction.out);
 
       await testUtils.logOut();
-
-      await ensureNoRegisteredUser(testUtils.hero);
-      await ensureNoRegisteredUser(testUtils.villain);
+      await unregisterAllBesidesAdmin();
     });
 
     it('#messages$ in contact should emit message on received messages', async () => {
@@ -160,8 +168,7 @@ describe('XmppChatAdapter', () => {
       expect(await contactsPromise).toEqual(1);
 
       await testUtils.logOut();
-      await ensureNoRegisteredUser(testUtils.hero);
-      await ensureNoRegisteredUser(testUtils.villain);
+      await unregisterAllBesidesAdmin();
     });
 
     it('#messages$ in contact should emit on sending messages', async () => {
@@ -193,17 +200,13 @@ describe('XmppChatAdapter', () => {
       expect(await contactsPromise).toEqual(1);
 
       await testUtils.logOut();
-      await ensureNoRegisteredUser(testUtils.hero);
-      await ensureNoRegisteredUser(testUtils.villain);
+      await unregisterAllBesidesAdmin();
     });
   });
 
   describe('states', () => {
     it('should clear contacts when logging out', async () => {
-      await ensureNoRegisteredUser(testUtils.princess);
-      await ensureNoRegisteredUser(testUtils.father);
-      await ensureNoRegisteredUser(testUtils.friend);
-      await ensureNoRegisteredUser(testUtils.hero);
+      await unregisterAllBesidesAdmin();
       await ensureRegisteredUser(testUtils.princess);
       await ensureRegisteredUser(testUtils.father);
       await ensureRegisteredUser(testUtils.friend);
@@ -261,10 +264,7 @@ describe('XmppChatAdapter', () => {
       await testUtils.logOut();
       expect((await zeroAfterReLogoutPromise).length).toEqual(0);
 
-      await ensureNoRegisteredUser(testUtils.princess);
-      await ensureNoRegisteredUser(testUtils.father);
-      await ensureNoRegisteredUser(testUtils.friend);
-      await ensureNoRegisteredUser(testUtils.hero);
+      await unregisterAllBesidesAdmin();
     });
   });
 });

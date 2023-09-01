@@ -28,6 +28,7 @@
         "karmaConfig": "libs/ngx-xmpp/karma.conf.js",
         "polyfills": "libs/ngx-xmpp/src/polyfills.ts",
         "main": "libs/ngx-xmpp/src/main.karma.ts",
+        "include": ["**/*.spec.ts"],
         "styles": [],
         "scripts": [],
         "assets": []

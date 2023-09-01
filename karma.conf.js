@@ -6,16 +6,26 @@
 const { join } = require('path');
 const { constants } = require('karma');
 process.env['CHROME_BIN'] = require('puppeteer').executablePath();
+const browser = process.env['DEBUG'] ? 'DebugChrome' : 'Chrome';
 
 module.exports = () => {
   return {
     basePath: '.',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    specReporter: {
+      maxLogLines: 5, // limit number of lines logged per test
+      suppressErrorSummary: true, // do not print error summary
+      suppressFailed: false, // do not print information about failed tests
+      suppressPassed: false, // do not print information about passed tests
+      suppressSkipped: true, // do not print information about skipped tests
+      showSpecTiming: false, // print the time elapsed for each spec
+    },
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage'),
+      require('karma-spec-reporter'),
       require('@angular-devkit/build-angular/plugins/karma'),
     ],
     client: {
@@ -37,12 +47,25 @@ module.exports = () => {
       subdir: '.',
       reporters: [{ type: 'html' }, { type: 'text-summary' }],
     },
-    reporters: ['progress', 'kjhtml'],
+    customLaunchers: {
+      DebugChrome: {
+        base: 'Chrome',
+        flags: [
+          '--disable-translate',
+          '--disable-extensions',
+          '--no-first-run',
+          '--disable-background-networking',
+          '--remote-debugging-port=9223',
+          '--remote-debugging-address=0.0.0.0',
+        ],
+      },
+    },
+    reporters: ['spec', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: constants.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
+    browsers: [browser],
     singleRun: false,
     restartOnFileChange: true,
   };

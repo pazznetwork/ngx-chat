@@ -147,9 +147,11 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   async createRoom(options: RoomCreationOptions): Promise<Room> {
     const userJid = await firstValueFrom(this.xmppService.userJid$);
     const { roomId, nick } = options;
+    console.log('before findService');
     const service = await this.serviceDiscoveryPlugin.findService('conference', 'text');
     const occupantJid = parseJid(`${roomId}@${service.jid}/${nick ?? userJid}`);
-    const { presenceResponse, room } = await this.joinRoomInternal(occupantJid);
+    console.log('before join room internal');
+    const { presenceResponse, room } = await this.joinRoomInternal(userJid, occupantJid);
 
     const itemElement = presenceResponse?.querySelector('x')?.querySelector('item');
     if (itemElement?.getAttribute('affiliation') !== Affiliation.owner) {
@@ -184,7 +186,8 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   }
 
   async joinRoom(occupantJid: JID): Promise<Room> {
-    const { room } = await this.joinRoomInternal(occupantJid);
+    const userJid = await firstValueFrom(this.xmppService.chatConnectionService.userJid$);
+    const { room } = await this.joinRoomInternal(userJid, occupantJid);
 
     return room;
   }
@@ -731,12 +734,14 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     return room;
   }
 
-  private async joinRoomInternal(roomJid: JID): Promise<{ presenceResponse: Stanza; room: Room }> {
-    const userJid = await firstValueFrom(this.xmppService.chatConnectionService.userJid$);
+  private async joinRoomInternal(
+    joiningUser: string,
+    roomJid: JID
+  ): Promise<{ presenceResponse: Stanza; room: Room }> {
     const occupantJid = new JID(
       roomJid.local,
       roomJid.domain,
-      roomJid.resource ?? userJid.split('@')[0]
+      roomJid.resource ?? joiningUser.split('@')[0]
     );
 
     const presenceResponse = await this.xmppService.chatConnectionService

@@ -2,7 +2,6 @@
 <div
   class="chat-message-image-wrapper"
   [class.chat-message-image-wrapper--placeholder]="showImagePlaceholder$ | async"
-  *ngIf="showComponent$"
 >
-  <img alt="chat message image" class="chat-message-image" (load)="afterImageLoaded()" [src]="imageLink$ | async" />
+  <img *ngIf="showImage$ | async" alt="chat message image" class="chat-message-image" (load)="afterImageLoaded()" [src]="imageLink$ | async" />
 </div>

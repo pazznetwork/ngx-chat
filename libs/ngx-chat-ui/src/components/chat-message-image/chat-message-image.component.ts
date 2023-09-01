@@ -10,8 +10,6 @@ import {
   Observable,
   race,
   ReplaySubject,
-  startWith,
-  Subject,
   switchMap,
   take,
 } from 'rxjs';
@@ -65,17 +63,18 @@ export class ChatMessageImageComponent implements OnInit {
     )
   );
 
-  private readonly showImagePlaceholderSubject = new Subject<boolean>();
-  showImagePlaceholder$ = this.showImagePlaceholderSubject.pipe(startWith(true));
+  private readonly showImagePlaceholderSubject = new ReplaySubject<boolean>(1);
+  showImagePlaceholder$ = this.showImagePlaceholderSubject.asObservable();
 
-  showComponent$ = merge(this.showImagePlaceholder$, this.imageLink$.pipe(map((link) => !!link)));
+  showImage$ = merge(this.imageLink$.pipe(map((link) => !!link)));
 
-  private readonly checkedHttpLinksSubject = new Subject<void>();
+  private readonly checkedHttpLinksSubject = new ReplaySubject<void>(1);
 
   constructor(private httpClient: HttpClient) {}
 
   ngOnInit(): void {
     if (!this.textContent) {
+      this.showImagePlaceholderSubject.next(false);
       return;
     }
     const candidateUrlsRegexArray = extractUrls(this.textContent);
