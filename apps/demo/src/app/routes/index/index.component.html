@@ -1,5 +1,9 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <div class="container">
+  <h2>More:</h2>
+  <a routerLink="/ui">Show mock chats</a>
+  <br />
+  <a routerLink="/muc">Show multi user chat</a>
   <div class="form-group">
     <div>
       XMPP domain
@@ -31,7 +35,8 @@
       />
     </div>
   </div>
-
+  <button data-zid="clean-up-jabber" (click)="cleanUpJabber()">Clean Up Jabber</button>
+  <button data-zid="force-update" (click)="forceAppUpdate()">Rerender App</button>
   <form>
     <div class="form-group">
       <label for="username">
@@ -82,7 +87,7 @@
   </div>
 
   <hr />
-
+  <div *ngIf="chatService.isOnline$ | async; else offline">
   <div class="form-group">
     <div>Contact Management</div>
     <div>
@@ -103,9 +108,21 @@
   <button data-zid="open-chat" (click)="onOpenChat()">Open chat</button>
 
   <hr />
-
-  <button data-zid="clean-up-jabber" (click)="cleanUpJabber()">Clean Up Jabber</button>
-
+    <div class="form-group">
+      <label for="room-name">
+        Room name
+      </label>
+      <input
+        id="room-name"
+        name="room-name"
+        [(ngModel)]="roomName"
+        class="form-control"
+        type="text"
+        placeholder="Room"
+      />
+    </div>
+    <button data-zid="create-room" (click)="onCreateRoom()">Create Room</button>
+    <hr />
   <div>
     <h2>Custom component for a chat session</h2>
     <ng-container
@@ -165,7 +182,7 @@
     presence={{ contact.presence$ | async }}<br />
   </p>
 
-  <ngx-chat-iq></ngx-chat-iq>
+  <ngx-chat-stanza></ngx-chat-stanza>
 
   <ngx-chat-multi-user-chat></ngx-chat-multi-user-chat>
 
@@ -174,10 +191,10 @@
     Sum unread messages: {{ chatService.messageService.unreadMessageCountSum$ | async }}
     <pre>{{ chatService.messageService.jidToUnreadCount$ | async | keyvalue | json }}</pre>
   </div>
-  <h2>More:</h2>
-  <a routerLink="/ui">Show mock chats</a>
-  <br />
-  <a routerLink="/muc">Show multi user chat</a>
+  </div>
+    <ng-template #offline>
+      <span *ngIf="chatService.isOffline$ | async">You need to be online.</span>
+    </ng-template>
 </div>
 
 <ngx-chat [rosterState]="'shown'"></ngx-chat>

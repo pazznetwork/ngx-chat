@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, ViewChild } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import {
   Affiliation,
   ChatService,
@@ -11,7 +11,6 @@ import {
   RoomOccupant,
   XmlSchemaForm,
 } from '@pazznetwork/ngx-chat-shared';
-import type { NgModel } from '@angular/forms';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
@@ -20,10 +19,8 @@ import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
   styleUrls: ['./multi-user-chat.component.css'],
 })
 export class MultiUserChatComponent {
-  @ViewChild('occupantJidInput')
-  occupantJidInput!: NgModel;
-  occupantJidText?: string;
-  occupantJid?: JID | null = null;
+  roomJidText?: string;
+  roomJid?: JID | null = null;
   selectedRoom?: Recipient;
   allRooms: Room[] = [];
   roomUserList: RoomOccupant[] = [];
@@ -34,12 +31,7 @@ export class MultiUserChatComponent {
   constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
 
   updateOccupantJid(enteredJid: string): void {
-    try {
-      this.occupantJid = parseJid(enteredJid);
-      this.occupantJidInput.control.setErrors(null);
-    } catch (e) {
-      this.occupantJidInput.control.setErrors({ notAJid: true });
-    }
+    this.roomJid = parseJid(enteredJid);
   }
 
   async joinRoom(occupantJid: JID | undefined | null): Promise<void> {
@@ -47,8 +39,8 @@ export class MultiUserChatComponent {
       throw new Error(`occupantJid is undefined`);
     }
     this.selectedRoom = await this.chatService.roomService.joinRoom(occupantJid.toString());
-    this.occupantJid = occupantJid;
-    this.occupantJidText = occupantJid.toString();
+    this.roomJid = occupantJid;
+    this.roomJidText = occupantJid.toString();
   }
 
   async subscribeWithMucSub(occupantJid: JID | undefined | null): Promise<void> {
@@ -105,14 +97,17 @@ export class MultiUserChatComponent {
 
   async destroyRoom(occupantJid: JID): Promise<void> {
     if (!occupantJid) {
-      throw new Error(`occupantJid is undefined`);
+      throw new Error(`occupantJid is undefined no roomJid in input field`);
     }
     await this.chatService.roomService.destroyRoom(occupantJid.toString());
     await this.queryAllRooms();
   }
 
   async queryAllRooms(): Promise<void> {
-    this.allRooms = await this.chatService.roomService.queryAllRooms();
+    const rooms = await this.chatService.roomService.queryAllRooms();
+    this.allRooms = await Promise.all(
+      rooms.map((room) => this.chatService.roomService.addRoomInfo(room))
+    );
   }
 
   createNewRoom(): void {
@@ -181,9 +176,9 @@ export class MultiUserChatComponent {
     if (!roomJid) {
       throw new Error('roomJid was undefined for leaveRoom call');
     }
-    if (roomJid.equals(this.occupantJid?.bare())) {
-      this.occupantJidText = '';
-      this.occupantJid = null;
+    if (roomJid.equals(this.roomJid?.bare())) {
+      this.roomJidText = '';
+      this.roomJid = null;
       this.selectedRoom = undefined;
     }
     await this.chatService.roomService.leaveRoom(roomJid.toString());

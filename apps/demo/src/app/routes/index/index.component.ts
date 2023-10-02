@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 /* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access */
 import 'zone.js/plugins/task-tracking';
-import { Component, Inject, NgZone, OnDestroy } from '@angular/core';
+import { ApplicationRef, Component, Inject, NgZone, OnDestroy } from '@angular/core';
 import { firstValueFrom, map, merge, Observable, startWith, Subject } from 'rxjs';
 import {
   AuthRequest,
@@ -22,7 +22,6 @@ import { cleanUpJabber } from '../../../../../../libs/ngx-xmpp/src/test/helpers/
 @Component({
   selector: 'ngx-chat-index',
   templateUrl: './index.component.html',
-  styleUrls: ['./index.component.css'],
 })
 export class IndexComponent implements OnDestroy {
   domain = '';
@@ -30,6 +29,7 @@ export class IndexComponent implements OnDestroy {
   password = '';
   username = '';
   otherJid = '';
+  roomName = '';
   private readonly registrationMessageSubject = new Subject<string>();
   registrationMessage$: Observable<string> = this.registrationMessageSubject.asObservable();
 
@@ -40,6 +40,7 @@ export class IndexComponent implements OnDestroy {
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     @Inject(LOG_SERVICE_TOKEN) readonly logService: Log,
     private chatListStateService: ChatListStateService,
+    private readonly appRef: ApplicationRef,
     private readonly ngZone: NgZone,
     private readonly chatBackgroundNotificationService: ChatBackgroundNotificationService
   ) {
@@ -208,5 +209,13 @@ export class IndexComponent implements OnDestroy {
 
   cleanUpJabber(): Promise<void> {
     return cleanUpJabber();
+  }
+
+  async onCreateRoom(): Promise<void> {
+    await this.chatService.roomService.createRoom({ roomId: this.roomName });
+  }
+
+  forceAppUpdate(): void {
+    this.appRef.tick();
   }
 }

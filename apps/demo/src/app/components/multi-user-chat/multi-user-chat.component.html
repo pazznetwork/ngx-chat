@@ -1,11 +1,10 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <div>
   <h2>Chat rooms:</h2>
-  <div *ngIf="chatService.isOnline$ | async; else offline">
     <div *ngFor="let room of chatService.roomService.rooms$ | async">
       {{ room.jid.bare().toString() }}:
       <button (click)="selectedRoom = room">Select</button>
-      <button (click)="leaveRoom(room.occupantJid)" class="red">Leave</button>
+      <button (click)="leaveRoom(room.jid)" class="red">Leave</button>
     </div>
 
     <ng-container *ngIf="selectedRoom">
@@ -17,24 +16,22 @@
     <hr />
 
     <input
-      [(ngModel)]="occupantJidText"
+      [(ngModel)]="roomJidText"
       (ngModelChange)="updateOccupantJid($event)"
       class="form-control"
-      #occupantJidInput="ngModel"
-      [ngClass]="occupantJidInput.control.invalid ? 'red' : null"
       type="text"
       placeholder="room"
     />
 
-    <button (click)="joinRoom(occupantJid)">Join room</button>
-    <button (click)="subscribeWithMucSub(occupantJid)">subscribe with MUC/Sub</button>
-    <button (click)="unsubscribeFromMucSub(occupantJid)">unsubscribe from MUC/Sub</button>
+    <button (click)="joinRoom(roomJid)">Join room</button>
+    <button (click)="subscribeWithMucSub(roomJid)">subscribe with MUC/Sub</button>
+    <button (click)="unsubscribeFromMucSub(roomJid)">unsubscribe from MUC/Sub</button>
     <button (click)="getSubscriptions()">get MUC/Sub subscriptions</button>
-    <button (click)="queryUserList(occupantJid)">get user list</button>
-    <button (click)="getRoomConfiguration(occupantJid)">get room configuration</button>
+    <button (click)="queryUserList(roomJid)">get user list</button>
+    <button (click)="getRoomConfiguration(roomJid)">get room configuration</button>
 
     <ng-container *ngIf="mucSubSubscriptions.size > 0">
-      <div>Current MUC subscriptions to room: {{ occupantJid }}</div>
+      <div>Current MUC subscriptions to room: {{ roomJid }}</div>
       <ul>
         <li *ngFor="let subscription of mucSubSubscriptions | keyvalue">
           {{ subscription.key }}:
@@ -49,7 +46,7 @@
 
     <br />
     <ng-container *ngIf="roomUserList.length > 0">
-      <div>Members of room: {{ occupantJid?.bare()?.toString() }}</div>
+      <div>Members of room: {{ roomJid?.bare()?.toString() }}</div>
       <table>
         <thead>
           <tr>
@@ -78,7 +75,7 @@
     </ng-container>
 
     <ng-container *ngIf="(roomConfiguration?.fields?.length || 0) > 0">
-      <p>Configuration of room: {{ occupantJid?.bare()?.toString() }}</p>
+      <p>Configuration of room: {{ roomJid?.bare()?.toString() }}</p>
       <table>
         <thead>
           <tr>
@@ -187,11 +184,4 @@
       <button type="submit">Create room</button>
       <button (click)="cancelRoomCreation()">Cancel room creation</button>
     </form>
-  </div>
-
-  <hr />
-
-  <ng-template #offline>
-    <span *ngIf="chatService.isOffline$ | async">You need to be online.</span>
-  </ng-template>
 </div>
