@@ -59,20 +59,22 @@ export class JID {
 export function parseJid(jid: string): JID {
   let local;
   let resource;
+  //  enforce lower-case as in jid's as server returns only lower case jid's
+  let lowerCaseJid = jid.toLowerCase();
 
-  const resourceStart = jid.indexOf('/');
+  const resourceStart = lowerCaseJid.indexOf('/');
   if (resourceStart !== -1) {
-    resource = jid.slice(resourceStart + 1);
-    jid = jid.slice(0, resourceStart);
+    resource = lowerCaseJid.slice(resourceStart + 1);
+    lowerCaseJid = lowerCaseJid.slice(0, resourceStart);
   }
 
-  const atStart = jid.indexOf('@');
+  const atStart = lowerCaseJid.indexOf('@');
   if (atStart !== -1) {
-    local = jid.slice(0, atStart);
-    jid = jid.slice(atStart + 1);
+    local = lowerCaseJid.slice(0, atStart);
+    lowerCaseJid = lowerCaseJid.slice(atStart + 1);
   }
 
-  return new JID(local, jid, resource);
+  return new JID(local, lowerCaseJid, resource);
 }
 
 export function makeSafeJidString(username: string, domain: string): string {
