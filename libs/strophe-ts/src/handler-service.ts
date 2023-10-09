@@ -25,12 +25,23 @@ export class HandlerService {
     const keptHandlers = [];
     let matches = 0;
 
+    const potentialHandlers = [];
+
     for (const handler of this.handlers) {
+      if (!handler.isMatch(child)) {
+        keptHandlers.push(handler);
+      } else {
+        potentialHandlers.push(handler);
+      }
+    }
+
+    // prioritize id handler before any other handler
+    // as this is my intuitively expected behaviour
+    // and would need otherwise ugly workarounds
+    const idHandler = potentialHandlers.find((handler) => !!handler.id);
+
+    const executeHandler = async (handler: Handler): Promise<void> => {
       try {
-        if (!handler.isMatch(child)) {
-          keptHandlers.push(handler);
-          continue;
-        }
         if (await handler.run(child)) {
           keptHandlers.push(handler);
         }
@@ -44,6 +55,15 @@ export class HandlerService {
             (e as Error).message
         );
       }
+    };
+
+    if (idHandler) {
+      await executeHandler(idHandler);
+      return;
+    }
+
+    for (const handler of potentialHandlers) {
+      await executeHandler(handler);
     }
 
     // If no handler was fired for an incoming IQ with type="set",
