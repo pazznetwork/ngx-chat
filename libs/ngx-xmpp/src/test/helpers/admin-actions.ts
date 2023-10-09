@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import {
   deleteOldMamMessages,
+  destroyRoom,
+  getMucRooms,
   register,
   registeredUsers,
   unregister,
@@ -26,6 +28,19 @@ export async function unregisterAllBesidesAdmin(domain = devXmppDomain): Promise
   for (const user of usersToUnregister) {
     await unregisterUnsafe({ username: user, domain });
   }
+}
+
+export async function destroyAllRooms(): Promise<void> {
+  const rooms = await getMucRooms();
+  for (const room of rooms) {
+    const [name, service] = room.split('@');
+    await destroyRoom(name as string, service);
+  }
+}
+
+export async function cleanServerBesidesAdmin(): Promise<void> {
+  await unregisterAllBesidesAdmin();
+  await destroyAllRooms();
 }
 
 export async function ensureRegisteredUser(auth: AuthRequest): Promise<void> {

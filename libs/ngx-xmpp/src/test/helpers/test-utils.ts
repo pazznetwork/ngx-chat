@@ -135,7 +135,7 @@ export class TestUtils {
       public: false,
       membersOnly: true,
       nonAnonymous: true,
-      persistentRoom: false,
+      persistentRoom: true,
       jid: this.roomIdToJid(roomId),
     };
   }
@@ -144,5 +144,10 @@ export class TestUtils {
     const connection = await firstValueFrom(this.chatService.chatConnectionService.connection$);
     const webSocket = connection.protocolManager as StropheWebsocket;
     await webSocket?.onMessage(stanza);
+  }
+
+  async logWebsocketStream(): Promise<void> {
+    const connection = await firstValueFrom(this.chatService.chatConnectionService.connection$);
+    console.log(connection.debugLog);
   }
 }

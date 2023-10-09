@@ -113,8 +113,16 @@ export async function registeredUsers(host = xmppDomain): Promise<string[]> {
   return executeRequest('registered_users', { host });
 }
 
-export async function getMucRooms(host = 'global'): Promise<string[]> {
-  return executeRequest('muc_online_rooms', { host });
+export async function getMucRooms(): Promise<string[]> {
+  return executeRequest('muc_online_rooms', { service: 'global' });
+}
+
+export async function getRoomAffiliation(
+  name: string,
+  jid: string,
+  service = 'conference.' + xmppDomain
+): Promise<{ affiliation: string }> {
+  return executeRequest('get_room_affiliation', { name, jid, service });
 }
 
 export async function changeRoomOption(
