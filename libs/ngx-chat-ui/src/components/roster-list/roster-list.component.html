@@ -12,8 +12,7 @@
   <div class="roster-header">
     {{ chatService.translations.chat }}
   </div>
-
-  <ng-container *ngIf="chatService.roomService.rooms$ | async as rooms">
+  <ng-container *ngIf="rooms$ | async as rooms">
     <ng-container *ngIf="rooms.length > 0">
       <div class="roster-group-header">{{ chatService.translations.rooms }}</div>
 

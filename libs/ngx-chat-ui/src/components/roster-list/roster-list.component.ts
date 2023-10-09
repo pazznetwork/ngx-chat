@@ -1,17 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Inject,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
-import { merge, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import { Observable } from 'rxjs';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
+import { Room } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN, ChatListStateService, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
 import { RosterRecipientComponent } from '../roster-recipient';
@@ -62,11 +54,10 @@ import { RosterRecipientPresenceComponent } from '../roster-recipient-presence';
       transition('shown => hidden', animate('400ms ease')),
     ]),
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RosterListComponent implements OnInit {
+export class RosterListComponent {
   @Input()
-  rosterState?: 'hidden' | 'shown';
+  blocked$?: Observable<Contact[]>;
 
   @Input()
   contacts$?: Observable<Contact[]>;
@@ -78,9 +69,13 @@ export class RosterListComponent implements OnInit {
   contactsUnaffiliated$?: Observable<Contact[]>;
 
   @Input()
-  blocked$?: Observable<Contact[]>;
-
   hasNoContacts$?: Observable<boolean>;
+
+  @Input()
+  rosterState?: 'hidden' | 'shown';
+
+  @Input()
+  rooms$?: Observable<Room[]>;
 
   @Output()
   rosterStateChanged = new EventEmitter<'hidden' | 'shown'>();
@@ -89,25 +84,6 @@ export class RosterListComponent implements OnInit {
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     private readonly chatListService: ChatListStateService
   ) {}
-
-  ngOnInit(): void {
-    this.contacts$ =
-      this.contacts$ ?? this.chatService.contactListService.contactsSubscribed$.pipe();
-    this.contactRequestsReceived$ =
-      this.contactRequestsReceived$ ??
-      this.chatService.contactListService.contactRequestsReceived$.pipe();
-    this.contactsUnaffiliated$ =
-      this.contactsUnaffiliated$ ??
-      this.chatService.contactListService.contactsUnaffiliated$.pipe();
-    this.blocked$ = this.blocked$ ?? this.chatService.contactListService.blockedContacts$.pipe();
-
-    this.hasNoContacts$ = merge(
-      this.contacts$,
-      this.contactRequestsReceived$,
-      this.contactsUnaffiliated$,
-      this.blocked$
-    ).pipe(map((arr) => arr.length === 0));
-  }
 
   onClickRecipient(recipient: Recipient): void {
     this.chatListService.openChat(recipient);
