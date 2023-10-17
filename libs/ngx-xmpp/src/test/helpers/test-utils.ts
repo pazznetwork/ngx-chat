@@ -11,6 +11,7 @@ export const testUser: AuthRequest = {
   username: 'test',
   password: 'test',
   domain: devXmppDomain,
+  service: `wss://${devXmppDomain}:5280/websocket`,
 };
 
 interface TestUserConst extends AuthRequest {
@@ -161,6 +162,7 @@ export class TestUtils {
 
   async logWebsocketStream(): Promise<void> {
     const connection = await firstValueFrom(this.chatService.chatConnectionService.connection$);
+    // eslint-disable-next-line no-console
     console.log(connection.debugLog);
   }
 }

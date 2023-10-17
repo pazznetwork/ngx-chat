@@ -8,6 +8,7 @@ import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { register } from './helpers/ejabberd-client';
+import { filter } from 'rxjs/operators';
 
 describe('message plugin', () => {
   let testUtils: TestUtils;
@@ -20,14 +21,17 @@ describe('message plugin', () => {
   });
 
   it('should process received messages', async () => {
-    const subscriptionMessage = testUtils.chatService.messageService.message$.subscribe();
-    const subscriptionContacts = testUtils.chatService.contactListService.contacts$.subscribe();
+    const messageContactPromise = firstValueFrom(testUtils.chatService.messageService.message$);
+    const contactsPromise = firstValueFrom(
+      testUtils.chatService.contactListService.contacts$.pipe(
+        filter((contacts) => contacts.length > 0)
+      )
+    );
+    const userPromise = firstValueFrom(testUtils.chatService.chatConnectionService.userJid$);
     await unregisterAllBesidesAdmin();
     await register(testUser);
     await testUtils.chatService.logIn(testUser);
-    const currentUserJid = await firstValueFrom(
-      testUtils.chatService.chatConnectionService.userJid$
-    );
+    const currentUserJid = await userPromise;
     const currentTime = new Date().getTime();
 
     const someUserJid = 'someone@example.com';
@@ -36,16 +40,15 @@ describe('message plugin', () => {
     const messageStanza = `<message from="${someUserJid}" to="${currentUserJid}" type="chat"><body>${messageText}</body></message>`;
 
     await testUtils.fakeWebsocketInStanza(messageStanza);
-
-    const messageContact = await firstValueFrom(testUtils.chatService.messageService.message$);
-    const contacts = await firstValueFrom(testUtils.chatService.contactListService.contacts$);
+    const messageContact = await messageContactPromise;
+    const contacts = await contactsPromise;
     expect(contacts.length).toBe(1);
 
     const someContact = contacts[0];
 
+    expect(someContact).toBeDefined();
     if (someContact == null) {
-      fail('First contact in contact list was undefined');
-      return;
+      throw new Error('First contact in contact list was undefined');
     }
 
     expect(someContact.jid.toString()).toEqual(someUserJid);
@@ -55,8 +58,7 @@ describe('message plugin', () => {
     expect(messages.length).toBe(1);
 
     if (messages[0] == null) {
-      fail('First message in message list was undefined');
-      return;
+      throw new Error('First message in message list was undefined');
     }
 
     expect(messages[0].body).toBe(messageText);
@@ -70,8 +72,6 @@ describe('message plugin', () => {
 
     await testUtils.chatService.logOut();
     await unregisterAllBesidesAdmin();
-    subscriptionMessage.unsubscribe();
-    subscriptionContacts.unsubscribe();
   });
 
   it('should process received messages when they were delayed', async () => {
@@ -98,8 +98,7 @@ describe('message plugin', () => {
     const someContact = contacts[0];
 
     if (someContact == null) {
-      fail('First contact in contact list was undefined');
-      return;
+      throw new Error('First contact in contact list was undefined');
     }
 
     expect(someContact.jid.toString()).toBe(parseJid(someUserJid).toString());
@@ -108,8 +107,7 @@ describe('message plugin', () => {
     expect(messages.length).toBe(1);
 
     if (messages[0] == null) {
-      fail('First message in message list was undefined');
-      return;
+      throw new Error('First message in message list was undefined');
     }
 
     expect(messages[0].body).toBe(messageText);

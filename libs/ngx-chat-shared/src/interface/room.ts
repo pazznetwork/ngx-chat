@@ -85,9 +85,6 @@ export class Room implements Recipient {
     this.logService?.debug(
       `occupant joined room: occupantJid=${occupant.jid.toString()}, roomJid=${this.jid.toString()}`
     );
-    console.log(
-      `occupant joined room: occupantJid=${occupant.jid.toString()}, roomJid=${this.jid.toString()}`
-    );
   }
 
   handleOccupantLeft(occupant: RoomOccupant, isCurrentUser: boolean): void {

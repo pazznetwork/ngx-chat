@@ -359,8 +359,7 @@ describe('roster plugin', () => {
     const contact = contacts[0];
 
     if (contact == null) {
-      fail('contact is undefined');
-      return;
+      throw new Error('contact is undefined');
     }
     expect(contact.jid.toString()).toEqual(newSubJid);
     expect(await firstValueFrom(contact.subscription$)).toEqual(ContactSubscription.from);
