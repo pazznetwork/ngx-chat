@@ -490,7 +490,7 @@ export class Connection {
   private createStanzaResponsePromise(id: string, timeout?: number): Promise<Element> {
     let timeoutHandler: ReturnType<typeof setTimeout>;
 
-    return new Promise<Element>((callback, errback) => {
+    return new Promise<Element>((callback, err) => {
       const handler = this.handlerService.addHandler(
         (stanza) => {
           // remove timeout handler if there is one
@@ -498,7 +498,7 @@ export class Connection {
             clearTimeout(timeoutHandler);
           }
           if (stanza.getAttribute('type') === 'error') {
-            errback(stanza);
+            err(stanza.outerHTML);
           } else {
             callback(stanza);
           }
@@ -516,7 +516,7 @@ export class Connection {
           // get rid of normal handler
           this.handlerService.deleteHandler(handler);
           // call err back on timeout with null stanza
-          errback(null);
+          err(null);
           return false;
         }, timeout);
       }
