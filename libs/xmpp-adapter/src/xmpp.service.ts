@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-import { firstValueFrom, Observable, Subject, tap } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import type {
   AuthRequest,
   ChatService,
@@ -59,9 +59,7 @@ export class XmppService implements ChatService {
     this.onOffline$ = this.chatConnectionService.onOffline$;
     this.isOnline$ = this.chatConnectionService.isOnline$;
     this.isOffline$ = this.chatConnectionService.isOffline$;
-    this.userJid$ = this.chatConnectionService.userJid$.pipe(
-      tap((value) => console.log('UserJID Emit', value))
-    );
+    this.userJid$ = this.chatConnectionService.userJid$;
 
     this.pluginMap = createPluginMap(this, httpClient, log, openChatsService);
 
@@ -81,7 +79,8 @@ export class XmppService implements ChatService {
 
     this.fileUploadHandler = this.pluginMap.xmppFileUpload;
 
-    this.onOffline$.subscribe(() => this.pluginMap.disco.clearDiscovered());
+    // TODO: Needs to be commented in when implementing a cleaner life cycle
+    // this.onOffline$.subscribe(() => this.pluginMap.disco.clearDiscovered());
   }
 
   static create(

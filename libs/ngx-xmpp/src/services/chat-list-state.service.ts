@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, mergeAll, windowTime } from 'rxjs';
+import { BehaviorSubject, debounceTime, mergeAll, windowTime } from 'rxjs';
 import { filter, map, pairwise, startWith } from 'rxjs/operators';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN } from '../injection-token';
@@ -31,6 +31,7 @@ export class ChatListStateService {
     this.zone.runOutsideAngular(() => {
       this.chatService.contactListService.contacts$
         .pipe(
+          debounceTime(2000),
           startWith(new Array<Contact>()),
           pairwise(),
           filter(([prev, next]) => prev.length < next.length),

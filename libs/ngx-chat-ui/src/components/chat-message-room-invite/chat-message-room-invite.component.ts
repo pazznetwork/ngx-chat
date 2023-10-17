@@ -39,7 +39,7 @@ export class ChatMessageRoomInviteComponent {
       return;
     }
     event.preventDefault();
-    await this.chatService.roomService.declineRoomInvite(this.invitation.roomJid.toString());
+    this.chatService.roomService.declineRoomInvite(this.invitation.roomJid.toString());
     this.contact.clearRoomInvitation();
     this.invitation = undefined;
     await this.chatService.contactListService.removeContact(this.contact.jid.toString());

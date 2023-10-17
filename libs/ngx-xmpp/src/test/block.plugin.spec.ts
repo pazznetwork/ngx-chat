@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { TestUtils } from './helpers/test-utils';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
+import { XmppContactListService } from '@pazznetwork/xmpp-adapter';
 import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
@@ -10,17 +11,18 @@ import { filter } from 'rxjs/operators';
 
 describe('block plugin', () => {
   let testUtils: TestUtils;
+  let contactService: XmppContactListService;
 
   beforeAll(() => {
     const testBed = TestBed.configureTestingModule({
       imports: [XmppAdapterTestModule],
     });
     testUtils = new TestUtils(testBed.inject<XmppService>(CHAT_SERVICE_TOKEN));
+    contactService = testUtils.chatService.contactListService;
   });
 
   it('should be able to block a contact', async () => {
     await ensureNoRegisteredUser(testUtils.hero);
-    const contactService = testUtils.chatService.contactListService;
     const contactsPromise = firstValueFrom(contactService.contacts$);
     const blockedPromise = firstValueFrom(
       contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 1))
@@ -40,7 +42,6 @@ describe('block plugin', () => {
   });
 
   it('should be able to unblock a contact', async () => {
-    const contactService = testUtils.chatService.contactListService;
     const contactsPromise = firstValueFrom(contactService.contacts$);
     const blockedPromise = firstValueFrom(
       contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 1))
@@ -72,7 +73,6 @@ describe('block plugin', () => {
 
   it('should be able to load roster with blocked, unblocked and normal contacts', async () => {
     await ensureRegisteredUser(testUtils.hero);
-    const contactService = testUtils.chatService.contactListService;
 
     const blockedPromiseAfterBlockingTwo = firstValueFrom(
       contactService.blockedContactJIDs$.pipe(filter((b) => b.size === 2))
