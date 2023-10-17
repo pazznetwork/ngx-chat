@@ -5,6 +5,7 @@ import { Affiliation, Direction, Role } from '@pazznetwork/ngx-chat-shared';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import type { StropheWebsocket } from '@pazznetwork/strophets';
 import { devXmppDomain } from '../../.secrets-const';
+import { filter } from 'rxjs/operators';
 
 export const testUser: AuthRequest = {
   username: 'test',
@@ -120,6 +121,18 @@ export class TestUtils {
     }
     return firstValueFrom(this.chatService.roomService.rooms$.pipe(map((arr) => arr.length)));
   };
+
+  waitForCurrentRoomCount(count: number): Promise<number> {
+    if (!this.chatService.roomService.rooms$) {
+      throw new Error(`this.chat.rooms$ is undefined`);
+    }
+    return firstValueFrom(
+      this.chatService.roomService.rooms$.pipe(
+        map((arr) => arr.length),
+        filter((c) => c === count)
+      )
+    );
+  }
 
   toJid(auth: AuthRequest): string {
     return `${auth.username}@${auth.domain}`;

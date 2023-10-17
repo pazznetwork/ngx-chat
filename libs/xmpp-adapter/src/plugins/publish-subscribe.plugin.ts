@@ -3,7 +3,6 @@ import { Subject, switchMap } from 'rxjs';
 import type { Stanza, StanzaHandlerChatPlugin } from '../core';
 import { serializeToSubmitForm, XmppResponseError } from '../core';
 import type { XmppService } from '../xmpp.service';
-import type { XmppConnectionService } from '../service';
 import type { StanzaBuilder } from '../stanza-builder';
 import type { XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
 import type { Handler } from '@pazznetwork/strophets';
@@ -26,16 +25,12 @@ export class PublishSubscribePlugin implements StanzaHandlerChatPlugin {
   private publishHandler?: Handler;
 
   constructor(private readonly xmppChatAdapter: XmppService) {
-    xmppChatAdapter.onOnline$
-      .pipe(switchMap(() => this.registerHandler(this.xmppChatAdapter.chatConnectionService)))
-      .subscribe();
-    xmppChatAdapter.onOffline$
-      .pipe(switchMap(() => this.unregisterHandler(this.xmppChatAdapter.chatConnectionService)))
-      .subscribe();
+    xmppChatAdapter.onOnline$.pipe(switchMap(() => this.registerHandler())).subscribe();
+    xmppChatAdapter.onOffline$.pipe(switchMap(() => this.unregisterHandler())).subscribe();
   }
 
-  async registerHandler(connection: XmppConnectionService): Promise<void> {
-    this.publishHandler = await connection.addHandler(
+  async registerHandler(): Promise<void> {
+    this.publishHandler = await this.xmppChatAdapter.chatConnectionService.addHandler(
       (stanza) => {
         this.publishSubject.next(stanza);
         return true;
@@ -47,11 +42,11 @@ export class PublishSubscribePlugin implements StanzaHandlerChatPlugin {
     );
   }
 
-  async unregisterHandler(connection: XmppConnectionService): Promise<void> {
+  async unregisterHandler(): Promise<void> {
     if (!this.publishHandler) {
       return;
     }
-    await connection.deleteHandler(this.publishHandler);
+    await this.xmppChatAdapter.chatConnectionService.deleteHandler(this.publishHandler);
   }
 
   async storePrivatePayloadPersistent(

@@ -49,12 +49,19 @@ export class ServiceDiscoveryPlugin implements ChatPlugin {
   }
 
   // TODO: into key collection(Enum) of used and tested keys
-  async findService(category: string, type: string): Promise<Service> {
+  async findService(
+    category: 'conference' | 'pubsub' | 'store',
+    type: 'text' | 'pep' | 'file' | 'push'
+  ): Promise<Service> {
     await firstValueFrom(this.servicesInitialized$);
     const key = category + '.' + type;
 
     if (!this.identityToService.has(key)) {
-      throw new Error(`no service matching category ${category} and type ${type} found!`);
+      throw new Error(
+        `no service matching category ${category} and type ${type} found! Know service: ${Array.from(
+          this.identityToService.values()
+        ).join(', ')}`
+      );
     }
 
     return this.identityToService.get(key) as Service;

@@ -70,5 +70,9 @@ export interface RoomService {
 
   getRooms(): Promise<Room[]>;
 
+  getRoomByJid(roomJid: string): Promise<Room | undefined>;
+
   queryAllRooms(): Promise<Room[]>;
+
+  addRoomInfo(room: Room): Promise<Room>;
 }

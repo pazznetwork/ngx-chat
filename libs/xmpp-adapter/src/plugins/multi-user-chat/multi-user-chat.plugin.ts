@@ -1,5 +1,15 @@
 // SPDX-License-Identifier: MIT
-import { combineLatest, firstValueFrom, mergeMap, Observable, of, startWith, Subject } from 'rxjs';
+import {
+  Connectable,
+  connectable,
+  firstValueFrom,
+  merge,
+  mergeMap,
+  Observable,
+  ReplaySubject,
+  switchMap,
+  tap,
+} from 'rxjs';
 import type {
   Invitation,
   Log,
@@ -33,8 +43,7 @@ import {
   nsMucUser,
   nsRSM,
 } from './multi-user-chat-constants';
-import { map, scan, shareReplay } from 'rxjs/operators';
-import type { XmppConnectionService } from '../../service';
+import { filter, map, scan, shareReplay } from 'rxjs/operators';
 import type { Handler } from '@pazznetwork/strophets';
 import type { StanzaBuilder } from '../../stanza-builder';
 import { OtherStatusCode } from './other-status-code';
@@ -50,49 +59,24 @@ import { ExitingRoomStatusCode } from './exiting-room-status-code';
  */
 export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   readonly nameSpace = nsMuc;
-  private readonly messageSubject = new Subject<Room>();
-  readonly message$ = this.messageSubject.asObservable();
+  private readonly messageReceivedSubject = new ReplaySubject<Room>(1);
+  readonly message$ = this.messageReceivedSubject.asObservable();
 
-  private readonly invitationSubject = new Subject<Invitation>();
+  private readonly invitationSubject = new ReplaySubject<Invitation>(1);
   readonly invitation$ = this.invitationSubject.asObservable();
 
-  private readonly leftRoomSubject = new Subject<JID>();
+  private readonly leftRoomSubject = new ReplaySubject<JID>(1);
   readonly leftRoom$ = this.leftRoomSubject.asObservable();
 
-  private readonly createdRoomSubject = new Subject<Room>();
-  readonly createdRoom$ = this.createdRoomSubject.asObservable();
+  private readonly destroyedRoomSubject = new ReplaySubject<JID>(1);
+  readonly destroyedRoom$ = this.destroyedRoomSubject.asObservable();
 
-  private readonly clearRoomsSubject = new Subject<void>();
+  private readonly createdRoomSubject = new ReplaySubject<Room>(1);
+  private readonly updateRoomSubject = new ReplaySubject<Room>(1);
 
-  private readonly allLeftRooms$ = this.clearRoomsSubject.pipe(
-    map((): Set<string> => new Set<string>()),
-    mergeMap((initialSet) =>
-      this.leftRoom$.pipe(
-        scan((acc, val) => acc.add(val.toString()), initialSet),
-        startWith(initialSet)
-      )
-    )
-  );
+  private readonly roomsFetchedSubject = new ReplaySubject<boolean>(1);
 
-  private readonly allCreatedRooms$ = this.clearRoomsSubject.pipe(
-    map((): Map<string, Room> => new Map<string, Room>()),
-    mergeMap((initialMap) =>
-      this.createdRoom$.pipe(
-        scan((acc, val) => acc.set(val.jid.toString(), val), initialMap),
-        startWith(initialMap)
-      )
-    )
-  );
-
-  readonly rooms$ = combineLatest([this.allLeftRooms$, this.allCreatedRooms$]).pipe(
-    map(([leftRoomSet, createdRoomMap]) =>
-      Array.from(createdRoomMap.values()).filter(
-        (val): boolean => !leftRoomSet.has(val.jid.toString())
-      )
-    ),
-    startWith([]),
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
+  readonly rooms$: Connectable<Room[]>;
 
   private handlers: { destroy?: Handler; presence?: Handler } = {};
   constructor(
@@ -100,44 +84,85 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     private readonly logService: Log,
     private readonly serviceDiscoveryPlugin: ServiceDiscoveryPlugin
   ) {
-    xmppService.onAuthenticating$
-      .pipe(
-        mergeMap(async (): Promise<void> => {
-          this.clearRoomsSubject.next();
-          await this.registerHandler(xmppService.chatConnectionService);
-        })
-      )
-      .subscribe();
+    this.rooms$ = connectable(
+      merge(
+        this.createdRoomSubject.pipe(
+          map((createdRoom) => (state: Map<string, Room>) => {
+            const key = createdRoom.jid.bare().toString();
+            if (state.has(key)) {
+              const existingContact = state.get(key) as Room;
+              state.set(key, existingContact);
+              return state;
+            }
+            state.set(key, createdRoom);
+            return state;
+          })
+        ),
+        this.updateRoomSubject.pipe(
+          map((updatedRoom) => (state: Map<string, Room>) => {
+            const key = updatedRoom.jid.bare().toString();
+            if (state.has(key)) {
+              state.set(key, updatedRoom);
+              return state;
+            }
+            return state;
+          })
+        ),
+        merge(this.leftRoomSubject, this.destroyedRoomSubject).pipe(
+          map((jid) => (state: Map<string, Room>) => {
+            state.delete(jid.toString());
+            return state;
+          })
+        ),
+        this.xmppService.onOnline$.pipe(
+          mergeMap(() => this.getRooms()),
+          map((contacts) => (state: Map<string, Room>) => {
+            contacts.forEach((c) => state.set(c.jid.bare().toString(), c));
+            return state;
+          }),
+          tap(() => this.roomsFetchedSubject.next(true))
+        ),
+        this.xmppService.onOffline$.pipe(
+          map(() => (state: Map<string, Room>) => {
+            state.clear();
+            return state;
+          }),
+          tap(() => this.roomsFetchedSubject.next(false))
+        )
+      ).pipe(
+        scan((state, innerFun) => innerFun(state), new Map<string, Room>()),
+        map((contactMap) => Array.from(contactMap.values())),
+        shareReplay({ bufferSize: 1, refCount: false })
+      ),
+      { connector: () => new ReplaySubject<Room[]>(1), resetOnDisconnect: false }
+    );
 
-    xmppService.onOffline$
-      .pipe(
-        mergeMap(async (): Promise<void> => {
-          await this.unregisterHandler(xmppService.chatConnectionService);
-          this.clearRoomsSubject.next();
-        })
-      )
-      .subscribe();
+    xmppService.onOnline$.pipe(switchMap(() => this.registerHandler())).subscribe();
+    xmppService.onOffline$.pipe(switchMap(() => this.unregisterHandler())).subscribe();
+
+    //TODO: move to be after service initialization
+    this.rooms$.connect();
   }
 
-  async registerHandler(connection: XmppConnectionService): Promise<void> {
-    this.handlers.destroy = await connection.addHandler(
+  async registerHandler(): Promise<void> {
+    this.handlers.destroy = await this.xmppService.chatConnectionService.addHandler(
       (stanza) => this.handleRoomDestroyedStanza(stanza),
       { ns: nsMucUser, name: 'destroy' }
     );
 
-    this.handlers.presence = await connection.addHandler(
+    this.handlers.presence = await this.xmppService.chatConnectionService.addHandler(
       (stanza) => this.handleRoomPresenceStanza(stanza),
       { ns: nsMuc, name: 'presence' },
       { ignoreNamespaceFragment: true, matchBareFromJid: true }
     );
   }
 
-  async unregisterHandler(connection: XmppConnectionService): Promise<void> {
+  async unregisterHandler(): Promise<void> {
     if (this.handlers.destroy) {
-      await connection.deleteHandler(this.handlers.destroy);
+      await this.xmppService.chatConnectionService.deleteHandler(this.handlers.destroy);
     }
     if (this.handlers.presence) {
-      await connection.deleteHandler(this.handlers.presence);
+      await this.xmppService.chatConnectionService.deleteHandler(this.handlers.presence);
     }
   }
 
@@ -145,13 +170,43 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
    * Resolves if room could be configured as requested, rejects if room did exist or server did not accept configuration.
    */
   async createRoom(options: RoomCreationOptions): Promise<Room> {
-    const userJid = await firstValueFrom(this.xmppService.userJid$);
+    const userJid = parseJid(await firstValueFrom(this.xmppService.userJid$));
     const { roomId, nick } = options;
-    console.log('before findService');
     const service = await this.serviceDiscoveryPlugin.findService('conference', 'text');
-    const occupantJid = parseJid(`${roomId}@${service.jid}/${nick ?? userJid}`);
-    console.log('before join room internal');
-    const { presenceResponse, room } = await this.joinRoomInternal(userJid, occupantJid);
+
+    const roomJid = new JID(roomId, service.jid, nick ?? userJid.local);
+
+    const roomFromUser = await firstValueFrom(this.getRoomByJid(roomJid.bare()));
+
+    if (roomFromUser) {
+      return roomFromUser;
+    }
+
+    const presenceResponse = await this.xmppService.chatConnectionService
+      .$pres({ to: roomJid.toString() })
+      .c('x', { xmlns: nsMuc })
+      .send();
+    const room = new Room(this.logService, roomJid);
+    await this.handleRoomPresenceStanza(presenceResponse, room);
+    room.handleOccupantJoined(
+      {
+        jid: userJid.bare(),
+        affiliation: presenceResponse.getAttribute('affiliation') as Affiliation,
+        role: presenceResponse.getAttribute('role') as Role,
+        nick: userJid?.resource ?? '',
+      },
+      true
+    );
+
+    const roomInfo = await this.getRoomInfo(roomJid.bare());
+
+    if (!roomInfo) {
+      throw new Error('Did not get roomInfo');
+    }
+
+    room.name = getField<TextualFormField>(roomInfo, 'muc#roomconfig_roomname')?.value;
+    room.description =
+      getField<TextualFormField>(roomInfo, 'muc#roominfo_description')?.value ?? '';
 
     const itemElement = presenceResponse?.querySelector('x')?.querySelector('item');
     if (itemElement?.getAttribute('affiliation') !== Affiliation.owner) {
@@ -160,6 +215,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
 
     await this.applyRoomConfiguration(room.jid, options);
     room.name = options.name || undefined;
+    this.updateRoomSubject.next(room);
     return room;
   }
 
@@ -168,31 +224,72 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     if (!roomJid) {
       return false;
     }
-    this.leftRoomSubject.next(parseJid(roomJid));
+    this.destroyedRoomSubject.next(parseJid(roomJid));
     return true;
   }
 
   async destroyRoom(roomJid: JID): Promise<void> {
+    await firstValueFrom(this.roomsFetchedSubject.pipe(filter((val) => val)));
     try {
       await this.xmppService.chatConnectionService
         .$iq({ type: 'set', to: roomJid.toString().toLowerCase() })
         .c('query', { xmlns: nsMucOwner })
         .c('destroy')
         .send();
+      this.destroyedRoomSubject.next(roomJid);
     } catch (e) {
-      this.logService.error('error destroying room');
+      this.logService.error((e as Element)?.outerHTML, 'error destroying room');
       throw e;
     }
   }
 
-  async joinRoom(occupantJid: JID): Promise<Room> {
+  async joinRoom(roomJid: JID): Promise<Room> {
     const userJid = await firstValueFrom(this.xmppService.chatConnectionService.userJid$);
-    const { room } = await this.joinRoomInternal(userJid, occupantJid);
+    const occupantJid = new JID(
+      roomJid.local,
+      roomJid.domain,
+      roomJid.resource ?? userJid.split('@')[0]
+    );
+
+    const presenceResponse = await this.xmppService.chatConnectionService
+      .$pres({ to: occupantJid.toString() })
+      .c('x', { xmlns: nsMuc })
+      .send();
+
+    await this.handleRoomPresenceStanza(presenceResponse);
+
+    const room = await this.getOrCreateRoom(occupantJid.bare());
+
+    room.nick = occupantJid.resource;
+
+    const roomInfo = await this.getRoomInfo(occupantJid.bare());
+
+    if (!roomInfo) {
+      throw new Error('Did not get roomInfo');
+    }
+
+    room.name = getField<TextualFormField>(roomInfo, 'muc#roomconfig_roomname')?.value;
+    room.description =
+      getField<TextualFormField>(roomInfo, 'muc#roominfo_description')?.value ?? '';
+    this.createdRoomSubject.next(room);
+
+    await this.handleRoomPresenceStanza(presenceResponse, room);
+    room.handleOccupantJoined(
+      {
+        jid: parseJid(userJid).bare(),
+        affiliation: presenceResponse.getAttribute('affiliation') as Affiliation,
+        role: presenceResponse.getAttribute('role') as Role,
+        nick: occupantJid?.resource ?? '',
+      },
+      true
+    );
+
+    this.updateRoomSubject.next(room);
 
     return room;
   }
 
-  async getRoomInfo(roomJid: JID): Promise<XmlSchemaForm | null> {
+  async getRoomInfo(roomJid: JID): Promise<XmlSchemaForm | undefined> {
     const roomInfoResponse = await this.xmppService.chatConnectionService
       .$iq({ type: 'get', to: roomJid.toString() })
       .c('query', { xmlns: nsDiscoInfo })
@@ -200,7 +297,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
 
     const responseQueryItems = Array.from(roomInfoResponse?.querySelectorAll('query'));
     if (!responseQueryItems) {
-      return null;
+      return undefined;
     }
 
     const infoElement = responseQueryItems.find(
@@ -208,7 +305,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     );
 
     if (!infoElement) {
-      return null;
+      return undefined;
     }
 
     const formEl = Array.from(infoElement.querySelectorAll('x')).find(
@@ -219,7 +316,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       return parseForm(formEl);
     }
 
-    return null;
+    return undefined;
   }
 
   async getRoomsQuery(): Promise<Element> {
@@ -235,13 +332,23 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   async getRooms(): Promise<Room[]> {
     const roomQueryResponse = await this.getRoomsQuery();
 
-    return this.extractRoomSummariesFromResponse(roomQueryResponse);
+    const rooms = this.extractRoomSummariesFromResponse(roomQueryResponse);
+    for (const room of rooms) {
+      await this.xmppService.messageService.loadMostRecentUnloadedMessages(room);
+    }
+    return rooms;
   }
 
+  /**
+   * Usually on simple query request as server responds with a maximum of 250 rooms if not with another configured limit.
+   * If one wants to get all rooms, one has to use the result set management extension (RSM) and query them page by page.
+   *
+   * @returns {Promise<Room[]>}
+   */
   async queryAllRooms(): Promise<Room[]> {
     let roomQueryResponse = await this.getRoomsQuery();
 
-    const result: Room[] = await this.getRooms();
+    const result: Room[] = this.extractRoomSummariesFromResponse(roomQueryResponse);
 
     const extractResultSet = (iq: IqResponseStanza): Element | undefined =>
       Finder.create(iq)
@@ -270,12 +377,13 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     }
 
     await Promise.all(
-      result.map(async (summary): Promise<void> => {
-        const roomInfo = await this.getRoomInfo(summary.jid);
+      result.map(async (room: Room): Promise<void> => {
+        // room.addOccupants(await this.queryUserList(room.jid));
+        const roomInfo = await this.getRoomInfo(room.jid);
         if (!roomInfo) {
           return;
         }
-        summary.info = roomInfo;
+        room.info = roomInfo;
       })
     );
 
@@ -283,7 +391,8 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   }
 
   /**
-   * Get all members of a MUC-Room with their affiliation to the room using the rooms fullJid
+   * Get all members of a MUC-Room with their affiliation to the room using the rooms fullJid.
+   * **Can be only called by room moderators.**
    *
    * @param roomJid jid of the room
    */
@@ -343,19 +452,23 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     return [...members.values()];
   }
 
-  async sendMessage(roomJid: string, body: string, thread?: string): Promise<Element> {
+  async sendMessage(roomJid: string, body: string): Promise<Element> {
     const from = await firstValueFrom(this.xmppService.chatConnectionService.userJid$);
-    const roomMessageBuilder = thread
-      ? this.xmppService.chatConnectionService
-          .$msg({ from, to: roomJid, type: 'groupchat' })
-          .c('body', {}, body)
-          .up()
-          .c('thread', {}, thread)
-      : this.xmppService.chatConnectionService
-          .$msg({ from, to: roomJid, type: 'groupchat' })
-          .c('body', {}, body);
 
-    return roomMessageBuilder.send();
+    return this.xmppService.chatConnectionService
+      .$msg({ from, to: roomJid, type: 'groupchat' })
+      .c('body', {}, body)
+      .send();
+  }
+
+  async sendThreadMessage(roomJid: string, body: string, thread: string): Promise<Element> {
+    const from = await firstValueFrom(this.xmppService.chatConnectionService.userJid$);
+    return this.xmppService.chatConnectionService
+      .$msg({ from, to: roomJid, type: 'groupchat' })
+      .c('body', {}, body)
+      .up()
+      .c('thread', {}, thread)
+      .send();
   }
 
   /**
@@ -396,7 +509,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       );
     }
 
-    if (roomConfiguration.name) {
+    if (roomConfiguration.name != undefined) {
       setFieldValue(
         roomConfigForm,
         'text-single',
@@ -404,7 +517,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         roomConfiguration.name
       );
     }
-    if (roomConfiguration.nonAnonymous) {
+    if (roomConfiguration.nonAnonymous != undefined) {
       setFieldValue(
         roomConfigForm,
         'list-single',
@@ -412,7 +525,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         roomConfiguration.nonAnonymous ? 'anyone' : 'moderators'
       );
     }
-    if (roomConfiguration.public) {
+    if (roomConfiguration.public != undefined) {
       setFieldValue(
         roomConfigForm,
         'boolean',
@@ -420,7 +533,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         roomConfiguration.public
       );
     }
-    if (roomConfiguration.membersOnly) {
+    if (roomConfiguration.membersOnly != undefined) {
       setFieldValue(
         roomConfigForm,
         'boolean',
@@ -428,7 +541,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         roomConfiguration.membersOnly
       );
     }
-    if (roomConfiguration.persistentRoom) {
+    if (roomConfiguration.persistentRoom != undefined) {
       setFieldValue(
         roomConfigForm,
         'boolean',
@@ -436,7 +549,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         roomConfiguration.persistentRoom
       );
     }
-    if (roomConfiguration.allowSubscription) {
+    if (roomConfiguration.allowSubscription != undefined) {
       setFieldValue(
         roomConfigForm,
         'boolean',
@@ -445,18 +558,25 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       );
     }
 
-    this.xmppService.chatConnectionService
+    await this.xmppService.chatConnectionService
       .$iq({ type: 'set', to: roomJid.toString() })
       .c('query', { xmlns: nsMucOwner })
-      .cCreateMethod((builder): StanzaBuilder => serializeToSubmitForm(builder, roomConfigForm));
+      .cCreateMethod((builder): StanzaBuilder => serializeToSubmitForm(builder, roomConfigForm))
+      .send();
   }
 
   getRoomByJid(jid: JID): Observable<Room | undefined> {
-    return this.rooms$.pipe(map((rooms) => rooms?.find((room) => room?.jid?.equals(jid.bare()))));
+    return this.rooms$.pipe(
+      map((rooms) => rooms?.find((room) => room?.jid?.bare()?.equals(jid.bare())))
+    );
   }
 
   async banUser(occupantJid: JID, roomJid: JID, reason?: string): Promise<IqResponseStanza> {
     const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
+
+    if (!userJid) {
+      throw new Error('can not ban user, userJid not found through room occupants');
+    }
 
     const response = await this.xmppService.chatConnectionService
       .$iq({ to: roomJid.toString(), type: 'set' })
@@ -470,7 +590,22 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   }
 
   async unbanUser(occupantJid: JID, roomJid: JID): Promise<IqResponseStanza> {
-    const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
+    const bannedUsersStanza = await this.xmppService.chatConnectionService
+      .$iq({ type: 'get', to: roomJid.toString() })
+      .c('query', { xmlns: nsMucAdmin })
+      .c('item', { affiliation: 'outcast' })
+      .send();
+
+    const userJidAttribute = Finder.create(bannedUsersStanza)
+      .searchByTag('item')
+      .results.map((item) => item.getAttribute('jid'))
+      .find((jid) => jid?.includes(occupantJid.local as string));
+
+    if (!userJidAttribute) {
+      throw new Error('can not unban user, userJid not found through room occupants');
+    }
+
+    const userJid = parseJid(userJidAttribute);
 
     const banList = (await this.getBanList(roomJid)).map((bannedUser): JID => bannedUser.userJid);
     this.logService.debug(`ban list: ${JSON.stringify(banList)}`);
@@ -557,16 +692,40 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       .send();
   }
 
-  async leaveRoom(occupantJid: JID, status?: string): Promise<void> {
+  async leaveRoom(roomJid: JID, status?: string): Promise<void> {
+    await firstValueFrom(this.roomsFetchedSubject.pipe(filter((val) => val)));
+    const room = await firstValueFrom(this.getRoomByJid(roomJid));
     const from = await firstValueFrom(this.xmppService.chatConnectionService.userJid$);
 
-    await this.xmppService.chatConnectionService
-      .$pres({ to: occupantJid.toString(), from, type: Presence[Presence.unavailable] })
+    if (!room) {
+      throw new Error('room not in room list');
+    }
+
+    const occupant = room?.getOccupant(parseJid(from).bare());
+
+    if (!occupant) {
+      throw new Error('user is not an occupant of the room');
+    }
+
+    const response = await this.xmppService.chatConnectionService
+      .$pres({ to: roomJid.toString(), from, type: Presence[Presence.unavailable] })
       .cCreateMethod(
         (builder): StanzaBuilder => (status ? builder.c('status', {}, status) : builder)
       )
       .send();
-    this.logService.debug(`occupant left room: occupantJid=${occupantJid.toString()}`);
+
+    if (Finder.create(response).searchByTag('item').result?.getAttribute('role') !== 'none') {
+      throw new Error('error leaving room: ' + response?.outerHTML?.toString());
+    }
+
+    /**
+     * To completely remove oneself from a room (i.e., change affiliation to "none"), a user generally needs to have the right permissions to change their own affiliation.
+     */
+    if (occupant.affiliation === Affiliation.owner) {
+      await this.setAffiliation(occupant.jid, roomJid, Affiliation.none);
+    }
+    this.leftRoomSubject.next(roomJid);
+    this.logService.debug(`occupant left room: occupantJid=${roomJid.toString()}`);
   }
 
   async changeRoomSubject(roomJid: JID, subject: string): Promise<void> {
@@ -581,10 +740,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   }
 
   isRoomInvitationStanza(stanza: Stanza): boolean {
-    const x = Array.from(stanza.querySelectorAll('x')).find(
-      (el): boolean => el.getAttribute('xmlns') === nsMucUser
-    );
-    return x != null && (x.querySelector('invite') != null || x.querySelector('decline') != null);
+    return stanza.querySelector('invite') != null || stanza.querySelector('decline') != null;
   }
 
   async grantMembership(userJid: JID, roomJid: JID, reason?: string): Promise<void> {
@@ -611,14 +767,17 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     await this.setRole(occupantNick, roomJid, Role.participant, reason);
   }
 
-  private async handleRoomPresenceStanza(stanza: Stanza): Promise<boolean> {
+  private async handleRoomPresenceStanza(stanza: Stanza, roomInCreation?: Room): Promise<boolean> {
     const stanzaType = stanza.getAttribute('type');
 
     if (stanzaType === 'error') {
       throw new Error(`error handling message, stanza: ${stanza.outerHTML}`);
     }
 
-    const occupantJid = parseJid(stanza.getAttribute('from') as string);
+    const roomJid = parseJid(stanza.getAttribute('from') as string);
+    const userJid = parseJid(
+      stanza.getAttribute('to') ?? (await firstValueFrom(this.xmppService.userJid$))
+    );
 
     const xEl = Array.from(stanza.querySelectorAll('x')).find(
       (el): boolean => el.getAttribute('xmlns') === nsMucUser
@@ -631,10 +790,10 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     }
 
     const subjectOccupant: RoomOccupant = {
-      jid: occupantJid,
+      jid: userJid,
       affiliation: itemEl.getAttribute('affiliation') as Affiliation,
       role: itemEl.getAttribute('role') as Role,
-      nick: occupantJid?.resource ?? '',
+      nick: userJid?.resource ?? '',
     };
 
     const isInCodes = (codes: string[], states: ExitingRoomStatusCode[]): boolean => {
@@ -657,12 +816,12 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     const isCurrentUser = statusCodes.includes(OtherStatusCode.PresenceSelfRef);
     const createdRoom = statusCodes.includes(EnteringRoomStatusCode.NewRoomCreated);
 
+    const room = roomInCreation ?? (await this.getOrCreateRoom(roomJid));
+
     if (isCurrentUser && createdRoom) {
-      this.createdRoomSubject.next(new Room(this.logService, occupantJid.bare()));
       return true;
     }
 
-    const room = await this.getOrCreateRoom(occupantJid);
     if (!stanzaType && room.hasOccupant(subjectOccupant.jid)) {
       const oldOccupant = room.getOccupant(subjectOccupant.jid);
       room.handleOccupantModified(subjectOccupant, oldOccupant as RoomOccupant, isCurrentUser);
@@ -734,106 +893,88 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     return room;
   }
 
-  private async joinRoomInternal(
-    joiningUser: string,
-    roomJid: JID
-  ): Promise<{ presenceResponse: Stanza; room: Room }> {
-    const occupantJid = new JID(
-      roomJid.local,
-      roomJid.domain,
-      roomJid.resource ?? joiningUser.split('@')[0]
-    );
-
-    const presenceResponse = await this.xmppService.chatConnectionService
-      .$pres({ to: occupantJid.toString() })
-      .c('x', { xmlns: nsMuc })
-      .send();
-    await this.handleRoomPresenceStanza(presenceResponse);
-
-    const room = await this.getOrCreateRoom(occupantJid.bare());
-    room.nick = occupantJid.resource;
-
-    const roomInfo = await this.getRoomInfo(occupantJid.bare());
-
-    if (!roomInfo) {
-      throw new Error('Did not get roomInfo');
-    }
-
-    room.name = getField<TextualFormField>(roomInfo, 'muc#roomconfig_roomname')?.value;
-    room.description =
-      getField<TextualFormField>(roomInfo, 'muc#roominfo_description')?.value ?? '';
-
-    return { presenceResponse, room };
-  }
-
   private extractRoomSummariesFromResponse(iq: IqResponseStanza): Room[] {
     return Finder.create(iq)
       .searchByTag('query')
       .searchByNamespace(nsDiscoItems)
       .searchByTag('item')
-      .results.reduce<Room[]>((acc, item): Room[] => {
-        const jid = item.getAttribute('jid') as string;
-        const name = item.getAttribute('name') as string;
-
-        acc.push(new Room(this.logService, parseJid(jid), name));
-
-        return acc;
-      }, []);
+      .results.map((item): Room => {
+        const jid = parseJid(item.getAttribute('jid') as string);
+        return new Room(this.logService, jid, jid.local);
+      });
   }
 
-  async handleRoomMessageStanza(stanza: Stanza, archiveDelayElement?: Stanza): Promise<boolean> {
-    if (stanza?.querySelector('body')?.textContent?.trim()) {
-      const delayElement = archiveDelayElement ?? stanza.querySelector('delay');
+  async handleRoomMessageStanza(
+    stanza: Stanza,
+    delayElement = stanza.querySelector('delay'),
+    from = this.extractFrom(stanza)
+  ): Promise<boolean> {
+    const messageText = stanza?.querySelector('body')?.textContent?.trim();
+
+    if (!from) {
+      throw new Error('Can not handle message for undefined from; muc:handleRoomMessageStanza');
+    }
+    // should be 'await firstValueFrom(this.getRoomByJid(roomJid))' and we should ensure Room exists with the presence handler
+    const room = await this.getOrCreateRoom(from.bare());
+
+    // When we create a room by message we want to extract the occupants to know their jid's (origin jid's and not jids in room)
+    // to avoid querying for them latter
+    const roomOccupants = Finder.create(stanza)
+      .searchByTag('x')
+      .searchByTag('item')
+      .results.map((item) => {
+        return {
+          jid: parseJid(item.getAttribute('jid') as string),
+          affiliation: item.getAttribute('affiliation') as Affiliation,
+          role: item.getAttribute('role') as Role,
+        } as RoomOccupant;
+      });
+
+    if (roomOccupants.length > 0) {
+      room.addOccupants(roomOccupants);
+    }
+
+    if (messageText) {
       const stamp = delayElement?.getAttribute('stamp');
-      const datetime$ = stamp
-        ? of(new Date(stamp))
-        : this.xmppService.pluginMap.entityTime
-            .getNow()
-            .pipe(map((number): Date => new Date(number)));
+      const datetime = stamp
+        ? new Date(stamp)
+        : new Date(await firstValueFrom(this.xmppService.pluginMap.entityTime.getNow()));
 
-      const from = parseJid(stanza.getAttribute('from') as string);
-      const room = await firstValueFrom(this.getRoomByJid(from.bare()));
+      const mineJid = parseJid(
+        await firstValueFrom(this.xmppService.chatConnectionService.userJid$)
+      );
 
-      if (!room) {
-        throw new Error('Can not handle message for undefined room; muc');
-      }
+      const isMyMucMessage =
+        !!roomOccupants.find((occupant) => mineJid.bare().equals(occupant.jid.bare())) ||
+        from.toString().includes(mineJid.local as string);
 
-      const datetimeFromObservable = await firstValueFrom(datetime$);
       const message: Message = {
-        body: stanza?.querySelector('body')?.textContent?.trim() ?? '',
-        datetime: datetimeFromObservable,
+        body: messageText,
+        datetime,
         id: stanza.getAttribute('id') as string,
         from,
-        direction: room.occupantJid && from.equals(room.occupantJid) ? Direction.out : Direction.in,
+        direction: isMyMucMessage ? Direction.out : Direction.in,
         delayed: !!delayElement,
-        fromArchive: archiveDelayElement != null,
+        fromArchive: stanza.querySelector('archived') == null,
       };
       room.messageStore.addMessage(message);
 
       if (!message.delayed) {
-        this.messageSubject.next(room);
+        this.messageReceivedSubject.next(room);
       }
 
       return true;
     }
 
-    if (stanza.querySelector('subject') != null && stanza.querySelector('body') == null) {
-      const roomJid = parseJid(stanza.getAttribute('from') as string).bare();
+    if (stanza.querySelector('subject') != null) {
       // The archive only stores non-empty subjects. The current value of the subject is sent directly after entering a room by the room,
       // not the archive.
       // If a subject was first set, then unset, we would first receive the empty subject on room entry and then overwrite it with the
       // previous non-empty value from archive. This is why we want to always ignore subjects from archive.
       // This actually looks like a bug in MAM, it seems that MAM interprets messages with just subject in them as if they were chat
       // messages and not room metadata. This would explain why empty subjects are not stored.
-      if (archiveDelayElement) {
+      if (stanza.querySelector('archived') != null || stanza.querySelector('forwarded') != null) {
         return true;
-      }
-
-      // should be 'await firstValueFrom(this.getRoomByJid(roomJid))' and we should ensure Room exists with the presence handler
-      const room = await this.getOrCreateRoom(roomJid);
-
-      if (!room) {
-        throw new Error('Can not handle message for undefined room');
       }
 
       room.subject = stanza?.querySelector('subject')?.textContent?.trim() ?? '';
@@ -841,27 +982,43 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       return true;
     }
 
-    if (this.isRoomInvitationStanza(stanza)) {
-      const xElFinder = Finder.create(stanza).searchByTag('x').searchByNamespace(nsMucUser);
-      const invitationEl =
-        xElFinder.searchByTag('invite').result ?? xElFinder.searchByTag('decline').result;
+    return false;
+  }
 
-      if (!invitationEl) {
-        return false;
-      }
+  handleRoomInvitationMessageStanza(stanza: Stanza): Invitation {
+    const xElFinder = Finder.create(stanza).searchByTag('x').searchByNamespace(nsMucUser);
+    const invitationEl =
+      xElFinder.searchByTag('invite').result ?? xElFinder.searchByTag('decline').result;
 
-      this.invitationSubject.next({
-        type: invitationEl.tagName as Invitation['type'],
-        roomJid: parseJid(stanza.getAttribute('from') as string),
-        roomPassword: xElFinder?.searchByTag('password').result?.textContent as string,
-        from: parseJid(invitationEl.getAttribute('from') as string),
-        message: invitationEl.querySelector('reason')?.textContent ?? '',
-      });
-
-      return true;
+    if (!invitationEl) {
+      throw new Error(
+        'Could not find invite or decline element in stanza; muc:handleRoomInvitationMessageStanza'
+      );
     }
 
-    return false;
+    const invitation: Invitation = {
+      type: invitationEl.tagName as Invitation['type'],
+      roomJid: parseJid(stanza.getAttribute('from') as string),
+      roomPassword: xElFinder?.searchByTag('password').result?.textContent as string,
+      from: parseJid(invitationEl.getAttribute('from') as string),
+      message: invitationEl.querySelector('reason')?.textContent ?? '',
+    };
+
+    this.invitationSubject.next(invitation);
+
+    return invitation;
+  }
+
+  private extractFrom(stanza: Stanza): JID {
+    const messageFrom = stanza.querySelector('message')?.getAttribute('from');
+    if (messageFrom != null) {
+      return parseJid(messageFrom);
+    }
+    const stanzaFrom = stanza.getAttribute('from');
+    if (stanzaFrom != null) {
+      return parseJid(stanzaFrom);
+    }
+    throw new Error('Could not extract from from stanza');
   }
 
   private async setAffiliation(
@@ -871,6 +1028,9 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     reason?: string
   ): Promise<IqResponseStanza> {
     const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
+    if (!userJid) {
+      throw new Error('can not change user affiliation, userJid not found through room occupants');
+    }
 
     return this.xmppService.chatConnectionService
       .$iq({ to: roomJid.toString(), type: 'set' })
@@ -894,17 +1054,15 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       .send();
   }
 
-  private async getUserJidByOccupantJid(occupantJid: JID, roomJid: JID): Promise<JID> {
-    const users = await this.queryUserList(roomJid);
-    const jid = users.find(
-      (roomUser): boolean =>
-        roomUser.nick === occupantJid.resource || roomUser.jid.bare().equals(occupantJid.bare())
-    )?.jid;
+  private async getUserJidByOccupantJid(occupantJid: JID, roomJid: JID): Promise<JID | undefined> {
+    const room = await firstValueFrom(this.getRoomByJid(roomJid.bare()));
+    return room?.findOccupantByNick(occupantJid.local as string)?.jid;
+  }
 
-    if (!jid) {
-      throw new Error('No user jid for occupant jid');
-    }
-
-    return jid;
+  hasMUCExtensionWithoutInvite(messageStanza: Element): boolean {
+    return (
+      messageStanza.querySelector('x')?.getAttribute('xmlns') === nsMucUser &&
+      !this.isRoomInvitationStanza(messageStanza)
+    );
   }
 }

@@ -139,4 +139,13 @@ export class XmppRoomService implements RoomService {
   async getRoomConfiguration(roomJid: string): Promise<XmlSchemaForm> {
     return this.multiUserPlugin.getRoomConfiguration(parseJid(roomJid));
   }
+
+  async addRoomInfo(room: Room): Promise<Room> {
+    room.info = await this.multiUserPlugin.getRoomInfo(room.jid);
+    return room;
+  }
+
+  async getRoomByJid(roomJid: string): Promise<Room | undefined> {
+    return firstValueFrom(this.multiUserPlugin.getRoomByJid(parseJid(roomJid)));
+  }
 }

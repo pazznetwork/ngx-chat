@@ -14,7 +14,7 @@ export function isContact(recipient: Recipient): recipient is Contact {
 }
 
 export class Contact implements Recipient {
-  readonly messageStore: MessageStore = new MessageStore();
+  readonly messageStore: MessageStore = MessageStore.create();
 
   readonly recipientType = 'contact';
 

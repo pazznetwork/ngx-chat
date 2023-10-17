@@ -15,6 +15,7 @@ export const dummyAvatarRoom =
 export class Room implements Recipient {
   readonly recipientType = 'room';
   readonly jid: JID;
+  // ??? maybe should have been current user occupant jid
   occupantJid: JID | undefined;
   description = '';
   subject = '';
@@ -22,7 +23,7 @@ export class Room implements Recipient {
   // Room configuration
   info?: XmlSchemaForm;
 
-  readonly messageStore: MessageStore = new MessageStore();
+  readonly messageStore: MessageStore = MessageStore.create();
   private readonly roomOccupants = new Map<string, RoomOccupant>();
 
   private readonly onOccupantChangeSubject = new ReplaySubject<OccupantChange>(Infinity, 1000);
@@ -70,7 +71,11 @@ export class Room implements Recipient {
   }
 
   getOccupant(occupantJid: JID): RoomOccupant | undefined {
-    return this.roomOccupants.get(occupantJid.toString());
+    return this.roomOccupants.get(occupantJid.bare().toString());
+  }
+
+  findOccupantByNick(nick: string): RoomOccupant | undefined {
+    return Array.from(this.roomOccupants.values()).find((occupant) => occupant.jid.local === nick);
   }
 
   handleOccupantJoined(occupant: RoomOccupant, isCurrentUser: boolean): void {
@@ -78,6 +83,9 @@ export class Room implements Recipient {
 
     this.onOccupantChangeSubject.next({ change: 'joined', occupant, isCurrentUser });
     this.logService?.debug(
+      `occupant joined room: occupantJid=${occupant.jid.toString()}, roomJid=${this.jid.toString()}`
+    );
+    console.log(
       `occupant joined room: occupantJid=${occupant.jid.toString()}, roomJid=${this.jid.toString()}`
     );
   }
@@ -221,5 +229,9 @@ export class Room implements Recipient {
         this.occupantsSubject.next([...this.roomOccupants.values()]);
       }
     }
+  }
+
+  addOccupants(users: RoomOccupant[]): void {
+    users.forEach((user) => this.addOccupant(user));
   }
 }

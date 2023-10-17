@@ -57,24 +57,34 @@ export class JID {
 }
 
 export function parseJid(jid: string): JID {
-  let local;
-  let resource;
-  //  enforce lower-case as in jid's as server returns only lower case jid's
-  let lowerCaseJid = jid.toLowerCase();
+  let local: string | undefined;
+  let resource: string | undefined;
+  let domain: string | undefined;
 
-  const resourceStart = lowerCaseJid.indexOf('/');
+  // Extract resource part, if available
+  const resourceStart = jid.indexOf('/');
   if (resourceStart !== -1) {
-    resource = lowerCaseJid.slice(resourceStart + 1);
-    lowerCaseJid = lowerCaseJid.slice(0, resourceStart);
+    resource = jid.substring(resourceStart + 1);
+    jid = jid.substring(0, resourceStart);
   }
 
-  const atStart = lowerCaseJid.indexOf('@');
+  // Extract local and domain parts
+  const atStart = jid.indexOf('@');
   if (atStart !== -1) {
-    local = lowerCaseJid.slice(0, atStart);
-    lowerCaseJid = lowerCaseJid.slice(atStart + 1);
+    local = jid.substring(0, atStart).toLowerCase();
+    domain = jid.substring(atStart + 1).toLowerCase();
+  } else if (jid.includes('.')) {
+    domain = jid.toLowerCase();
+  } else {
+    local = jid.toLowerCase();
   }
 
-  return new JID(local, lowerCaseJid, resource);
+  // Return parsed JID parts
+  return new JID(local, domain ?? '', resource);
+}
+
+export function bareJidEquals(a: string, b: string): boolean {
+  return parseJid(a).bare().equals(parseJid(b).bare());
 }
 
 export function makeSafeJidString(username: string, domain: string): string {

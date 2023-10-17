@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Affiliation, AuthRequest } from '@pazznetwork/ngx-chat-shared';
+import { bareJidEquals } from '@pazznetwork/ngx-chat-shared';
 import { devXmppDomain, devXmppJid, devXmppPassword } from '../../.secrets-const';
 import type { RoomOptions } from './room-options';
 
@@ -121,8 +122,40 @@ export async function getRoomAffiliation(
   name: string,
   jid: string,
   service = 'conference.' + xmppDomain
-): Promise<{ affiliation: string }> {
-  return executeRequest('get_room_affiliation', { name, jid, service });
+): Promise<string> {
+  const { affiliation } = await executeRequest<{ affiliation: string }>('get_room_affiliation', {
+    name,
+    jid,
+    service,
+  });
+  return affiliation;
+}
+
+type MucRole = 'participant' | 'moderator' | 'none' | 'visitor';
+export async function getRoomRole(
+  name: string,
+  jid: string,
+  service = 'conference.' + xmppDomain
+): Promise<MucRole> {
+  const occupants = await getRoomOccupants(name, service);
+  console.log('occupants', occupants);
+  return occupants.find((occupant) => bareJidEquals(occupant.jid, jid))?.role ?? 'none';
+}
+
+export async function getRoomOccupants(
+  name: string,
+  service = 'conference.' + xmppDomain
+): Promise<
+  {
+    jid: string;
+    nick: string;
+    role: MucRole;
+  }[]
+> {
+  return executeRequest('get_room_occupants', {
+    name,
+    service,
+  });
 }
 
 export async function changeRoomOption(

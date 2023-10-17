@@ -18,11 +18,45 @@ export class Finder {
     return new Finder(root);
   }
 
+  static getElementByTags(stanza: Element, tags: string[]): Element | undefined {
+    let finder = Finder.create(stanza);
+    tags.forEach((tag) => (finder = finder.searchByTag(tag)));
+    return finder.result;
+  }
+
   searchByTag(tagName: string): Finder {
     this.currentElements = this.currentElements.reduce((acc: Element[], el: Element) => {
       acc.push(...Array.from(el.querySelectorAll(tagName)));
       return acc;
     }, []);
+    return this;
+  }
+
+  searchForDeepestByTag(tagName: string): Finder {
+    // Gather all matching elements.
+    const allMatches: Element[] = [];
+    for (const el of this.currentElements) {
+      allMatches.push(...Array.from(el.querySelectorAll(tagName)));
+    }
+
+    // Compute the depth for each element.
+    const depths: Map<Element, number> = new Map();
+    let maxDepth = 0;
+    for (const el of allMatches) {
+      let depth = 0;
+      let current = el;
+      while (current.parentElement) {
+        depth++;
+        current = current.parentElement;
+      }
+      depths.set(el, depth);
+      if (depth > maxDepth) {
+        maxDepth = depth;
+      }
+    }
+
+    // Filter the elements that have the maximum depth.
+    this.currentElements = allMatches.filter((el) => depths.get(el) === maxDepth);
     return this;
   }
 

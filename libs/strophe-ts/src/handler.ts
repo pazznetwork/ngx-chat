@@ -31,12 +31,12 @@ export class Handler {
    * @param user whether the handler is a user handler or a system handler
    */
   constructor(
-    private readonly handler: (stanza: Element) => boolean | Promise<boolean>,
-    private readonly ns?: string,
-    private readonly name?: string,
-    private readonly type?: string | string[],
-    private readonly id?: string,
-    private readonly from?: string,
+    readonly handler: (stanza: Element) => boolean | Promise<boolean>,
+    readonly ns?: string,
+    readonly name?: string,
+    readonly type?: string | string[],
+    readonly id?: string,
+    readonly from?: string,
     readonly options = { matchBareFromJid: false, ignoreNamespaceFragment: false },
     readonly user = true
   ) {
