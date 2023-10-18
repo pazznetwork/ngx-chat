@@ -10,6 +10,8 @@ import type { ChatContactClickHandler, ChatService } from '@pazznetwork/ngx-chat
 import { Contact, isContact } from '@pazznetwork/ngx-chat-shared';
 import { ChatAvatarComponent } from '../chat-avatar';
 import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -28,8 +30,10 @@ export class ChatWindowHeaderComponent {
   @Output()
   headerClick = new EventEmitter<void>();
 
-  get recipientAsContact(): Contact {
-    return this.chatWindowState?.recipient as Contact;
+  get status$(): Observable<string> {
+    return (this.chatWindowState?.recipient as Contact).presence$.pipe(
+      map((presence) => this.chatService.translations.presence[presence])
+    );
   }
 
   constructor(
