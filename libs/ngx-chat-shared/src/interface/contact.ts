@@ -14,7 +14,7 @@ export function isContact(recipient: Recipient): recipient is Contact {
 }
 
 export class Contact implements Recipient {
-  readonly messageStore: MessageStore = MessageStore.create();
+  readonly messageStore: MessageStore = new MessageStore();
 
   readonly recipientType = 'contact';
 
@@ -90,13 +90,13 @@ export class Contact implements Recipient {
   }
 
   async updateSubscriptionOnReceived(): Promise<void> {
-    this.subscriptionSubject.next(
+    this.newSubscription(
       this.transitionSubscriptionRequestReceivedAccepted(await firstValueFrom(this.subscription$))
     );
   }
 
   async updateSubscriptionOnRequestSent(): Promise<void> {
-    this.subscriptionSubject.next(
+    this.newSubscription(
       this.transitionSubscriptionRequestSentAccepted(await firstValueFrom(this.subscription$))
     );
   }

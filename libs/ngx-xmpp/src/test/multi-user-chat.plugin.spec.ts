@@ -449,7 +449,9 @@ describe('multi user chat plugin', () => {
       await testUtils.chatService.roomService.joinRoom(room.jid.toString());
       await testUtils.chatService.messageService.sendMessage(room, 'message body');
 
-      const messages = await firstValueFrom(room.messageStore.messages$);
+      const messages = await firstValueFrom(
+        room.messageStore.messages$.pipe(filter((array) => array.length > 0))
+      );
 
       // then
       expect(messages.length).toEqual(1);

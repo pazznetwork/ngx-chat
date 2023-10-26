@@ -23,7 +23,7 @@ export class Room implements Recipient {
   // Room configuration
   info?: XmlSchemaForm;
 
-  readonly messageStore: MessageStore = MessageStore.create();
+  readonly messageStore: MessageStore = new MessageStore();
   private readonly roomOccupants = new Map<string, RoomOccupant>();
 
   private readonly onOccupantChangeSubject = new ReplaySubject<OccupantChange>(Infinity, 1000);
