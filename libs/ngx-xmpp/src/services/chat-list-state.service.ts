@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, debounceTime, mergeAll, windowTime } from 'rxjs';
+import { BehaviorSubject, mergeMap, throttleTime } from 'rxjs';
 import { filter, map, pairwise, startWith } from 'rxjs/operators';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN } from '../injection-token';
@@ -31,20 +31,17 @@ export class ChatListStateService {
     this.zone.runOutsideAngular(() => {
       this.chatService.contactListService.contacts$
         .pipe(
-          debounceTime(2000),
           startWith(new Array<Contact>()),
           pairwise(),
           filter(([prev, next]) => prev.length < next.length),
           map(([prev, next]) =>
             next.filter((nc) => !prev.find((pc) => pc.jid.local === nc.jid.local))
           ),
-          windowTime(500),
-          mergeAll(3)
+          mergeMap((contacts) => contacts),
+          throttleTime(5000)
         )
-        .subscribe((contacts) => {
-          for (const contact of contacts) {
-            this.openChat(contact);
-          }
+        .subscribe((contact) => {
+          this.openChat(contact);
         });
     });
   }
@@ -81,8 +78,8 @@ export class ChatListStateService {
   }
 
   private findChatWindowStateIndexByRecipient(recipient: Recipient): number {
-    // TODO: Multiple domain and ressource compatibilty
-    // We check only for local part as we don't test currently against multiple domain and ressource compatibilty
+    // TODO: Multiple domain and ressource compatibility
+    // We check only for local part as we don't test currently against multiple domain and ressource compatibility
     // the presence handling with the subscription info lacks the ressource only a follow up presence element from the server shares it
     return this.openChatsSubject
       .getValue()
@@ -90,8 +87,8 @@ export class ChatListStateService {
   }
 
   private findChatWindowStateByRecipient(recipient: Recipient): ChatWindowState | undefined {
-    // TODO: Multiple domain and ressource compatibilty
-    // We check only for local part as we don't test currently against multiple domain and ressource compatibilty
+    // TODO: Multiple domain and ressource compatibility
+    // We check only for local part as we don't test currently against multiple domain and ressource compatibility
     // the presence handling with the subscription info lacks the ressource only a follow up presence element from the server shares it
     return this.openChatsSubject
       .getValue()
