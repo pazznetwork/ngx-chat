@@ -30,6 +30,7 @@ test.describe('ngx-chat', () => {
 
     await ejabberdAdminPage.register(fooUser, testPassword);
     await ejabberdAdminPage.register(barUser, testPassword);
+    await appPage.setupForTest();
   });
 
   test('should be able to submit message with enter key and button', async () => {
