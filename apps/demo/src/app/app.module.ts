@@ -9,7 +9,7 @@ import { StanzaComponent } from './components/stanza/stanza.component';
 import { MucComponent } from './routes/muc/muc.component';
 import { MultiUserChatComponent } from './components/multi-user-chat/multi-user-chat.component';
 import { NgModule } from '@angular/core';
-import { NgxChatModule } from '@pazznetwork/ngx-chat';
+import { ChatWindowComponent, NgxChatModule } from '@pazznetwork/ngx-chat';
 import { UiComponent } from './routes/ui/ui.component';
 
 @NgModule({
@@ -21,7 +21,14 @@ import { UiComponent } from './routes/ui/ui.component';
     MultiUserChatComponent,
     UiComponent,
   ],
-  imports: [AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, NgxChatModule],
+  imports: [
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    BrowserModule,
+    FormsModule,
+    NgxChatModule,
+    ChatWindowComponent,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })

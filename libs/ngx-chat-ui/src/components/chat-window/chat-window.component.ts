@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectionStrategy, Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnInit } from '@angular/core';
 import { merge, Observable, scan, startWith, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { type ChatService, Direction } from '@pazznetwork/ngx-chat-shared';
@@ -26,7 +26,6 @@ import { ChatWindowContentComponent } from '../chat-window-content';
   selector: 'ngx-chat-window',
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.less'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatWindowComponent implements OnInit {
   @Input()

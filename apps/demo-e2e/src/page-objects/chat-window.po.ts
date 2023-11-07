@@ -28,11 +28,11 @@ export class ChatWindowPage {
     this.inMessage = this.windowLocator.locator('ngx-chat-message-in ngx-chat-message-text-area');
     this.outMessage = this.windowLocator.locator('ngx-chat-message-out ngx-chat-message-text-area');
 
-    this.acceptLink = this.windowLocator.locator('a[data-zid="accept-user"]');
-    this.denyLink = this.windowLocator.locator('a[data-zid="deny-user"]');
-    this.blockLink = this.windowLocator.locator('a[data-zid="block-user"]');
-    // this.blockAndReportLink = this.windowLocator.locator('a[data-zid="block-and-report-user"]'); todo needed?
-    this.addLink = this.windowLocator.locator('a[data-zid="add-user"]');
+    this.acceptLink = this.windowLocator.locator('[data-zid="accept-user"]');
+    this.denyLink = this.windowLocator.locator('[data-zid="deny-user"]');
+    this.blockLink = this.windowLocator.locator('[data-zid="block-user"]');
+    // this.blockAndReportLink = this.windowLocator.locator('[data-zid="block-and-report-user"]'); todo needed?
+    this.addLink = this.windowLocator.locator('[data-zid="add-user"]');
 
     this.chatInput = this.windowLocator.locator(`[data-zid="chat-input"]`);
     this.messageSubmitButton = this.windowLocator.locator('.chat-window-send');
@@ -95,6 +95,7 @@ export class ChatWindowPage {
   }
 
   async block(): Promise<void> {
+    await this.blockLink.waitFor();
     await this.blockLink.click();
   }
 
@@ -116,11 +117,26 @@ export class ChatWindowPage {
     return this.blockLink.isVisible();
   }
 
-  async add(): Promise<void> {
+  async addContact(): Promise<void> {
     await this.addLink.click();
   }
 
   async acceptContactRequest(): Promise<void> {
     await this.acceptLink.click();
+  }
+
+  async blockOrAddMessageIsVisible(): Promise<boolean> {
+    await this.blockLink.waitFor();
+    await this.addLink.waitFor();
+    return (await this.hasBlockLink()) && (await this.hasAddLink());
+  }
+
+  async blockOrAddMessageWaitForHidden(): Promise<void> {
+    await this.blockLink.waitFor({ state: 'hidden' });
+    await this.addLink.waitFor({ state: 'hidden' });
+  }
+
+  async hasAddLink(): Promise<boolean> {
+    return this.addLink.isVisible();
   }
 }

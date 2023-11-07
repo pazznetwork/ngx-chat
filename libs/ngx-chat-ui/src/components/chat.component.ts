@@ -10,7 +10,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { combineLatest, merge, Subject, switchMap, tap } from 'rxjs';
+import { combineLatest, merge, Subject, switchMap } from 'rxjs';
 import type { ChatService, Contact, Translations } from '@pazznetwork/ngx-chat-shared';
 import { defaultTranslations, Room } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
@@ -127,7 +127,7 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
       this.contactRequestsReceived$ ?? this.chatService.contactListService.contactRequestsReceived$;
     this.contactsUnaffiliated$ =
       this.contactsUnaffiliated$ ?? this.chatService.contactListService.contactsUnaffiliated$;
-    this.blocked$ = this.blocked$ ?? this.chatService.contactListService.blockedContacts$;
+    this.blocked$ = this.blocked$ ?? this.chatService.contactListService.contactsBlocked$;
 
     this.hasNoContacts$ = combineLatest([
       this.rooms$.pipe(map((arr) => arr.length > 0)),
@@ -142,7 +142,6 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
     merge([this.rooms$, this.contacts$])
       .pipe(
         switchMap((obs$) => obs$),
-        tap((value) => console.log('markForCheck', value)),
         takeUntil(this.ngDestroy$)
       )
       .subscribe(() => this.changeDetectorRef.markForCheck());

@@ -30,7 +30,7 @@ enum SubscriptionAction {
 })
 export class ChatMessageContactRequestComponent implements OnInit {
   @Input()
-  contact!: Contact;
+  pendingRequestContact?: Contact;
 
   private subscriptionActionSubject = new Subject<SubscriptionAction>();
   subscriptionAction$!: Observable<SubscriptionAction>;
@@ -46,8 +46,12 @@ export class ChatMessageContactRequestComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (this.pendingRequestContact == null) {
+      throw new Error('no pending request contact in chat message contact request component');
+    }
+
     this.subscriptionAction$ = merge(
-      this.contact.subscription$.pipe(
+      this.pendingRequestContact.subscription$.pipe(
         map((subscription) => {
           if (subscription === ContactSubscription.from) {
             return SubscriptionAction.PENDING_REQUEST;
@@ -78,20 +82,34 @@ export class ChatMessageContactRequestComponent implements OnInit {
   }
 
   async acceptSubscriptionRequest(): Promise<void> {
-    await this.chatService.contactListService.addContact(this.contact.jid.toString());
+    if (this.pendingRequestContact == null) {
+      throw new Error('no pending request contact in chat message contact request component');
+    }
+    await this.chatService.contactListService.addContact(this.pendingRequestContact.jid.toString());
   }
 
   async removeContact(): Promise<void> {
-    await this.chatService.contactListService.removeContact(this.contact.jid.toString());
+    if (this.pendingRequestContact == null) {
+      throw new Error('no pending request contact in chat message contact request component');
+    }
+    await this.chatService.contactListService.removeContact(
+      this.pendingRequestContact.jid.toString()
+    );
   }
 
   async blockUser(): Promise<void> {
-    await this.chatService.contactListService.blockJid(this.contact.jid.toString());
-    this.chatListService.closeChat(this.contact);
+    if (this.pendingRequestContact == null) {
+      throw new Error('no pending request contact in chat message contact request component');
+    }
+    await this.chatService.contactListService.blockJid(this.pendingRequestContact.jid.toString());
+    this.chatListService.closeChat(this.pendingRequestContact);
   }
 
   async blockUserAndReport(): Promise<void> {
-    this.reportUserService.reportUser(this.contact);
+    if (this.pendingRequestContact == null) {
+      throw new Error('no pending request contact in chat message contact request component');
+    }
+    this.reportUserService.reportUser(this.pendingRequestContact);
     await this.blockUser();
   }
 }

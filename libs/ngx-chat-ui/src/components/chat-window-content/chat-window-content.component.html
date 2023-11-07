@@ -6,8 +6,7 @@
   [dropMessage]="chatService.translations.dropMessage"
 >
   <div (click)="onFocus()">
-    <ngx-chat-history [recipient]="recipient" [showAvatars]="false"> </ngx-chat-history>
-    <ngx-chat-window-input [recipient]="recipient" (messageSent)="afterSendMessage()">
-    </ngx-chat-window-input>
+    <ngx-chat-history [recipient]="asContact" [showAvatars]="showAvatars" [scheduleScrollToBottom$]="scheduleScrollToBottom$" [pendingRequest$]="pendingRequest$" [pendingRequestContact]="asContact"></ngx-chat-history>
+    <ngx-chat-window-input [recipient]="recipient" (messageSent)="afterSendMessage()"></ngx-chat-window-input>
   </div>
 </ngx-chat-file-drop>
