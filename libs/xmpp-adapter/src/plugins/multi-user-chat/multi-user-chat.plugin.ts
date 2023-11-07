@@ -43,7 +43,7 @@ import {
   nsMucUser,
   nsRSM,
 } from './multi-user-chat-constants';
-import { filter, map, scan, shareReplay } from 'rxjs/operators';
+import { filter, map, shareReplay } from 'rxjs/operators';
 import type { Handler } from '@pazznetwork/strophets';
 import type { StanzaBuilder } from '../../stanza-builder';
 import { OtherStatusCode } from './other-status-code';
@@ -76,6 +76,8 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
 
   private readonly roomsFetchedSubject = new ReplaySubject<boolean>(1);
 
+  private readonly roomsMap = new Map<string, Room>();
+
   readonly rooms$: Connectable<Room[]>;
 
   private handlers: { destroy?: Handler; presence?: Handler } = {};
@@ -87,50 +89,49 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     this.rooms$ = connectable(
       merge(
         this.createdRoomSubject.pipe(
-          map((createdRoom) => (state: Map<string, Room>) => {
+          map((createdRoom) => {
             const key = createdRoom.jid.bare().toString();
-            if (state.has(key)) {
-              const existingContact = state.get(key) as Room;
-              state.set(key, existingContact);
-              return state;
+            if (this.roomsMap.has(key)) {
+              const existingContact = this.roomsMap.get(key) as Room;
+              this.roomsMap.set(key, existingContact);
+              return this.roomsMap;
             }
-            state.set(key, createdRoom);
-            return state;
+            this.roomsMap.set(key, createdRoom);
+            return this.roomsMap;
           })
         ),
         this.updateRoomSubject.pipe(
-          map((updatedRoom) => (state: Map<string, Room>) => {
+          map((updatedRoom) => {
             const key = updatedRoom.jid.bare().toString();
-            if (state.has(key)) {
-              state.set(key, updatedRoom);
-              return state;
+            if (this.roomsMap.has(key)) {
+              this.roomsMap.set(key, updatedRoom);
+              return this.roomsMap;
             }
-            return state;
+            return this.roomsMap;
           })
         ),
         merge(this.leftRoomSubject, this.destroyedRoomSubject).pipe(
-          map((jid) => (state: Map<string, Room>) => {
-            state.delete(jid.toString());
-            return state;
+          map((jid) => {
+            this.roomsMap.delete(jid.toString());
+            return this.roomsMap;
           })
         ),
         this.xmppService.onOnline$.pipe(
           mergeMap(() => this.getRooms()),
-          map((contacts) => (state: Map<string, Room>) => {
-            contacts.forEach((c) => state.set(c.jid.bare().toString(), c));
-            return state;
+          map((contacts) => {
+            contacts.forEach((c) => this.roomsMap.set(c.jid.bare().toString(), c));
+            return this.roomsMap;
           }),
           tap(() => this.roomsFetchedSubject.next(true))
         ),
         this.xmppService.onOffline$.pipe(
-          map(() => (state: Map<string, Room>) => {
-            state.clear();
-            return state;
+          map(() => {
+            this.roomsMap.clear();
+            return this.roomsMap;
           }),
           tap(() => this.roomsFetchedSubject.next(false))
         )
       ).pipe(
-        scan((state, innerFun) => innerFun(state), new Map<string, Room>()),
         map((contactMap) => Array.from(contactMap.values())),
         shareReplay({ bufferSize: 1, refCount: false })
       ),
@@ -948,10 +949,13 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         !!roomOccupants.find((occupant) => mineJid.bare().equals(occupant.jid.bare())) ||
         from.toString().includes(mineJid.local as string);
 
+      const id = (stanza.getAttribute('id') ??
+        stanza.querySelector('stanza-id')?.getAttribute('id')) as string;
+
       const message: Message = {
         body: messageText,
         datetime,
-        id: stanza.getAttribute('id') as string,
+        id,
         from,
         direction: isMyMucMessage ? Direction.out : Direction.in,
         delayed: !!delayElement,
