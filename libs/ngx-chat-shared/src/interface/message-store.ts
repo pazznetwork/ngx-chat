@@ -27,8 +27,17 @@ export class MessageStore {
   get mostRecentMessageSent(): Message | undefined {
     return findLast(this.messages, (msg) => msg.direction === Direction.out);
   }
+
   addMessage(message: Message): void {
-    if (!this.mostRecentMessage?.datetime || message.datetime > this.mostRecentMessage?.datetime) {
+    if (this.messageIdToMessage.has(message.id)) {
+      // as we are querying for messages in the past, we might get duplicate messages
+      return;
+    }
+
+    if (
+      this.mostRecentMessage?.datetime == null ||
+      message.datetime > this.mostRecentMessage?.datetime
+    ) {
       this.messages.push(message);
     } else {
       insertSortedLast(message, this.messages, (m) => m.datetime);
