@@ -86,6 +86,8 @@
     <p data-zid="registration-success">{{ message }}</p>
   </div>
 
+  <button name="watch-angular-stable" (click)="watchAngularStability()">Watch Angular Stability</button>
+
   <hr />
   <div *ngIf="chatService.isOnline$ | async; else offline">
   <div class="form-group">
@@ -133,8 +135,7 @@
       "
     >
       <ng-container *ngIf="contacts.length > 0; else messagesComponentInformation">
-        <ngx-chat-history [recipient]="contacts[0]" [showAvatars]="true"></ngx-chat-history>
-        <ngx-chat-window-input [recipient]="contacts[0]"></ngx-chat-window-input>
+      <ngx-chat-window-content [recipient]="contacts[0]" [showAvatars]="true"></ngx-chat-window-content>
       </ng-container>
     </ng-container>
     <ng-template #messagesComponentInformation

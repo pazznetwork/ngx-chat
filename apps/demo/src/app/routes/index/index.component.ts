@@ -98,7 +98,7 @@ export class IndexComponent implements OnDestroy {
         // eslint-disable-next-line no-console
         console.log({
           microTasks: taskTrackingZone.getTasksFor('microTask'),
-          macroTasks: taskTrackingZone.getTasksFor('macroTask'),
+          macroTasks: JSON.parse(JSON.stringify(taskTrackingZone.getTasksFor('macroTask'))),
           eventTasks: taskTrackingZone
             .getTasksFor('eventTask')
             .filter((task: { eventName: string }) => task.eventName !== 'click'),
