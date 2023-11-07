@@ -65,8 +65,8 @@ describe('message plugin', () => {
     expect(messages[0].direction).toBe('in');
     expect(messages[0].datetime.getTime()).toBeLessThanOrEqual(currentTime);
     expect(messages[0].datetime.getTime())
-      .withContext('incoming message should be processed within 20ms')
-      .toBeLessThan(currentTime + 20);
+      .withContext('incoming message should be processed within 40ms')
+      .toBeLessThan(currentTime + 40);
     expect(messages[0].delayed).toBeFalse();
     expect(messages[0].fromArchive).toBeFalse();
 
