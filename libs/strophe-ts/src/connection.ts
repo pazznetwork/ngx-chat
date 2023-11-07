@@ -24,12 +24,15 @@ import {
   firstValueFrom,
   merge,
   Observable,
+  of,
   pairwise,
   ReplaySubject,
   share,
   shareReplay,
   startWith,
   Subject,
+  switchMap,
+  takeUntil,
 } from 'rxjs';
 import type { ConnectionOptions } from './connection-options';
 import { AuthenticationMode } from './authentication-mode';
@@ -109,22 +112,34 @@ export class Connection {
 
   readonly isOffline$ = this.isOnline$.pipe(map((online) => !online));
 
-  readonly onOffline$ = this.isOnline$.pipe(
+  private readonly innerOnOffline$ = this.isOnline$.pipe(
     pairwise(),
     filter(([prev, curr]) => prev && !curr),
-    map(() => {
-      return;
-    }),
-    share()
+    map(() => undefined)
   );
 
-  readonly onOnline$ = this.isOnline$.pipe(
+  private readonly innerOnOnline$ = this.isOnline$.pipe(
     pairwise(),
     filter(([prev, curr]) => !prev && curr),
-    map(() => {
-      return;
-    }),
-    share()
+    map(() => undefined)
+  );
+
+  readonly onOffline$ = this.innerOnOffline$.pipe(
+    switchMap(() =>
+      of(undefined).pipe(
+        takeUntil(this.innerOnOnline$),
+        shareReplay({ bufferSize: 1, refCount: true })
+      )
+    )
+  );
+
+  readonly onOnline$ = this.innerOnOnline$.pipe(
+    switchMap(() =>
+      of(undefined).pipe(
+        takeUntil(this.innerOnOffline$),
+        shareReplay({ bufferSize: 1, refCount: true })
+      )
+    )
   );
 
   /**
@@ -974,16 +989,17 @@ export class Connection {
    *  are ready and keep poll requests going.
    */
   onIdle(): void {
-    clearTimeout(this.idleTimeout);
-    if (this.protocolManager instanceof Bosh) {
-      this.protocolManager.onIdle();
-    }
-
-    if (!this.connected) {
-      return;
-    }
-    // reactivate the timer only if connected
-    this.idleTimeout = setTimeout(() => this.onIdle(), 100);
+    // pollutes the angularZone and currently not in use.
+    // clearTimeout(this.idleTimeout);
+    // if (this.protocolManager instanceof Bosh) {
+    //   this.protocolManager.onIdle();
+    // }
+    //
+    // if (!this.connected) {
+    //   return;
+    // }
+    // // reactivate the timer only if connected
+    // this.idleTimeout = setTimeout(() => this.onIdle(), 100);
   }
 
   static async create(
