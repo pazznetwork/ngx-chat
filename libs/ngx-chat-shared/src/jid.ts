@@ -54,6 +54,20 @@ export class JID {
   bare(): JID {
     return new JID(this.local, this.domain, '');
   }
+
+  equalsBare(other: JID | undefined): boolean {
+    if (!other) {
+      return false;
+    }
+    return this.bare().equals(other.bare());
+  }
+
+  equalsBareString(other: string | undefined): boolean {
+    if (!other) {
+      return false;
+    }
+    return this.bare().equals(parseJid(other).bare());
+  }
 }
 
 export function parseJid(jid: string): JID {
@@ -83,7 +97,7 @@ export function parseJid(jid: string): JID {
   return new JID(local, domain ?? '', resource);
 }
 
-export function bareJidEquals(a: string, b: string): boolean {
+export function bareJidStringsEqual(a: string, b: string): boolean {
   return parseJid(a).bare().equals(parseJid(b).bare());
 }
 
