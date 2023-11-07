@@ -1,5 +1,8 @@
 import { devices, PlaywrightTestConfig } from '@playwright/test';
 import { baseConfig } from '../../playwright.config.base';
+import * as puppeteer from 'puppeteer';
+
+const executablePath: string = puppeteer.executablePath();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -38,6 +41,9 @@ const config: PlaywrightTestConfig = {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        launchOptions: {
+          executablePath,
+        },
       },
     },
     /* Test against a major browsers. */
