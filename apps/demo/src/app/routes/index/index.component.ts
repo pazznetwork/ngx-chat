@@ -193,11 +193,13 @@ export class IndexComponent implements OnDestroy {
   }
 
   async blockContact(): Promise<void> {
-    await this.chatService.contactListService.blockJid(this.otherJid);
+    const jid = this.otherJid?.includes('@') ? this.otherJid : this.otherJid + '@' + this.domain;
+    await this.chatService.contactListService.blockJid(jid);
   }
 
   async unblockContact(): Promise<void> {
-    await this.chatService.contactListService.unblockJid(this.otherJid);
+    const jid = this.otherJid?.includes('@') ? this.otherJid : this.otherJid + '@' + this.domain;
+    await this.chatService.contactListService.unblockJid(jid);
   }
 
   async onUnregister(): Promise<void> {

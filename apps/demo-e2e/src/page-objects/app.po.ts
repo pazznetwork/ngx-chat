@@ -139,8 +139,8 @@ export class AppPage {
   }
 
   async unblockContact(jid: string): Promise<void> {
-    await this.page.pause();
     await this.contactJid.fill(jid);
+    await this.unblockContactButton.scrollIntoViewIfNeeded();
     await this.unblockContactButton.click();
   }
 
@@ -174,6 +174,11 @@ export class AppPage {
   async isBlockedListVisible(): Promise<boolean> {
     await this.rosterListBlockedHeader.waitFor();
     return this.rosterListBlockedHeader.isVisible();
+  }
+
+  async isBlockedListHidden(): Promise<boolean> {
+    await this.rosterListBlockedHeader.waitFor({ state: 'hidden' });
+    return !(await this.rosterListBlockedHeader.isVisible());
   }
 
   async selectChatWithContact(jid: string): Promise<ChatWindowPage> {

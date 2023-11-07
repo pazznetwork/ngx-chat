@@ -75,6 +75,20 @@ export class ChatWindowPage {
     expect(lastMessage).toBe(expectedMessage);
   }
 
+  async assertLastMessageIsNot(
+    expectedMessage: string,
+    messageDirection: MessageDirection = 'incoming'
+  ): Promise<void> {
+    const messageCount = await (messageDirection === 'incoming'
+      ? this.inMessage
+      : this.outMessage
+    ).count();
+
+    const lastMessage = await this.getNthMessage(messageCount - 1, messageDirection);
+
+    expect(lastMessage).not.toBe(expectedMessage);
+  }
+
   assertIsOpen(): void {
     expect(this.windowTitleLocator.isVisible()).toBeTruthy();
   }
