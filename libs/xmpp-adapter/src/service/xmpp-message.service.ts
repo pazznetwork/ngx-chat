@@ -171,31 +171,21 @@ export class XmppMessageService implements MessageService {
       return this.handleSingleMessage(messageStanza, delayElement, messageFromArchive);
     }
 
-    //  const itemsElement = eventElement?.querySelector('items');
-
-    //  if (!itemsElement) {
-    //    throw new Error('No itemsElement to handle from archive');
-    //  }
-
-    // const itemElements = !!messageFromArchive
-    //   ? Array.from(stanza.querySelectorAll('message'))
-    //   : Array.from(stanza.querySelectorAll('item'));
-
     const messageElements = Finder.create(stanza)
       .searchByTag('forwarded')
       .searchForDeepestByTag('message').results;
 
-    const messagesHandled = await Promise.all(
-      messageElements.map((message) => {
-        if (!message) {
-          return Promise.resolve(false);
-        }
+    let handled = true; // Assume all messages will be handled successfully initially
+    for (const message of messageElements) {
+      if (!message) {
+        handled = false;
+        continue;
+      }
+      const result = await this.handleSingleMessage(message, delayElement, messageFromArchive);
+      handled = handled && result;
+    }
 
-        return this.handleSingleMessage(message, delayElement, messageFromArchive);
-      })
-    );
-
-    return messagesHandled.every((val) => val);
+    return handled;
   }
 
   private async handleSingleMessage(
