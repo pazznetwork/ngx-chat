@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 import type { XmppService } from '../xmpp.service';
-import { firstValueFrom, map, merge, mergeMap, Observable, ReplaySubject, scan } from 'rxjs';
+import { firstValueFrom, map, merge, mergeMap, Observable, ReplaySubject, startWith } from 'rxjs';
 import type { ChatPlugin } from '../core';
 import { shareReplay, switchMap } from 'rxjs/operators';
 import { getUniqueId, NS } from '@pazznetwork/strophets';
@@ -17,27 +17,37 @@ export class BlockPlugin implements ChatPlugin {
 
   private readonly blockContactJIDSubject = new ReplaySubject<string>(1);
   private readonly unblockContactJIDSubject = new ReplaySubject<string>(1);
+  private blockedContactMap = new Set<string>();
   readonly blockedContactJIDs$: Observable<Set<string>>;
 
   constructor(private xmppService: XmppService) {
     this.blockedContactJIDs$ = merge(
       this.xmppService.onOnline$.pipe(
         mergeMap(() => this.requestBlockedJIDs()),
-        map((blocked) => () => {
-          const state = new Set<string>();
-          blocked.forEach((b) => state.add(parseJid(b).bare().toString()));
-          return state;
+        map((blocked) => {
+          blocked.forEach((b) => this.blockedContactMap.add(parseJid(b).bare().toString()));
+          return this.blockedContactMap;
         })
       ),
-      this.blockContactJIDSubject.pipe(map((value) => (state: Set<string>) => state.add(value))),
-      this.unblockContactJIDSubject.pipe(
-        map((jid) => (state: Set<string>) => state.delete(jid) ? state : state)
+      this.blockContactJIDSubject.pipe(
+        map((value) => {
+          this.blockedContactMap.add(parseJid(value).bare().toString());
+          return this.blockedContactMap;
+        })
       ),
-      xmppService.onOffline$.pipe(map(() => () => new Set<string>()))
-    ).pipe(
-      scan((state, innerFun) => innerFun(state), new Set<string>()),
-      shareReplay({ bufferSize: 1, refCount: false })
-    );
+      this.unblockContactJIDSubject.pipe(
+        map((jid) => {
+          this.blockedContactMap.delete(jid);
+          return this.blockedContactMap;
+        })
+      ),
+      xmppService.onOffline$.pipe(
+        map(() => {
+          this.blockedContactMap = new Set<string>();
+          return this.blockedContactMap;
+        })
+      )
+    ).pipe(shareReplay({ bufferSize: 1, refCount: false }), startWith(this.blockedContactMap));
 
     xmppService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
   }

@@ -4,18 +4,17 @@ import type {
   ContactListService,
   ContactSubscription,
 } from '@pazznetwork/ngx-chat-shared';
-import { combineLatest, map, Observable, startWith } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import type { BlockPlugin, RosterPlugin } from '@pazznetwork/xmpp-adapter';
 
 export class XmppContactListService implements ContactListService {
   readonly blockedContactJIDs$: Observable<Set<string>>;
-  readonly blockedContacts$: Observable<Contact[]>;
   readonly contactRequestsReceived$: Observable<Contact[]>;
   readonly contactRequestsSent$: Observable<Contact[]>;
   readonly contacts$: Observable<Contact[]>;
   readonly contactsSubscribed$: Observable<Contact[]>;
   readonly contactsUnaffiliated$: Observable<Contact[]>;
-  readonly notBlockedContacts$: Observable<Contact[]>;
+  readonly contactsBlocked$: Observable<Contact[]>;
 
   constructor(
     private readonly rosterPlugin: RosterPlugin,
@@ -25,34 +24,23 @@ export class XmppContactListService implements ContactListService {
     this.contactsSubscribed$ = rosterPlugin.contactsSubscribed$;
     this.contactRequestsReceived$ = rosterPlugin.contactRequestsReceived$;
     this.contactRequestsSent$ = rosterPlugin.contactRequestsSent$;
-    this.contactsUnaffiliated$ = rosterPlugin.contactsUnaffiliated$;
+    this.contactsUnaffiliated$ = combineLatest([
+      rosterPlugin.contactsUnaffiliated$,
+      this.blockPlugin.blockedContactJIDs$,
+    ]).pipe(
+      map(([contacts, blockedJIDs]) =>
+        contacts.filter((c) => !blockedJIDs.has(c.jid.bare().toString()))
+      )
+    );
     this.blockedContactJIDs$ = blockPlugin.blockedContactJIDs$;
 
-    const contactsWithBlockedPair$ = combineLatest([
+    this.contactsBlocked$ = combineLatest([
       this.contacts$,
-      this.blockPlugin.blockedContactJIDs$.pipe(startWith(new Set<string>())),
+      this.blockPlugin.blockedContactJIDs$,
     ]).pipe(
-      map(([contacts, blockedJIDs]) => {
-        const blocked: Contact[] = [];
-        const notBlocked: Contact[] = [];
-        for (const contact of contacts) {
-          if (blockedJIDs.has(contact.jid.bare().toString())) {
-            blocked.push(contact);
-          } else {
-            notBlocked.push(contact);
-          }
-        }
-        return { blocked, notBlocked };
-      })
-    );
-
-    this.blockedContacts$ = contactsWithBlockedPair$.pipe(
-      map(({ blocked }) => blocked),
-      startWith([])
-    );
-    this.notBlockedContacts$ = contactsWithBlockedPair$.pipe(
-      map(({ notBlocked }) => notBlocked),
-      startWith([])
+      map(([contacts, blockedJIDs]) =>
+        contacts.filter((c) => blockedJIDs.has(c.jid.bare().toString()))
+      )
     );
   }
 

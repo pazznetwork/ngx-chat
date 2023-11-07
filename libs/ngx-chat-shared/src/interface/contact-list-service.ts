@@ -8,12 +8,7 @@ export interface ContactListService {
   /**
    * A list of contacts which the current user has blocked.
    */
-  blockedContacts$: Observable<Contact[]>;
-
-  /**
-   * contacts$ without the blockedContacts$.
-   */
-  notBlockedContacts$: Observable<Contact[]>;
+  contactsBlocked$: Observable<Contact[]>;
 
   /**
    * A list of contacts to which the current user has accepted subscriptions to.
