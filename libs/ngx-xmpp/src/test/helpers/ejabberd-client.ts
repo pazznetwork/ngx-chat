@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Affiliation, AuthRequest } from '@pazznetwork/ngx-chat-shared';
-import { bareJidEquals } from '@pazznetwork/ngx-chat-shared';
+import { bareJidStringsEqual } from '@pazznetwork/ngx-chat-shared';
 import { devXmppDomain, devXmppJid, devXmppPassword } from '../../.secrets-const';
 import type { RoomOptions } from './room-options';
 
@@ -138,8 +138,7 @@ export async function getRoomRole(
   service = 'conference.' + xmppDomain
 ): Promise<MucRole> {
   const occupants = await getRoomOccupants(name, service);
-  console.log('occupants', occupants);
-  return occupants.find((occupant) => bareJidEquals(occupant.jid, jid))?.role ?? 'none';
+  return occupants.find((occupant) => bareJidStringsEqual(occupant.jid, jid))?.role ?? 'none';
 }
 
 export async function getRoomOccupants(
