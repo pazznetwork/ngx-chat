@@ -8,39 +8,39 @@
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script>
-      (function(w) {
-        var oldST = w.setTimeout;
-        var oldSI = w.setInterval;
-        var oldCI = w.clearInterval;
-        var timers = [];
-        w.timers = timers;
-        w.setTimeout = function(fn, delay) {
-          var id = oldST(function() {
-            fn && fn();
-            removeTimer(id);
-          }, delay);
-          // console.trace('setTimeout', id);
-          timers.push(id);
-          return id;
-        };
-        w.setInterval = function(fn, delay) {
-          var id = oldSI(fn, delay);
-          // console.trace('setInterval', id);
-          timers.push(id);
-          return id;
-        };
-        w.clearInterval = function(id) {
-          oldCI(id);
-          removeTimer(id);
-        };
-        w.clearTimeout = w.clearInterval;
-
-        function removeTimer(id) {
-          var index = timers.indexOf(id);
-          if (index >= 0)
-            timers.splice(index, 1);
-        }
-      }(window));
+      // (function(w) {
+      //   var oldST = w.setTimeout;
+      //   var oldSI = w.setInterval;
+      //   var oldCI = w.clearInterval;
+      //   var timers = [];
+      //   w.timers = timers;
+      //   w.setTimeout = function(fn, delay) {
+      //     var id = oldST(function() {
+      //       fn && fn();
+      //       removeTimer(id);
+      //     }, delay);
+      //     // console.trace('setTimeout', id);
+      //     timers.push(id);
+      //     return id;
+      //   };
+      //   w.setInterval = function(fn, delay) {
+      //     var id = oldSI(fn, delay);
+      //     // console.trace('setInterval', id);
+      //     timers.push(id);
+      //     return id;
+      //   };
+      //   w.clearInterval = function(id) {
+      //     oldCI(id);
+      //     removeTimer(id);
+      //   };
+      //   w.clearTimeout = w.clearInterval;
+      //
+      //   function removeTimer(id) {
+      //     var index = timers.indexOf(id);
+      //     if (index >= 0)
+      //       timers.splice(index, 1);
+      //   }
+      // }(window));
     </script>
   </head>
   <body>

@@ -14,7 +14,7 @@
   </div>
   <ng-container *ngIf="rooms$ | async as rooms">
     <ng-container *ngIf="rooms.length > 0">
-      <div class="roster-group-header">{{ chatService.translations.rooms }}</div>
+      <div class="roster-group-header" data-zid="roster-group-header-rooms">{{ chatService.translations.rooms }}</div>
 
       <div class="contact-list-wrapper">
         <ngx-chat-roster-recipient
@@ -29,7 +29,7 @@
 
   <ng-container *ngIf="contacts$ | async as contacts">
     <ng-container *ngIf="contacts.length > 0">
-      <div class="roster-group-header">{{ chatService.translations.contacts }}</div>
+      <div class="roster-group-header" data-zid="roster-group-header-contacts">{{ chatService.translations.contacts }}</div>
 
       <div class="contact-list-wrapper">
         <ngx-chat-roster-recipient
@@ -47,7 +47,7 @@
 
   <ng-container *ngIf="contactRequestsReceived$ | async as contactRequestsReceived">
     <ng-container *ngIf="contactRequestsReceived.length > 0">
-      <div class="roster-group-header">{{ chatService.translations.contactRequestIn }}</div>
+      <div class="roster-group-header" data-zid="roster-group-header-contacts-request">{{ chatService.translations.contactRequestIn }}</div>
       <div class="contact-list-wrapper">
         <ngx-chat-roster-recipient
           *ngFor="let contact of contactRequestsReceived"
@@ -61,7 +61,7 @@
 
   <ng-container *ngIf="contactsUnaffiliated$ | async as contactsUnaffiliated">
     <ng-container *ngIf="contactsUnaffiliated.length > 0">
-      <div class="roster-group-header">{{ chatService.translations.contactsUnaffiliated }}</div>
+      <div class="roster-group-header" data-zid="roster-group-header-contacts-unaffiliated">{{ chatService.translations.contactsUnaffiliated }}</div>
       <div class="contact-list-wrapper">
         <ngx-chat-roster-recipient
           *ngFor="let contact of contactsUnaffiliated"
@@ -75,7 +75,7 @@
 
   <ng-container *ngIf="blocked$ | async as blocked">
     <ng-container *ngIf="blocked.length > 0">
-      <div class="roster-group-header">{{ chatService.translations.contactsBlocked }}</div>
+      <div class="roster-group-header" data-zid="roster-group-header-blocked">{{ chatService.translations.contactsBlocked }}</div>
       <div class="contact-list-wrapper">
         <ngx-chat-roster-recipient
           *ngFor="let contact of blocked"

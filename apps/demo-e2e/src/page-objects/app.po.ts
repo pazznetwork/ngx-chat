@@ -35,6 +35,8 @@ export class AppPage {
   private readonly unblockContactButton: Locator;
   private readonly openChatButton: Locator;
   private readonly rosterList: Locator;
+  private readonly rosterListUnaffiliatedHeader: Locator;
+  private readonly rosterListBlockedHeader: Locator;
 
   private readonly createRoosterEntrySelector: (jid: string) => string;
   private readonly createRoosterEntryLocator: (jid: string) => Locator;
@@ -58,9 +60,15 @@ export class AppPage {
     this.unblockContactButton = page.locator('[data-zid="unblock-contact"]');
     this.openChatButton = page.locator('[data-zid="open-chat"]');
     this.rosterList = page.locator('[data-zid="roster-list-visible"]');
+    this.rosterListUnaffiliatedHeader = page.locator(
+      '[data-zid="roster-group-header-contacts-unaffiliated"]'
+    );
+    this.rosterListBlockedHeader = page.locator('[data-zid="roster-group-header-blocked"]');
 
-    this.createRoosterEntrySelector = (jid) => `.roster-recipient[title="${jid.toLowerCase()}"]`;
-    this.createRoosterEntryLocator = (jid) => page.locator(this.createRoosterEntrySelector(jid));
+    this.createRoosterEntrySelector = (username) =>
+      `.roster-recipient[title="${username.toLowerCase()}"]`;
+    this.createRoosterEntryLocator = (username) =>
+      page.locator(this.createRoosterEntrySelector(username));
     this.createChatBoxInputLocator = (username) =>
       page.locator(`[data-zid=chat-input-${username.toLowerCase()}]`);
 
@@ -110,6 +118,9 @@ export class AppPage {
 
   async logOut(): Promise<void> {
     await this.logoutButton.click();
+    await this.page.locator(this.connectionStateSelector, { hasText: 'offline' }).isVisible();
+    // fails without this pause, no time to investigate
+    await this.page.waitForTimeout(100);
   }
 
   async addContact(jid: string): Promise<void> {
@@ -150,17 +161,24 @@ export class AppPage {
   }
 
   async isContactInRoster(jid: string): Promise<boolean> {
-    const foundCount = await this.createRoosterEntryLocator(jid).count();
-    return foundCount > 0;
+    const locator = this.createRoosterEntryLocator(jid);
+    await locator.first().waitFor();
+    return locator.first().isVisible();
   }
 
-  async isContactNotInRoster(jid: string): Promise<boolean> {
-    await this.page.waitForSelector(this.createRoosterEntrySelector(jid), { state: 'detached' });
+  async isUnaffiliatedListHidden(): Promise<boolean> {
+    await this.rosterListUnaffiliatedHeader.waitFor({ state: 'hidden' });
     return true;
+  }
+
+  async isBlockedListVisible(): Promise<boolean> {
+    await this.rosterListBlockedHeader.waitFor();
+    return this.rosterListBlockedHeader.isVisible();
   }
 
   async selectChatWithContact(jid: string): Promise<ChatWindowPage> {
     const locator = this.createRoosterEntryLocator(jid);
+    await locator.first().waitFor();
     await locator.nth(0).click();
     return this.getChatWindow(jid);
   }
@@ -184,6 +202,7 @@ export class AppPage {
     await this.page.reload();
   }
 
+  // TODO: register and unregister in demo app still does not work properly in automation
   async register(username: string, password: string): Promise<void> {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
