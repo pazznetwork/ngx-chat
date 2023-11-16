@@ -2,8 +2,7 @@
 import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { exhaustMap, map, Observable, Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
-import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
-import { Contact } from '@pazznetwork/ngx-chat-shared';
+import { ChatService, Contact, Recipient, Room } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
 import { ChatMessageEmptyComponent } from '../chat-message-empty';
@@ -15,18 +14,20 @@ import {
   OPEN_CHAT_SERVICE_TOKEN,
 } from '@pazznetwork/ngx-xmpp';
 import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
-import { ChatHistoryMessagesComponent } from '../chat-history-messages';
+import { ChatHistoryMessagesContactComponent } from '../chat-history-messages-contact';
+import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room';
 
 @Component({
   standalone: true,
   imports: [
     CommonModule,
-    ChatHistoryMessagesComponent,
     ChatMessageEmptyComponent,
     ChatMessageInComponent,
     ChatMessageOutComponent,
     ChatMessageContactRequestComponent,
     ChatHistoryAutoScrollComponent,
+    ChatHistoryMessagesContactComponent,
+    ChatHistoryMessagesRoomComponent,
   ],
   selector: 'ngx-chat-history',
   templateUrl: './chat-history.component.html',
@@ -43,7 +44,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
   pendingRequestContact?: Contact;
 
   @Input()
-  showAvatars = false;
+  showAvatars = true;
 
   @Input()
   scheduleScrollToBottom$?: Observable<void>;
@@ -58,6 +59,13 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
   noMessages$!: Observable<boolean>;
 
+  isContact(recipient: Recipient | undefined): boolean {
+    if (!recipient) {
+      return false;
+    }
+    return recipient.recipientType === 'contact';
+  }
+
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
     @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
@@ -68,6 +76,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     if (!this.recipient) {
       return;
     }
+
     this.noMessages$ = this.recipient.messageStore.messages$.pipe(
       map((messages) => messages.length === 0)
     );
@@ -77,10 +86,10 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    console.log('ChatHistoryComponent ngOnDestroy');
     if (!this.recipient) {
       return;
     }
+
     this.ngDestroySubject.next();
     this.chatMessageListRegistry.decrementOpenWindowCount(this.recipient);
   }
@@ -112,5 +121,13 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         takeUntil(this.ngDestroySubject)
       )
       .subscribe();
+  }
+
+  asContact(recipient: Recipient | undefined): Contact {
+    return recipient as Contact;
+  }
+
+  asRoom(recipient: Recipient | undefined): Room {
+    return recipient as Room;
   }
 }

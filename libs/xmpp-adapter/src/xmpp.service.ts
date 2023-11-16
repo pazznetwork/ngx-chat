@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import type {
   AuthRequest,
   ChatService,
@@ -8,7 +8,11 @@ import type {
   OpenChatsService,
   Translations,
 } from '@pazznetwork/ngx-chat-shared';
-import { defaultTranslations } from '@pazznetwork/ngx-chat-shared';
+import {
+  CustomContactFactory,
+  CustomRoomFactory,
+  defaultTranslations,
+} from '@pazznetwork/ngx-chat-shared';
 import type { HttpClient } from '@angular/common/http';
 import {
   XmppConnectionService,
@@ -35,7 +39,6 @@ export class XmppService implements ChatService {
 
   readonly pluginMap: PluginMap;
 
-  readonly userAvatar$: Observable<string> = new Subject();
   translations: Translations = defaultTranslations();
 
   readonly fileUploadHandler: FileUploadHandler;
@@ -49,8 +52,11 @@ export class XmppService implements ChatService {
   private constructor(
     readonly zone: NgZone,
     readonly log: Log,
+    readonly userAvatar$: Observable<string>,
     openChatsService: OpenChatsService,
-    httpClient: HttpClient
+    httpClient: HttpClient,
+    customRoomFactory: CustomRoomFactory,
+    customContactFactory: CustomContactFactory
   ) {
     this.chatConnectionService = new XmppConnectionService(log);
 
@@ -61,7 +67,14 @@ export class XmppService implements ChatService {
     this.isOffline$ = this.chatConnectionService.isOffline$;
     this.userJid$ = this.chatConnectionService.userJid$;
 
-    this.pluginMap = createPluginMap(this, httpClient, log, openChatsService);
+    this.pluginMap = createPluginMap(
+      this,
+      httpClient,
+      log,
+      openChatsService,
+      customRoomFactory,
+      customContactFactory
+    );
 
     this.messageService = new XmppMessageService(
       this,
@@ -86,13 +99,24 @@ export class XmppService implements ChatService {
   static create(
     zone: NgZone,
     log: Log,
+    userAvatar$: Observable<string>,
     openChatsService: OpenChatsService,
-    httpClient: HttpClient
+    httpClient: HttpClient,
+    customRoomFactory: CustomRoomFactory,
+    customContactFactory: CustomContactFactory
   ): XmppService {
     if (XmppService.instance) {
       return XmppService.instance;
     }
-    XmppService.instance = new XmppService(zone, log, openChatsService, httpClient);
+    XmppService.instance = new XmppService(
+      zone,
+      log,
+      userAvatar$,
+      openChatsService,
+      httpClient,
+      customRoomFactory,
+      customContactFactory
+    );
     return XmppService.instance;
   }
 

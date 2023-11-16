@@ -33,7 +33,7 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
   recipient?: Recipient;
 
   @Input()
-  showAvatars = false;
+  showAvatars = true;
 
   @ViewChild(ChatWindowInputComponent)
   readonly messageInput?: ChatWindowInputComponent;

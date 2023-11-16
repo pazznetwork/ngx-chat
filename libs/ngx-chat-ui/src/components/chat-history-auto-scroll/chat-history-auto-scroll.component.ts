@@ -56,7 +56,6 @@ export class ChatHistoryAutoScrollComponent implements OnChanges, OnInit, AfterV
   }
 
   ngOnChanges(): void {
-    console.log('ChatHistoryAutoScrollComponent ngOnChanges');
     this.isAtBottomSubject.next(this.isScrolledToBottom());
   }
 
@@ -71,7 +70,6 @@ export class ChatHistoryAutoScrollComponent implements OnChanges, OnInit, AfterV
 
     const container = this.scrollContainer.nativeElement;
     const is = container.scrollHeight - container.scrollTop === container.clientHeight;
-    console.log('ChatHistoryAutoScrollComponent isScrolledToBottom', is);
     return is;
   }
 

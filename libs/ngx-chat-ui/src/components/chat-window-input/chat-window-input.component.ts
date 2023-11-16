@@ -33,7 +33,7 @@ export class ChatWindowInputComponent {
 
   message = '';
 
-  constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
+  constructor(@Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService) {}
 
   async onKeydownEnter($event: Event): Promise<void> {
     $event?.preventDefault();
@@ -41,12 +41,13 @@ export class ChatWindowInputComponent {
   }
 
   async onSendMessage(): Promise<void> {
-    if (!this.recipient || !this.message) {
+    if (!this.recipient || !this.message || !this.chatInput?.nativeElement) {
       return;
     }
 
     await this.chatService.messageService.sendMessage(this.recipient, this.message);
     this.message = '';
+    this.chatInput.nativeElement.value = '';
     this.messageSent.emit();
   }
 

@@ -2,14 +2,14 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import {
   Contact,
-  type Recipient,
-  type Message,
   Direction,
   JID,
   Log,
   LOG_SERVICE_TOKEN,
+  type Message,
   MessageState,
   parseJid,
+  type Recipient,
   Room,
 } from '@pazznetwork/ngx-chat-shared';
 
@@ -22,10 +22,10 @@ export class UiComponent implements OnInit {
   readonly dummyAvatarContact =
     'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjYwMCIgdmlld0JveD0iMCAwIDYwMCA2MDAiPgogIDxkZWZzPgogICAgPGNsaXBQYXRoIGlkPSJjbGlwLV8xIj4KICAgICAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI2MDAiLz4KICAgIDwvY2xpcFBhdGg+CiAgPC9kZWZzPgogIDxnIGlkPSJfMSIgZGF0YS1uYW1lPSIxIiBjbGlwLXBhdGg9InVybCgjY2xpcC1fMSkiPgogICAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI2MDAiIGZpbGw9IiNmZmYiLz4KICAgIDxnIGlkPSJHcnVwcGVfNzcxNyIgZGF0YS1uYW1lPSJHcnVwcGUgNzcxNyI+CiAgICAgIDxyZWN0IGlkPSJSZWNodGVja18xMzk3IiBkYXRhLW5hbWU9IlJlY2h0ZWNrIDEzOTciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZTVlNmU4Ii8+CiAgICAgIDxlbGxpcHNlIGlkPSJFbGxpcHNlXzI4MyIgZGF0YS1uYW1lPSJFbGxpcHNlIDI4MyIgY3g9IjExNi4yMzEiIGN5PSIxMjUuNjcxIiByeD0iMTE2LjIzMSIgcnk9IjEyNS42NzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4NS4yMzEgMTExLjQ4NSkiIGZpbGw9IiNhZmI0YjgiLz4KICAgICAgPHBhdGggaWQ9IlBmYWRfMjQ5NjIiIGRhdGEtbmFtZT0iUGZhZCAyNDk2MiIgZD0iTTU0Ni4zNTksNTk1LjI3NnMwLTIxNy41NjMtMjQ0LjkwOS0yMTcuNTYzaC0xLjQ1N2MtMjQ0LjkwOSwwLTI0NC45MDksMjE3LjU2My0yNDQuOTA5LDIxNy41NjMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgNC43MjQpIiBmaWxsPSIjYWZiNGI4Ii8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K';
 
-  contact?: Contact;
+  contact!: Contact;
   Direction = Direction;
   MessageState = MessageState;
-  room?: Room;
+  room!: Room;
   private myJid: JID = parseJid('me@example.com');
   private otherContactJid: JID = parseJid('other@example.com');
   outMessages: { contact: Recipient; message: Message }[] = [

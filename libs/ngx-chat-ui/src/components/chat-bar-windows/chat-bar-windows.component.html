@@ -1,10 +1,11 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <div class="chat-list" [@rosterVisibility]="rosterState">
-  <ngx-chat-video-window *ngFor="let track of chatListService.openTracks$ | async" [track]="track">
+  <ngx-chat-video-window *ngFor="let track of tracks$ | async" [track]="track">
   </ngx-chat-video-window>
 
   <ngx-chat-window
-    *ngFor="let chatWindowState of chatListService.openChats$ | async"
-    [chatWindowState]="chatWindowState"
+    *ngFor="let chatWindowState of chats$ | async"
+    [recipient]="chatWindowState.recipient"
+    [isCollapsed]="chatWindowState.isCollapsed"
   ></ngx-chat-window>
 </div>

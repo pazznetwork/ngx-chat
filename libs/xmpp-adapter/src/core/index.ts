@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 export * from './chat-plugin';
+export * from './default-contact-factory';
+export * from './default-room-factory';
 export * from './finder';
 export * from './form';
 export * from './plugin-map-create';

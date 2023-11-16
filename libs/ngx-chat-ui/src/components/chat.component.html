@@ -1,6 +1,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <ng-container *ngIf="chatService.isOnline$ | async">
-<ngx-chat-bar-windows  [rosterState]="rosterState">
+<ngx-chat-bar-windows  [rosterState]="rosterState" [contacts$]="contacts$"
+                       [rooms$]="rooms$">
 </ngx-chat-bar-windows>
 <ngx-chat-roster-list
   [blocked$]="blocked$"

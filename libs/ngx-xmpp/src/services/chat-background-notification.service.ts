@@ -13,7 +13,6 @@ export class ChatBackgroundNotificationService {
     chatService.messageService.message$
       .pipe(filter((message) => message.recipientType === 'contact'))
       .subscribe((msg): void => {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         this.receivedDirectMessage(msg as Contact);
       });
     chatService.roomService.groupMessage$

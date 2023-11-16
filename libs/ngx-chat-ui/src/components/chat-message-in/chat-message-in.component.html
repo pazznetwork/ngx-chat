@@ -3,8 +3,8 @@
   <ngx-chat-bubble-avatar
     [avatar]="contact?.avatar"
     [avatarClickable]="true"
-    [contact]="contact"
     [showAvatar]="showAvatar"
+    (clicked$)="onContactClick()"
   >
   </ngx-chat-bubble-avatar>
   <ngx-chat-message-text-area [textContent]="message?.body"> </ngx-chat-message-text-area>

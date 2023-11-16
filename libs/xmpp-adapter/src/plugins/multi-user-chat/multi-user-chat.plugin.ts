@@ -19,6 +19,7 @@ import type {
 import {
   Affiliation,
   AffiliationModification,
+  CustomRoomFactory,
   Direction,
   JID,
   Message,
@@ -84,7 +85,8 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   constructor(
     private readonly xmppService: XmppService,
     private readonly logService: Log,
-    private readonly serviceDiscoveryPlugin: ServiceDiscoveryPlugin
+    private readonly serviceDiscoveryPlugin: ServiceDiscoveryPlugin,
+    private readonly customRoomFactory: CustomRoomFactory
   ) {
     this.rooms$ = connectable(
       merge(
@@ -117,7 +119,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
           })
         ),
         this.xmppService.onOnline$.pipe(
-          mergeMap(() => this.getRooms()),
+          mergeMap(async () => this.getAndJoinRooms()),
           map((contacts) => {
             contacts.forEach((c) => this.roomsMap.set(c.jid.bare().toString(), c));
             return this.roomsMap;
@@ -187,7 +189,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       .$pres({ to: roomJid.toString() })
       .c('x', { xmlns: nsMuc })
       .send();
-    const room = new Room(this.logService, roomJid);
+    const room = await this.customRoomFactory.create(this.logService, roomJid);
     await this.handleRoomPresenceStanza(presenceResponse, room);
     room.handleOccupantJoined(
       {
@@ -249,7 +251,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     const occupantJid = new JID(
       roomJid.local,
       roomJid.domain,
-      roomJid.resource ?? userJid.split('@')[0]
+      roomJid.resource != '' && roomJid.resource != null ? roomJid.resource : userJid.split('@')[0]
     );
 
     const presenceResponse = await this.xmppService.chatConnectionService
@@ -269,7 +271,9 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       throw new Error('Did not get roomInfo');
     }
 
-    room.name = getField<TextualFormField>(roomInfo, 'muc#roomconfig_roomname')?.value;
+    const fieldName = getField<TextualFormField>(roomInfo, 'muc#roomconfig_roomname')?.value;
+
+    room.name = fieldName != null && fieldName != '' ? fieldName : roomJid.local;
     room.description =
       getField<TextualFormField>(roomInfo, 'muc#roominfo_description')?.value ?? '';
     this.createdRoomSubject.next(room);
@@ -284,8 +288,6 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       },
       true
     );
-
-    this.updateRoomSubject.next(room);
 
     return room;
   }
@@ -330,10 +332,21 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       .send();
   }
 
+  private async getAndJoinRooms(): Promise<Room[]> {
+    const rooms = await this.getRooms();
+    // We need to join rooms in our room list to regain affiliation
+    // the logic is the same as broadcasting that you are online in a room / channel
+    // .then() because there seems to be a problem with the promise resolution when joining multiple rooms
+    // can be refactored to be joined when accessing messages of room for example in the ui
+    // rooms would need than a joined Flag
+    rooms.map((room) => this.joinRoom(room.jid).then());
+    return rooms;
+  }
+
   async getRooms(): Promise<Room[]> {
     const roomQueryResponse = await this.getRoomsQuery();
 
-    const rooms = this.extractRoomSummariesFromResponse(roomQueryResponse);
+    const rooms = await this.extractRoomSummariesFromResponse(roomQueryResponse);
     for (const room of rooms) {
       await this.xmppService.messageService.loadMostRecentUnloadedMessages(room);
     }
@@ -349,7 +362,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   async queryAllRooms(): Promise<Room[]> {
     let roomQueryResponse = await this.getRoomsQuery();
 
-    const result: Room[] = this.extractRoomSummariesFromResponse(roomQueryResponse);
+    const result: Room[] = await this.extractRoomSummariesFromResponse(roomQueryResponse);
 
     const extractResultSet = (iq: IqResponseStanza): Element | undefined =>
       Finder.create(iq)
@@ -373,7 +386,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         .up()
         .c('after', {}, lastReceivedRoom as string)
         .send();
-      result.push(...this.extractRoomSummariesFromResponse(roomQueryResponse));
+      result.push(...(await this.extractRoomSummariesFromResponse(roomQueryResponse)));
       resultSet = extractResultSet(roomQueryResponse);
     }
 
@@ -888,21 +901,23 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     roomJid = roomJid.bare();
     let room = await firstValueFrom(this.getRoomByJid(roomJid));
     if (!room) {
-      room = new Room(this.logService, roomJid);
+      room = await this.customRoomFactory.create(this.logService, roomJid);
       this.createdRoomSubject.next(room);
     }
     return room;
   }
 
-  private extractRoomSummariesFromResponse(iq: IqResponseStanza): Room[] {
-    return Finder.create(iq)
-      .searchByTag('query')
-      .searchByNamespace(nsDiscoItems)
-      .searchByTag('item')
-      .results.map((item): Room => {
-        const jid = parseJid(item.getAttribute('jid') as string);
-        return new Room(this.logService, jid, jid.local);
-      });
+  private extractRoomSummariesFromResponse(iq: IqResponseStanza): Promise<Room[]> {
+    return Promise.all(
+      Finder.create(iq)
+        .searchByTag('query')
+        .searchByNamespace(nsDiscoItems)
+        .searchByTag('item')
+        .results.map((item): Promise<Room> => {
+          const jid = parseJid(item.getAttribute('jid') as string);
+          return this.customRoomFactory.create(this.logService, jid, jid.local);
+        })
+    );
   }
 
   async handleRoomMessageStanza(
@@ -917,6 +932,11 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     }
     // should be 'await firstValueFrom(this.getRoomByJid(roomJid))' and we should ensure Room exists with the presence handler
     const room = await this.getOrCreateRoom(from.bare());
+
+    if (this.isRoomInvitationStanza(stanza)) {
+      room.newRoomInvitation(this.handleRoomInvitationMessageStanza(stanza));
+      return true;
+    }
 
     // When we create a room by message we want to extract the occupants to know their jid's (origin jid's and not jids in room)
     // to avoid querying for them latter
@@ -956,7 +976,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         body: messageText,
         datetime,
         id,
-        from,
+        from: this.toUserJid(from),
         direction: isMyMucMessage ? Direction.out : Direction.in,
         delayed: !!delayElement,
         fromArchive: stanza.querySelector('archived') == null,
@@ -987,6 +1007,14 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     }
 
     return false;
+  }
+
+  private toUserJid(from: JID): JID {
+    if (!from.resource) {
+      throw new Error('No resource in muc from jid to be used as nickname');
+    }
+
+    return parseJid(from.resource + '@' + from.domain);
   }
 
   handleRoomInvitationMessageStanza(stanza: Stanza): Invitation {
@@ -1031,15 +1059,10 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     affiliation: Affiliation,
     reason?: string
   ): Promise<IqResponseStanza> {
-    const userJid = await this.getUserJidByOccupantJid(occupantJid, roomJid);
-    if (!userJid) {
-      throw new Error('can not change user affiliation, userJid not found through room occupants');
-    }
-
     return this.xmppService.chatConnectionService
       .$iq({ to: roomJid.toString(), type: 'set' })
       .c('query', { xmlns: nsMucAdmin })
-      .c('item', { jid: userJid.toString(), affiliation })
+      .c('item', { jid: occupantJid.toString(), affiliation })
       .c('reason', {}, reason)
       .send();
   }

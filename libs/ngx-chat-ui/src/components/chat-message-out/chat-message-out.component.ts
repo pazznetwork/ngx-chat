@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input } from '@angular/core';
-import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
-import { Message, MessageState } from '@pazznetwork/ngx-chat-shared';
+import { Component, Inject, Input, OnInit } from '@angular/core';
+import type { ChatService } from '@pazznetwork/ngx-chat-shared';
+import { Message, MessageState, parseJid } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatBubbleComponent } from '../chat-bubble';
 import { ChatBubbleAvatarComponent } from '../chat-bubble-avatar';
@@ -10,6 +10,8 @@ import { ChatMessageImageComponent } from '../chat-message-image';
 import { ChatBubbleFooterComponent } from '../chat-bubble-footer';
 import { ChatMessageStateIconComponent } from '../chat-message-state-icon';
 import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -27,17 +29,20 @@ import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
   templateUrl: './chat-message-out.component.html',
   styleUrls: ['./chat-message-out.component.less'],
 })
-export class ChatMessageOutComponent {
+export class ChatMessageOutComponent implements OnInit {
   @Input()
   showAvatar = true;
 
   @Input()
   message: Message | undefined;
 
-  @Input()
-  contact: Recipient | undefined;
+  nick$?: Observable<string | undefined>;
 
   constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
+
+  ngOnInit(): void {
+    this.nick$ = this.chatService.userJid$.pipe(map((jid) => parseJid(jid).local));
+  }
 
   // TODO: check if message.state can be ensured so this method can be removed
   getMessageState(): MessageState {

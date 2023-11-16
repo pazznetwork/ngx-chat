@@ -6,15 +6,25 @@ import {
   ChatMessageListRegistryService,
   LogService,
 } from './services';
-import type { ChatService, FileUploadHandler, Log } from '@pazznetwork/ngx-chat-shared';
+import type {
+  ChatService,
+  CustomContactFactory,
+  CustomRoomFactory,
+  FileUploadHandler,
+  Log,
+} from '@pazznetwork/ngx-chat-shared';
 import { LOG_SERVICE_TOKEN } from '@pazznetwork/ngx-chat-shared';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { XmppService } from '@pazznetwork/xmpp-adapter';
+import { DefaultContactFactory, DefaultRoomFactory, XmppService } from '@pazznetwork/xmpp-adapter';
 import {
   CHAT_SERVICE_TOKEN,
+  CUSTOM_CONTACT_FACTORY_TOKEN,
+  CUSTOM_ROOM_FACTORY_TOKEN,
   FILE_UPLOAD_HANDLER_TOKEN,
   OPEN_CHAT_SERVICE_TOKEN,
 } from './injection-token';
+import { NEVER, Observable } from 'rxjs';
+import { USER_AVATAR_TOKEN } from './injection-token/user-avatar.token';
 
 @NgModule({
   imports: [HttpClientModule],
@@ -29,9 +39,21 @@ import {
       provide: LOG_SERVICE_TOKEN,
       useClass: LogService,
     },
+    { provide: CUSTOM_CONTACT_FACTORY_TOKEN, useClass: DefaultContactFactory },
+    { provide: CUSTOM_ROOM_FACTORY_TOKEN, useClass: DefaultRoomFactory },
+    // eslint-disable-next-line rxjs/finnish
+    { provide: USER_AVATAR_TOKEN, useValue: NEVER },
     {
       provide: CHAT_SERVICE_TOKEN,
-      deps: [NgZone, HttpClient, OPEN_CHAT_SERVICE_TOKEN, LOG_SERVICE_TOKEN],
+      deps: [
+        NgZone,
+        HttpClient,
+        USER_AVATAR_TOKEN,
+        OPEN_CHAT_SERVICE_TOKEN,
+        LOG_SERVICE_TOKEN,
+        CUSTOM_ROOM_FACTORY_TOKEN,
+        CUSTOM_CONTACT_FACTORY_TOKEN,
+      ],
       useFactory: XmppAdapterModule.xmppServiceFactory,
     },
     {
@@ -49,11 +71,22 @@ export class XmppAdapterModule {
   private static xmppServiceFactory(
     zone: NgZone,
     httpClient: HttpClient,
+    userAvatar$: Observable<string>,
     chatMessageListRegistryService: ChatMessageListRegistryService,
-    logService: Log
+    logService: Log,
+    customRoomFactory: CustomRoomFactory,
+    customContactFactory: CustomContactFactory
   ): XmppService {
     return zone.runOutsideAngular(() =>
-      XmppService.create(zone, logService, chatMessageListRegistryService, httpClient)
+      XmppService.create(
+        zone,
+        logService,
+        userAvatar$,
+        chatMessageListRegistryService,
+        httpClient,
+        customRoomFactory,
+        customContactFactory
+      )
     );
   }
 }

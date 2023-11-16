@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input, Optional } from '@angular/core';
-import type { ChatContactClickHandler, Recipient } from '@pazznetwork/ngx-chat-shared';
+import { Component, Input, Output } from '@angular/core';
 import { ChatAvatarComponent } from '../chat-avatar';
 import { CommonModule } from '@angular/common';
-import { CONTACT_CLICK_HANDLER_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { Subject } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -14,31 +14,24 @@ import { CONTACT_CLICK_HANDLER_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx
 })
 export class ChatBubbleAvatarComponent {
   @Input()
-  avatar: string | undefined;
+  avatar: string | undefined | null;
 
   @Input()
   avatarClickable = false;
 
   @Input()
-  contact?: Recipient;
-
-  @Input()
   showAvatar?: boolean;
 
-  constructor(
-    @Inject(CONTACT_CLICK_HANDLER_TOKEN)
-    @Optional()
-    public contactClickHandler: ChatContactClickHandler
-  ) {}
+  private clickedSubject = new Subject<void>();
+
+  @Output()
+  clicked$ = this.clickedSubject.asObservable();
 
   onContactClick(): void {
-    if (!this.contactClickHandler) {
-      return;
-    }
-    if (!this.contact) {
+    if (!this.avatarClickable) {
       return;
     }
 
-    this.contactClickHandler.onClick(this.contact);
+    this.clickedSubject.next();
   }
 }

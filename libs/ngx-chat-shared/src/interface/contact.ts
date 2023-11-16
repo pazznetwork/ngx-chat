@@ -5,7 +5,6 @@ import { Presence } from './presence';
 import type { Recipient } from './recipient';
 import { ContactSubscription } from './contact-subscription';
 import { JID, parseJid } from '../jid';
-import type { Invitation } from './invitation';
 
 export type JidToPresence = Map<string, Presence>;
 
@@ -32,9 +31,6 @@ export class Contact implements Recipient {
     map((resources): Presence => this.determineOverallPresence(resources)),
     startWith(Presence.unavailable)
   );
-
-  private readonly pendingRoomInviteSubject = new ReplaySubject<Invitation | null>(1);
-  readonly pendingRoomInvite$ = this.pendingRoomInviteSubject.asObservable();
 
   constructor(
     jid: string,
@@ -63,14 +59,6 @@ export class Contact implements Recipient {
 
   updateResourcePresence(jid: string, presence: Presence): void {
     this.resourcesSubject.next([jid, presence]);
-  }
-
-  clearRoomInvitation(): void {
-    this.pendingRoomInviteSubject.next(null);
-  }
-
-  newRoomInvitation(invitation: Invitation): void {
-    this.pendingRoomInviteSubject.next(invitation);
   }
 
   private determineOverallPresence(jidToPresence: JidToPresence): Presence {

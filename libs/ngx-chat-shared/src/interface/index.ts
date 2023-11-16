@@ -6,6 +6,8 @@ export * from './chat.service';
 export * from './connection-states';
 export * from './connection-service';
 export * from './contact-subscription';
+export * from './custom-contact-factory';
+export * from './custom-room-factory';
 export * from './contact';
 export * from './file-upload-handler';
 export * from './invitation';

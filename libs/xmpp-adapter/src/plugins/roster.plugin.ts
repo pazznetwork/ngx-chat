@@ -2,6 +2,7 @@
 import {
   Contact,
   ContactSubscription,
+  CustomContactFactory,
   JID,
   parseJid,
   Presence,
@@ -68,7 +69,10 @@ export class RosterPlugin implements ChatPlugin {
 
   private handlers: { iq?: Handler; presence?: Handler; message?: Handler } = {};
 
-  constructor(private readonly xmppService: XmppService) {
+  constructor(
+    private readonly xmppService: XmppService,
+    private readonly customContactFactory: CustomContactFactory
+  ) {
     this.contacts$ = connectable(
       merge(
         this.getContactRequestSubject.pipe(
@@ -241,7 +245,7 @@ export class RosterPlugin implements ChatPlugin {
       .$iq({ from: fromAttr, id, type: 'result' })
       .sendResponseLess();
 
-    const contacts = this.rosterQueryResultToContacts(stanza);
+    const contacts = await this.rosterQueryResultToContacts(stanza);
     for (const contact of contacts) {
       // We need to check if the contact is already in the roster
       await this.getOrCreateContactById(
@@ -274,24 +278,26 @@ export class RosterPlugin implements ChatPlugin {
    *
    * @param rosterIQResult XMl Object from jabber:iq:roster namespace
    */
-  private rosterQueryResultToContacts(rosterIQResult: Stanza): Contact[] {
-    return Finder.create(rosterIQResult)
-      .searchByTag('query')
-      .searchByTag('item')
-      .results.map((rosterItem) => {
-        const to = rosterItem.getAttribute('jid') as string;
-        const attrName = rosterItem.getAttribute('name') ?? to;
-        const name = attrName.includes('@') ? (attrName?.split('@')?.[0] as string) : attrName;
+  private rosterQueryResultToContacts(rosterIQResult: Stanza): Promise<Contact[]> {
+    return Promise.all(
+      Finder.create(rosterIQResult)
+        .searchByTag('query')
+        .searchByTag('item')
+        .results.map((rosterItem) => {
+          const to = rosterItem.getAttribute('jid') as string;
+          const attrName = rosterItem.getAttribute('name') ?? to;
+          const name = attrName.includes('@') ? (attrName?.split('@')?.[0] as string) : attrName;
 
-        // The default is to because there is no subscription attribute on roster items,
-        // we assume that the user has subscribed to the contact
-        // when adding him to the roster as does our code
-        // The ask attribute in the roster item element is an optional attribute used to indicate an outstanding subscription request.
-        // I can have only the value 'subscribe'.
-        // This value indicates that a subscription request is pending and has been sent to the contact specified by the 'jid' attribute.
-        const subscription = ContactSubscription.to;
-        return new Contact(to, name, undefined, subscription);
-      });
+          // The default is to because there is no subscription attribute on roster items,
+          // we assume that the user has subscribed to the contact
+          // when adding him to the roster as does our code
+          // The ask attribute in the roster item element is an optional attribute used to indicate an outstanding subscription request.
+          // I can have only the value 'subscribe'.
+          // This value indicates that a subscription request is pending and has been sent to the contact specified by the 'jid' attribute.
+          const subscription = ContactSubscription.to;
+          return this.customContactFactory.create(to, name, undefined, subscription);
+        })
+    );
   }
 
   private async handlePresenceStanza(stanza: PresenceStanza): Promise<boolean> {
@@ -411,7 +417,12 @@ export class RosterPlugin implements ChatPlugin {
     const existingContact = await this.getContactById(jid);
     if (existingContact == null) {
       const definedName = name?.includes('@') ? (name?.split('@')?.[0] as string) : name;
-      const newContact = new Contact(jid, definedName, avatar, subscription);
+      const newContact = await this.customContactFactory.create(
+        jid,
+        definedName,
+        avatar,
+        subscription
+      );
       this.getContactRequestSubject.next({ contact: newContact, subscription });
       return newContact;
     }

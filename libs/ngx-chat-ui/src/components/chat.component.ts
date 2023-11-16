@@ -5,19 +5,18 @@ import {
   Inject,
   Input,
   OnChanges,
-  OnDestroy,
   OnInit,
   SimpleChanges,
 } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { combineLatest, merge, Subject, switchMap } from 'rxjs';
+import { combineLatest, tap } from 'rxjs';
 import type { ChatService, Contact, Translations } from '@pazznetwork/ngx-chat-shared';
 import { defaultTranslations, Room } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 import { RosterListComponent } from './roster-list';
 import { ChatBarWindowsComponent } from './chat-bar-windows';
-import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 /**
  * The main UI component. Should be instantiated near the root of your application.
@@ -43,7 +42,7 @@ import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.less'],
 })
-export class ChatComponent implements OnInit, OnDestroy, OnChanges {
+export class ChatComponent implements OnInit, OnChanges {
   /**
    * If supplied, the blocked input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your blocked list.
    */
@@ -84,10 +83,6 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
   @Input()
   rooms$?: Observable<Room[]>;
 
-  private ngDestroySubject = new Subject<void>();
-
-  private ngDestroy$ = this.ngDestroySubject.asObservable();
-
   /**
    * If supplied, translations contain an object with the structure of the Translations interface.
    */
@@ -110,18 +105,16 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
-    private changeDetectorRef: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {
     // eslint-disable-next-line rxjs-angular/prefer-takeuntil
     this.chatService.isOnline$.subscribe((online) => this.onChatStateChange(online));
   }
 
-  ngOnDestroy(): void {
-    this.ngDestroySubject.next();
-  }
-
   ngOnInit(): void {
-    this.rooms$ = this.rooms$ ?? this.chatService.roomService.rooms$;
+    this.rooms$ = (this.rooms$ ?? this.chatService.roomService.rooms$).pipe(
+      tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
+    );
     this.contacts$ = this.contacts$ ?? this.chatService.contactListService.contactsSubscribed$;
     this.contactRequestsReceived$ =
       this.contactRequestsReceived$ ?? this.chatService.contactListService.contactRequestsReceived$;
@@ -136,15 +129,7 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
       map((results) => results.some((hasContacts) => hasContacts)),
       distinctUntilChanged()
     );
-    this.rooms$.pipe(takeUntil(this.ngDestroy$)).subscribe();
-    this.contacts$.pipe(takeUntil(this.ngDestroy$)).subscribe();
     this.onRosterStateChanged(this.rosterState);
-    merge([this.rooms$, this.contacts$])
-      .pipe(
-        switchMap((obs$) => obs$),
-        takeUntil(this.ngDestroy$)
-      )
-      .subscribe(() => this.changeDetectorRef.markForCheck());
   }
 
   ngOnChanges(changes: SimpleChanges): void {

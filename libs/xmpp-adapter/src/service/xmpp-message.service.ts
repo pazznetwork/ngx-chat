@@ -132,10 +132,11 @@ export class XmppMessageService implements MessageService {
    */
   async handleMessageStanza(stanza: MessageWithBodyStanza): Promise<boolean> {
     if (stanza.querySelector('error')) {
+      throw new Error(`message stanza contains error: ${stanza.outerHTML}`);
       // The recipient's account does not exist on the server.
       // The recipient is offline and the server is not configured to store offline messages for later delivery.
       // The recipient's client or server has some temporary issue that prevents message delivery.
-      return true;
+      // return true;
     }
 
     // can be wrapped in result from a query, or in a message received carbons
@@ -197,7 +198,11 @@ export class XmppMessageService implements MessageService {
     // If no type is provided, it should be treated as if it were a "normal" message. Each type has its own specific usage context and meaning.
     const type = messageStanza.getAttribute('type');
 
-    if (type === 'groupchat' || this.multiUserPlugin.hasMUCExtensionWithoutInvite(messageStanza)) {
+    if (
+      type === 'groupchat' ||
+      this.multiUserPlugin.hasMUCExtensionWithoutInvite(messageStanza) ||
+      this.multiUserPlugin.isRoomInvitationStanza(messageStanza)
+    ) {
       return this.multiUserPlugin.handleRoomMessageStanza(messageStanza, delayElement);
     }
 
@@ -217,13 +222,6 @@ export class XmppMessageService implements MessageService {
     const contact = await this.chatService.contactListService.getOrCreateContactById(
       contactJid as string
     );
-
-    if (this.multiUserPlugin.isRoomInvitationStanza(messageStanza)) {
-      contact.newRoomInvitation(
-        this.multiUserPlugin.handleRoomInvitationMessageStanza(messageStanza)
-      );
-      return true;
-    }
 
     const message = {
       id: messageStanza.querySelector('stanza-id')?.id as string,

@@ -2,13 +2,8 @@
 import { Component, Inject, Input, OnInit } from '@angular/core';
 import { merge, Observable, scan, startWith, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { type ChatService, Direction } from '@pazznetwork/ngx-chat-shared';
-import {
-  CHAT_SERVICE_TOKEN,
-  ChatListStateService,
-  ChatWindowState,
-  XmppAdapterModule,
-} from '@pazznetwork/ngx-xmpp';
+import { type ChatService, Direction, Recipient } from '@pazznetwork/ngx-chat-shared';
+import { CHAT_SERVICE_TOKEN, ChatListStateService, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
 import { ChatWindowFrameComponent } from '../chat-window-frame';
 import { ChatWindowHeaderComponent } from '../chat-window-header';
@@ -29,7 +24,10 @@ import { ChatWindowContentComponent } from '../chat-window-content';
 })
 export class ChatWindowComponent implements OnInit {
   @Input()
-  chatWindowState!: ChatWindowState;
+  recipient!: Recipient;
+
+  @Input()
+  isCollapsed!: boolean;
 
   isWindowOpen$?: Observable<boolean>;
 
@@ -41,7 +39,7 @@ export class ChatWindowComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const openOnInit$ = this.chatWindowState.recipient.messageStore.messages$.pipe(
+    const openOnInit$ = this.recipient.messageStore.messages$.pipe(
       filter(
         (messages) => messages.findIndex((message) => message.direction === Direction.in) > -1
       ),
@@ -49,7 +47,7 @@ export class ChatWindowComponent implements OnInit {
     );
 
     const toggleOpen$ = this.headerClickedSubject.pipe(
-      startWith(!this.chatWindowState.isCollapsed),
+      startWith(!this.isCollapsed),
       scan((toggle) => !toggle, false)
     );
     this.isWindowOpen$ = merge(openOnInit$, toggleOpen$);
@@ -60,6 +58,6 @@ export class ChatWindowComponent implements OnInit {
   }
 
   onClickClose(): void {
-    this.chatListService.closeChat(this.chatWindowState.recipient);
+    this.chatListService.closeChat(this.recipient);
   }
 }

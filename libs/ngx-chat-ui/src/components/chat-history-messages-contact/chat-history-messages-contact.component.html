@@ -9,14 +9,13 @@
     </div>
     <ng-container *ngFor="let message of entry.messages">
       <ng-container *ngIf="message.direction === Direction.in">
-        <ngx-chat-message-in [showAvatar]="showAvatars" [message]="message" [contact]="recipient">
+        <ngx-chat-message-in [showAvatar]="showAvatars" [message]="message" [contact]="contact">
         </ngx-chat-message-in>
       </ng-container>
       <ng-container *ngIf="message.direction === Direction.out">
         <ngx-chat-message-out
           [showAvatar]="showAvatars"
           [message]="message"
-          [contact]="recipient"
         >
         </ngx-chat-message-out>
       </ng-container>

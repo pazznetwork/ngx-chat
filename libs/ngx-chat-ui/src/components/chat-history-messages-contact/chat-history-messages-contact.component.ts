@@ -2,7 +2,7 @@
 import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { map, Observable, ReplaySubject, Subject, tap } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
+import type { ChatService } from '@pazznetwork/ngx-chat-shared';
 import { Contact, Direction, Message } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
@@ -24,19 +24,16 @@ import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
     ChatMessageOutComponent,
     ChatHistoryAutoScrollComponent,
   ],
-  selector: 'ngx-chat-history-messages',
-  templateUrl: './chat-history-messages.component.html',
-  styleUrls: ['./chat-history-messages.component.less'],
+  selector: 'ngx-chat-history-messages-contact',
+  templateUrl: './chat-history-messages-contact.component.html',
+  styleUrls: ['./chat-history-messages-contact.component.less'],
 })
-export class ChatHistoryMessagesComponent implements OnInit, OnDestroy {
+export class ChatHistoryMessagesContactComponent implements OnInit, OnDestroy {
   @Input()
-  recipient?: Recipient;
+  contact!: Contact;
 
   @Input()
-  sender?: Contact;
-
-  @Input()
-  showAvatars = false;
+  showAvatars = true;
 
   private ngDestroySubject = new Subject<void>();
   private messagesGroupedByDateSubject = new ReplaySubject<{ date: Date; messages: Message[] }[]>(
@@ -56,12 +53,7 @@ export class ChatHistoryMessagesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log('ChatHistoryComponent ngOnInit this.recipient', this.recipient);
-
-    if (!this.recipient) {
-      return;
-    }
-    this.recipient.messageStore.messages$
+    this.contact.messageStore.messages$
       .pipe(
         map((messages) => {
           messages.sort((a, b) => a?.datetime?.getTime() - b?.datetime?.getTime());
@@ -91,10 +83,6 @@ export class ChatHistoryMessagesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    console.log('ChatHistoryComponent ngOnDestroy');
-    if (!this.recipient) {
-      return;
-    }
     this.ngDestroySubject.next();
   }
 }

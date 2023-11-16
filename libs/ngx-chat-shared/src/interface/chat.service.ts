@@ -27,6 +27,8 @@ export interface ChatService {
    */
   userAvatar$: Observable<string>;
 
+  userJid$: Observable<string>;
+
   /**
    * The current translation. Do NOT write to this attribute, use the [translations]{@link ChatService#translations} @Input-attribute
    * of {@link ChatService} instead.
