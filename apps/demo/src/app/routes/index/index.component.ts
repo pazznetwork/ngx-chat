@@ -29,7 +29,6 @@ export class IndexComponent implements OnDestroy {
   password = '';
   username = '';
   otherJid = '';
-  roomName = '';
   private readonly registrationMessageSubject = new Subject<string>();
   registrationMessage$: Observable<string> = this.registrationMessageSubject.asObservable();
 
@@ -211,10 +210,6 @@ export class IndexComponent implements OnDestroy {
 
   cleanUpJabber(): Promise<void> {
     return cleanUpJabber();
-  }
-
-  async onCreateRoom(): Promise<void> {
-    await this.chatService.roomService.createRoom({ roomId: this.roomName });
   }
 
   forceAppUpdate(): void {

@@ -1,21 +1,28 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 
-:host {
-  font-family: 'Roboto', sans-serif;
+ngx-chat-message-input {
+  display: block;
+  border: 1px solid #dadada;
+  width: 100%;
+  padding: 0.5em;
 }
 
-nav {
-  grid-area: nav;
-  background-color: #666;
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  padding: 1em;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5em;
 }
 
-nav a {
-  color: #fff;
+th,
+td {
+  padding: 0.3em;
+  border: 1px solid #999;
 }
+
+td {
+  text-align: center;
+}
+
 
 aside {
   padding: 1em;
@@ -24,16 +31,11 @@ aside {
 .grid {
   display: grid;
   grid-template-areas:
-    'nav nav nav nav nav'
-    'left main main main right';
+    'left main main main';
 }
 
-.grid aside:first-child {
+.grid aside{
   grid-area: left;
-}
-
-.grid aside:last-child {
-  grid-area: right;
 }
 
 .grid main {
@@ -60,7 +62,7 @@ ul {
 
 .list-item {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   column-gap: 0.5em;
   align-items: center;
   justify-content: space-evenly;

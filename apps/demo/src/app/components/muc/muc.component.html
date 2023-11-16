@@ -1,0 +1,250 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<div class="grid">
+  <aside>
+    <span *ngIf="(chatService.roomService.rooms$ | async)?.length === 0">(no room joined yet)</span>
+
+    <h4>Rooms:</h4>
+    <div class="list">
+      <div class="list-item" *ngFor="let room of rooms$ | async">
+        <div>
+          <p>{{ room.name }}</p>
+          <small>JID: {{ room.jid.toString() }}</small>
+        </div>
+        <div>
+          <button (click)="leaveRoom()">Leave</button>
+          <button (click)="selectRoom(room)">Select</button>
+          <button (click)="subscribeWithMucSub(room)">subscribe with MUC/Sub</button>
+          <button (click)="unsubscribeFromMucSub(room)">unsubscribe from MUC/Sub</button>
+          <button (click)="queryUserList(room)">get user list</button>
+          <button (click)="getRoomConfiguration(room)">get room configuration</button>
+          <button (click)="destroyRoom(room)">destroy</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="form-group">
+      <label for="room-join-name">
+        Room to join name
+      </label>
+      <input
+        id="room-join-name"
+        name="room-name"
+        [(ngModel)]="roomNameToJoin"
+        class="form-control"
+        type="text"
+        placeholder="Room"
+      />
+    </div>
+    <button data-zid="create-room" (click)="joinRoom(roomNameToJoin)">Join Room</button>
+
+    <form (submit)="createRoomOnServer()">
+      <div class="form-group">
+        <input
+          name="roomId"
+          [(ngModel)]="newRoomConfiguration.roomId"
+          class="form-control"
+          type="text"
+          placeholder="Room id"
+          required="required"
+          #roomId="ngModel"
+        />
+        <div [hidden]="roomId.valid || roomId.pristine" class="alert alert-danger">
+          Room id is required
+        </div>
+      </div>
+      <div class="form-group">
+        <input
+          name="roomName"
+          class="form-control"
+          [(ngModel)]="newRoomConfiguration.name"
+          type="text"
+          placeholder="Room name"
+        />
+      </div>
+      <label>
+        <input name="membersOnly" [(ngModel)]="newRoomConfiguration.membersOnly" type="checkbox" />
+        members only
+      </label>
+      <br />
+      <label>
+        <input name="nonAnonymous" [(ngModel)]="newRoomConfiguration.nonAnonymous" type="checkbox" />
+        non-anonymous
+      </label>
+      <br />
+      <label>
+        <input name="persistentRoom" [(ngModel)]="newRoomConfiguration.persistentRoom" type="checkbox" />
+        persistent
+      </label>
+      <br />
+      <label>
+        <input name="public" [(ngModel)]="newRoomConfiguration.public" type="checkbox" />
+        public
+      </label>
+      <br />
+      <label>
+        <input name="allowSubscription" [(ngModel)]="newRoomConfiguration.allowSubscription" type="checkbox" />
+        allow subscription
+      </label>
+      <br />
+      <button type="submit">Create room</button>
+    </form>
+
+    <div class="form-group">
+      <label for="room-name">
+        Room name
+      </label>
+      <input
+        id="room-name"
+        name="room-name"
+        [(ngModel)]="newRoomName"
+        class="form-control"
+        type="text"
+        placeholder="Room"
+      />
+    </div>
+    <button data-zid="create-room" (click)="onCreateRoom()">Create & Join Room</button>
+
+    <ng-container *ngIf="selectedRoom$ | async as room">
+      <h1 style="text-align: center">
+        {{ room.name }}<br />
+        <small>JID: {{ room.jid.toString() }}</small
+        ><br />
+        <small>Subject: {{ room.subject || "[unset]" }}</small>
+      </h1>
+
+      <h4>Occupants:</h4>
+      <table>
+        <thead>
+        <tr>
+          <th>JID</th>
+          <th>Nicks</th>
+          <th>Affiliation</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let member of roomUserList">
+          <td>{{ displayMemberJid(member) }}</td>
+          <td>{{ displayMemberNicks(member) || "[unknown]" }}</td>
+          <td>{{ member.affiliation }}</td>
+          <td>{{ member.role }}</td>
+          <td>
+            <button (click)="kick(member)">
+              Kick ({{ member.nick || "[unknown]" }})
+            </button>
+            <button (click)="banOrUnban(member, room)">Ban/Unban</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <hr />
+
+      <h2>Actions:</h2>
+
+      <button (click)="getSubscriptions()">get MUC/Sub subscriptions</button>
+
+      <form>
+        <div class="form-group">
+          <label for="room-subject">Room subject:</label>
+          <input
+            [(ngModel)]="subject"
+            class="form-control"
+            id="room-subject"
+            name="room-subject"
+            placeholder="Enter a new room subject"
+            type="text"
+          />
+          <button type="button" (click)="changeRoomSubject()">Change</button>
+        </div>
+        <div class="form-group">
+          <label for="change-nick">Change nick:</label>
+          <input
+            [(ngModel)]="nick"
+            class="form-control"
+            id="change-nick"
+            name="change-nick"
+            placeholder="Enter a new nick"
+            type="text"
+          />
+          <button type="button" (click)="changeNick()">Change</button>
+        </div>
+        <div class="form-group">
+          <label for="invite-user">Invite user:</label>
+          <input
+            [(ngModel)]="inviteJid"
+            class="form-control"
+            id="invite-user"
+            name="invite-user"
+            placeholder="Enter JID of a user to invite"
+            type="text"
+          />
+          <button type="button" (click)="inviteUser()">Invite</button>
+        </div>
+        <div class="form-group">
+          <label for="member">Grant / Revoke Membership affiliation</label>
+          <input
+            [(ngModel)]="memberJid"
+            class="form-control"
+            id="member"
+            name="member"
+            type="text"
+            placeholder="Enter JID of an occupant to grant/revoke membership"
+          />
+          <button type="button" (click)="revokeMembership()">Revoke</button>
+          <button type="button" (click)="grantMembership()">Grant</button>
+        </div>
+        <div class="form-group">
+          <label for="moderator">Grant / Revoke moderator role</label>
+          <input
+            [(ngModel)]="moderatorNick"
+            class="form-control"
+            id="moderator"
+            name="moderator"
+            type="text"
+            placeholder="Enter nick of an occupant to grant or revoke moderator role"
+          />
+          <button type="button" (click)="revokeModeratorStatus()">Revoke</button>
+          <button type="button" (click)="grantModeratorStatus()">Grant</button>
+        </div>
+        <div class="form-group">
+          <label for="admin">Grant / Revoke Admin affiliation</label>
+          <input
+            [(ngModel)]="adminNick"
+            class="form-control"
+            id="admin"
+            name="moderator"
+            type="text"
+            placeholder="Enter id to set affiliation"
+          />
+          <button type="button" (click)="revokeAdmin()">Revoke</button>
+          <button type="button" (click)="grantAdmin()">Grant</button>
+        </div>
+      </form>
+
+      <ng-container *ngIf="(roomConfiguration?.fields?.length || 0) > 0">
+        <p>Configuration of room: {{ room.jid.bare().toString() }}</p>
+        <table>
+          <thead>
+          <tr>
+            <th>Variable</th>
+            <th>Value</th>
+            <th>Label</th>
+          </tr>
+          </thead>
+          <tbody>
+          <ng-container *ngFor="let field of roomConfiguration?.fields">
+            <tr *ngIf="field.type !== 'hidden'">
+              <td>{{ field.variable }}</td>
+              <td>{{ field.value }}</td>
+              <td>{{ field.label }}</td>
+            </tr>
+          </ng-container>
+          </tbody>
+        </table>
+      </ng-container>
+    </ng-container>
+  </main>
+</div>

@@ -4,7 +4,7 @@ import { XmppService } from '@pazznetwork/xmpp-adapter';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
-  selector: 'ngx-chat-stanza',
+  selector: 'ngx-chat-demo-stanza',
   templateUrl: './stanza.component.html',
 })
 export class StanzaComponent {

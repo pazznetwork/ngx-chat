@@ -90,112 +90,16 @@
 
   <hr />
   <div *ngIf="chatService.isOnline$ | async; else offline">
-  <div class="form-group">
-    <div>Contact Management</div>
-    <div>
-      <input
-        data-zid="contact-jid"
-        [(ngModel)]="otherJid"
-        class="form-control"
-        type="text"
-        placeholder="JID (name@domain)"
-      />
-    </div>
+
+    <ngx-chat-demo-stanza></ngx-chat-demo-stanza>
+
+    <ngx-chat-demo-contact-management [domain]="domain"></ngx-chat-demo-contact-management>
+
+    <ngx-chat-demo-muc></ngx-chat-demo-muc>
   </div>
-
-  <button data-zid="add-contact" (click)="onAddContact()">Add contact</button>
-  <button data-zid="remove-contact" (click)="onRemoveContact()">Remove contact</button>
-  <button data-zid="block-contact" (click)="blockContact()">Block contact</button>
-  <button data-zid="unblock-contact" (click)="unblockContact()">Unblock contact</button>
-  <button data-zid="open-chat" (click)="onOpenChat()">Open chat</button>
-
-  <hr />
-    <div class="form-group">
-      <label for="room-name">
-        Room name
-      </label>
-      <input
-        id="room-name"
-        name="room-name"
-        [(ngModel)]="roomName"
-        class="form-control"
-        type="text"
-        placeholder="Room"
-      />
-    </div>
-    <button data-zid="create-room" (click)="onCreateRoom()">Create Room</button>
-    <hr />
-  <div>
-    <h2>Custom component for a chat session</h2>
-    <ng-container
-      *ngIf="
-        (chatService.isOnline$ | async) &&
-          (chatService.contactListService.contactsSubscribed$ | async) as contacts;
-        else messagesComponentInformation
-      "
-    >
-      <ng-container *ngIf="contacts.length > 0; else messagesComponentInformation">
-      <ngx-chat-window-content [recipient]="contacts[0]" [showAvatars]="true"></ngx-chat-window-content>
-      </ng-container>
-    </ng-container>
-    <ng-template #messagesComponentInformation
-      >You need to be logged in and have contacts to see this component</ng-template
-    >
-  </div>
-
-  <hr />
-
-  <hr />
-
-  <div class="contact-pending-request-received-wrapper">
-    debug contact requests in:
-    <div
-      class="contact-pending-request-received"
-      *ngFor="let request of chatService.contactListService.contactRequestsReceived$ | async"
-    >
-      {{ request.name }}
-    </div>
-  </div>
-
-  <hr />
-
-  <div class="contact-pending-request-sent-wrapper">
-    debug contact requests out:
-    <div
-      class="contact-pending-request-sent"
-      *ngFor="let request of chatService.contactListService.contactRequestsSent$ | async"
-    >
-      {{ request.name }}
-    </div>
-  </div>
-
-  <hr />
-
-  <p>
-    debug contacts (count: {{ (chatService.contactListService.contacts$ | async)?.length }})<br />
-  </p>
-  <p
-    *ngFor="let contact of chatService.contactListService.contacts$ | async"
-    style="margin-bottom: 1em"
-  >
-    <em>{{ contact.name }}:</em><br />
-    subscription={{ contact.subscription$ | async }}<br />
-    presence={{ contact.presence$ | async }}<br />
-  </p>
-
-  <ngx-chat-stanza></ngx-chat-stanza>
-
-  <ngx-chat-multi-user-chat></ngx-chat-multi-user-chat>
-
-  <div>
-    <h2>Unread messages count:</h2>
-    Sum unread messages: {{ chatService.messageService.unreadMessageCountSum$ | async }}
-    <pre>{{ chatService.messageService.jidToUnreadCount$ | async | keyvalue | json }}</pre>
-  </div>
-  </div>
-    <ng-template #offline>
-      <span *ngIf="chatService.isOffline$ | async">You need to be online.</span>
-    </ng-template>
+  <ng-template #offline>
+    <span *ngIf="chatService.isOffline$ | async">You need to be online.</span>
+  </ng-template>
 </div>
 
 <ngx-chat [rosterState]="'shown'"></ngx-chat>
