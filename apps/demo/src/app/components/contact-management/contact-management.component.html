@@ -1,0 +1,84 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<hr />
+
+<div class="form-group">
+  <div>Contact Management</div>
+  <div>
+    <input
+      data-zid="contact-jid"
+      [(ngModel)]="otherJid"
+      class="form-control"
+      type="text"
+      placeholder="JID (name@domain)"
+    />
+  </div>
+</div>
+
+<button data-zid="add-contact" (click)="onAddContact()">Add contact</button>
+<button data-zid="remove-contact" (click)="onRemoveContact()">Remove contact</button>
+<button data-zid="block-contact" (click)="blockContact()">Block contact</button>
+<button data-zid="unblock-contact" (click)="unblockContact()">Unblock contact</button>
+<button data-zid="open-chat" (click)="onOpenChat()">Open chat</button>
+
+<hr />
+
+
+<div>
+  <h2>Custom component for a chat session</h2>
+  <ng-container
+    *ngIf="
+        (chatService.isOnline$ | async) &&
+          (chatService.contactListService.contactsSubscribed$ | async) as contacts
+      "
+  >
+    <ng-container *ngIf="contacts.length > 0; else messagesComponentInformation">
+      <ngx-chat-window-content [recipient]="contacts[0]" [showAvatars]="true"></ngx-chat-window-content>
+    </ng-container>
+  </ng-container>
+  <ng-template #messagesComponentInformation
+  >You need contacts to see this component
+  </ng-template
+  >
+</div>
+
+<hr />
+
+<div class="contact-pending-request-received-wrapper">
+  debug contact requests in:
+  <div
+    class="contact-pending-request-received"
+    *ngFor="let request of chatService.contactListService.contactRequestsReceived$ | async"
+  >
+    {{ request.name }}
+  </div>
+</div>
+
+<hr />
+
+<div class="contact-pending-request-sent-wrapper">
+  debug contact requests out:
+  <div
+    class="contact-pending-request-sent"
+    *ngFor="let request of chatService.contactListService.contactRequestsSent$ | async"
+  >
+    {{ request.name }}
+  </div>
+</div>
+
+<div>
+  <h2>Unread messages count:</h2>
+  Sum unread messages: {{ chatService.messageService.unreadMessageCountSum$ | async }}
+  <pre>{{ chatService.messageService.jidToUnreadCount$ | async | keyvalue | json }}</pre>
+</div>
+
+<p>
+  debug contacts (count: {{ (chatService.contactListService.contacts$ | async)?.length }})<br />
+</p>
+<p
+  *ngFor="let contact of chatService.contactListService.contacts$ | async"
+  style="margin-bottom: 1em"
+>
+  <em>{{ contact.name }}:</em><br />
+  subscription={{ contact.subscription$ | async }}<br />
+  presence={{ contact.presence$ | async }}<br />
+</p>
