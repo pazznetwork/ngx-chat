@@ -7,6 +7,8 @@ import {
   devXmppJid,
   devXmppPassword,
 } from '../../../../libs/ngx-xmpp/src/.secrets-const';
+import { Browser } from '@playwright/test';
+import { MucPageObject } from './muc.po';
 
 const adminLogin: AuthRequest = {
   domain: devXmppDomain,
@@ -44,7 +46,7 @@ export class AppPage {
   // @ts-ignore
   private readonly createChatBoxInputLocator: (jid: string) => Locator;
 
-  constructor(private readonly page: Page) {
+  private constructor(private readonly browser: Browser, private readonly page: Page) {
     this.domainInput = page.locator('[name=domain]');
     this.serviceInput = page.locator('[name=service]');
     this.usernameInput = page.locator('[name=username]');
@@ -83,6 +85,14 @@ export class AppPage {
     });
   }
 
+  static async create(browser: Browser): Promise<AppPage> {
+    return new AppPage(browser, await browser.newPage());
+  }
+
+  createMUCPageObject(): MucPageObject {
+    return new MucPageObject(this.page);
+  }
+
   async pause(): Promise<void> {
     await this.page.pause();
   }
@@ -107,6 +117,21 @@ export class AppPage {
 
   async setService(service: string): Promise<void> {
     await this.serviceInput.fill(service);
+  }
+
+  async newPage(): Promise<AppPage> {
+    const context = await this.browser.newContext();
+    const newPage = await context.newPage();
+    await newPage.goto('https://local.entenhausen.pazz.de:4200/');
+    const newAppPage = new AppPage(this.browser, newPage);
+    await newAppPage.setupForTest();
+    return newAppPage;
+  }
+
+  async logInInNewPage(username: string, password: string): Promise<AppPage> {
+    const newAppPage = await this.newPage();
+    await newAppPage.logIn(username, password);
+    return newAppPage;
   }
 
   async logIn(username: string, password: string): Promise<void> {

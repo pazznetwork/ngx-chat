@@ -17,7 +17,7 @@ test.describe.serial('ngx-chat', () => {
   let ejabberdAdminPage: EjabberdAdminPage;
 
   test.beforeAll(async ({ browser, playwright }) => {
-    appPage = new AppPage(await browser.newPage());
+    appPage = await AppPage.create(browser);
     ejabberdAdminPage = await EjabberdAdminPage.create(
       playwright,
       devXmppDomain,

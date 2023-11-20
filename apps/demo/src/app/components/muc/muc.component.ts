@@ -25,7 +25,7 @@ export class MucComponent implements OnInit, OnDestroy {
   );
 
   newRoomName = '';
-  roomNameToJoin = '';
+  roomIdToJoin = '';
 
   inviteJid = '';
   subject = '';

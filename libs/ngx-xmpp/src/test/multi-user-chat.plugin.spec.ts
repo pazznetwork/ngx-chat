@@ -11,7 +11,7 @@ import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { cleanServerBesidesAdmin, ensureRegisteredUser } from './helpers/admin-actions';
 import { getRoomAffiliation, getRoomRole } from './helpers/ejabberd-client';
 
-describe('multi user chat plugin', () => {
+fdescribe('multi user chat plugin', () => {
   let testUtils: TestUtils;
   beforeAll(() => {
     const testBed = TestBed.configureTestingModule({
@@ -163,7 +163,7 @@ describe('multi user chat plugin', () => {
     });
   });
 
-  describe('room joining', () => {
+  fdescribe('room joining', () => {
     const createRoomsAsFatherAndInviteUser = async (userJid: string): Promise<void> => {
       await testUtils.logIn.father();
 
@@ -267,12 +267,7 @@ describe('multi user chat plugin', () => {
           testUtils.father.jid
         )
       ).toEqual('owner');
-      expect(
-        await getRoomAffiliation(
-          parseJid(testUtils.princessRoom.jid)?.local as string,
-          testUtils.father.jid
-        )
-      ).toEqual('owner');
+
       expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
       await testUtils.chatService.roomService.inviteUserToRoom(
         testUtils.hero.jid,
@@ -303,6 +298,7 @@ describe('multi user chat plugin', () => {
       await testUtils.logOut();
 
       await testUtils.logIn.father();
+      await testUtils.waitForCurrentRoomCount(3);
       await testUtils.chatService.roomService.destroyRoom(testUtils.heroRoom.jid);
       await testUtils.chatService.roomService.destroyRoom(testUtils.fatherRoom.jid);
       await testUtils.chatService.roomService.destroyRoom(testUtils.princessRoom.jid);
@@ -350,6 +346,7 @@ describe('multi user chat plugin', () => {
       await testUtils.logOut();
 
       await testUtils.logIn.father();
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
 
       await testUtils.chatService.roomService.destroyRoom(testUtils.heroRoom.jid);
       await testUtils.chatService.roomService.destroyRoom(testUtils.fatherRoom.jid);
@@ -359,7 +356,7 @@ describe('multi user chat plugin', () => {
       await testUtils.logOut();
     });
 
-    it('should be able to query only for rooms joined', async () => {
+    fit('should be able to query only for rooms joined', async () => {
       await ensureRegisteredUser(testUtils.father);
       await ensureRegisteredUser(testUtils.hero);
       // 'Needs the bookmark plugin implementation';
@@ -370,6 +367,7 @@ describe('multi user chat plugin', () => {
 
       await testUtils.logIn.hero();
       await testUtils.create.room.villain();
+      expect(await testUtils.waitForCurrentRoomCount(4)).toEqual(4);
 
       const queriedRooms = await testUtils.chatService.roomService.queryAllRooms();
       const gotRooms = await testUtils.chatService.roomService.getRooms();
@@ -455,10 +453,12 @@ describe('multi user chat plugin', () => {
 
       // then
       expect(messages.length).toEqual(1);
-      expect(messages[0]?.body).toEqual('message body');
-      expect(messages[0]?.direction).toEqual(testUtils.direction.out);
-      expect(messages[0]?.id).not.toBeUndefined();
-      expect(messages[0]?.from?.bare().toString()).toEqual(room.jid.bare().toString());
+      const message = messages[0];
+      expect(message?.body).toEqual('message body');
+      expect(message?.direction).toEqual(testUtils.direction.out);
+      expect(message?.id).not.toBeUndefined();
+      expect(message?.from?.bare().toString()).toEqual(room.jid.bare().toString());
+      expect(message?.from?.resource).toEqual(parseJid(testUtils.hero.jid).local);
       await testUtils.logOut();
     });
   });

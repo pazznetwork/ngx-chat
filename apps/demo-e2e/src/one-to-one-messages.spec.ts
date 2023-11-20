@@ -21,7 +21,7 @@ test.describe.serial('ngx-chat', () => {
   let ejabberdAdminPage: EjabberdAdminPage;
 
   test.beforeAll(async ({ browser, playwright }) => {
-    appPage = new AppPage(await browser.newPage());
+    appPage = await AppPage.create(browser);
     ejabberdAdminPage = await EjabberdAdminPage.create(
       playwright,
       devXmppDomain,
@@ -122,12 +122,8 @@ test.describe.serial('ngx-chat', () => {
     await appPage.logOut();
   });
 
-  test('should open message component on message received', async ({ browser }) => {
-    const context = await browser.newContext();
-    const bobPage = await context.newPage();
-    await bobPage.goto('https://local.entenhausen.pazz.de:4200/');
-    const bobAppPo = new AppPage(bobPage);
-    await bobAppPo.setupForTest();
+  test('should open message component on message received', async () => {
+    const bobAppPo = await appPage.newPage();
     const aliceAppPo = appPage;
 
     await aliceAppPo.logIn(alice, testPassword);

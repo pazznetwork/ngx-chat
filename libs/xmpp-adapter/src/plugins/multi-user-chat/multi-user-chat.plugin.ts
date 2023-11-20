@@ -6,6 +6,7 @@ import {
   merge,
   mergeMap,
   Observable,
+  pairwise,
   ReplaySubject,
   switchMap,
   tap,
@@ -232,7 +233,16 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   }
 
   async destroyRoom(roomJid: JID): Promise<void> {
-    await firstValueFrom(this.roomsFetchedSubject.pipe(filter((val) => val)));
+    const lessRoomsPromise = firstValueFrom(
+      this.rooms$.pipe(
+        map((rooms) => rooms.length),
+        pairwise(),
+        filter(([before, after]) => before > after)
+      )
+    );
+    if (!this.roomsMap.get(roomJid.bare().toString())) {
+      throw new Error('Room does not exist in your list');
+    }
     try {
       await this.xmppService.chatConnectionService
         .$iq({ type: 'set', to: roomJid.toString().toLowerCase() })
@@ -240,6 +250,8 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         .c('destroy')
         .send();
       this.destroyedRoomSubject.next(roomJid);
+
+      await lessRoomsPromise;
     } catch (e) {
       this.logService.error((e as Element)?.outerHTML, 'error destroying room');
       throw e;
@@ -976,7 +988,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         body: messageText,
         datetime,
         id,
-        from: this.toUserJid(from),
+        from,
         direction: isMyMucMessage ? Direction.out : Direction.in,
         delayed: !!delayElement,
         fromArchive: stanza.querySelector('archived') == null,
@@ -1007,14 +1019,6 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     }
 
     return false;
-  }
-
-  private toUserJid(from: JID): JID {
-    if (!from.resource) {
-      throw new Error('No resource in muc from jid to be used as nickname');
-    }
-
-    return parseJid(from.resource + '@' + from.domain);
   }
 
   handleRoomInvitationMessageStanza(stanza: Stanza): Invitation {
