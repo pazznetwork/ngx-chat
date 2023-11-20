@@ -132,11 +132,10 @@ export class XmppMessageService implements MessageService {
    */
   async handleMessageStanza(stanza: MessageWithBodyStanza): Promise<boolean> {
     if (stanza.querySelector('error')) {
-      throw new Error(`message stanza contains error: ${stanza.outerHTML}`);
       // The recipient's account does not exist on the server.
       // The recipient is offline and the server is not configured to store offline messages for later delivery.
       // The recipient's client or server has some temporary issue that prevents message delivery.
-      // return true;
+      return true;
     }
 
     // can be wrapped in result from a query, or in a message received carbons
