@@ -28,7 +28,7 @@ test.describe.serial('ngx-chat', () => {
       devXmppJid,
       devXmppPassword
     );
-    await ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin();
+    await ejabberdAdminPage.deleteAllBesidesAdminUser();
 
     await appPage.setupForTest();
     await ejabberdAdminPage.register(alice, testPassword);
@@ -36,7 +36,7 @@ test.describe.serial('ngx-chat', () => {
     await ejabberdAdminPage.register(tim, testPassword);
   });
 
-  test.afterAll(() => ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin());
+  test.afterAll(() => ejabberdAdminPage.deleteAllBesidesAdminUser());
 
   test('should be able to block contact after receiving message without contact request', async () => {
     await appPage.logIn(alice, testPassword);

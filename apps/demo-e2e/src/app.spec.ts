@@ -53,7 +53,7 @@ test.describe.serial('ngx-chat', () => {
       devXmppJid,
       devXmppPassword
     );
-    await ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin();
+    await ejabberdAdminPage.deleteAllBesidesAdminUser();
     await ejabberdAdminPage.register(evilQueen, evilQueen);
     await ejabberdAdminPage.register(snowWhite, snowWhite);
     await ejabberdAdminPage.register(huntsman, huntsman);

@@ -47,7 +47,11 @@ export class EjabberdAdminPage {
       await deleteUser();
     }
   }
-  async requestDeleteAllUsersBesidesAdmin(): Promise<void> {
+  async deleteAllBesidesAdminUser(): Promise<void> {
+    const rooms = await this.getMucRooms();
+    for (const room of rooms) {
+      await this.destroyRoom(room.split('@')[0] as string);
+    }
     const users = await this.registeredUsers();
     const withoutAdmin = users.filter((user) => user.toLowerCase() !== 'local-admin');
     for (const user of withoutAdmin) {
@@ -60,6 +64,17 @@ export class EjabberdAdminPage {
       user,
       host: this.host,
     });
+  }
+
+  async destroyRoom(room: string, service = 'conference.' + devXmppDomain): Promise<unknown> {
+    return this.executeRequest('destroy_room', {
+      name: room,
+      service,
+    });
+  }
+
+  async getMucRooms(): Promise<string[]> {
+    return this.executeRequest('muc_online_rooms', { service: 'global' });
   }
 
   async register(user: string, password: string): Promise<void> {

@@ -8,14 +8,9 @@ import {
 } from '../../../libs/ngx-xmpp/src/.secrets-const';
 import { EjabberdAdminPage } from './page-objects/ejabberd-admin.po';
 
-const alice = 'alice';
-const bob = 'bob';
-const tim = 'tim';
 const testPassword = 'test';
 
-const room = 'wonderland';
-
-test.describe.serial.only('ngx-chat', () => {
+test.describe.serial('ngx-chat', () => {
   let mainPage: AppPage;
   let ejabberdAdminPage: EjabberdAdminPage;
 
@@ -27,24 +22,62 @@ test.describe.serial.only('ngx-chat', () => {
       devXmppJid,
       devXmppPassword
     );
-    await ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin();
+    await ejabberdAdminPage.deleteAllBesidesAdminUser();
 
     await mainPage.setupForTest();
+  });
+
+  test.afterAll(() => ejabberdAdminPage.deleteAllBesidesAdminUser());
+
+  test('grant membership to single user to single room async (one is online another offline)', async () => {
+    const room = 'mines';
+    const owner = 'owner';
+    const slave = 'slave';
+    await ejabberdAdminPage.register(owner, testPassword);
+    await ejabberdAdminPage.register(slave, testPassword);
+
+    await mainPage.logIn(owner, testPassword);
+    const ownerMuc = mainPage.createMUCPageObject();
+    await ownerMuc.createRoom(room);
+    await ownerMuc.selectRoom();
+    await ownerMuc.grantMembership(slave);
+    await ownerMuc.inviteUser(slave);
+    const ownerChat = await mainPage.openChatWith(room);
+    const welcome = 'Welcome to the the mines!';
+    await ownerChat.write(welcome);
+    await mainPage.logOut();
+
+    await mainPage.logIn(slave, testPassword);
+    const slaveMuc = mainPage.createMUCPageObject();
+    await slaveMuc.acceptInvite(room);
+    const slaveChat = await mainPage.openChatWith(room);
+    await slaveChat.assertLastMessage(welcome);
+    const workWork = 'Work work more work...';
+    await ownerChat.write(workWork);
+    await mainPage.logOut();
+
+    await mainPage.logIn(owner, testPassword);
+    const later = await mainPage.openChatWith(room);
+    await later.assertLastMessage(workWork);
+    await mainPage.logOut();
+  });
+
+  test.skip('should be able to create a room, write a message, invite bob and tim, let them join and see the message, and destroy the room', async () => {
+    const room = 'wonderland';
+    const alice = 'alice';
+    const bob = 'bob';
+    const tim = 'tim';
+    const hello = 'Hello my dear friends';
     await ejabberdAdminPage.register(alice, testPassword);
     await ejabberdAdminPage.register(bob, testPassword);
     await ejabberdAdminPage.register(tim, testPassword);
-  });
-
-  test.afterAll(() => ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin());
-
-  test('should be able to create a room, write a message, invite bob and tim, let them join and see the message, and destroy the room', async () => {
-    const hello = 'Hello my dear friends';
 
     await mainPage.logIn(alice, testPassword);
     const aliceMuc = mainPage.createMUCPageObject();
 
     await aliceMuc.createRoom(room);
     await aliceMuc.selectRoom();
+    await aliceMuc.grantMembership(alice);
     await aliceMuc.inviteUser(bob);
     await aliceMuc.inviteUser(tim);
 

@@ -26,7 +26,7 @@ test.describe('ngx-chat', () => {
       devXmppJid,
       devXmppPassword
     );
-    await ejabberdAdminPage.requestDeleteAllUsersBesidesAdmin();
+    await ejabberdAdminPage.deleteAllBesidesAdminUser();
 
     await ejabberdAdminPage.register(fooUser, testPassword);
     await ejabberdAdminPage.register(barUser, testPassword);

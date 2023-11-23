@@ -128,6 +128,7 @@ export class MucPageObject {
   }
 
   async selectRoom(index = 0): Promise<void> {
+    await this.listRoomSelectButtonLocator.waitFor();
     const all = await this.listRoomSelectButtonLocator.all();
     await all[index]?.click();
   }
@@ -278,6 +279,7 @@ export class MucPageObject {
   async inviteUser(userJid: string): Promise<void> {
     await this.roomInviteUserJidInputLocator.fill(userJid);
     await this.roomInviteUserActionButtonLocator.click();
+    await this.grantMembership(userJid);
   }
 
   async acceptInvite(room: string): Promise<void> {
