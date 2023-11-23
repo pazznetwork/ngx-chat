@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { firstValueFrom, Observable, shareReplay, startWith, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import {
@@ -18,6 +18,9 @@ import { XmppService } from '@pazznetwork/xmpp-adapter';
   styleUrls: ['./muc.component.css'],
 })
 export class MucComponent implements OnInit, OnDestroy {
+  @Input()
+  domain?: string;
+
   private readonly selectedRoomSubject = new Subject<Room | null>();
   selectedRoom$: Observable<Room | null> = this.selectedRoomSubject.pipe(
     startWith(null),
@@ -132,7 +135,7 @@ export class MucComponent implements OnInit, OnDestroy {
 
   async inviteUser(): Promise<void> {
     await this.chatService.roomService.inviteUserToRoom(
-      await this.getFullMemberJid(),
+      this.getFullMemberJid(),
       await this.getSelectedRoomJid()
     );
   }
@@ -164,14 +167,14 @@ export class MucComponent implements OnInit, OnDestroy {
 
   async grantMembership(): Promise<void> {
     await this.chatService.roomService.grantMembershipForRoom(
-      await this.getFullMemberJid(),
+      this.getFullMemberJid(),
       await this.getSelectedRoomJid()
     );
   }
 
   async revokeMembership(): Promise<void> {
     await this.chatService.roomService.revokeMembershipForRoom(
-      await this.getFullMemberJid(),
+      this.getFullMemberJid(),
       await this.getSelectedRoomJid()
     );
   }
@@ -213,15 +216,10 @@ export class MucComponent implements OnInit, OnDestroy {
     return selected.jid.toString();
   }
 
-  private async getFullMemberJid(): Promise<string> {
-    const selected = await firstValueFrom(this.selectedRoom$);
-    if (!selected) {
-      throw new Error('selected room is undefined');
-    }
-
+  private getFullMemberJid(): string {
     return this.memberJid?.includes('@')
       ? this.memberJid
-      : this.memberJid + '@' + selected.jid.domain;
+      : this.memberJid + '@' + (this.domain as string);
   }
 
   async onCreateRoom(): Promise<void> {

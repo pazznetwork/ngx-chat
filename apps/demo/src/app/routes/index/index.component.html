@@ -95,7 +95,7 @@
 
     <ngx-chat-demo-contact-management [domain]="domain"></ngx-chat-demo-contact-management>
 
-    <ngx-chat-demo-muc></ngx-chat-demo-muc>
+    <ngx-chat-demo-muc [domain]="domain"></ngx-chat-demo-muc>
   </div>
   <ng-template #offline>
     <span *ngIf="chatService.isOffline$ | async">You need to be online.</span>
