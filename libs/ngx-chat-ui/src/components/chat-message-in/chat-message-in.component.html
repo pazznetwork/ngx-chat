@@ -11,7 +11,7 @@
   <ngx-chat-message-image [textContent]="message?.body"> </ngx-chat-message-image>
   <ngx-chat-bubble-footer
     [formattedDate]="message?.datetime | date: chatService.translations.timeFormat"
-    [nick]="contact?.name"
+    [nick]="nick ?? contact?.name"
   >
   </ngx-chat-bubble-footer>
 </ngx-chat-bubble>

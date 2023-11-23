@@ -39,6 +39,9 @@ export class ChatMessageInComponent {
   @Input()
   showAvatar?: boolean;
 
+  @Input()
+  nick?: string;
+
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
     @Inject(CONTACT_CLICK_HANDLER_TOKEN)

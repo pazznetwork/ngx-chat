@@ -13,6 +13,7 @@
           [showAvatar]="showAvatars"
           [message]="messageWithContact.message"
           [contact]="messageWithContact.contact"
+          [nick]="getNickFromContact(messageWithContact.contact)"
         >
         </ngx-chat-message-in>
       </ng-container>

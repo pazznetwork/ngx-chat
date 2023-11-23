@@ -113,4 +113,8 @@ export class ChatHistoryMessagesRoomComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngDestroySubject.next();
   }
+
+  getNickFromContact(contact: Contact): string | undefined {
+    return contact.jid.resource;
+  }
 }
