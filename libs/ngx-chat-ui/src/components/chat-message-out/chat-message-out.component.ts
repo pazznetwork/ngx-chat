@@ -10,8 +10,8 @@ import { ChatMessageImageComponent } from '../chat-message-image';
 import { ChatBubbleFooterComponent } from '../chat-bubble-footer';
 import { ChatMessageStateIconComponent } from '../chat-message-state-icon';
 import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -41,7 +41,14 @@ export class ChatMessageOutComponent implements OnInit {
   constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
 
   ngOnInit(): void {
-    this.nick$ = this.chatService.userJid$.pipe(map((jid) => parseJid(jid).local));
+    this.nick$ = this.chatService.userName$.pipe(
+      switchMap((userName) => {
+        if (userName === '') {
+          return this.chatService.userJid$.pipe(map((jid) => parseJid(jid).local));
+        }
+        return of(userName);
+      })
+    );
   }
 
   // TODO: check if message.state can be ensured so this method can be removed

@@ -23,8 +23,9 @@ import {
   FILE_UPLOAD_HANDLER_TOKEN,
   OPEN_CHAT_SERVICE_TOKEN,
 } from './injection-token';
-import { NEVER, Observable } from 'rxjs';
+import { NEVER, Observable, of } from 'rxjs';
 import { USER_AVATAR_TOKEN } from './injection-token/user-avatar.token';
+import { USER_NAME_TOKEN } from './injection-token/user-name.token';
 
 @NgModule({
   imports: [HttpClientModule],
@@ -43,12 +44,14 @@ import { USER_AVATAR_TOKEN } from './injection-token/user-avatar.token';
     { provide: CUSTOM_ROOM_FACTORY_TOKEN, useClass: DefaultRoomFactory },
     // eslint-disable-next-line rxjs/finnish
     { provide: USER_AVATAR_TOKEN, useValue: NEVER },
+    { provide: USER_NAME_TOKEN, useValue: of('') },
     {
       provide: CHAT_SERVICE_TOKEN,
       deps: [
         NgZone,
         HttpClient,
         USER_AVATAR_TOKEN,
+        USER_NAME_TOKEN,
         OPEN_CHAT_SERVICE_TOKEN,
         LOG_SERVICE_TOKEN,
         CUSTOM_ROOM_FACTORY_TOKEN,
@@ -72,6 +75,7 @@ export class XmppAdapterModule {
     zone: NgZone,
     httpClient: HttpClient,
     userAvatar$: Observable<string>,
+    userName$: Observable<string>,
     chatMessageListRegistryService: ChatMessageListRegistryService,
     logService: Log,
     customRoomFactory: CustomRoomFactory,
@@ -82,6 +86,7 @@ export class XmppAdapterModule {
         zone,
         logService,
         userAvatar$,
+        userName$,
         chatMessageListRegistryService,
         httpClient,
         customRoomFactory,

@@ -11,10 +11,14 @@ import { NgModule } from '@angular/core';
 import { NgxChatModule } from '@pazznetwork/ngx-chat';
 import { UiComponent } from './routes/ui/ui.component';
 import { ContactManagementComponent } from './components/contact-management/contact-management.component';
-import { CUSTOM_CONTACT_FACTORY_TOKEN, CUSTOM_ROOM_FACTORY_TOKEN } from '@pazznetwork/ngx-xmpp';
+import {
+  CUSTOM_CONTACT_FACTORY_TOKEN,
+  CUSTOM_ROOM_FACTORY_TOKEN,
+  USER_AVATAR_TOKEN,
+  USER_NAME_TOKEN,
+} from '@pazznetwork/ngx-xmpp';
 import { CustomContact } from './service/custom-contact';
 import { CustomRoom } from './service/custom-room';
-import { USER_AVATAR_TOKEN } from '../../../../libs/ngx-xmpp/src/injection-token/user-avatar.token';
 import { of, shareReplay } from 'rxjs';
 import { dummyAvatar } from './service/dummy-avatar';
 
@@ -34,6 +38,10 @@ import { dummyAvatar } from './service/dummy-avatar';
     {
       provide: USER_AVATAR_TOKEN,
       useFactory: () => of(dummyAvatar).pipe(shareReplay({ bufferSize: 1, refCount: true })),
+    },
+    {
+      provide: USER_NAME_TOKEN,
+      useFactory: () => of('InconvenientName').pipe(shareReplay({ bufferSize: 1, refCount: true })),
     },
   ],
   bootstrap: [AppComponent],
