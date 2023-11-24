@@ -8,7 +8,7 @@ import { IndexComponent } from './routes/index/index.component';
 import { StanzaComponent } from './components/stanza/stanza.component';
 import { MucComponent } from './components/muc/muc.component';
 import { NgModule } from '@angular/core';
-import { ChatWindowComponent, NgxChatModule } from '@pazznetwork/ngx-chat';
+import { NgxChatModule } from '@pazznetwork/ngx-chat';
 import { UiComponent } from './routes/ui/ui.component';
 import { ContactManagementComponent } from './components/contact-management/contact-management.component';
 import { CUSTOM_CONTACT_FACTORY_TOKEN, CUSTOM_ROOM_FACTORY_TOKEN } from '@pazznetwork/ngx-xmpp';
@@ -27,14 +27,7 @@ import { dummyAvatar } from './service/dummy-avatar';
     UiComponent,
     ContactManagementComponent,
   ],
-  imports: [
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    BrowserModule,
-    FormsModule,
-    NgxChatModule,
-    ChatWindowComponent,
-  ],
+  imports: [AppRoutingModule, BrowserAnimationsModule, BrowserModule, FormsModule, NgxChatModule],
   providers: [
     { provide: CUSTOM_CONTACT_FACTORY_TOKEN, useClass: CustomContact },
     { provide: CUSTOM_ROOM_FACTORY_TOKEN, useClass: CustomRoom },

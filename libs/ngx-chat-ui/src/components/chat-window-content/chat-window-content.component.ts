@@ -4,7 +4,7 @@ import type { ChatService, FileUploadHandler, Recipient } from '@pazznetwork/ngx
 import { Contact, ContactSubscription } from '@pazznetwork/ngx-chat-shared';
 import { ChatWindowInputComponent } from '../chat-window-input';
 import { ChatHistoryComponent } from '../chat-history';
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ChatFileDropComponent } from '../chat-file-drop';
 import {
   CHAT_SERVICE_TOKEN,
@@ -19,7 +19,6 @@ import { filter, takeUntil } from 'rxjs/operators';
   imports: [
     CommonModule,
     XmppAdapterModule,
-    AsyncPipe,
     ChatFileDropComponent,
     ChatHistoryComponent,
     ChatWindowInputComponent,

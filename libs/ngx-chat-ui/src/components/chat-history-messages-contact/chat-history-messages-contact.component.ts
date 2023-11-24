@@ -6,24 +6,17 @@ import type { ChatService } from '@pazznetwork/ngx-chat-shared';
 import { Contact, Direction, Message } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
-import { ChatMessageEmptyComponent } from '../chat-message-empty';
 import { ChatMessageOutComponent } from '../chat-message-out';
 import {
   CHAT_SERVICE_TOKEN,
   ChatMessageListRegistryService,
   OPEN_CHAT_SERVICE_TOKEN,
+  XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
-import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
 
 @Component({
   standalone: true,
-  imports: [
-    CommonModule,
-    ChatMessageEmptyComponent,
-    ChatMessageInComponent,
-    ChatMessageOutComponent,
-    ChatHistoryAutoScrollComponent,
-  ],
+  imports: [CommonModule, XmppAdapterModule, ChatMessageInComponent, ChatMessageOutComponent],
   selector: 'ngx-chat-history-messages-contact',
   templateUrl: './chat-history-messages-contact.component.html',
   styleUrls: ['./chat-history-messages-contact.component.less'],

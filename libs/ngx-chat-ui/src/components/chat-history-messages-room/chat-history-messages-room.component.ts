@@ -6,25 +6,18 @@ import type { ChatService, CustomContactFactory } from '@pazznetwork/ngx-chat-sh
 import { Contact, Direction, Message, Room } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
-import { ChatMessageEmptyComponent } from '../chat-message-empty';
 import { ChatMessageOutComponent } from '../chat-message-out';
 import {
   CHAT_SERVICE_TOKEN,
   ChatMessageListRegistryService,
   CUSTOM_CONTACT_FACTORY_TOKEN,
   OPEN_CHAT_SERVICE_TOKEN,
+  XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
-import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
 
 @Component({
   standalone: true,
-  imports: [
-    CommonModule,
-    ChatMessageEmptyComponent,
-    ChatMessageInComponent,
-    ChatMessageOutComponent,
-    ChatHistoryAutoScrollComponent,
-  ],
+  imports: [CommonModule, XmppAdapterModule, ChatMessageInComponent, ChatMessageOutComponent],
   selector: 'ngx-chat-history-messages-room',
   templateUrl: './chat-history-messages-room.component.html',
   styleUrls: ['./chat-history-messages-room.component.less'],

@@ -12,9 +12,9 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IntersectionObserverDirective } from '@pazznetwork/ngx-chat';
 import { combineLatestWith, merge, Observable, Subject } from 'rxjs';
 import { debounceTime, filter, map, takeUntil } from 'rxjs/operators';
+import { IntersectionObserverDirective } from '../../directives';
 
 @Component({
   standalone: true,

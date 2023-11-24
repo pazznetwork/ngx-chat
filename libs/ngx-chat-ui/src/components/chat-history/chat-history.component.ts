@@ -3,15 +3,14 @@ import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '
 import { exhaustMap, map, Observable, Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import { ChatService, Contact, Recipient, Room } from '@pazznetwork/ngx-chat-shared';
-import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
 import { ChatMessageEmptyComponent } from '../chat-message-empty';
-import { ChatMessageOutComponent } from '../chat-message-out';
 import { ChatMessageContactRequestComponent } from '../chat-message-contact-request';
 import {
   CHAT_SERVICE_TOKEN,
   ChatMessageListRegistryService,
   OPEN_CHAT_SERVICE_TOKEN,
+  XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
 import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
 import { ChatHistoryMessagesContactComponent } from '../chat-history-messages-contact';
@@ -21,9 +20,8 @@ import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room'
   standalone: true,
   imports: [
     CommonModule,
+    XmppAdapterModule,
     ChatMessageEmptyComponent,
-    ChatMessageInComponent,
-    ChatMessageOutComponent,
     ChatMessageContactRequestComponent,
     ChatHistoryAutoScrollComponent,
     ChatHistoryMessagesContactComponent,
