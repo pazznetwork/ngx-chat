@@ -5,7 +5,7 @@ import type { Service, ServiceDiscoveryPlugin } from './service-discovery.plugin
 import type { ChatPlugin } from '../core';
 import { Finder } from '../core';
 import type { FileUploadHandler } from '@pazznetwork/ngx-chat-shared';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 
 export const upload = 'urn:xmpp:http:upload:0';
 
@@ -14,6 +14,8 @@ export const upload = 'urn:xmpp:http:upload:0';
  */
 export class XmppHttpFileUploadHandler implements ChatPlugin, FileUploadHandler {
   readonly nameSpace = upload;
+
+  isUploadSupported$ = of(true);
 
   constructor(
     private readonly httpClient: HttpClient,
@@ -35,10 +37,6 @@ export class XmppHttpFileUploadHandler implements ChatPlugin, FileUploadHandler 
     }
     await firstValueFrom(this.httpClient.put(slotUrl, file, { responseType: 'blob' }));
     return slotUrl;
-  }
-
-  isUploadSupported(): boolean {
-    return true;
   }
 
   private async requestSlot(

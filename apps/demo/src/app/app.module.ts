@@ -15,7 +15,6 @@ import {
   CUSTOM_CONTACT_FACTORY_TOKEN,
   CUSTOM_ROOM_FACTORY_TOKEN,
   USER_AVATAR_TOKEN,
-  USER_NAME_TOKEN,
 } from '@pazznetwork/ngx-xmpp';
 import { CustomContact } from './service/custom-contact';
 import { CustomRoom } from './service/custom-room';
@@ -38,10 +37,6 @@ import { dummyAvatar } from './service/dummy-avatar';
     {
       provide: USER_AVATAR_TOKEN,
       useFactory: () => of(dummyAvatar).pipe(shareReplay({ bufferSize: 1, refCount: true })),
-    },
-    {
-      provide: USER_NAME_TOKEN,
-      useFactory: () => of('InconvenientName').pipe(shareReplay({ bufferSize: 1, refCount: true })),
     },
   ],
   bootstrap: [AppComponent],

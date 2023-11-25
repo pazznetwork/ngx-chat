@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <ngx-chat-file-drop
   class="window-content"
-  [enabled]="fileUploadHandler.isUploadSupported()"
+  [enabled]="fileUploadHandler.isUploadSupported$ | async"
   (fileUpload)="uploadFile($event)"
   [dropMessage]="chatService.translations.dropMessage"
 >

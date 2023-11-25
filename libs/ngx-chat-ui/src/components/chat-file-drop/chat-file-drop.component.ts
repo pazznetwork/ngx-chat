@@ -17,7 +17,7 @@ export class ChatFileDropComponent {
   dropMessage?: string;
 
   @Input()
-  enabled = true;
+  enabled: boolean | null = true;
 
   isDropTarget = false;
 
