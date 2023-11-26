@@ -71,6 +71,10 @@ export class JID {
 }
 
 export function parseJid(jid: string): JID {
+  if (jid == null) {
+    // helpful in other application context
+    throw new Error('Can not parseJid with null, jid=', jid);
+  }
   let local: string | undefined;
   let resource: string | undefined;
   let domain: string | undefined;
