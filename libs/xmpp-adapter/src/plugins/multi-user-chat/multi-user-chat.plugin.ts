@@ -559,6 +559,9 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         roomConfiguration.public
       );
     }
+    if (roomConfiguration.publicList != undefined) {
+      setFieldValue(roomConfigForm, 'boolean', 'public_list', roomConfiguration.publicList);
+    }
     if (roomConfiguration.membersOnly != undefined) {
       setFieldValue(
         roomConfigForm,
@@ -942,13 +945,11 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     if (!from) {
       throw new Error('Can not handle message for undefined from; muc:handleRoomMessageStanza');
     }
-    // should be 'await firstValueFrom(this.getRoomByJid(roomJid))' and we should ensure Room exists with the presence handler
-    const room = await this.getOrCreateRoom(from.bare());
 
     if (this.isRoomInvitationStanza(stanza)) {
-      room.newRoomInvitation(this.handleRoomInvitationMessageStanza(stanza));
-      return true;
+      return this.handleRoomInvitationMessageStanza(stanza);
     }
+    const room = await this.getOrCreateRoom(from.bare());
 
     // When we create a room by message we want to extract the occupants to know their jid's (origin jid's and not jids in room)
     // to avoid querying for them latter
@@ -1021,7 +1022,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     return false;
   }
 
-  handleRoomInvitationMessageStanza(stanza: Stanza): Invitation {
+  async handleRoomInvitationMessageStanza(stanza: Stanza): Promise<true> {
     const xElFinder = Finder.create(stanza).searchByTag('x').searchByNamespace(nsMucUser);
     const invitationEl =
       xElFinder.searchByTag('invite').result ?? xElFinder.searchByTag('decline').result;
@@ -1031,18 +1032,21 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         'Could not find invite or decline element in stanza; muc:handleRoomInvitationMessageStanza'
       );
     }
+    const roomJid = parseJid(invitationEl.getAttribute('to') as string);
+    const room = await this.getOrCreateRoom(roomJid);
 
     const invitation: Invitation = {
       type: invitationEl.tagName as Invitation['type'],
-      roomJid: parseJid(stanza.getAttribute('from') as string),
+      roomJid,
       roomPassword: xElFinder?.searchByTag('password').result?.textContent as string,
-      from: parseJid(invitationEl.getAttribute('from') as string),
+      from: parseJid(stanza.getAttribute('from') as string),
       message: invitationEl.querySelector('reason')?.textContent ?? '',
     };
 
     this.invitationSubject.next(invitation);
 
-    return invitation;
+    room.newRoomInvitation(invitation);
+    return true;
   }
 
   private extractFrom(stanza: Stanza): JID {
