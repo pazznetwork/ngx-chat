@@ -5,6 +5,5 @@ export * from './id-generator';
 export * from './jid';
 export * from './log.token';
 export * from './utils-array';
-export * from './utils-date';
 export * from './utils-file';
 export * from './utils-links';

@@ -91,9 +91,10 @@ export class HandlerService {
     // If a handler is being deleted while it is being added,
     // prevent it from getting added
     const i = this.addHandlers.indexOf(handRef);
-    if (i >= 0) {
-      this.addHandlers.splice(i, 1);
+    if (i === -1) {
+      return;
     }
+    this.addHandlers.splice(i, 1);
   }
 
   /**
@@ -180,9 +181,10 @@ export class HandlerService {
     while (this.removeHandlers.length > 0) {
       const hand = this.removeHandlers.pop();
       const i = this.handlers.indexOf(hand as Handler);
-      if (i >= 0) {
-        this.handlers.splice(i, 1);
+      if (i === -1) {
+        return;
       }
+      this.handlers.splice(i, 1);
     }
   }
 

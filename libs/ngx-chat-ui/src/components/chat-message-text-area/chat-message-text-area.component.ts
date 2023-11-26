@@ -33,12 +33,11 @@ export class ChatMessageTextAreaComponent implements AfterViewInit {
   }
 
   private transform(): void {
-    const message = this.textContent;
-
-    if (!message) {
+    if (!this.textContent) {
       return;
     }
 
+    const message = this.textContent;
     const links = extractUrls(message);
 
     let lastIndex = 0;
