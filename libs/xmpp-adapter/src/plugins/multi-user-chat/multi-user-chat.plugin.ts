@@ -1032,7 +1032,12 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         'Could not find invite or decline element in stanza; muc:handleRoomInvitationMessageStanza'
       );
     }
-    const roomJid = parseJid(invitationEl.getAttribute('to') as string);
+    const conferenceElement = Finder.create(stanza)
+      .searchByTag('x')
+      .searchByNamespace('jabber:x:conference').result;
+    const roomJidString: string =
+      invitationEl.getAttribute('to') ?? (conferenceElement?.getAttribute('jid') as string);
+    const roomJid = parseJid(roomJidString);
     const room = await this.getOrCreateRoom(roomJid);
 
     const invitation: Invitation = {
