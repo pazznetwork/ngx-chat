@@ -28,8 +28,14 @@ export class ChatWindowInputComponent {
   @Output()
   messageSent = new EventEmitter<void>();
 
+  @Output()
+  fileUploaded = new EventEmitter<File>();
+
   @ViewChild('chatInput')
   chatInput?: ElementRef<HTMLTextAreaElement>;
+
+  @ViewChild('fileInput', { static: true })
+  fileInput!: ElementRef<HTMLInputElement>;
 
   message = '';
 
@@ -57,5 +63,24 @@ export class ChatWindowInputComponent {
     }
 
     this.chatInput.nativeElement.focus();
+  }
+
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  fileSelected($event: Event): void {
+    if (!$event || !this.recipient) {
+      return;
+    }
+
+    const target = $event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+      const file = target.files[0];
+      // Emit the file object
+      this.fileUploaded.emit(file);
+      // Reset the value of the input to allow for the same file to be selected again if necessary
+      target.value = '';
+    }
   }
 }

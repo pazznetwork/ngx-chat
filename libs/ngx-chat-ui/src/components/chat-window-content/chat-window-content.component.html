@@ -2,11 +2,11 @@
 <ngx-chat-file-drop
   class="window-content"
   [enabled]="fileUploadHandler.isUploadSupported$ | async"
-  (fileUpload)="uploadFile($event)"
+  (fileUploaded)="uploadFile($event)"
   [dropMessage]="chatService.translations.dropMessage"
 >
   <div (click)="onFocus()">
     <ngx-chat-history [recipient]="recipient" [showAvatars]="showAvatars" [scheduleScrollToBottom$]="scheduleScrollToBottom$" [pendingRequest$]="pendingRequest$" [pendingRequestContact]="asContact"></ngx-chat-history>
-    <ngx-chat-window-input [recipient]="recipient" (messageSent)="afterSendMessage()"></ngx-chat-window-input>
+    <ngx-chat-window-input [recipient]="recipient" (messageSent)="afterSendMessage()"  (fileUploaded)="uploadFile($event)"></ngx-chat-window-input>
   </div>
 </ngx-chat-file-drop>

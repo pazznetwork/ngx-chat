@@ -13,4 +13,11 @@
   >
   </textarea>
   <div class="chat-action chat-window-send" (click)="onSendMessage()">&raquo;</div>
+  <input type="file" [hidden]="true" #fileInput (change)="fileSelected($event)"/>
+  <svg class="chat-action chat-window-upload" (click)="triggerFileInput()" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Use a rounded rectangle as the base of the upload icon -->
+    <rect x="3" y="14" width="18" height="6" rx="3" fill="currentColor"/>
+    <!-- Use a path element to draw the arrow inside the rectangle -->
+    <path d="M12 17V7m0 0l-4 4m4-4l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
 </div>
