@@ -51,6 +51,8 @@ export class HandlerService {
         throw new Error(
           'Removing Strophe handler ' +
             handler.toString() +
+            'after stanza ' +
+            child.outerHTML +
             ' due to uncaught exception: ' +
             (e as Error).message
         );
