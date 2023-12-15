@@ -45,9 +45,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
   showAvatars = true;
 
   @Input()
-  scheduleScrollToBottom$?: Observable<void>;
-
-  @Input()
   pendingRequest$!: Observable<boolean>;
 
   private ngDestroySubject = new Subject<void>();

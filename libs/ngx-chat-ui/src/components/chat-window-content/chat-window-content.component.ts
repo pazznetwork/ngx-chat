@@ -12,7 +12,6 @@ import {
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
 import { combineLatest, map, Observable, of, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -37,9 +36,6 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
   @ViewChild(ChatWindowInputComponent)
   readonly messageInput?: ChatWindowInputComponent;
 
-  private readonly scheduleScrollToBottomSubject = new Subject<void>();
-  readonly scheduleScrollToBottom$ = this.scheduleScrollToBottomSubject.asObservable();
-
   pendingRequest$!: Observable<boolean>;
 
   private ngDestroySubject = new Subject<void>();
@@ -59,10 +55,6 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
     }
     const url = await this.fileUploadHandler.upload(file);
     await this.chatService.messageService.sendMessage(this.recipient, url);
-  }
-
-  afterSendMessage(): void {
-    this.scheduleScrollToBottomSubject.next();
   }
 
   onFocus(): void {
@@ -86,12 +78,6 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
           return isNotBlocked && isNotContact;
         })
       );
-      this.pendingRequest$
-        .pipe(
-          filter((val) => val),
-          takeUntil(this.ngDestroySubject)
-        )
-        .subscribe(() => this.scheduleScrollToBottomSubject.next());
     } else {
       this.pendingRequest$ = of(false);
     }

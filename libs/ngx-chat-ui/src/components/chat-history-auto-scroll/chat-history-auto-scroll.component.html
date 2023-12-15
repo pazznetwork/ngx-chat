@@ -1,5 +1,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<div class="chat-messages-auto-scroll" #scrollContainer>
-  <div class="top-intersection" (ngxChatIntersectionObserver)="scrolledToTop.emit()"></div>
-  <ng-content></ng-content>
+<div class="chat-messages-auto-scroll">
+  <div class="chat-messages-auto-scroll-content">
+    <div class="top-intersection" (ngxChatIntersectionObserver)="scrolledToTop.emit()"></div>
+    <ng-content></ng-content>
+  </div>
 </div>
