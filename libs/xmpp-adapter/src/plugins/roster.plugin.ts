@@ -134,8 +134,7 @@ export class RosterPlugin implements ChatPlugin {
         combineLatest(
           contacts.map((contact) => contact.subscription$.pipe(map((sub) => ({ contact, sub }))))
         )
-      ),
-      shareReplay({ bufferSize: 1, refCount: false })
+      )
     );
 
     const mapToContactByFilter = (
