@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { merge, Observable, scan, startWith, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { type ChatService, Direction, Recipient } from '@pazznetwork/ngx-chat-shared';
-import { CHAT_SERVICE_TOKEN, ChatListStateService, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import {
+  CHAT_SERVICE_TOKEN,
+  ChatListStateService,
+  ChatMessageListRegistryService,
+  OPEN_CHAT_SERVICE_TOKEN,
+  XmppAdapterModule,
+} from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
 import { ChatWindowFrameComponent } from '../chat-window-frame';
 import { ChatWindowHeaderComponent } from '../chat-window-header';
@@ -22,7 +28,7 @@ import { ChatWindowContentComponent } from '../chat-window-content';
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.less'],
 })
-export class ChatWindowComponent implements OnInit {
+export class ChatWindowComponent implements OnInit, OnDestroy {
   @Input()
   recipient!: Recipient;
 
@@ -35,6 +41,7 @@ export class ChatWindowComponent implements OnInit {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
+    @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
     private readonly chatListService: ChatListStateService
   ) {}
 
@@ -51,6 +58,11 @@ export class ChatWindowComponent implements OnInit {
       scan((toggle) => !toggle, false)
     );
     this.isWindowOpen$ = merge(openOnInit$, toggleOpen$);
+    this.chatMessageListRegistry.incrementOpenWindowCount(this.recipient);
+  }
+
+  ngOnDestroy(): void {
+    this.chatMessageListRegistry.decrementOpenWindowCount(this.recipient);
   }
 
   onClickHeader(): void {

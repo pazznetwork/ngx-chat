@@ -6,12 +6,7 @@ import { ChatService, Contact, Recipient, Room } from '@pazznetwork/ngx-chat-sha
 import { CommonModule } from '@angular/common';
 import { ChatMessageEmptyComponent } from '../chat-message-empty';
 import { ChatMessageContactRequestComponent } from '../chat-message-contact-request';
-import {
-  CHAT_SERVICE_TOKEN,
-  ChatMessageListRegistryService,
-  OPEN_CHAT_SERVICE_TOKEN,
-  XmppAdapterModule,
-} from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
 import { ChatHistoryMessagesContactComponent } from '../chat-history-messages-contact';
 import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room';
@@ -63,7 +58,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
-    @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
     private changeDetectorRef: ChangeDetectorRef
   ) {}
 
@@ -76,7 +70,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
       map((messages) => messages.length === 0)
     );
 
-    this.chatMessageListRegistry.incrementOpenWindowCount(this.recipient);
     this.loadMessagesOnScrollToTop();
   }
 
@@ -86,7 +79,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     }
 
     this.ngDestroySubject.next();
-    this.chatMessageListRegistry.decrementOpenWindowCount(this.recipient);
   }
 
   scheduleLoadMessages(): void {
