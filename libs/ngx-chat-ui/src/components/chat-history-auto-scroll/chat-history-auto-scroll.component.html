@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<div class="chat-messages-auto-scroll">
+<div class="chat-messages-auto-scroll" [style.max-height]="maxHeight">
   <div class="chat-messages-auto-scroll-content">
     <div class="top-intersection" (ngxChatIntersectionObserver)="scrolledToTop.emit()"></div>
     <ng-content></ng-content>

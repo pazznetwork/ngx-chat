@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IntersectionObserverDirective } from '../../directives';
 
@@ -13,4 +13,6 @@ import { IntersectionObserverDirective } from '../../directives';
 export class ChatHistoryAutoScrollComponent {
   @Output()
   scrolledToTop = new EventEmitter<void>();
+  @Input()
+  maxHeight = 'none';
 }

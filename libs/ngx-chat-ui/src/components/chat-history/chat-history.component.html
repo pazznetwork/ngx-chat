@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<ngx-chat-history-auto-scroll (scrolledToTop)="scheduleLoadMessages()">
+<ngx-chat-history-auto-scroll (scrolledToTop)="scheduleLoadMessages()" [maxHeight]="maxHeight">
   <ng-container *ngIf="isContact(recipient)">
     <ngx-chat-history-messages-contact [contact]="asContact(recipient)"
                                        [showAvatars]="showAvatars">
