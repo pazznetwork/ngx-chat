@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { map, Observable, ReplaySubject, Subject, tap } from 'rxjs';
-import { shareReplay, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import type { ChatService } from '@pazznetwork/ngx-chat-shared';
 import { Contact, Direction, Message } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
@@ -23,7 +23,7 @@ import {
 })
 export class ChatHistoryMessagesContactComponent implements OnInit, OnDestroy {
   @Input()
-  contact!: Contact;
+  contact?: Contact;
 
   @Input()
   showAvatars = true;
@@ -33,7 +33,6 @@ export class ChatHistoryMessagesContactComponent implements OnInit, OnDestroy {
     1
   );
 
-  // can not render two components with the same recipient example index.html and in chat-window, waisted time 8h
   messagesGroupedByDate$: Observable<{ date: Date; messages: Message[] }[]> =
     this.messagesGroupedByDateSubject.asObservable();
 
@@ -46,6 +45,9 @@ export class ChatHistoryMessagesContactComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    if (this.contact == null) {
+      throw new Error('ngx-chat-history-messages-contact: contact input is null or undefined');
+    }
     this.contact.messageStore.messages$
       .pipe(
         map((messages) => {
@@ -69,7 +71,6 @@ export class ChatHistoryMessagesContactComponent implements OnInit, OnDestroy {
           return returnArray;
         }),
         tap(() => setTimeout(() => this.cdr.detectChanges(), 0)),
-        shareReplay({ bufferSize: 1, refCount: true }),
         takeUntil(this.ngDestroySubject)
       )
       .subscribe(this.messagesGroupedByDateSubject);
