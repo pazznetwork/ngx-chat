@@ -4,18 +4,17 @@ import type { Translations } from './translations';
 
 export function defaultTranslations(): Translations {
   return {
-    addUser: 'Add Contact',
     acceptSubscriptionRequest: 'Accept',
+    addUser: 'Add Contact',
     block: 'Block',
     blockAndReport: 'Block & report',
     chat: 'Chat',
     contactRequestIn: 'Incoming contact requests',
     contactRequestOut: 'Outgoing contact requests',
     contacts: 'Contacts',
-    contactsUnaffiliated: 'Unknown',
     contactsBlocked: 'Blocked',
+    contactsUnaffiliated: 'Unknown',
     dateFormat: 'EEEE, MM/dd/yyyy',
-    removeContact: 'Remove Contact',
     dismiss: 'Dismiss',
     dropMessage: 'Drop your file to send it',
     locale: undefined,
@@ -27,9 +26,10 @@ export function defaultTranslations(): Translations {
       [Presence.present]: 'Online',
       [Presence.unavailable]: 'Offline',
     },
+    removeContact: 'Remove Contact',
     rooms: 'Rooms',
     subscriptionRequestMessage: 'I want to add you as a contact.',
-    unaffiliatedMessage: 'This conversation started without a contact request',
     timeFormat: 'shortTime',
+    unaffiliatedMessage: 'This conversation started without a contact request',
   };
 }
