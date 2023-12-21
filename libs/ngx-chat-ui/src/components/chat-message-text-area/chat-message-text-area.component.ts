@@ -6,6 +6,7 @@ import {
   Input,
   ViewChild,
   ViewContainerRef,
+  ViewEncapsulation,
 } from '@angular/core';
 import { extractUrls } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageTextComponent } from './chat-message-text';
@@ -17,6 +18,8 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   selector: 'ngx-chat-message-text-area',
   templateUrl: './chat-message-text-area.component.html',
+  styleUrls: ['chat-message-text-area.component.less'],
+  encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class ChatMessageTextAreaComponent implements AfterViewInit {
   @Input()
