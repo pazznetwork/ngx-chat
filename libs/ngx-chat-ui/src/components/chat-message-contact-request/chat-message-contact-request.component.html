@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<ngx-chat-bubble>
+<ngx-chat-bubble *ngIf="showAll$ | async">
   <ng-container ngProjectAs="ngx-chat-message-text-area" data-zid="contact-request">
     <span>{{ message$ | async }}</span>
     <ul class="chat-presence-subscription-actions">
