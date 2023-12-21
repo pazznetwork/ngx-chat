@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ReplaySubject, shareReplay, startWith } from 'rxjs';
+import { ReplaySubject, startWith } from 'rxjs';
 import { Direction, type Message } from './message';
 import { findLast, insertSortedLast } from '../utils-array';
 
 export class MessageStore {
   readonly messages: Message[] = [];
   private readonly messagesSubject = new ReplaySubject<Message[]>(1);
-  readonly messages$ = this.messagesSubject.pipe(
-    startWith(this.messages),
-    shareReplay({ bufferSize: 1, refCount: false })
-  );
+  readonly messages$ = this.messagesSubject.pipe(startWith(this.messages));
   readonly messageIdToMessage = new Map<string, Message>();
 
   get oldestMessage(): Message | undefined {

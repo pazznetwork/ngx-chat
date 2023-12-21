@@ -2,12 +2,13 @@
 <ngx-chat-history-auto-scroll (scrolledToTop)="scheduleLoadMessages()" [maxHeight]="maxHeight">
   <ng-container *ngIf="isContact(recipient)">
     <ngx-chat-history-messages-contact [contact]="asContact(recipient)"
+                                       [messages$]="recipient?.messageStore?.messages$"
                                        [showAvatars]="showAvatars">
     </ngx-chat-history-messages-contact>
   </ng-container>
   <ng-container *ngIf="!isContact(recipient)">
-    <ngx-chat-history-messages-room [room]="asRoom(recipient)"
-                                       [showAvatars]="showAvatars">
+    <ngx-chat-history-messages-room [messages$]="recipient?.messageStore?.messages$"
+                                    [showAvatars]="showAvatars">
     </ngx-chat-history-messages-room>
   </ng-container>
   <ngx-chat-message-empty *ngIf="noMessages$ | async"></ngx-chat-message-empty>
