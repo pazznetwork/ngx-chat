@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<ngx-chat-bubble>
+<ngx-chat-bubble [reverse]="true">
   <ngx-chat-bubble-avatar [showAvatar]="showAvatar" [avatar]="chatService.userAvatar$ | async"></ngx-chat-bubble-avatar>
   <ngx-chat-message-text-area [textContent]="message?.body"> </ngx-chat-message-text-area>
   <ngx-chat-message-image [textContent]="message?.body"> </ngx-chat-message-image>
