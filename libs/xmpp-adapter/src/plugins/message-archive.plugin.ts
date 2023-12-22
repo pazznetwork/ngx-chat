@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-import { mergeMap } from 'rxjs';
 import type { Contact, Recipient, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
 import type { ChatPlugin } from '../core';
 import { serializeToSubmitForm } from '../core';
@@ -15,11 +14,9 @@ const nsMAM = 'urn:xmpp:mam:2';
 export class MessageArchivePlugin implements ChatPlugin {
   readonly nameSpace = nsMAM;
 
-  constructor(private readonly chatService: XmppService) {
-    this.chatService.onOnline$.pipe(mergeMap(() => this.requestNewestMessages())).subscribe();
-  }
+  constructor(private readonly chatService: XmppService) {}
 
-  private async requestNewestMessages(): Promise<void> {
+  async requestNewestMessages(): Promise<void> {
     await this.chatService.chatConnectionService
       .$iq({ type: 'set' })
       .c('query', { xmlns: this.nameSpace })

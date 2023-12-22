@@ -106,14 +106,10 @@ export class RosterPlugin implements ChatPlugin {
         ),
         this.xmppService.onOnline$.pipe(
           mergeMap(() => this.getRosterContacts()),
-          mergeMap(async (contacts) => {
+          mergeMap(async (contactsData) => {
             await Promise.all(
-              contacts.map(async (c) =>
-                this.getOrCreateContactById(
-                  c.jid.toString(),
-                  c.name,
-                  await firstValueFrom(c.subscription$)
-                )
+              contactsData.map(async ({ to, name, subscription }) =>
+                this.getOrCreateContactById(to, name, subscription)
               )
             );
             return this.contactsMap;
@@ -245,14 +241,9 @@ export class RosterPlugin implements ChatPlugin {
       .sendResponseLess();
 
     const contacts = await this.rosterQueryResultToContacts(stanza);
-    for (const contact of contacts) {
+    for (const { to, name, subscription } of contacts) {
       // We need to check if the contact is already in the roster
-      await this.getOrCreateContactById(
-        contact.jid.toString(),
-        contact.name,
-        await firstValueFrom(contact.subscription$),
-        contact.avatar
-      );
+      await this.getOrCreateContactById(to, name, subscription);
     }
     return true;
   }
@@ -277,7 +268,9 @@ export class RosterPlugin implements ChatPlugin {
    *
    * @param rosterIQResult XMl Object from jabber:iq:roster namespace
    */
-  private rosterQueryResultToContacts(rosterIQResult: Stanza): Promise<Contact[]> {
+  private rosterQueryResultToContacts(
+    rosterIQResult: Stanza
+  ): Promise<{ to: string; name: string; subscription: ContactSubscription }[]> {
     return Promise.all(
       Finder.create(rosterIQResult)
         .searchByTag('query')
@@ -294,7 +287,7 @@ export class RosterPlugin implements ChatPlugin {
           // I can have only the value 'subscribe'.
           // This value indicates that a subscription request is pending and has been sent to the contact specified by the 'jid' attribute.
           const subscription = ContactSubscription.to;
-          return this.customContactFactory.create(to, name, undefined, subscription);
+          return { to, name, subscription };
         })
     );
   }
@@ -394,7 +387,9 @@ export class RosterPlugin implements ChatPlugin {
       .sendResponseLess();
   }
 
-  async getRosterContacts(): Promise<Contact[]> {
+  async getRosterContacts(): Promise<
+    { to: string; name: string; subscription: ContactSubscription }[]
+  > {
     const responseStanza = await this.xmppService.chatConnectionService
       .$iq({ type: 'get' })
       .c('query', { xmlns: this.nameSpace })

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input, OnDestroy } from '@angular/core';
 import { exhaustMap, map, Observable, Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import { ChatService, Contact, Recipient, Room } from '@pazznetwork/ngx-chat-shared';
@@ -26,9 +26,19 @@ import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room'
   templateUrl: './chat-history.component.html',
   styleUrls: ['./chat-history.component.less'],
 })
-export class ChatHistoryComponent implements OnInit, OnDestroy {
+export class ChatHistoryComponent implements OnDestroy {
+  currentRecipient?: Recipient;
   @Input()
-  recipient?: Recipient;
+  set recipient(value: Recipient | undefined) {
+    if (!value) {
+      throw new Error('ChatHistoryComponent: recipient was null or undefined');
+    }
+
+    this.noMessages$ = value.messageStore.messages$.pipe(map((messages) => messages.length === 0));
+    this.currentRecipient = value;
+
+    this.loadMessagesOnScrollToTop();
+  }
 
   @Input()
   sender?: Contact;
@@ -64,23 +74,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    if (!this.recipient) {
-      return;
-    }
-
-    this.noMessages$ = this.recipient.messageStore.messages$.pipe(
-      map((messages) => messages.length === 0)
-    );
-
-    this.loadMessagesOnScrollToTop();
-  }
-
   ngOnDestroy(): void {
-    if (!this.recipient) {
-      return;
-    }
-
     this.ngDestroySubject.next();
   }
 
@@ -94,15 +88,17 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         filter(() => !this.isLoadingMessages),
         debounceTime(1000),
         exhaustMap(async () => {
-          if (!this.recipient) {
-            return;
+          if (!this.currentRecipient) {
+            throw new Error('ChatHistoryComponent: recipient was null or undefined');
           }
           this.isLoadingMessages = true;
 
           try {
             // improve performance when loading lots of old messages
             this.changeDetectorRef.detach();
-            await this.chatService.messageService.loadMostRecentUnloadedMessages(this.recipient);
+            await this.chatService.messageService.loadMostRecentUnloadedMessages(
+              this.currentRecipient
+            );
           } finally {
             this.changeDetectorRef.reattach();
             this.isLoadingMessages = false;

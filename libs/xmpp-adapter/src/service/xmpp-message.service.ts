@@ -64,6 +64,7 @@ export class XmppMessageService implements MessageService {
       (stanza) => this.handleMessageStanza(stanza),
       { name: 'message' }
     );
+    await this.messageArchivePlugin.requestNewestMessages();
   }
 
   async loadCompleteHistory(): Promise<void> {

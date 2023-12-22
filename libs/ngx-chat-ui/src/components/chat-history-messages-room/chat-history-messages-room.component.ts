@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, Inject, Input } from '@angular/core';
 import { mergeMap, Observable } from 'rxjs';
-import type { ChatService, CustomContactFactory } from '@pazznetwork/ngx-chat-shared';
+import type { ChatService } from '@pazznetwork/ngx-chat-shared';
 import { Contact, Direction, Message } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
@@ -9,7 +9,6 @@ import { ChatMessageOutComponent } from '../chat-message-out';
 import {
   CHAT_SERVICE_TOKEN,
   ChatMessageListRegistryService,
-  CUSTOM_CONTACT_FACTORY_TOKEN,
   OPEN_CHAT_SERVICE_TOKEN,
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
@@ -43,11 +42,8 @@ export class ChatHistoryMessagesRoomComponent {
             throw new Error('message.from is undefined');
           }
 
-          const contact = await this.contactFactory.create(
-            message.from.toString(),
-            message.from.local as string,
-            undefined,
-            undefined
+          const contact = await this.chatService.contactListService.getOrCreateContactById(
+            message.from.toString()
           );
 
           if (!contact) {
@@ -86,8 +82,7 @@ export class ChatHistoryMessagesRoomComponent {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
-    @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
-    @Inject(CUSTOM_CONTACT_FACTORY_TOKEN) public contactFactory: CustomContactFactory
+    @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService
   ) {}
 
   getNickFromContact(contact: Contact): string | undefined {
