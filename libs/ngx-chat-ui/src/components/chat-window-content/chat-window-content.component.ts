@@ -72,12 +72,8 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
             b.jid.bare().equals(this.recipient?.jid.bare())
           );
 
-          // none is checked for pazz
-          const isNotContact = ![
-            (ContactSubscription.both, ContactSubscription.to, ContactSubscription.none),
-          ].includes(subscription);
-
-          return isNotBlocked && isNotContact;
+          // none and undefined no longer checked for pazz
+          return isNotBlocked && ContactSubscription.from === subscription;
         })
       );
     } else {
