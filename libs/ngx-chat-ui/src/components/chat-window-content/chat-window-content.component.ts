@@ -71,9 +71,11 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
           const isNotBlocked = !blockedContacts.find((b) =>
             b.jid.bare().equals(this.recipient?.jid.bare())
           );
-          const isNotContact = ![(ContactSubscription.both, ContactSubscription.to)].includes(
-            subscription
-          );
+
+          // none is checked for pazz
+          const isNotContact = ![
+            (ContactSubscription.both, ContactSubscription.to, ContactSubscription.none),
+          ].includes(subscription);
 
           return isNotBlocked && isNotContact;
         })
