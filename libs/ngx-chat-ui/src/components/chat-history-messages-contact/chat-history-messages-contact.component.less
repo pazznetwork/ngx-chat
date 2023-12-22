@@ -34,18 +34,18 @@
   }
 }
 
-ngx-chat-message-in,
-ngx-chat-message-out {
+ngx-chat-message-in {
   align-self: flex-start;
+  max-width: 100%;
+}
+
+ngx-chat-message-out {
+  align-self: flex-end;
   max-width: 100%;
 }
 
 ngx-chat-message-in:last-child, ngx-chat-message-contact-request {
   animation-name: ngx-chat-message-in;
-}
-
-ngx-chat-message-in {
-  align-self: flex-end;
 }
 
 ngx-chat-message-out:last-child {
