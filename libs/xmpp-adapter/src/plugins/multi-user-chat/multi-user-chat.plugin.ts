@@ -381,7 +381,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         .searchByTag('query')
         .searchByNamespace(nsDiscoItems)
         .searchByTag('set')
-        .searchByNamespace('http://jabber.org/protocol/rsm').result;
+        .searchByNamespace(nsRSM).result;
 
     let resultSet = extractResultSet(roomQueryResponse);
 
@@ -396,7 +396,9 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         .c('set', { xmlns: nsRSM })
         .c('max', {}, String(250))
         .up()
-        .c('after', {}, lastReceivedRoom as string)
+        .cCreateMethod((builder) =>
+          lastReceivedRoom ? builder.c('after', {}, lastReceivedRoom) : builder
+        )
         .send();
       result.push(...(await this.extractRoomSummariesFromResponse(roomQueryResponse)));
       resultSet = extractResultSet(roomQueryResponse);

@@ -56,7 +56,7 @@ export class MessageArchivePlugin implements ChatPlugin {
       .c('set', { xmlns: nsRSM })
       .c('max', {}, '100')
       .cCreateMethod((builder) =>
-        recipient.messageStore.mostRecentMessage
+        recipient.messageStore.mostRecentMessage?.id
           ? builder.c('after', {}, recipient.messageStore.mostRecentMessage.id)
           : builder
       )
