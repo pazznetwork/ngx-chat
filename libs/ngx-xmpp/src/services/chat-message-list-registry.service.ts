@@ -12,10 +12,17 @@ export class ChatMessageListRegistryService implements OpenChatsService {
   openChats$ = this.openChatsSubject.asObservable();
   private chatOpenedSubject = new Subject<Recipient>();
   chatOpened$ = this.chatOpenedSubject.asObservable();
+
+  private chatMessagesViewedSubject = new Subject<Recipient>();
+  chatMessagesViewed$ = this.chatMessagesViewedSubject.asObservable();
   recipientToOpenMessageListCount = new Map<Recipient, number>();
 
   isChatOpen(recipient: Recipient): boolean {
     return this.getOrDefault(recipient, 0) > 0;
+  }
+
+  viewedChatMessages(recipient: Recipient): void {
+    this.chatMessagesViewedSubject.next(recipient);
   }
 
   incrementOpenWindowCount(recipient: Recipient): void {

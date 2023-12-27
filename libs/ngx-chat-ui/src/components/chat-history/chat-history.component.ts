@@ -43,6 +43,8 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     this.currentRecipient = value;
 
     this.loadMessagesOnScrollToTop();
+    // the unread count plugin relies on this call
+    this.chatMessageListRegistry.viewedChatMessages(this.currentRecipient);
   }
 
   @Input()
@@ -84,9 +86,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     if (!this.currentRecipient) {
       throw new Error('ChatHistoryComponent: recipient was null or undefined');
     }
-
-    // the unread count plugin relies on this behaviour
-    this.chatMessageListRegistry.incrementOpenWindowCount(this.currentRecipient);
   }
 
   ngOnDestroy(): void {
@@ -95,8 +94,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     }
 
     this.ngDestroySubject.next();
-    // the unread count plugin relies on this behaviour
-    this.chatMessageListRegistry.decrementOpenWindowCount(this.currentRecipient);
+    this.ngDestroySubject.complete();
   }
 
   scheduleLoadMessages(): void {

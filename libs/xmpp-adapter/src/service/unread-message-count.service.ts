@@ -60,8 +60,8 @@ export class UnreadMessageCountService {
     muc: MultiUserChatPlugin,
     private block: BlockPlugin
   ) {
-    this.chatService.zone.runOutsideAngular(() => {
-      this.chatMessageListRegistry.chatOpened$
+    this.chatService.zone.run(() => {
+      this.chatMessageListRegistry.chatMessagesViewed$
         .pipe(
           delay(0), // prevent 'Expression has changed after it was checked'
           mergeMap((recipient): Promise<void> => this.checkForUnreadCountChange(recipient))
