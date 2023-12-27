@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectorRef, Component, Inject, Input, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { exhaustMap, map, Observable, Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import { ChatService, Contact, Recipient, Room } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatMessageEmptyComponent } from '../chat-message-empty';
 import { ChatMessageContactRequestComponent } from '../chat-message-contact-request';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import {
+  CHAT_SERVICE_TOKEN,
+  ChatMessageListRegistryService,
+  OPEN_CHAT_SERVICE_TOKEN,
+  XmppAdapterModule,
+} from '@pazznetwork/ngx-xmpp';
 import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
 import { ChatHistoryMessagesContactComponent } from '../chat-history-messages-contact';
 import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room';
@@ -26,7 +31,7 @@ import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room'
   templateUrl: './chat-history.component.html',
   styleUrls: ['./chat-history.component.less'],
 })
-export class ChatHistoryComponent implements OnDestroy {
+export class ChatHistoryComponent implements OnInit, OnDestroy {
   currentRecipient?: Recipient;
   @Input()
   set recipient(value: Recipient | undefined) {
@@ -71,11 +76,27 @@ export class ChatHistoryComponent implements OnDestroy {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    @Inject(OPEN_CHAT_SERVICE_TOKEN) private chatMessageListRegistry: ChatMessageListRegistryService
   ) {}
 
+  ngOnInit(): void {
+    if (!this.currentRecipient) {
+      throw new Error('ChatHistoryComponent: recipient was null or undefined');
+    }
+
+    // the unread count plugin relies on this behaviour
+    this.chatMessageListRegistry.incrementOpenWindowCount(this.currentRecipient);
+  }
+
   ngOnDestroy(): void {
+    if (!this.currentRecipient) {
+      throw new Error('ChatHistoryComponent: recipient was null or undefined');
+    }
+
     this.ngDestroySubject.next();
+    // the unread count plugin relies on this behaviour
+    this.chatMessageListRegistry.decrementOpenWindowCount(this.currentRecipient);
   }
 
   scheduleLoadMessages(): void {
