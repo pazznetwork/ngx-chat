@@ -45,6 +45,7 @@ export function createPluginMap(
     xmppService,
     openChatsService,
     publishSubscribePlugin,
+    entityTime,
     multiUserChatPlugin,
     block
   );

@@ -23,6 +23,7 @@ export class PublishSubscribePlugin implements StanzaHandlerChatPlugin {
   readonly publish$ = this.publishSubject.asObservable();
 
   private publishHandler?: Handler;
+  // private supportsPrivatePublishSubject = new ReplaySubject<boolean>(1);
 
   constructor(private readonly xmppChatAdapter: XmppService) {
     xmppChatAdapter.onOnline$.pipe(switchMap(() => this.registerHandler())).subscribe();
@@ -64,9 +65,19 @@ export class PublishSubscribePlugin implements StanzaHandlerChatPlugin {
       .up()
       .up()
       .c('publish-options')
-      .cCreateMethod((builder) =>
-        serializeToSubmitForm(builder, this.getPrivateConfigurationForm(true))
-      )
+      .c('x', { xmlns: 'jabber:x:data', type: 'submit' })
+      .c('field', { var: 'FORM_TYPE' })
+      .c('value', undefined, 'http://jabber.org/protocol/pubsub#publish-options')
+      .up()
+      .up()
+      .c('field', { var: 'pubsub#persist_items' })
+      .c('value', undefined, 'true')
+      .up()
+      .up()
+      .c('field', { var: 'pubsub#access_model' })
+      .c('value', undefined, 'whitelist')
+      .up()
+      .up()
       .send();
   }
 
@@ -151,6 +162,18 @@ export class PublishSubscribePlugin implements StanzaHandlerChatPlugin {
       ],
     };
   }
+
+  // private async determineSupportForPrivatePublish(): Promise<void> {
+  //   let isSupported: boolean;
+  //   try {
+  //     const service = await this.xmppChatAdapter.pluginMap.disco.findService('pubsub', 'pep');
+  //     isSupported =
+  //       service.features.indexOf('http://jabber.org/protocol/pubsub#publish-options') > -1;
+  //   } catch (e) {
+  //     isSupported = false;
+  //   }
+  //   this.supportsPrivatePublishSubject.next(isSupported);
+  // }
 }
 
 export interface Subscription {
