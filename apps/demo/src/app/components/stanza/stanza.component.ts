@@ -52,10 +52,11 @@ export class StanzaComponent {
   private parse(request: string): { attributes: Record<string, string>; element: Element } {
     const parser = new globalThis.DOMParser();
     const element = parser.parseFromString(request, 'text/xml').documentElement;
-    const attributes = Array.from(element.attributes).reduce(
-      (acc, val) => (acc[val.name] = val.value),
-      {}
-    );
+    const attributeArray = Array.from(element.attributes);
+    const attributes = attributeArray.reduce((acc, val) => {
+      acc[`${val.name}`] = val.value;
+      return acc;
+    }, {});
 
     return { attributes, element };
   }
