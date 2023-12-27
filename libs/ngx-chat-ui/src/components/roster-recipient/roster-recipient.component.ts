@@ -27,7 +27,7 @@ export class RosterRecipientComponent implements OnInit {
       throw new Error('recipient cannot be undefined');
     }
     this.unreadCount$ = this.chatService.messageService.jidToUnreadCount$.pipe(
-      map((jidToUnreadCount) => jidToUnreadCount.get(this.recipient.jid.toString()) || 0),
+      map((jidToUnreadCount) => jidToUnreadCount.get(this.recipient.jid.bare().toString()) || 0),
       distinctUntilChanged(),
       debounceTime(20)
     );

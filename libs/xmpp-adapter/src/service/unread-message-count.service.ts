@@ -141,9 +141,17 @@ export class UnreadMessageCountService {
     this.updateContactUnreadMessageState(recipient);
   }
 
-  async fillJidToLastSeenDates(): Promise<any> {
-    const fetchedDates = await this.fetchLastSeenDates();
-    this.mergeJidToDates(fetchedDates);
+  async fillJidToLastSeenDates(): Promise<void> {
+    try {
+      const fetchedDates = await this.fetchLastSeenDates();
+      this.mergeJidToDates(fetchedDates);
+    } catch (e) {
+      if (e?.toString().includes('item-not-found')) {
+        return;
+      }
+
+      throw e;
+    }
   }
 
   onOffline(): void {

@@ -139,6 +139,9 @@ export class XmppMessageService implements MessageService {
       return true;
     }
 
+    if (stanza.querySelector('items')?.getAttribute('node') === 'ngxchat:unreadmessagedate') {
+      return true;
+    }
     // can be wrapped in result from a query, or in a message received carbons
     const messageElement = Finder.create(stanza)
       .searchByTag('forwarded')
