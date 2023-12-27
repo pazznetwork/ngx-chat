@@ -87,7 +87,7 @@ export class UnreadMessageCountService {
             if (!recipient) {
               continue;
             }
-            const jid = recipient.jid.toString();
+            const jid = recipient.jid.bare().toString();
             if (!this.recipientIdToMessageSubscription.has(jid)) {
               const messages$: Observable<Message[]> = recipient.messageStore.messages$;
               const updateUnreadCountSubscription = messages$
@@ -184,7 +184,7 @@ export class UnreadMessageCountService {
   }
 
   updateContactUnreadMessageState(recipient: Recipient): void {
-    const contactJid = recipient.jid.toString();
+    const contactJid = recipient.jid.bare().toString();
     const lastReadDate = this.jidToLastReadTimestamp.get(contactJid) || 0;
     const contactUnreadMessageCount = this.calculateUnreadMessageCount(recipient, lastReadDate);
     const jidToCount = this.jidToUnreadCountSubject.getValue();
