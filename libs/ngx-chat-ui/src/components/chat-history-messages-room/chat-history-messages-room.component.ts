@@ -2,13 +2,20 @@
 import { ChangeDetectorRef, Component, Inject, Input } from '@angular/core';
 import { mergeMap, Observable, tap } from 'rxjs';
 import type { ChatService } from '@pazznetwork/ngx-chat-shared';
-import { Contact, Direction, Message } from '@pazznetwork/ngx-chat-shared';
+import {
+  Contact,
+  ContactSubscription,
+  CustomContactFactory,
+  Direction,
+  Message,
+} from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
 import { ChatMessageOutComponent } from '../chat-message-out';
 import {
   CHAT_SERVICE_TOKEN,
   ChatMessageListRegistryService,
+  CUSTOM_CONTACT_FACTORY_TOKEN,
   OPEN_CHAT_SERVICE_TOKEN,
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
@@ -42,8 +49,11 @@ export class ChatHistoryMessagesRoomComponent {
             throw new Error('message.from is undefined');
           }
 
-          const contact = await this.chatService.contactListService.getOrCreateContactById(
-            message.from.toString()
+          const contact = await this.customContactFactory.create(
+            message.from.toString(),
+            message.from?.local?.toString() ?? '',
+            undefined,
+            ContactSubscription.none
           );
 
           if (!contact) {
@@ -84,6 +94,8 @@ export class ChatHistoryMessagesRoomComponent {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
     @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
+    @Inject(CUSTOM_CONTACT_FACTORY_TOKEN)
+    private readonly customContactFactory: CustomContactFactory,
     private readonly cdr: ChangeDetectorRef
   ) {}
 
