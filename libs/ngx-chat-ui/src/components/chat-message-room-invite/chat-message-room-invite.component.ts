@@ -42,6 +42,6 @@ export class ChatMessageRoomInviteComponent {
     this.chatService.roomService.declineRoomInvite(this.invitation.roomJid.toString());
     this.room.clearRoomInvitation();
     this.invitation = undefined;
-    await this.chatService.contactListService.removeContact(this.room.jid.toString());
+    await this.chatService.roomService.leaveRoom(this.room.jid.toString());
   }
 }
