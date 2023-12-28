@@ -120,7 +120,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
           })
         ),
         this.xmppService.onOnline$.pipe(
-          mergeMap(async () => this.getAndJoinRooms()),
+          mergeMap(async () => this.getRooms()),
           map((contacts) => {
             contacts.forEach((c) => this.roomsMap.set(c.jid.bare().toString(), c));
             return this.roomsMap;
@@ -344,16 +344,18 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       .send();
   }
 
-  private async getAndJoinRooms(): Promise<Room[]> {
-    const rooms = await this.getRooms();
-    // We need to join rooms in our room list to regain affiliation
-    // the logic is the same as broadcasting that you are online in a room / channel
-    // .then() because there seems to be a problem with the promise resolution when joining multiple rooms
-    // can be refactored to be joined when accessing messages of room for example in the ui
-    // rooms would need than a joined Flag
-    rooms.map((room) => this.joinRoom(room.jid).then());
-    return rooms;
-  }
+  // TODO: make it configurable
+  // Pazz is depending on the chat not to join rooms from its list
+  // private async getAndJoinRooms(): Promise<Room[]> {
+  //   const rooms = await this.getRooms();
+  //   // We need to join rooms in our room list to regain affiliation
+  //   // the logic is the same as broadcasting that you are online in a room / channel
+  //   // .then() because there seems to be a problem with the promise resolution when joining multiple rooms
+  //   // can be refactored to be joined when accessing messages of room for example in the ui
+  //   // rooms would need than a joined Flag
+  //   rooms.map((room) => this.joinRoom(room.jid).then());
+  //   return rooms;
+  // }
 
   async getRooms(): Promise<Room[]> {
     const roomQueryResponse = await this.getRoomsQuery();
