@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import type { ChatService, FileUploadHandler, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { Contact, ContactSubscription } from '@pazznetwork/ngx-chat-shared';
 import { ChatWindowInputComponent } from '../chat-window-input';
@@ -11,7 +19,7 @@ import {
   FILE_UPLOAD_HANDLER_TOKEN,
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
-import { combineLatest, map, Observable, of, Subject } from 'rxjs';
+import { combineLatest, map, Observable, of, Subject, tap } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -46,7 +54,8 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
-    @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler
+    @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   async uploadFile(file: File): Promise<void> {
@@ -74,7 +83,8 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
 
           // none and undefined no longer checked for pazz
           return isNotBlocked && ContactSubscription.from === subscription;
-        })
+        }),
+        tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
       );
     } else {
       this.pendingRequest$ = of(false);

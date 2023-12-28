@@ -276,20 +276,51 @@ export class RosterPlugin implements ChatPlugin {
         .searchByTag('query')
         .searchByTag('item')
         .results.map((rosterItem) => {
+          // The ask attribute in the roster item element is an optional attribute used to indicate an outstanding subscription request.
+          // It can have only the value 'subscribe'.
+          // This value indicates that a subscription request is pending and has been sent to the contact specified by the 'jid' attribute.
           const to = rosterItem.getAttribute('jid') as string;
           const attrName = rosterItem.getAttribute('name') ?? to;
           const name = attrName.includes('@') ? (attrName?.split('@')?.[0] as string) : attrName;
 
-          // The default is to because there is no subscription attribute on roster items,
-          // we assume that the user has subscribed to the contact
-          // when adding him to the roster as does our code
-          // The ask attribute in the roster item element is an optional attribute used to indicate an outstanding subscription request.
-          // I can have only the value 'subscribe'.
-          // This value indicates that a subscription request is pending and has been sent to the contact specified by the 'jid' attribute.
-          const subscription = ContactSubscription.to;
+          const subscription = this.processSubscription(rosterItem.getAttribute('subscription'));
           return { to, name, subscription };
         })
     );
+  }
+
+  // The default is to because there is no subscription attribute on roster items,
+  // we assume that the user has subscribed to the contact when adding him to the roster as does our code.
+  //
+  // https://xmpp.org/rfcs/rfc6121.html#roster-syntax-items-subscription
+  //The state of the presence subscription is captured in the 'subscription' attribute of the <item/> element. The defined subscription-related values are:
+  //
+  // none:
+  // the user does not have a subscription to the contact's presence, and the contact does not have a subscription to the user's presence; this is the default value, so if the subscription attribute is not included then the state is to be understood as "none"
+  // to:
+  // the user has a subscription to the contact's presence, but the contact does not have a subscription to the user's presence
+  // from:
+  // the contact has a subscription to the user's presence, but the user does not have a subscription to the contact's presence
+  // both:
+  // the user and the contact have subscriptions to each other's presence (also called a "mutual subscription")
+  // In a roster result, the client MUST ignore values of the 'subscription' attribute other than "none", "to", "from", or "both".
+  //
+  // In a roster push, the client MUST ignore values of the 'subscription' attribute other than "none", "to", "from", "both", or "remove".
+  //
+  // In a roster set, the 'subscription' attribute MAY be included with a value of "remove", which indicates that the item is to be removed from the roster; in a roster set the server MUST ignore all values of the 'subscription' attribute other than "remove".
+  //
+  // Inclusion of the 'subscription' attribute is OPTIONAL.
+  private processSubscription(subscription: string | undefined | null): ContactSubscription {
+    if (subscription === 'both') {
+      return ContactSubscription.both;
+    }
+    // We have only a roster item when we added the contact,
+    // in code we also subscribe which means this case occurs when we have a pending subscription
+    // that means we subscribed while the contact was offline and we wait for his approval
+    if (subscription === 'from') {
+      return ContactSubscription.both;
+    }
+    return ContactSubscription.to;
   }
 
   private async handlePresenceStanza(stanza: PresenceStanza): Promise<boolean> {
@@ -350,7 +381,7 @@ export class RosterPlugin implements ChatPlugin {
     }
 
     if (type === 'subscribe') {
-      if (isSubscribed) {
+      if (await firstValueFrom(fromContact.isSubscribed())) {
         // subscriber is already a contact of us, approve subscription
         await this.sendApprovalSubscription(fromJid);
         await fromContact.updateSubscriptionOnReceived();
@@ -436,9 +467,6 @@ export class RosterPlugin implements ChatPlugin {
 
   async addContact(jid: string): Promise<void> {
     const existingContact = await this.getContactById(jid);
-    if (existingContact && (await firstValueFrom(existingContact.isSubscribed()))) {
-      return;
-    }
 
     // new contact should come from the server push
     const moreContactsPromise = firstValueFrom(
@@ -453,7 +481,7 @@ export class RosterPlugin implements ChatPlugin {
     // subscribe is necessary because a subscribed won't be resent to user after getting online
     await this.sendSubscribe(jid);
     await moreContactsPromise;
-    existingContact?.newSubscription(ContactSubscription.to);
+    await existingContact?.updateSubscriptionOnRequestSent();
   }
 
   private async sendAddToRoster(jid: string): Promise<Element> {
