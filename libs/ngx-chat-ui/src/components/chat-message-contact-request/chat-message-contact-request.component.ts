@@ -2,13 +2,13 @@
 import { Component, Inject, Input, Optional } from '@angular/core';
 import { map, merge, Observable, startWith, Subject } from 'rxjs';
 import {
+  CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
-  ChatListStateService,
   REPORT_USER_INJECTION_TOKEN,
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
 import type { ChatService, Contact, ReportUserService } from '@pazznetwork/ngx-chat-shared';
-import { ContactSubscription } from '@pazznetwork/ngx-chat-shared';
+import { ContactSubscription, OpenChatStateService } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatBubbleComponent } from '../chat-bubble';
 import { shareReplay } from 'rxjs/operators';
@@ -80,7 +80,8 @@ export class ChatMessageContactRequestComponent {
   showAll$ = this.showAllSubject.pipe(startWith(true));
 
   constructor(
-    public chatListService: ChatListStateService,
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    public chatListService: OpenChatStateService,
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
     @Optional() @Inject(REPORT_USER_INJECTION_TOKEN) public reportUserService: ReportUserService
   ) {}

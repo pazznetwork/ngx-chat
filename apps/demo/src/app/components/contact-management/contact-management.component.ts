@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, Inject, Input } from '@angular/core';
-import { ChatService, Log, LOG_SERVICE_TOKEN } from '@pazznetwork/ngx-chat-shared';
-import { CHAT_SERVICE_TOKEN, ChatListStateService } from '@pazznetwork/ngx-xmpp';
+import {
+  ChatService,
+  Log,
+  LOG_SERVICE_TOKEN,
+  OpenChatStateService,
+} from '@pazznetwork/ngx-chat-shared';
+import { CHAT_LIST_STATE_SERVICE_TOKEN, CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
   selector: 'ngx-chat-demo-contact-management',
@@ -16,7 +21,8 @@ export class ContactManagementComponent {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     @Inject(LOG_SERVICE_TOKEN) readonly logService: Log,
-    private chatListStateService: ChatListStateService
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    private chatListStateService: OpenChatStateService
   ) {}
 
   async onAddContact(): Promise<void> {
@@ -29,7 +35,8 @@ export class ContactManagementComponent {
 
   async onOpenChat(): Promise<void> {
     this.chatListStateService.openChat(
-      await this.chatService.contactListService.getOrCreateContactById(this.ensureFullJid())
+      await this.chatService.contactListService.getOrCreateContactById(this.ensureFullJid()),
+      false
     );
   }
 

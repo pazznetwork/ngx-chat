@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { OpenChatsService, Recipient } from '@pazznetwork/ngx-chat-shared';
 
 /**
  * Used to determine if a message component for a given recipient is open.
  */
-@Injectable()
 export class ChatMessageListRegistryService implements OpenChatsService {
   private openChatsSubject = new BehaviorSubject<Set<Recipient>>(new Set());
   openChats$ = this.openChatsSubject.asObservable();

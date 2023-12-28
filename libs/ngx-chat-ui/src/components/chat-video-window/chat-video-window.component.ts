@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
-import type { AttachableTrack } from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
 import { ChatWindowFrameComponent } from '../chat-window-frame';
+import { AttachableTrack } from '@pazznetwork/ngx-chat-shared';
 
 @Component({
   standalone: true,

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 export * from './affiliation';
 export * from './auth-request';
+export * from './chat-browser-notification-service';
 export * from './chat-contact-click-handler';
 export * from './chat.service';
 export * from './connection-states';
@@ -17,6 +18,7 @@ export * from './log';
 export * from './message-store';
 export * from './message';
 export * from './occupant-change';
+export * from './open-chat-state-service';
 export * from './open-chats-service';
 export * from './presence';
 export * from './recipient';

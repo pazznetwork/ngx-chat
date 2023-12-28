@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Inject, Injectable } from '@angular/core';
+import { Inject } from '@angular/core';
 import { CHAT_SERVICE_TOKEN } from '../injection-token';
-import { ChatService, Contact, JID, Room } from '@pazznetwork/ngx-chat-shared';
+import {
+  ChatBrowserNotificationService,
+  ChatService,
+  Contact,
+  JID,
+  Room,
+} from '@pazznetwork/ngx-chat-shared';
 
-@Injectable()
-export class ChatBackgroundNotificationService {
+export class ChatBackgroundNotificationService implements ChatBrowserNotificationService {
   private enabled = false;
 
   constructor(@Inject(CHAT_SERVICE_TOKEN) protected chatService: ChatService) {

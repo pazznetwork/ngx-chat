@@ -1,24 +1,20 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Inject, Injectable } from '@angular/core';
+import { Inject } from '@angular/core';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
-import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
+import type {
+  AttachableTrack,
+  ChatService,
+  ChatWindowState,
+  OpenChatStateService,
+  Recipient,
+} from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN } from '../injection-token';
 import { filter, map, shareReplay } from 'rxjs/operators';
-
-interface ChatWindowState {
-  recipient: Recipient;
-  isCollapsed: boolean;
-}
-
-export interface AttachableTrack {
-  attach(elem: HTMLVideoElement): void;
-}
 
 /**
  * Used to open chat windows programmatically.
  */
-@Injectable()
-export class ChatListStateService {
+export class ChatListStateService implements OpenChatStateService {
   private readonly openChatSubject = new Subject<ChatWindowState>();
   private readonly closeChatSubject = new Subject<string>();
   private readonly openChatsMap = new Map<string, ChatWindowState>();

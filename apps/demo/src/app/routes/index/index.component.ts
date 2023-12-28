@@ -5,16 +5,18 @@ import { ApplicationRef, Component, Inject, NgZone, OnDestroy } from '@angular/c
 import { firstValueFrom, map, merge, Observable, startWith, Subject } from 'rxjs';
 import {
   AuthRequest,
+  ChatBrowserNotificationService,
   ChatService,
   Log,
   LOG_SERVICE_TOKEN,
   LogLevel,
+  OpenChatStateService,
 } from '@pazznetwork/ngx-chat-shared';
 import { takeUntil } from 'rxjs/operators';
 import {
+  CHAT_BACKGROUND_NOTIFICATION_SERVICE_TOKEN,
+  CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
-  ChatBackgroundNotificationService,
-  ChatListStateService,
 } from '@pazznetwork/ngx-xmpp';
 import { XmppService } from '@pazznetwork/xmpp-adapter';
 import { cleanUpJabber } from '../../../../../../libs/ngx-xmpp/src/test/helpers/ejabberd-client';
@@ -38,10 +40,12 @@ export class IndexComponent implements OnDestroy {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     @Inject(LOG_SERVICE_TOKEN) readonly logService: Log,
-    private chatListStateService: ChatListStateService,
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    private chatListStateService: OpenChatStateService,
     private readonly appRef: ApplicationRef,
     private readonly ngZone: NgZone,
-    private readonly chatBackgroundNotificationService: ChatBackgroundNotificationService
+    @Inject(CHAT_BACKGROUND_NOTIFICATION_SERVICE_TOKEN)
+    private readonly chatBackgroundNotificationService: ChatBrowserNotificationService
   ) {
     const item = localStorage.getItem('data');
     const contactData: {
@@ -183,7 +187,8 @@ export class IndexComponent implements OnDestroy {
     }
     const jid = this.otherJid?.includes('@') ? this.otherJid : this.otherJid + '@' + this.domain;
     this.chatListStateService.openChat(
-      await this.chatService.contactListService.getOrCreateContactById(jid)
+      await this.chatService.contactListService.getOrCreateContactById(jid),
+      false
     );
   }
 

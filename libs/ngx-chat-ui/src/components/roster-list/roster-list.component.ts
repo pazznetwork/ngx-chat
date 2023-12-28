@@ -11,8 +11,12 @@ import {
 } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
-import { Room } from '@pazznetwork/ngx-chat-shared';
-import { CHAT_SERVICE_TOKEN, ChatListStateService, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { OpenChatStateService, Room } from '@pazznetwork/ngx-chat-shared';
+import {
+  CHAT_LIST_STATE_SERVICE_TOKEN,
+  CHAT_SERVICE_TOKEN,
+  XmppAdapterModule,
+} from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
 import { RosterRecipientComponent } from '../roster-recipient';
 import { RosterRecipientPresenceComponent } from '../roster-recipient-presence';
@@ -90,7 +94,8 @@ export class RosterListComponent implements OnInit {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
-    private readonly chatListService: ChatListStateService,
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    private readonly chatListService: OpenChatStateService,
     private readonly cdr: ChangeDetectorRef
   ) {}
 
@@ -123,7 +128,7 @@ export class RosterListComponent implements OnInit {
   }
 
   onClickRecipient(recipient: Recipient): void {
-    this.chatListService.openChat(recipient);
+    this.chatListService.openChat(recipient, false);
   }
 
   toggleVisibility(): void {

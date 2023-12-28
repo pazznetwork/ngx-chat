@@ -2,10 +2,15 @@
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { merge, Observable, scan, startWith, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { type ChatService, Direction, Recipient } from '@pazznetwork/ngx-chat-shared';
 import {
+  type ChatService,
+  Direction,
+  OpenChatStateService,
+  Recipient,
+} from '@pazznetwork/ngx-chat-shared';
+import {
+  CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
-  ChatListStateService,
   ChatMessageListRegistryService,
   OPEN_CHAT_SERVICE_TOKEN,
   XmppAdapterModule,
@@ -42,7 +47,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
-    private readonly chatListService: ChatListStateService
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    private readonly chatListService: OpenChatStateService
   ) {}
 
   ngOnInit(): void {

@@ -4,9 +4,16 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { ChatVideoWindowComponent } from '../chat-video-window';
 import { ChatWindowComponent } from '../chat-window';
-import { AttachableTrack, CHAT_SERVICE_TOKEN, ChatListStateService } from '@pazznetwork/ngx-xmpp';
+import { CHAT_LIST_STATE_SERVICE_TOKEN, CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { merge, mergeMap, Observable, Subject, tap, throttleTime } from 'rxjs';
-import { ChatService, Contact, Recipient, Room } from '@pazznetwork/ngx-chat-shared';
+import {
+  AttachableTrack,
+  ChatService,
+  Contact,
+  OpenChatStateService,
+  Recipient,
+  Room,
+} from '@pazznetwork/ngx-chat-shared';
 import { filter, map, pairwise, startWith, takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -51,7 +58,8 @@ export class ChatBarWindowsComponent implements OnInit, OnDestroy {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService,
-    readonly chatListService: ChatListStateService,
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    readonly chatListService: OpenChatStateService,
     readonly cdr: ChangeDetectorRef
   ) {
     this.tracks$ = this.chatListService.openTracks$.pipe(
@@ -84,7 +92,7 @@ export class ChatBarWindowsComponent implements OnInit, OnDestroy {
         throttleTime(5000),
         takeUntil(this.ngDestroySubject)
       )
-      .subscribe((contact) => this.chatListService.openChat(contact));
+      .subscribe((contact) => this.chatListService.openChat(contact, false));
 
     merge(
       this.contacts$ ?? this.chatService.contactListService.contacts$,
