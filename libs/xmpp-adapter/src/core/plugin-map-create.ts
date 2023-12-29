@@ -5,6 +5,7 @@ import {
   EntityTimePlugin,
   MessageArchivePlugin,
   MessageCarbonsPlugin,
+  MessageStatePlugin,
   MessageUuidPlugin,
   MucSubPlugin,
   MultiUserChatPlugin,
@@ -60,12 +61,12 @@ export function createPluginMap(
     entityTime,
     mam: new MessageArchivePlugin(xmppService),
     messageCarbon: new MessageCarbonsPlugin(xmppService),
-    /*    messageState: new MessageStatePlugin(
+    messageState: new MessageStatePlugin(
       publishSubscribePlugin,
       xmppService,
       openChatsService,
       logService
-    ),*/
+    ),
     messageUuid: new MessageUuidPlugin(),
     mucSub: new MucSubPlugin(xmppService, serviceDiscoveryPlugin),
     ping: new PingPlugin(xmppService),

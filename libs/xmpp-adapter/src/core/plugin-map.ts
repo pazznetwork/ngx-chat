@@ -5,6 +5,7 @@ import type {
   EntityTimePlugin,
   MessageArchivePlugin,
   MessageCarbonsPlugin,
+  MessageStatePlugin,
   MessageUuidPlugin,
   MucSubPlugin,
   MultiUserChatPlugin,
@@ -24,7 +25,7 @@ export interface PluginMap {
   entityTime: EntityTimePlugin;
   mam: MessageArchivePlugin;
   messageCarbon: MessageCarbonsPlugin;
-  // messageState: MessageStatePlugin;
+  messageState: MessageStatePlugin;
   messageUuid: MessageUuidPlugin;
   mucSub: MucSubPlugin;
   ping: PingPlugin;

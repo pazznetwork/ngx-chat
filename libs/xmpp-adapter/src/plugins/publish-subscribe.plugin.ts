@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
-import { Subject, switchMap } from 'rxjs';
-import type { Stanza, StanzaHandlerChatPlugin } from '../core';
+import { Subject } from 'rxjs';
+import type { ChatPlugin, Stanza } from '../core';
 import { serializeToSubmitForm, XmppResponseError } from '../core';
 import type { XmppService } from '../xmpp.service';
 import type { StanzaBuilder } from '../stanza-builder';
 import type { XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
-import type { Handler } from '@pazznetwork/strophets';
 
 export const nsPubSub = 'http://jabber.org/protocol/pubsub';
 export const nsPubSubOwner = `${nsPubSub}#owner`;
@@ -16,38 +15,22 @@ export const nsPubSubOptions = `${nsPubSub}#publish-options`;
  * XEP-0060 Publish Subscribe (https://xmpp.org/extensions/xep-0060.html)
  * XEP-0223 Persistent Storage of Private Data via PubSub (https://xmpp.org/extensions/xep-0223.html)
  */
-export class PublishSubscribePlugin implements StanzaHandlerChatPlugin {
-  nameSpace = nsPubSubEvent;
+export class PublishSubscribePlugin implements ChatPlugin {
+  nameSpace = nsPubSub;
 
-  private readonly publishSubject = new Subject<Stanza>();
-  readonly publish$ = this.publishSubject.asObservable();
+  private readonly publishEventSubject = new Subject<Stanza>();
+  readonly publishEvent$ = this.publishEventSubject.asObservable();
 
-  private publishHandler?: Handler;
   // private supportsPrivatePublishSubject = new ReplaySubject<boolean>(1);
 
-  constructor(private readonly xmppChatAdapter: XmppService) {
-    xmppChatAdapter.onOnline$.pipe(switchMap(() => this.registerHandler())).subscribe();
-    xmppChatAdapter.onOffline$.pipe(switchMap(() => this.unregisterHandler())).subscribe();
+  constructor(private readonly xmppChatAdapter: XmppService) {}
+
+  isPubSubEvent(stanza: Element): boolean {
+    return stanza.querySelector('event')?.getAttribute('xmlns') === nsPubSubEvent;
   }
 
-  async registerHandler(): Promise<void> {
-    this.publishHandler = await this.xmppChatAdapter.chatConnectionService.addHandler(
-      (stanza) => {
-        this.publishSubject.next(stanza);
-        return true;
-      },
-      {
-        ns: nsPubSub,
-        name: 'message',
-      }
-    );
-  }
-
-  async unregisterHandler(): Promise<void> {
-    if (!this.publishHandler) {
-      return;
-    }
-    await this.xmppChatAdapter.chatConnectionService.deleteHandler(this.publishHandler);
+  publishEvent(stanza: Element): void {
+    this.publishEventSubject.next(stanza);
   }
 
   async storePrivatePayloadPersistent(

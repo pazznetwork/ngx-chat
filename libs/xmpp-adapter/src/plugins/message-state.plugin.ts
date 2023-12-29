@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 import { filter, switchMap } from 'rxjs/operators';
-import type { Log, NewMessage, OpenChatsService } from '@pazznetwork/ngx-chat-shared';
-import { Direction, JID, Message, MessageState, parseJid } from '@pazznetwork/ngx-chat-shared';
-import type { ChatPlugin, MessageWithBodyStanza, Stanza } from '../core';
+import type { Log, OpenChatsService } from '@pazznetwork/ngx-chat-shared';
+import { Contact, JID, Message, MessageState } from '@pazznetwork/ngx-chat-shared';
+import type { ChatPlugin, Stanza } from '../core';
 import type { XmppService } from '../xmpp.service';
-import { MessageUuidPlugin } from './message-uuid.plugin';
 import type { PublishSubscribePlugin } from './publish-subscribe.plugin';
-import { combineLatest, firstValueFrom } from 'rxjs';
+import { combineLatest, firstValueFrom, tap } from 'rxjs';
 import type { StanzaBuilder } from '../stanza-builder';
 
 export interface StateDate {
@@ -36,40 +35,46 @@ export class MessageStatePlugin implements ChatPlugin {
     private readonly chatService: XmppService,
     private readonly openChatsService: OpenChatsService,
     private readonly logService: Log
-  ) {}
-
-  active(): void {
-    this.chatService.onOnline$.subscribe(() => this.onBeforeOnline());
-    this.chatService.onOffline$.subscribe(() => this.onOffline());
+  ) {
+    this.chatService.onOnline$.pipe(switchMap(() => this.onOnline())).subscribe();
+    this.chatService.onOffline$.subscribe(() => this.jidToMessageStateDate.clear());
 
     combineLatest([this.openChatsService.openChats$, this.chatService.isOnline$])
       .pipe(
         filter(([, online]) => online),
         switchMap(([contacts]) =>
-          Array.from(contacts).map(async (contact) => {
-            if (contact.messageStore.mostRecentMessageReceived) {
-              await this.sendMessageStateNotification(
-                contact.jid,
-                contact.messageStore.mostRecentMessageReceived.id,
-                MessageState.RECIPIENT_SEEN
-              );
-            }
-          })
+          Promise.all(
+            Array.from(contacts).map(async (contact) => {
+              if (contact.messageStore.mostRecentMessageReceived) {
+                await this.sendMessageStateNotification(
+                  contact.jid,
+                  contact.messageStore.mostRecentMessageReceived.id,
+                  MessageState.RECIPIENT_SEEN
+                );
+              }
+            })
+          )
         )
       )
       .subscribe();
 
-    this.publishSubscribePlugin.publish$
+    this.publishSubscribePlugin.publishEvent$
       .pipe(
-        filter((stanza) => stanza.querySelector('items')?.getAttribute('node') === this.nameSpace)
+        filter((stanza) => stanza.querySelector('items')?.getAttribute('node') === this.nameSpace),
+        tap(() => console.log('calling processPubSub in message-state.plugin'))
       )
       .subscribe((stanza) => this.processPubSub(Array.from(stanza?.querySelectorAll('item'))));
   }
 
-  private onBeforeOnline(): void {
-    this.parseContactMessageStates().catch((err) =>
-      this.logService.error('error parsing contact message states', err)
-    );
+  private async onOnline(): Promise<void> {
+    try {
+      await this.parseContactMessageStates();
+    } catch (err) {
+      if ((err as string).includes('item-not-found')) {
+        return;
+      }
+      this.logService.error('error parsing contact message states', err);
+    }
   }
 
   private async parseContactMessageStates(): Promise<void> {
@@ -110,81 +115,35 @@ export class MessageStatePlugin implements ChatPlugin {
       (builder: StanzaBuilder) =>
         builder.c(wrapperNodeName).cCreateMethod((childBuilder) => {
           [...this.jidToMessageStateDate.entries()].map(([jid, stateDates]) =>
-            childBuilder.c(nodeName, {
-              jid,
-              lastRecipientReceived: String(stateDates.lastRecipientReceived.getTime()),
-              lastRecipientSeen: String(stateDates.lastRecipientSeen.getTime()),
-              lastSent: String(stateDates.lastSent.getTime()),
-            })
+            childBuilder
+              .c(nodeName, {
+                jid,
+                lastRecipientReceived: String(stateDates.lastRecipientReceived.getTime()),
+                lastRecipientSeen: String(stateDates.lastRecipientSeen.getTime()),
+                lastSent: String(stateDates.lastSent.getTime()),
+              })
+              .up()
           );
           return childBuilder;
         })
     );
   }
 
-  private onOffline(): void {
-    this.jidToMessageStateDate.clear();
-  }
-
-  beforeSendMessage(message: NewMessage, messageStanza: Element): void {
-    const type = messageStanza.getAttribute('type');
-    if (type === 'chat' && message) {
-      message.state = MessageState.SENDING;
-    }
-  }
-
-  async afterSendMessage(message: Message, messageStanza: Element): Promise<void> {
-    const type = messageStanza.getAttribute('type');
-    const to = messageStanza.getAttribute('to');
-    if (type === 'chat') {
-      this.updateContactMessageState(
-        parseJid(to as string)
-          .bare()
-          .toString(),
-        MessageState.SENT,
-        new Date(await firstValueFrom(this.chatService.pluginMap.entityTime.getNow()))
-      );
-      delete message.state;
-    }
-  }
-
-  afterReceiveMessage(
-    messageReceived: Message,
-    stanza: MessageWithBodyStanza,
-    messageReceivedEvent: { discard: boolean }
-  ): void {
-    const messageStateElement = Array.from(stanza.querySelectorAll('message-state')).find(
-      (el) => el.getAttribute('xmlns') === this.nameSpace
+  async afterSendMessage(to: JID, message: Message): Promise<void> {
+    await this.updateContactMessageState(
+      to.bare().toString(),
+      MessageState.SENT,
+      new Date(await firstValueFrom(this.chatService.pluginMap.entityTime.getNow()))
     );
-    if (messageStateElement) {
-      // we received a message state or a message via carbon from another resource, discard it
-      messageReceivedEvent.discard = true;
-    } else if (
-      messageReceived.direction === Direction.in &&
-      !messageReceived.fromArchive &&
-      stanza.getAttribute('type') !== 'groupchat'
-    ) {
-      this.acknowledgeReceivedMessage(stanza);
-    }
+    delete message.state;
   }
 
-  private acknowledgeReceivedMessage(stanza: MessageWithBodyStanza): void {
-    const from = stanza.getAttribute('from');
-    if (!from) {
-      throw new Error(
-        `No from attribute on message; message-state.plugin.acknowledgeReceivedMessage stanza=${stanza.outerHTML}`
-      );
-    }
-    void this.chatService.contactListService.getOrCreateContactById(from).then((contact) => {
-      const isChatWithContactOpen = this.openChatsService.isChatOpen(contact);
-      const state = isChatWithContactOpen
-        ? MessageState.RECIPIENT_SEEN
-        : MessageState.RECIPIENT_RECEIVED;
-      const messageId = MessageUuidPlugin.extractIdFromStanza(stanza);
-      this.sendMessageStateNotification(parseJid(from), messageId, state).catch((e) =>
-        this.logService.error('error sending state notification', e)
-      );
-    });
+  async afterReceiveMessage(contact: Contact, message: Message): Promise<void> {
+    const isChatWithContactOpen = this.openChatsService.isChatOpen(contact);
+    const state = isChatWithContactOpen
+      ? MessageState.RECIPIENT_SEEN
+      : MessageState.RECIPIENT_RECEIVED;
+    await this.sendMessageStateNotification(contact.jid, message.id, state);
   }
 
   private async sendMessageStateNotification(
@@ -210,7 +169,14 @@ export class MessageStatePlugin implements ChatPlugin {
       .send();
   }
 
-  registerHandler(stanza: Stanza): boolean {
+  isMessageState(stanza: Element): boolean {
+    return (
+      stanza.querySelector('message-state')?.getAttribute('xmlns') ===
+      'ngxchat:contactmessagestates'
+    );
+  }
+
+  async handleStanza(stanza: Stanza): Promise<boolean> {
     const type = stanza.getAttribute('type');
     const from = stanza.getAttribute('from');
 
@@ -224,13 +190,13 @@ export class MessageStatePlugin implements ChatPlugin {
       (el) => el.getAttribute('xmlns') === this.nameSpace
     );
     if (type === 'chat' && stateElement) {
-      this.handleStateNotificationStanza(stateElement, from);
+      await this.handleStateNotificationStanza(stateElement, from);
       return true;
     }
     return false;
   }
 
-  private handleStateNotificationStanza(stateElement: Element, from: string): void {
+  private async handleStateNotificationStanza(stateElement: Element, from: string): Promise<void> {
     const state = stateElement.getAttribute('state');
     const date = stateElement.getAttribute('date');
 
@@ -240,17 +206,20 @@ export class MessageStatePlugin implements ChatPlugin {
       );
     }
 
-    void this.chatService.contactListService.getOrCreateContactById(from).then((contact) => {
-      const stateDate = new Date(date);
-      this.updateContactMessageState(contact.jid.toString(), state as MessageState, stateDate);
-    });
+    const contact = await this.chatService.contactListService.getOrCreateContactById(from);
+    const stateDate = new Date(date);
+    await this.updateContactMessageState(
+      contact.jid.bare().toString(),
+      state as MessageState,
+      stateDate
+    );
   }
 
-  private updateContactMessageState(
+  private async updateContactMessageState(
     contactJid: string,
     state: MessageState,
     stateDate: Date
-  ): void {
+  ): Promise<void> {
     const current = this.getContactMessageStateDate(contactJid);
     let changed = false;
     if (state === MessageState.RECIPIENT_RECEIVED && current.lastRecipientReceived < stateDate) {
@@ -265,9 +234,11 @@ export class MessageStatePlugin implements ChatPlugin {
       changed = true;
     }
     if (changed) {
-      this.persistContactMessageStates().catch((err) =>
-        this.logService.error('error persisting contact message states', err)
-      );
+      try {
+        await this.persistContactMessageStates();
+      } catch (err) {
+        this.logService.error('error persisting contact message states', err);
+      }
     }
   }
 

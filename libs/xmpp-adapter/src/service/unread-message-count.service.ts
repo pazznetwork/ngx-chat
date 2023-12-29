@@ -104,7 +104,7 @@ export class UnreadMessageCountService {
 
       chatService.onOnline$.pipe(switchMap(() => this.fillJidToLastSeenDates())).subscribe();
 
-      pubSub.publish$.subscribe((event): void => {
+      pubSub.publishEvent$.subscribe((event): void => {
         this.handlePubSubEvent(event);
       });
 

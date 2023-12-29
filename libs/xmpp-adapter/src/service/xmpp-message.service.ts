@@ -94,9 +94,8 @@ export class XmppMessageService implements MessageService {
     return this.messageArchivePlugin.loadMostRecentUnloadedMessages(recipient);
   }
 
-  getContactMessageState(_message: Message, _contactJid: string): MessageState {
-    throw new Error('Not implemented getContactMessageState');
-    // return this.messageState.getContactMessageState(message, contactJid);
+  getContactMessageState(message: Message, contactJid: string): MessageState {
+    return this.chatService.pluginMap.messageState.getContactMessageState(message, contactJid);
   }
 
   private async sendMessageToContact(recipient: Recipient, body: string): Promise<void> {
@@ -120,6 +119,7 @@ export class XmppMessageService implements MessageService {
     try {
       await messageBuilder.send();
       recipient.messageStore.addMessage(message);
+      await this.chatService.pluginMap.messageState.afterSendMessage(recipient.jid, message);
     } catch (rej) {
       throw new Error(
         `rejected message; message=${JSON.stringify(message)}, rejection=${JSON.stringify(rej)}`
@@ -139,9 +139,15 @@ export class XmppMessageService implements MessageService {
       return true;
     }
 
-    if (stanza.querySelector('items')?.getAttribute('node') === 'ngxchat:unreadmessagedate') {
+    if (this.chatService.pluginMap.pubSub.isPubSubEvent(stanza)) {
+      this.chatService.pluginMap.pubSub.publishEvent(stanza);
       return true;
     }
+
+    if (this.chatService.pluginMap.messageState.isMessageState(stanza)) {
+      return this.chatService.pluginMap.messageState.handleStanza(stanza);
+    }
+
     // can be wrapped in result from a query, or in a message received carbons
     const messageElement = Finder.create(stanza)
       .searchByTag('forwarded')
@@ -238,6 +244,7 @@ export class XmppMessageService implements MessageService {
     };
 
     contact.messageStore.addMessage(message);
+    await this.chatService.pluginMap.messageState.afterReceiveMessage(contact, message);
 
     if (direction === Direction.in && !messageFromArchive) {
       this.messageReceivedSubject.next(contact);

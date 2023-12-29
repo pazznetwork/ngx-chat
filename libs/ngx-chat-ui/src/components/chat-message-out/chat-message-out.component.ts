@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, Inject, Input, OnInit } from '@angular/core';
 import type { ChatService } from '@pazznetwork/ngx-chat-shared';
-import { Message, MessageState, parseJid } from '@pazznetwork/ngx-chat-shared';
+import { Contact, Message, MessageState, parseJid } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatBubbleComponent } from '../chat-bubble';
 import { ChatBubbleAvatarComponent } from '../chat-bubble-avatar';
@@ -36,6 +36,9 @@ export class ChatMessageOutComponent implements OnInit {
   @Input()
   message: Message | undefined;
 
+  @Input()
+  contact?: Contact;
+
   nick$?: Observable<string | undefined>;
 
   constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
@@ -51,17 +54,19 @@ export class ChatMessageOutComponent implements OnInit {
     );
   }
 
-  // TODO: check if message.state can be ensured so this method can be removed
   getMessageState(): MessageState {
-    return MessageState.UNKNOWN;
-    /*if (this.message?.state) {
+    if (this.contact == null || this.contact.recipientType !== 'contact') {
+      return MessageState.UNKNOWN;
+    }
+
+    if (this.message?.state) {
       return this.message.state;
-    } else if (this.contact && this.message) {
+    } else if (this.message) {
       return this.chatService.messageService.getContactMessageState(
         this.message,
-        this.contact.jid.toString()
+        this.contact.jid.bare().toString()
       );
     }
-    return MessageState.HIDDEN;*/
+    return MessageState.HIDDEN;
   }
 }
