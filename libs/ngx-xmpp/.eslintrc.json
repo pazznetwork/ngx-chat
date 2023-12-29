@@ -10,7 +10,7 @@
         ]
       },
       "extends": [
-        "plugin:@nrwl/nx/angular",
+        "plugin:@nx/angular",
         "plugin:rxjs/recommended"
       ],
       "rules": {

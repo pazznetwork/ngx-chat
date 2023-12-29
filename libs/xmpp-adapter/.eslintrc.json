@@ -11,10 +11,7 @@
         "project": [
           "libs/xmpp-adapter/tsconfig.*?.json"
         ]
-      },
-      "extends": [
-        "plugin:rxjs/recommended"
-      ]
+      }
     }
   ]
 }

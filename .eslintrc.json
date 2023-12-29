@@ -17,16 +17,13 @@
   "ignorePatterns": ["dist/*"],
   "overrides": [
     {
-      "files": [
-        "*.ts"
-      ],
+      "files": ["*.ts"],
       "extends": [
-        "plugin:@nrwl/nx/typescript",
+        "plugin:@nx/typescript",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "plugin:eslint-comments/recommended",
         "plugin:prettier/recommended"
       ],
-
       "rules": {
         "@typescript-eslint/array-type": [
           "error",
@@ -143,7 +140,7 @@
         "no-console": ["error", {}],
         "no-trailing-spaces": "off",
         "no-underscore-dangle": "off",
-        "space-before-function-paren" : "off",
+        "space-before-function-paren": "off",
         "object-shorthand": "error",
         "prefer-arrow/prefer-arrow-functions": "off",
         "rxjs/finnish": [
@@ -191,7 +188,7 @@
     },
     {
       "files": ["*.html"],
-      "extends": ["plugin:@nrwl/nx/angular-template"],
+      "extends": ["plugin:@nx/angular-template"],
       "rules": {
         "@angular-eslint/template/eqeqeq": [
           "error",
@@ -208,7 +205,7 @@
         "ecmaVersion": "latest"
       },
       "extends": [
-        "plugin:@nrwl/nx/javascript",
+        "plugin:@nx/javascript",
         "plugin:eslint-comments/recommended",
         "plugin:prettier/recommended"
       ],
