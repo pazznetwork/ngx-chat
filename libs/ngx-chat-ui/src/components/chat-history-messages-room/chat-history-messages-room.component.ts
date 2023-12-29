@@ -100,6 +100,6 @@ export class ChatHistoryMessagesRoomComponent {
   ) {}
 
   getNickFromContact(contact: Contact): string | undefined {
-    return contact.jid.resource;
+    return contact.name ?? contact.jid.resource;
   }
 }
