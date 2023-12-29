@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { merge, Observable, scan, startWith, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 import {
   type ChatService,
   Direction,
@@ -19,6 +18,7 @@ import { CommonModule } from '@angular/common';
 import { ChatWindowFrameComponent } from '../chat-window-frame';
 import { ChatWindowHeaderComponent } from '../chat-window-header';
 import { ChatWindowContentComponent } from '../chat-window-content';
+import { filter, map } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -34,8 +34,25 @@ import { ChatWindowContentComponent } from '../chat-window-content';
   styleUrls: ['./chat-window.component.less'],
 })
 export class ChatWindowComponent implements OnInit, OnDestroy {
+  currentRecipient!: Recipient;
+
   @Input()
-  recipient!: Recipient;
+  set recipient(value: Recipient) {
+    const openOnInit$ = value.messageStore.messages$.pipe(
+      filter(
+        (messages) => messages.findIndex((message) => message.direction === Direction.in) > -1
+      ),
+      map(() => true)
+    );
+
+    const toggleOpen$ = this.headerClickedSubject.pipe(
+      startWith(!this.isCollapsed),
+      scan((toggle) => !toggle, false)
+    );
+    this.isWindowOpen$ = merge(openOnInit$, toggleOpen$);
+
+    this.currentRecipient = value;
+  }
 
   @Input()
   isCollapsed!: boolean;
@@ -52,23 +69,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const openOnInit$ = this.recipient.messageStore.messages$.pipe(
-      filter(
-        (messages) => messages.findIndex((message) => message.direction === Direction.in) > -1
-      ),
-      map(() => true)
-    );
-
-    const toggleOpen$ = this.headerClickedSubject.pipe(
-      startWith(!this.isCollapsed),
-      scan((toggle) => !toggle, false)
-    );
-    this.isWindowOpen$ = merge(openOnInit$, toggleOpen$);
-    this.chatMessageListRegistry.incrementOpenWindowCount(this.recipient);
+    this.chatMessageListRegistry.incrementOpenWindowCount(this.currentRecipient);
   }
 
   ngOnDestroy(): void {
-    this.chatMessageListRegistry.decrementOpenWindowCount(this.recipient);
+    this.chatMessageListRegistry.decrementOpenWindowCount(this.currentRecipient);
   }
 
   onClickHeader(): void {
@@ -76,6 +81,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
   onClickClose(): void {
-    this.chatListService.closeChat(this.recipient);
+    this.chatListService.closeChat(this.currentRecipient);
   }
 }

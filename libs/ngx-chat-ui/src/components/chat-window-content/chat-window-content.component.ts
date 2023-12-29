@@ -1,13 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import {
-  ChangeDetectorRef,
-  Component,
-  Inject,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input, ViewChild } from '@angular/core';
 import type { ChatService, FileUploadHandler, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { Contact, ContactSubscription } from '@pazznetwork/ngx-chat-shared';
 import { ChatWindowInputComponent } from '../chat-window-input';
@@ -19,7 +11,7 @@ import {
   FILE_UPLOAD_HANDLER_TOKEN,
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
-import { combineLatest, map, Observable, of, Subject, tap } from 'rxjs';
+import { combineLatest, map, Observable, of, tap } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -34,52 +26,18 @@ import { combineLatest, map, Observable, of, Subject, tap } from 'rxjs';
   templateUrl: './chat-window-content.component.html',
   styleUrls: ['./chat-window-content.component.less'],
 })
-export class ChatWindowContentComponent implements OnInit, OnDestroy {
-  @Input()
-  recipient?: Recipient;
+export class ChatWindowContentComponent {
+  currentRecipient!: Recipient;
 
   @Input()
-  showAvatars = true;
-
-  @ViewChild(ChatWindowInputComponent)
-  readonly messageInput?: ChatWindowInputComponent;
-
-  pendingRequest$!: Observable<boolean>;
-
-  private ngDestroySubject = new Subject<void>();
-
-  get asContact(): Contact | undefined {
-    return this.recipient instanceof Contact ? this.recipient : undefined;
-  }
-
-  constructor(
-    @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
-    @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler,
-    private readonly cdr: ChangeDetectorRef
-  ) {}
-
-  async uploadFile(file: File): Promise<void> {
-    if (!this.recipient) {
-      return;
-    }
-    const url = await this.fileUploadHandler.upload(file);
-    await this.chatService.messageService.sendMessage(this.recipient, url);
-  }
-
-  onFocus(): void {
-    this.messageInput?.focus();
-  }
-
-  ngOnInit(): void {
-    if (this.recipient instanceof Contact) {
+  set recipient(value: Recipient) {
+    if (value instanceof Contact) {
       this.pendingRequest$ = combineLatest([
         this.chatService.contactListService.contactsBlocked$,
-        this.recipient.subscription$,
+        value.subscription$,
       ]).pipe(
         map(([blockedContacts, subscription]) => {
-          const isNotBlocked = !blockedContacts.find((b) =>
-            b.jid.bare().equals(this.recipient?.jid.bare())
-          );
+          const isNotBlocked = !blockedContacts.find((b) => b.jid.bare().equals(value?.jid.bare()));
 
           // none and undefined no longer checked for pazz
           return isNotBlocked && ContactSubscription.from === subscription;
@@ -89,9 +47,37 @@ export class ChatWindowContentComponent implements OnInit, OnDestroy {
     } else {
       this.pendingRequest$ = of(false);
     }
+
+    this.currentRecipient = value;
   }
 
-  ngOnDestroy(): void {
-    this.ngDestroySubject.next();
+  @Input()
+  showAvatars = true;
+
+  @ViewChild(ChatWindowInputComponent)
+  readonly messageInput?: ChatWindowInputComponent;
+
+  pendingRequest$!: Observable<boolean>;
+
+  get asContact(): Contact | undefined {
+    return this.currentRecipient instanceof Contact ? this.currentRecipient : undefined;
+  }
+
+  constructor(
+    @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
+    @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
+
+  async uploadFile(file: File): Promise<void> {
+    if (!this.currentRecipient) {
+      return;
+    }
+    const url = await this.fileUploadHandler.upload(file);
+    await this.chatService.messageService.sendMessage(this.currentRecipient, url);
+  }
+
+  onFocus(): void {
+    this.messageInput?.focus();
   }
 }

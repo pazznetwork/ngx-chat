@@ -190,7 +190,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       .$pres({ to: roomJid.toString() })
       .c('x', { xmlns: nsMuc })
       .send();
-    const room = await this.customRoomFactory.create(this.logService, roomJid);
+    const room = await this.getOrCreateRoom(roomJid);
     await this.handleRoomPresenceStanza(presenceResponse, room);
     room.handleOccupantJoined(
       {

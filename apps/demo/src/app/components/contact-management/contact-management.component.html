@@ -31,7 +31,7 @@
           (chatService.contactListService.contactsSubscribed$ | async) as contacts
       "
   >
-    <ng-container *ngIf="contacts.length > 0; else messagesComponentInformation">
+    <ng-container *ngIf="contacts.length > 0 && !!contacts[0]; else messagesComponentInformation">
       <ngx-chat-window-content [recipient]="contacts[0]" [showAvatars]="true"></ngx-chat-window-content>
     </ng-container>
   </ng-container>

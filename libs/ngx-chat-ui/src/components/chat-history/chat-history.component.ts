@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input, OnDestroy } from '@angular/core';
 import { exhaustMap, map, Observable, Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import { ChatService, Contact, Recipient, Room } from '@pazznetwork/ngx-chat-shared';
@@ -31,7 +31,7 @@ import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room'
   templateUrl: './chat-history.component.html',
   styleUrls: ['./chat-history.component.less'],
 })
-export class ChatHistoryComponent implements OnInit, OnDestroy {
+export class ChatHistoryComponent implements OnDestroy {
   currentRecipient?: Recipient;
   @Input()
   set recipient(value: Recipient | undefined) {
@@ -81,12 +81,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     @Inject(OPEN_CHAT_SERVICE_TOKEN) private chatMessageListRegistry: ChatMessageListRegistryService
   ) {}
-
-  ngOnInit(): void {
-    if (!this.currentRecipient) {
-      throw new Error('ChatHistoryComponent: recipient was null or undefined');
-    }
-  }
 
   ngOnDestroy(): void {
     if (!this.currentRecipient) {
