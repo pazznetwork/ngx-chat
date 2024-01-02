@@ -4,13 +4,13 @@ import { merge, Observable, scan, startWith, Subject } from 'rxjs';
 import {
   type ChatService,
   Direction,
+  OpenChatsService,
   OpenChatStateService,
   Recipient,
 } from '@pazznetwork/ngx-chat-shared';
 import {
   CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
-  ChatMessageListRegistryService,
   OPEN_CHAT_SERVICE_TOKEN,
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
@@ -63,17 +63,17 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
-    @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
+    @Inject(OPEN_CHAT_SERVICE_TOKEN) public openChatsService: OpenChatsService,
     @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
-    private readonly chatListService: OpenChatStateService
+    private readonly openChatStateService: OpenChatStateService
   ) {}
 
   ngOnInit(): void {
-    this.chatMessageListRegistry.incrementOpenWindowCount(this.currentRecipient);
+    this.openChatsService.incrementOpenWindowCount(this.currentRecipient);
   }
 
   ngOnDestroy(): void {
-    this.chatMessageListRegistry.decrementOpenWindowCount(this.currentRecipient);
+    this.openChatsService.decrementOpenWindowCount(this.currentRecipient);
   }
 
   onClickHeader(): void {
@@ -81,6 +81,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
   }
 
   onClickClose(): void {
-    this.chatListService.closeChat(this.currentRecipient);
+    this.openChatStateService.closeChat(this.currentRecipient);
   }
 }

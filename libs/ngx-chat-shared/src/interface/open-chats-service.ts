@@ -10,6 +10,8 @@ export interface OpenChatsService {
 
   isChatOpen(recipient: Recipient): boolean;
 
+  viewedChatMessages(recipient: Recipient): void;
+
   incrementOpenWindowCount(recipient: Recipient): void;
 
   decrementOpenWindowCount(recipient: Recipient): void;

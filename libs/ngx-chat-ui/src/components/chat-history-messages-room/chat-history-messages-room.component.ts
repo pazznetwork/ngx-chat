@@ -14,9 +14,7 @@ import { CommonModule } from '@angular/common';
 import { ChatMessageOutComponent } from '../chat-message-out';
 import {
   CHAT_SERVICE_TOKEN,
-  ChatMessageListRegistryService,
   CUSTOM_CONTACT_FACTORY_TOKEN,
-  OPEN_CHAT_SERVICE_TOKEN,
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
 
@@ -93,7 +91,6 @@ export class ChatHistoryMessagesRoomComponent {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
-    @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
     @Inject(CUSTOM_CONTACT_FACTORY_TOKEN)
     private readonly customContactFactory: CustomContactFactory,
     private readonly cdr: ChangeDetectorRef

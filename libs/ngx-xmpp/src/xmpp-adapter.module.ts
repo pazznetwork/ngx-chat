@@ -12,6 +12,7 @@ import type {
   CustomRoomFactory,
   FileUploadHandler,
   Log,
+  OpenChatsService,
 } from '@pazznetwork/ngx-chat-shared';
 import { LOG_SERVICE_TOKEN } from '@pazznetwork/ngx-chat-shared';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -86,7 +87,7 @@ export class XmppAdapterModule {
     httpClient: HttpClient,
     userAvatar$: Observable<string>,
     userName$: Observable<string>,
-    chatMessageListRegistryService: ChatMessageListRegistryService,
+    openChatsService: OpenChatsService,
     logService: Log,
     customRoomFactory: CustomRoomFactory,
     customContactFactory: CustomContactFactory
@@ -97,7 +98,7 @@ export class XmppAdapterModule {
         logService,
         userAvatar$,
         userName$,
-        chatMessageListRegistryService,
+        openChatsService,
         httpClient,
         customRoomFactory,
         customContactFactory

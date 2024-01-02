@@ -1,20 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { ChangeDetectorRef, Component, Inject, Input, OnDestroy } from '@angular/core';
-import { exhaustMap, map, Observable, Subject } from 'rxjs';
+import { exhaustMap, map, Observable, Subject, tap } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
-import { ChatService, Contact, Recipient, Room } from '@pazznetwork/ngx-chat-shared';
+import {
+  ChatService,
+  Contact,
+  OpenChatsService,
+  Recipient,
+  Room,
+} from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatMessageEmptyComponent } from '../chat-message-empty';
 import { ChatMessageContactRequestComponent } from '../chat-message-contact-request';
 import {
   CHAT_SERVICE_TOKEN,
-  ChatMessageListRegistryService,
   OPEN_CHAT_SERVICE_TOKEN,
   XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
 import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
 import { ChatHistoryMessagesContactComponent } from '../chat-history-messages-contact';
 import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room';
+import { XmppService } from '@pazznetwork/xmpp-adapter';
 
 @Component({
   standalone: true,
@@ -44,7 +50,10 @@ export class ChatHistoryComponent implements OnDestroy {
 
     this.loadMessagesOnScrollToTop();
     // the unread count plugin relies on this call
-    this.chatMessageListRegistry.viewedChatMessages(this.currentRecipient);
+    this.openChatsService.viewedChatMessages(this.currentRecipient);
+    void (this.chatService as XmppService).pluginMap.messageState.afterRecipientSeen(
+      this.currentRecipient
+    );
   }
 
   @Input()
@@ -79,7 +88,7 @@ export class ChatHistoryComponent implements OnDestroy {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
     private changeDetectorRef: ChangeDetectorRef,
-    @Inject(OPEN_CHAT_SERVICE_TOKEN) private chatMessageListRegistry: ChatMessageListRegistryService
+    @Inject(OPEN_CHAT_SERVICE_TOKEN) private openChatsService: OpenChatsService
   ) {}
 
   ngOnDestroy(): void {
@@ -117,6 +126,7 @@ export class ChatHistoryComponent implements OnDestroy {
             this.isLoadingMessages = false;
           }
         }),
+        tap(() => setTimeout(() => this.changeDetectorRef.detectChanges, 0)),
         takeUntil(this.ngDestroySubject)
       )
       .subscribe();

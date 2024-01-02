@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 import { filter, switchMap } from 'rxjs/operators';
-import type { Log, OpenChatsService } from '@pazznetwork/ngx-chat-shared';
+import type { Log, OpenChatsService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { Contact, JID, Message, MessageState } from '@pazznetwork/ngx-chat-shared';
 import type { ChatPlugin, Stanza } from '../core';
 import type { XmppService } from '../xmpp.service';
 import type { PublishSubscribePlugin } from './publish-subscribe.plugin';
-import { combineLatest, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import type { StanzaBuilder } from '../stanza-builder';
 
 export interface StateDate {
@@ -38,22 +38,6 @@ export class MessageStatePlugin implements ChatPlugin {
   ) {
     this.chatService.onOnline$.pipe(switchMap(() => this.onOnline())).subscribe();
     this.chatService.onOffline$.subscribe(() => this.jidToMessageStateDate.clear());
-
-    combineLatest([this.openChatsService.chatMessagesViewed$, this.chatService.isOnline$])
-      .pipe(
-        filter(([, online]) => online),
-        switchMap(async ([contact]) => {
-          if (contact.messageStore.mostRecentMessageReceived) {
-            await this.sendMessageStateNotification(
-              contact.jid,
-              contact.messageStore.mostRecentMessageReceived.id,
-              MessageState.RECIPIENT_SEEN
-            );
-          }
-        })
-      )
-      .subscribe();
-
     this.publishSubscribePlugin.publishEvent$
       .pipe(
         filter((stanza) => stanza.querySelector('items')?.getAttribute('node') === this.nameSpace)
@@ -139,6 +123,15 @@ export class MessageStatePlugin implements ChatPlugin {
       ? MessageState.RECIPIENT_SEEN
       : MessageState.RECIPIENT_RECEIVED;
     await this.sendMessageStateNotification(contact.jid, message.id, state);
+  }
+
+  async afterRecipientSeen(recipient: Recipient): Promise<void> {
+    const recentMessage = recipient.messageStore.mostRecentMessageReceived as Message;
+    return this.sendMessageStateNotification(
+      recipient.jid,
+      recentMessage.id,
+      MessageState.RECIPIENT_SEEN
+    );
   }
 
   private async sendMessageStateNotification(

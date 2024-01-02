@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import type { OpenChatsService, Recipient } from '@pazznetwork/ngx-chat-shared';
 
 /**
@@ -11,7 +11,7 @@ export class ChatMessageListRegistryService implements OpenChatsService {
   private chatOpenedSubject = new Subject<Recipient>();
   chatOpened$ = this.chatOpenedSubject.asObservable();
 
-  private chatMessagesViewedSubject = new Subject<Recipient>();
+  private chatMessagesViewedSubject = new ReplaySubject<Recipient>(1);
   chatMessagesViewed$ = this.chatMessagesViewedSubject.asObservable();
   recipientToOpenMessageListCount = new Map<Recipient, number>();
 

@@ -6,12 +6,7 @@ import { Contact, Direction, Message } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
 import { ChatMessageOutComponent } from '../chat-message-out';
-import {
-  CHAT_SERVICE_TOKEN,
-  ChatMessageListRegistryService,
-  OPEN_CHAT_SERVICE_TOKEN,
-  XmppAdapterModule,
-} from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 
 @Component({
   standalone: true,
@@ -63,7 +58,6 @@ export class ChatHistoryMessagesContactComponent {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
-    @Inject(OPEN_CHAT_SERVICE_TOKEN) public chatMessageListRegistry: ChatMessageListRegistryService,
     private readonly cdr: ChangeDetectorRef
   ) {}
 }
