@@ -5,7 +5,7 @@ import { Contact, JID, Message, MessageState } from '@pazznetwork/ngx-chat-share
 import type { ChatPlugin, Stanza } from '../core';
 import type { XmppService } from '../xmpp.service';
 import type { PublishSubscribePlugin } from './publish-subscribe.plugin';
-import { combineLatest, firstValueFrom, tap } from 'rxjs';
+import { combineLatest, firstValueFrom } from 'rxjs';
 import type { StanzaBuilder } from '../stanza-builder';
 
 export interface StateDate {
@@ -39,29 +39,24 @@ export class MessageStatePlugin implements ChatPlugin {
     this.chatService.onOnline$.pipe(switchMap(() => this.onOnline())).subscribe();
     this.chatService.onOffline$.subscribe(() => this.jidToMessageStateDate.clear());
 
-    combineLatest([this.openChatsService.openChats$, this.chatService.isOnline$])
+    combineLatest([this.openChatsService.chatMessagesViewed$, this.chatService.isOnline$])
       .pipe(
         filter(([, online]) => online),
-        switchMap(([contacts]) =>
-          Promise.all(
-            Array.from(contacts).map(async (contact) => {
-              if (contact.messageStore.mostRecentMessageReceived) {
-                await this.sendMessageStateNotification(
-                  contact.jid,
-                  contact.messageStore.mostRecentMessageReceived.id,
-                  MessageState.RECIPIENT_SEEN
-                );
-              }
-            })
-          )
-        )
+        switchMap(async ([contact]) => {
+          if (contact.messageStore.mostRecentMessageReceived) {
+            await this.sendMessageStateNotification(
+              contact.jid,
+              contact.messageStore.mostRecentMessageReceived.id,
+              MessageState.RECIPIENT_SEEN
+            );
+          }
+        })
       )
       .subscribe();
 
     this.publishSubscribePlugin.publishEvent$
       .pipe(
-        filter((stanza) => stanza.querySelector('items')?.getAttribute('node') === this.nameSpace),
-        tap(() => console.log('calling processPubSub in message-state.plugin'))
+        filter((stanza) => stanza.querySelector('items')?.getAttribute('node') === this.nameSpace)
       )
       .subscribe((stanza) => this.processPubSub(Array.from(stanza?.querySelectorAll('item'))));
   }
