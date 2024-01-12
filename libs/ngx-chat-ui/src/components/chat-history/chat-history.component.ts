@@ -20,7 +20,6 @@ import {
 import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
 import { ChatHistoryMessagesContactComponent } from '../chat-history-messages-contact';
 import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room';
-import { XmppService } from '@pazznetwork/xmpp-adapter';
 
 @Component({
   standalone: true,
@@ -51,9 +50,10 @@ export class ChatHistoryComponent implements OnDestroy {
     this.loadMessagesOnScrollToTop();
     // the unread count plugin relies on this call
     this.openChatsService.viewedChatMessages(this.currentRecipient);
-    void (this.chatService as XmppService).pluginMap.messageState.afterRecipientSeen(
-      this.currentRecipient
-    );
+    // todo implement xmpp message state
+    // void (this.chatService as XmppService).pluginMap.messageState.afterRecipientSeen(
+    //   this.currentRecipient
+    // );
   }
 
   @Input()

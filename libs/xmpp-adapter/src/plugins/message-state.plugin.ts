@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 import { filter, switchMap } from 'rxjs/operators';
-import type { Log, OpenChatsService, Recipient } from '@pazznetwork/ngx-chat-shared';
+import type { Log, OpenChatsService } from '@pazznetwork/ngx-chat-shared';
 import { Contact, JID, Message, MessageState } from '@pazznetwork/ngx-chat-shared';
 import type { ChatPlugin, Stanza } from '../core';
 import type { XmppService } from '../xmpp.service';
@@ -68,7 +68,8 @@ export class MessageStatePlugin implements ChatPlugin {
     }
 
     const el = itemElements[0];
-    el.querySelector(wrapperNodeName)
+    el
+      .querySelector(wrapperNodeName)
       ?.querySelectorAll(nodeName)
       .forEach((contactMessageStateElement: Stanza) => {
         const lastRecipientReceived =
@@ -125,14 +126,15 @@ export class MessageStatePlugin implements ChatPlugin {
     await this.sendMessageStateNotification(contact.jid, message.id, state);
   }
 
-  async afterRecipientSeen(recipient: Recipient): Promise<void> {
+  // todo implement xmpp message state
+  /*async afterRecipientSeen(recipient: Recipient): Promise<void> {
     const recentMessage = recipient.messageStore.mostRecentMessageReceived as Message;
     return this.sendMessageStateNotification(
       recipient.jid,
       recentMessage.id,
       MessageState.RECIPIENT_SEEN
     );
-  }
+  }*/
 
   private async sendMessageStateNotification(
     recipient: JID,

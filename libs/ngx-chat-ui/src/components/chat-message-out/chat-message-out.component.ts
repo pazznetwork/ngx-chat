@@ -54,8 +54,10 @@ export class ChatMessageOutComponent implements OnInit {
     );
   }
 
+  // todo implement xmpp message state
   getMessageState(): MessageState {
-    if (this.contact == null || this.contact.recipientType !== 'contact') {
+    return MessageState.UNKNOWN;
+    /*if (this.contact == null || this.contact.recipientType !== 'contact') {
       return MessageState.UNKNOWN;
     }
 
@@ -67,6 +69,6 @@ export class ChatMessageOutComponent implements OnInit {
         this.contact.jid.bare().toString()
       );
     }
-    return MessageState.HIDDEN;
+    return MessageState.HIDDEN;*/
   }
 }
