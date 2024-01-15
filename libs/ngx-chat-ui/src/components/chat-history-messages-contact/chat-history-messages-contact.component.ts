@@ -6,11 +6,11 @@ import { Contact, Direction, Message } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
 import { ChatMessageOutComponent } from '../chat-message-out';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, ChatMessageInComponent, ChatMessageOutComponent],
+  imports: [CommonModule, ChatMessageInComponent, ChatMessageOutComponent],
   selector: 'ngx-chat-history-messages-contact',
   templateUrl: './chat-history-messages-contact.component.html',
   styleUrls: ['./chat-history-messages-contact.component.less'],

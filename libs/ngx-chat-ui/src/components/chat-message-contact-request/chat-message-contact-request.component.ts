@@ -5,7 +5,6 @@ import {
   CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
   REPORT_USER_INJECTION_TOKEN,
-  XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
 import type { ChatService, Contact, ReportUserService } from '@pazznetwork/ngx-chat-shared';
 import { ContactSubscription, OpenChatStateService } from '@pazznetwork/ngx-chat-shared';
@@ -23,7 +22,7 @@ enum SubscriptionAction {
 
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, ChatBubbleComponent],
+  imports: [CommonModule, ChatBubbleComponent],
   selector: 'ngx-chat-message-contact-request',
   templateUrl: './chat-message-contact-request.component.html',
   styleUrls: ['./chat-message-contact-request.component.less'],

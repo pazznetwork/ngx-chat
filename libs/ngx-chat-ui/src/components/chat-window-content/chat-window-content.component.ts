@@ -6,22 +6,12 @@ import { ChatWindowInputComponent } from '../chat-window-input';
 import { ChatHistoryComponent } from '../chat-history';
 import { CommonModule } from '@angular/common';
 import { ChatFileDropComponent } from '../chat-file-drop';
-import {
-  CHAT_SERVICE_TOKEN,
-  FILE_UPLOAD_HANDLER_TOKEN,
-  XmppAdapterModule,
-} from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN, FILE_UPLOAD_HANDLER_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { combineLatest, map, Observable, of, tap } from 'rxjs';
 
 @Component({
   standalone: true,
-  imports: [
-    CommonModule,
-    XmppAdapterModule,
-    ChatFileDropComponent,
-    ChatHistoryComponent,
-    ChatWindowInputComponent,
-  ],
+  imports: [CommonModule, ChatFileDropComponent, ChatHistoryComponent, ChatWindowInputComponent],
   selector: 'ngx-chat-window-content',
   templateUrl: './chat-window-content.component.html',
   styleUrls: ['./chat-window-content.component.less'],

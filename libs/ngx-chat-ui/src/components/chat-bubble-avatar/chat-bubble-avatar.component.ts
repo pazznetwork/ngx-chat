@@ -2,12 +2,11 @@
 import { Component, Input, Output } from '@angular/core';
 import { ChatAvatarComponent } from '../chat-avatar';
 import { CommonModule } from '@angular/common';
-import { XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 import { Subject } from 'rxjs';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, ChatAvatarComponent],
+  imports: [CommonModule, ChatAvatarComponent],
   selector: 'ngx-chat-bubble-avatar',
   templateUrl: './chat-bubble-avatar.component.html',
   styleUrls: ['./chat-bubble-avatar.component.less'],

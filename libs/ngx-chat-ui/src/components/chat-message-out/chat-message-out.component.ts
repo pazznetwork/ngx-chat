@@ -9,7 +9,7 @@ import { ChatMessageTextAreaComponent } from '../chat-message-text-area';
 import { ChatMessageImageComponent } from '../chat-message-image';
 import { ChatBubbleFooterComponent } from '../chat-bubble-footer';
 import { ChatMessageStateIconComponent } from '../chat-message-state-icon';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { map, switchMap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 
@@ -17,7 +17,6 @@ import { Observable, of } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    XmppAdapterModule,
     ChatBubbleComponent,
     ChatBubbleAvatarComponent,
     ChatMessageTextAreaComponent,

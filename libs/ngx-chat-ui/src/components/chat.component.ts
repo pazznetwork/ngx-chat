@@ -13,7 +13,7 @@ import { combineLatest, Subject } from 'rxjs';
 import type { ChatService, Contact, Translations } from '@pazznetwork/ngx-chat-shared';
 import { defaultTranslations, Room } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { RosterListComponent } from './roster-list';
 import { ChatBarWindowsComponent } from './chat-bar-windows';
 import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
@@ -37,7 +37,7 @@ import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
  */
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, RosterListComponent, ChatBarWindowsComponent],
+  imports: [CommonModule, RosterListComponent, ChatBarWindowsComponent],
   selector: 'ngx-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.less'],

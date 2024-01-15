@@ -12,7 +12,6 @@ import {
   CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
   OPEN_CHAT_SERVICE_TOKEN,
-  XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
 import { ChatWindowFrameComponent } from '../chat-window-frame';
@@ -24,7 +23,6 @@ import { filter, map } from 'rxjs/operators';
   standalone: true,
   imports: [
     CommonModule,
-    XmppAdapterModule,
     ChatWindowFrameComponent,
     ChatWindowHeaderComponent,
     ChatWindowContentComponent,

@@ -3,12 +3,12 @@ import { Component, Inject, Input } from '@angular/core';
 import type { Invitation } from '@pazznetwork/ngx-chat-shared';
 import { ChatService, Direction, Room } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { ChatMessageInComponent } from '../chat-message-in';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, ChatMessageInComponent, XmppAdapterModule],
+  imports: [CommonModule, ChatMessageInComponent],
   selector: 'ngx-chat-message-room-invite',
   templateUrl: './chat-message-room-invite.component.html',
   styleUrls: ['./chat-message-room-invite.component.less'],

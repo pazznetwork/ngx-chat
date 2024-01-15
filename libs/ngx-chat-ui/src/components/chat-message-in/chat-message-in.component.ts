@@ -8,17 +8,12 @@ import { ChatBubbleAvatarComponent } from '../chat-bubble-avatar';
 import { ChatMessageTextAreaComponent } from '../chat-message-text-area';
 import { ChatMessageImageComponent } from '../chat-message-image';
 import { ChatBubbleFooterComponent } from '../chat-bubble-footer';
-import {
-  CHAT_SERVICE_TOKEN,
-  CONTACT_CLICK_HANDLER_TOKEN,
-  XmppAdapterModule,
-} from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN, CONTACT_CLICK_HANDLER_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
   standalone: true,
   imports: [
     CommonModule,
-    XmppAdapterModule,
     ChatBubbleComponent,
     ChatBubbleAvatarComponent,
     ChatMessageTextAreaComponent,

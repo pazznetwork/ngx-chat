@@ -12,11 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ChatMessageEmptyComponent } from '../chat-message-empty';
 import { ChatMessageContactRequestComponent } from '../chat-message-contact-request';
-import {
-  CHAT_SERVICE_TOKEN,
-  OPEN_CHAT_SERVICE_TOKEN,
-  XmppAdapterModule,
-} from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN, OPEN_CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { ChatHistoryAutoScrollComponent } from '../chat-history-auto-scroll';
 import { ChatHistoryMessagesContactComponent } from '../chat-history-messages-contact';
 import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room';
@@ -25,7 +21,6 @@ import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room'
   standalone: true,
   imports: [
     CommonModule,
-    XmppAdapterModule,
     ChatMessageEmptyComponent,
     ChatMessageContactRequestComponent,
     ChatHistoryAutoScrollComponent,

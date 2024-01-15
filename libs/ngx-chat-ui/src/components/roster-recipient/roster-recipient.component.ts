@@ -5,12 +5,12 @@ import { combineLatestWith, ReplaySubject, tap } from 'rxjs';
 import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatAvatarComponent } from '../chat-avatar';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, ChatAvatarComponent],
+  imports: [CommonModule, ChatAvatarComponent],
   selector: 'ngx-chat-roster-recipient',
   templateUrl: './roster-recipient.component.html',
   styleUrls: ['./roster-recipient.component.less'],

@@ -12,23 +12,14 @@ import {
 import { Observable, tap } from 'rxjs';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { OpenChatStateService, Room } from '@pazznetwork/ngx-chat-shared';
-import {
-  CHAT_LIST_STATE_SERVICE_TOKEN,
-  CHAT_SERVICE_TOKEN,
-  XmppAdapterModule,
-} from '@pazznetwork/ngx-xmpp';
+import { CHAT_LIST_STATE_SERVICE_TOKEN, CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { CommonModule } from '@angular/common';
 import { RosterRecipientComponent } from '../roster-recipient';
 import { RosterRecipientPresenceComponent } from '../roster-recipient-presence';
 
 @Component({
   standalone: true,
-  imports: [
-    CommonModule,
-    XmppAdapterModule,
-    RosterRecipientComponent,
-    RosterRecipientPresenceComponent,
-  ],
+  imports: [CommonModule, RosterRecipientComponent, RosterRecipientPresenceComponent],
   selector: 'ngx-chat-roster-list',
   templateUrl: './roster-list.component.html',
   styleUrls: ['./roster-list.component.less'],
