@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Inject } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { CHAT_SERVICE_TOKEN } from '../injection-token';
 import {
   ChatBrowserNotificationService,
@@ -9,6 +9,7 @@ import {
   Room,
 } from '@pazznetwork/ngx-chat-shared';
 
+@Injectable()
 export class ChatBackgroundNotificationService implements ChatBrowserNotificationService {
   private enabled = false;
 
@@ -76,12 +77,11 @@ export class ChatBackgroundNotificationService implements ChatBrowserNotificatio
   }
 
   private shouldDisplayNotification(): boolean {
-    const notification = Notification;
     return (
       this.enabled &&
       document.visibilityState === 'hidden' &&
       this.supportsNotification() &&
-      notification.permission === 'granted'
+      Notification.permission === 'granted'
     );
   }
 
