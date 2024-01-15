@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Inject } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import type {
   AttachableTrack,
@@ -14,6 +14,7 @@ import { filter, map, shareReplay } from 'rxjs/operators';
 /**
  * Used to open chat windows programmatically.
  */
+@Injectable()
 export class ChatListStateService implements OpenChatStateService {
   private readonly openChatSubject = new Subject<ChatWindowState>();
   private readonly closeChatSubject = new Subject<string>();
