@@ -8,8 +8,15 @@ import {
   parseJid,
   type Recipient,
 } from '@pazznetwork/ngx-chat-shared';
-import type { Connectable, Observable } from 'rxjs';
-import { connectable, firstValueFrom, merge, Subject, switchMap } from 'rxjs';
+import {
+  Connectable,
+  connectable,
+  firstValueFrom,
+  merge,
+  Observable,
+  Subject,
+  switchMap,
+} from 'rxjs';
 import type {
   MessageArchivePlugin,
   MessageCarbonsPlugin,
@@ -24,6 +31,7 @@ import {
 } from '@pazznetwork/xmpp-adapter';
 import { shareReplay } from 'rxjs/operators';
 import { getUniqueId } from '@pazznetwork/strophets';
+import { runInZone } from '../core/zone-rxjs-operator';
 
 /**
  * Part of the XMPP Core Specification
@@ -49,12 +57,14 @@ export class XmppMessageService implements MessageService {
         this.messageSentSubject,
         this.multiUserPlugin.message$,
         messageCarbonPlugin.message$
-      ).pipe(shareReplay({ bufferSize: 1, refCount: false }))
+      ).pipe(shareReplay({ bufferSize: 1, refCount: false }), runInZone(chatService.zone))
     );
     this.message$.connect();
 
-    this.jidToUnreadCount$ = unreadMessageCount.jidToUnreadCount$;
-    this.unreadMessageCountSum$ = unreadMessageCount.unreadMessageCountSum$;
+    this.jidToUnreadCount$ = unreadMessageCount.jidToUnreadCount$.pipe(runInZone(chatService.zone));
+    this.unreadMessageCountSum$ = unreadMessageCount.unreadMessageCountSum$.pipe(
+      runInZone(chatService.zone)
+    );
 
     this.chatService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
   }

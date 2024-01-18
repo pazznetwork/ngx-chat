@@ -10,6 +10,8 @@ import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { MucSubPlugin, MultiUserChatPlugin } from '@pazznetwork/xmpp-adapter';
 import { filter } from 'rxjs/operators';
+import { runInZone } from '../core/zone-rxjs-operator';
+import { NgZone } from '@angular/core';
 
 export class XmppRoomService implements RoomService {
   groupMessage$: Observable<Room>;
@@ -18,11 +20,12 @@ export class XmppRoomService implements RoomService {
 
   constructor(
     private readonly multiUserPlugin: MultiUserChatPlugin,
-    private readonly mucSubPlugin: MucSubPlugin
+    private readonly mucSubPlugin: MucSubPlugin,
+    zone: NgZone
   ) {
-    this.onInvitation$ = multiUserPlugin.invitation$;
-    this.rooms$ = multiUserPlugin.rooms$;
-    this.groupMessage$ = multiUserPlugin.message$;
+    this.onInvitation$ = multiUserPlugin.invitation$.pipe(runInZone(zone));
+    this.rooms$ = multiUserPlugin.rooms$.pipe(runInZone(zone));
+    this.groupMessage$ = multiUserPlugin.message$.pipe(runInZone(zone));
   }
 
   async createRoom(options: RoomCreationOptions): Promise<Room> {

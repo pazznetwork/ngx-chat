@@ -6,6 +6,8 @@ import type {
 } from '@pazznetwork/ngx-chat-shared';
 import { combineLatest, map, Observable } from 'rxjs';
 import type { BlockPlugin, RosterPlugin } from '@pazznetwork/xmpp-adapter';
+import { NgZone } from '@angular/core';
+import { runInZone } from '../core/zone-rxjs-operator';
 
 export class XmppContactListService implements ContactListService {
   readonly blockedContactJIDs$: Observable<Set<string>>;
@@ -18,21 +20,26 @@ export class XmppContactListService implements ContactListService {
 
   constructor(
     private readonly rosterPlugin: RosterPlugin,
-    private readonly blockPlugin: BlockPlugin
+    private readonly blockPlugin: BlockPlugin,
+    zone: NgZone
   ) {
-    this.contacts$ = rosterPlugin.contacts$;
-    this.contactsSubscribed$ = rosterPlugin.contactsSubscribed$;
-    this.contactRequestsReceived$ = rosterPlugin.contactRequestsReceived$;
-    this.contactRequestsSent$ = rosterPlugin.contactRequestsSent$;
+    this.contacts$ = rosterPlugin.contacts$.pipe(
+      map((contactMap) => Array.from(contactMap.values())),
+      runInZone(zone)
+    );
+    this.contactsSubscribed$ = rosterPlugin.contactsSubscribed$.pipe(runInZone(zone));
+    this.contactRequestsReceived$ = rosterPlugin.contactRequestsReceived$.pipe(runInZone(zone));
+    this.contactRequestsSent$ = rosterPlugin.contactRequestsSent$.pipe(runInZone(zone));
     this.contactsUnaffiliated$ = combineLatest([
       rosterPlugin.contactsUnaffiliated$,
       this.blockPlugin.blockedContactJIDs$,
     ]).pipe(
       map(([contacts, blockedJIDs]) =>
         contacts.filter((c) => !blockedJIDs.has(c.jid.bare().toString()))
-      )
+      ),
+      runInZone(zone)
     );
-    this.blockedContactJIDs$ = blockPlugin.blockedContactJIDs$;
+    this.blockedContactJIDs$ = blockPlugin.blockedContactJIDs$.pipe(runInZone(zone));
 
     this.contactsBlocked$ = combineLatest([
       this.contacts$,
@@ -40,7 +47,8 @@ export class XmppContactListService implements ContactListService {
     ]).pipe(
       map(([contacts, blockedJIDs]) =>
         contacts.filter((c) => blockedJIDs.has(c.jid.bare().toString()))
-      )
+      ),
+      runInZone(zone)
     );
   }
 

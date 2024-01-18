@@ -73,18 +73,18 @@ export class ChatHistoryComponent implements OnDestroy {
 
   noMessages$!: Observable<boolean>;
 
+  constructor(
+    @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
+    private changeDetectorRef: ChangeDetectorRef,
+    @Inject(OPEN_CHAT_SERVICE_TOKEN) private openChatsService: OpenChatsService
+  ) {}
+
   isContact(recipient: Recipient | undefined): boolean {
     if (!recipient) {
       return false;
     }
     return recipient.recipientType === 'contact';
   }
-
-  constructor(
-    @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
-    private changeDetectorRef: ChangeDetectorRef,
-    @Inject(OPEN_CHAT_SERVICE_TOKEN) private openChatsService: OpenChatsService
-  ) {}
 
   ngOnDestroy(): void {
     if (!this.currentRecipient) {

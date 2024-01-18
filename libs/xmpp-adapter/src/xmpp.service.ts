@@ -23,6 +23,7 @@ import {
 import type { PluginMap } from './core';
 import { createPluginMap } from './core';
 import { NgZone } from '@angular/core';
+import { runInZone } from './core/zone-rxjs-operator';
 
 export class XmppService implements ChatService {
   static instance: XmppService;
@@ -61,12 +62,12 @@ export class XmppService implements ChatService {
   ) {
     this.chatConnectionService = new XmppConnectionService(log);
 
-    this.onAuthenticating$ = this.chatConnectionService.onAuthenticating$;
-    this.onOnline$ = this.chatConnectionService.onOnline$;
-    this.onOffline$ = this.chatConnectionService.onOffline$;
-    this.isOnline$ = this.chatConnectionService.isOnline$;
-    this.isOffline$ = this.chatConnectionService.isOffline$;
-    this.userJid$ = this.chatConnectionService.userJid$;
+    this.onAuthenticating$ = this.chatConnectionService.onAuthenticating$.pipe(runInZone(zone));
+    this.onOnline$ = this.chatConnectionService.onOnline$.pipe(runInZone(zone));
+    this.onOffline$ = this.chatConnectionService.onOffline$.pipe(runInZone(zone));
+    this.isOnline$ = this.chatConnectionService.isOnline$.pipe(runInZone(zone));
+    this.isOffline$ = this.chatConnectionService.isOffline$.pipe(runInZone(zone));
+    this.userJid$ = this.chatConnectionService.userJid$.pipe(runInZone(zone));
 
     this.pluginMap = createPluginMap(
       this,
@@ -85,10 +86,11 @@ export class XmppService implements ChatService {
       this.pluginMap.messageCarbon,
       this.pluginMap.unreadMessageCount
     );
-    this.roomService = new XmppRoomService(this.pluginMap.muc, this.pluginMap.mucSub);
+    this.roomService = new XmppRoomService(this.pluginMap.muc, this.pluginMap.mucSub, this.zone);
     this.contactListService = new XmppContactListService(
       this.pluginMap.roster,
-      this.pluginMap.block
+      this.pluginMap.block,
+      this.zone
     );
 
     this.fileUploadHandler = this.pluginMap.xmppFileUpload;
