@@ -19,6 +19,7 @@ import { Bosh } from './bosh';
 import { StropheWebsocket } from './strophe-websocket';
 import type { ProtocolManager } from './protocol-manager';
 import {
+  concatMap,
   distinctUntilChanged,
   filter,
   firstValueFrom,
@@ -68,6 +69,7 @@ import { isValidJID } from './utils';
  *  To send data to the connection, use send().
  */
 export class Connection {
+  private readonly checkHandlerChainSubject = new Subject<Element>();
   private readonly userJidSubject = new ReplaySubject<string>(1);
 
   readonly userJid$: Observable<string> = this.userJidSubject.pipe(
@@ -245,6 +247,10 @@ export class Connection {
 
     // Call onIdle callback every 1/10th of a second
     this.idleTimeout = setTimeout(() => this.onIdle(), 100);
+
+    this.checkHandlerChainSubject
+      .pipe(concatMap((elem) => this.handlerService.checkHandlerChain(elem)))
+      .subscribe();
   }
 
   /**
@@ -968,7 +974,7 @@ export class Connection {
 
     if (elem.getAttribute('type') !== 'terminate') {
       // send each incoming stanza through the handler chain
-      await this.handlerService.checkHandlerChain(elem);
+      this.checkHandlerChainSubject.next(elem);
       return;
     }
 
