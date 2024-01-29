@@ -19,6 +19,7 @@ import { Bosh } from './bosh';
 import { StropheWebsocket } from './strophe-websocket';
 import type { ProtocolManager } from './protocol-manager';
 import {
+  concatMap,
   distinctUntilChanged,
   filter,
   firstValueFrom,
@@ -27,6 +28,7 @@ import {
   Observable,
   of,
   pairwise,
+  partition,
   ReplaySubject,
   share,
   shareReplay,
@@ -248,9 +250,15 @@ export class Connection {
     // Call onIdle callback every 1/10th of a second
     this.idleTimeout = setTimeout(() => this.onIdle(), 100);
 
-    this.checkHandlerChainSubject
-      .pipe(mergeMap((elem) => this.handlerService.checkHandlerChain(elem)))
-      .subscribe();
+    const [messages$, nonMessages$] = partition(
+      this.checkHandlerChainSubject,
+      (elem) => elem?.nodeName === 'message'
+    );
+
+    merge(
+      messages$.pipe(concatMap((elem) => this.handlerService.checkHandlerChain(elem))),
+      nonMessages$.pipe(mergeMap((elem) => this.handlerService.checkHandlerChain(elem)))
+    ).subscribe();
   }
 
   /**
