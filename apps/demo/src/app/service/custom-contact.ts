@@ -9,6 +9,9 @@ export class CustomContact implements CustomContactFactory {
     avatar: string = dummyAvatar,
     subscription = ContactSubscription.none
   ): Promise<Contact> {
-    return Promise.resolve(new Contact(jid, name, avatar, subscription));
+    return new Promise((resolve) =>
+      setTimeout(() => resolve(new Contact(jid, name, avatar, subscription)), 10)
+    );
+    // return Promise.resolve(new Contact(jid, name, avatar, subscription));
   }
 }

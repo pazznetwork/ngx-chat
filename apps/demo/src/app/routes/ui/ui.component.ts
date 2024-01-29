@@ -12,11 +12,16 @@ import {
   type Recipient,
   Room,
 } from '@pazznetwork/ngx-chat-shared';
+import { ChatHistoryComponent, ChatMessageOutComponent } from '@pazznetwork/ngx-chat';
+import { NgForOf } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'ngx-chat-ui',
   templateUrl: './ui.component.html',
   styleUrls: ['./ui.component.less'],
+  standalone: true,
+  imports: [ChatMessageOutComponent, ChatHistoryComponent, NgForOf, RouterLink],
 })
 export class UiComponent implements OnInit {
   readonly dummyAvatarContact =

@@ -11,11 +11,15 @@ import {
 } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { XmppService } from '@pazznetwork/xmpp-adapter';
+import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'ngx-chat-demo-muc',
   templateUrl: './muc.component.html',
   styleUrls: ['./muc.component.css'],
+  standalone: true,
+  imports: [AsyncPipe, FormsModule, NgIf, NgForOf],
 })
 export class MucComponent implements OnInit, OnDestroy {
   @Input()
@@ -135,7 +139,7 @@ export class MucComponent implements OnInit, OnDestroy {
 
   async inviteUser(): Promise<void> {
     await this.chatService.roomService.inviteUserToRoom(
-      this.getFullMemberJid(),
+      this.inviteJid,
       await this.getSelectedRoomJid()
     );
   }
@@ -217,6 +221,7 @@ export class MucComponent implements OnInit, OnDestroy {
   }
 
   private getFullMemberJid(): string {
+    debugger;
     return this.memberJid?.includes('@')
       ? this.memberJid
       : this.memberJid + '@' + (this.domain as string);

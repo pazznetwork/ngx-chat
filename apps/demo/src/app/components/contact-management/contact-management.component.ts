@@ -7,10 +7,23 @@ import {
   OpenChatStateService,
 } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_LIST_STATE_SERVICE_TOKEN, CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe, JsonPipe, KeyValuePipe, NgForOf, NgIf } from '@angular/common';
+import { ChatWindowContentComponent } from '@pazznetwork/ngx-chat';
 
 @Component({
   selector: 'ngx-chat-demo-contact-management',
   templateUrl: './contact-management.component.html',
+  standalone: true,
+  imports: [
+    FormsModule,
+    NgIf,
+    ChatWindowContentComponent,
+    AsyncPipe,
+    NgForOf,
+    KeyValuePipe,
+    JsonPipe,
+  ],
 })
 export class ContactManagementComponent {
   otherJid = '';

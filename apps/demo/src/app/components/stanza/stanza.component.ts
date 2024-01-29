@@ -2,10 +2,13 @@
 import { Component, Inject } from '@angular/core';
 import { XmppService } from '@pazznetwork/xmpp-adapter';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'ngx-chat-demo-stanza',
   templateUrl: './stanza.component.html',
+  standalone: true,
+  imports: [FormsModule],
 })
 export class StanzaComponent {
   request?: string;

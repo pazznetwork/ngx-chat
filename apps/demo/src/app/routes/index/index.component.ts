@@ -20,10 +20,28 @@ import {
 } from '@pazznetwork/ngx-xmpp';
 import { XmppService } from '@pazznetwork/xmpp-adapter';
 import { cleanUpJabber } from '../../../../../../libs/ngx-xmpp/src/test/helpers/ejabberd-client';
+import { StanzaComponent } from '../../components/stanza/stanza.component';
+import { ContactManagementComponent } from '../../components/contact-management/contact-management.component';
+import { MucComponent } from '../../components/muc/muc.component';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { ChatComponent } from '@pazznetwork/ngx-chat';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'ngx-chat-index',
   templateUrl: './index.component.html',
+  standalone: true,
+  imports: [
+    StanzaComponent,
+    ContactManagementComponent,
+    MucComponent,
+    AsyncPipe,
+    NgIf,
+    ChatComponent,
+    FormsModule,
+    RouterLink,
+  ],
 })
 export class IndexComponent implements OnDestroy {
   domain = '';
@@ -82,8 +100,8 @@ export class IndexComponent implements OnDestroy {
     this.ngDestroySubject.next();
   }
 
-  async chatBackgroundNotificationServiceEnable(): Promise<void> {
-    await this.chatBackgroundNotificationService.enable();
+  chatBackgroundNotificationServiceEnable(): void {
+    this.chatBackgroundNotificationService.enable();
   }
 
   watchAngularStability(): void {
