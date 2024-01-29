@@ -8,6 +8,7 @@ import {
   Observable,
   pairwise,
   ReplaySubject,
+  startWith,
   switchMap,
   tap,
 } from 'rxjs';
@@ -136,6 +137,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         )
       ).pipe(
         map((contactMap) => Array.from(contactMap.values())),
+        startWith([]),
         shareReplay({ bufferSize: 1, refCount: false })
       ),
       { connector: () => new ReplaySubject<Room[]>(1), resetOnDisconnect: false }
@@ -1041,8 +1043,8 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       .searchByNamespace('jabber:x:conference').result;
     const roomJidString: string =
       invitationEl.getAttribute('to') ?? (conferenceElement?.getAttribute('jid') as string);
+
     const roomJid = parseJid(roomJidString);
-    const room = await this.getOrCreateRoom(roomJid);
 
     const invitation: Invitation = {
       type: invitationEl.tagName as Invitation['type'],
@@ -1054,7 +1056,6 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
 
     this.invitationSubject.next(invitation);
 
-    room.newRoomInvitation(invitation);
     return true;
   }
 
