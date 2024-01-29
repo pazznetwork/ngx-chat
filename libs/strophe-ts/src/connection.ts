@@ -19,11 +19,11 @@ import { Bosh } from './bosh';
 import { StropheWebsocket } from './strophe-websocket';
 import type { ProtocolManager } from './protocol-manager';
 import {
-  concatMap,
   distinctUntilChanged,
   filter,
   firstValueFrom,
   merge,
+  mergeMap,
   Observable,
   of,
   pairwise,
@@ -249,7 +249,7 @@ export class Connection {
     this.idleTimeout = setTimeout(() => this.onIdle(), 100);
 
     this.checkHandlerChainSubject
-      .pipe(concatMap((elem) => this.handlerService.checkHandlerChain(elem)))
+      .pipe(mergeMap((elem) => this.handlerService.checkHandlerChain(elem)))
       .subscribe();
   }
 
