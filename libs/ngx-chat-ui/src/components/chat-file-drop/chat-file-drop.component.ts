@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 })
 export class ChatFileDropComponent {
   @Output()
-  readonly fileUploaded = new EventEmitter<File>();
+  readonly fileDropped = new EventEmitter<File>();
 
   @Input()
   dropMessage?: string;
@@ -63,7 +63,7 @@ export class ChatFileDropComponent {
         continue;
       }
 
-      this.fileUploaded.emit(file);
+      this.fileDropped.emit(file);
     }
   }
 }
