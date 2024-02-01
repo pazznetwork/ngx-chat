@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { ChatVideoWindowComponent } from '../chat-video-window';
 import { ChatWindowComponent } from '../chat-window';
 import { CHAT_LIST_STATE_SERVICE_TOKEN, CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { merge, mergeMap, Observable, Subject, tap, throttleTime } from 'rxjs';
+import { merge, mergeMap, Observable, Subject, throttleTime } from 'rxjs';
 import {
   AttachableTrack,
   ChatService,
@@ -59,15 +59,10 @@ export class ChatBarWindowsComponent implements OnInit, OnDestroy {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService,
     @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
-    readonly chatListService: OpenChatStateService,
-    readonly cdr: ChangeDetectorRef
+    readonly chatListService: OpenChatStateService
   ) {
-    this.tracks$ = this.chatListService.openTracks$.pipe(
-      tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
-    );
-    this.chats$ = this.chatListService.openChats$.pipe(
-      tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
-    );
+    this.tracks$ = this.chatListService.openTracks$;
+    this.chats$ = this.chatListService.openChats$;
   }
 
   ngOnDestroy(): void {

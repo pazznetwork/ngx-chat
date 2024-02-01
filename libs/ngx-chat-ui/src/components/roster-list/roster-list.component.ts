@@ -1,15 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import {
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Inject,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
+import { Observable } from 'rxjs';
 import type { ChatService, Contact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { OpenChatStateService, Room } from '@pazznetwork/ngx-chat-shared';
 import { CHAT_LIST_STATE_SERVICE_TOKEN, CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
@@ -58,7 +50,7 @@ import { RosterRecipientPresenceComponent } from '../roster-recipient-presence';
     ]),
   ],
 })
-export class RosterListComponent implements OnInit {
+export class RosterListComponent {
   @Input()
   blocked$?: Observable<Contact[]>;
 
@@ -86,37 +78,8 @@ export class RosterListComponent implements OnInit {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
-    private readonly chatListService: OpenChatStateService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly chatListService: OpenChatStateService
   ) {}
-
-  ngOnInit(): void {
-    if (this.blocked$) {
-      this.blocked$ = this.blocked$.pipe(tap(() => setTimeout(() => this.cdr.detectChanges(), 0)));
-    }
-
-    if (this.contacts$) {
-      this.contacts$ = this.contacts$.pipe(
-        tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
-      );
-    }
-
-    if (this.contactRequestsReceived$) {
-      this.contactRequestsReceived$ = this.contactRequestsReceived$.pipe(
-        tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
-      );
-    }
-
-    if (this.contactsUnaffiliated$) {
-      this.contactsUnaffiliated$ = this.contactsUnaffiliated$.pipe(
-        tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
-      );
-    }
-
-    if (this.rooms$) {
-      this.rooms$ = this.rooms$.pipe(tap(() => setTimeout(() => this.cdr.detectChanges(), 0)));
-    }
-  }
 
   onClickRecipient(recipient: Recipient): void {
     this.chatListService.openChat(recipient, false);

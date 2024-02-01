@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectorRef, Component, Inject, Input } from '@angular/core';
-import { mergeMap, Observable, tap } from 'rxjs';
+import { Component, Inject, Input } from '@angular/core';
+import { mergeMap, Observable } from 'rxjs';
 import type { ChatService } from '@pazznetwork/ngx-chat-shared';
 import {
   Contact,
@@ -72,8 +72,7 @@ export class ChatHistoryMessagesRoomComponent {
         }
 
         return returnArray;
-      }),
-      tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
+      })
     );
   }
 
@@ -88,8 +87,7 @@ export class ChatHistoryMessagesRoomComponent {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
     @Inject(CUSTOM_CONTACT_FACTORY_TOKEN)
-    private readonly customContactFactory: CustomContactFactory,
-    private readonly cdr: ChangeDetectorRef
+    private readonly customContactFactory: CustomContactFactory
   ) {}
 
   getNickFromContact(contact: Contact): string | undefined {

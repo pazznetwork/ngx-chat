@@ -1,13 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  ViewChild,
-  ViewContainerRef,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { extractUrls } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageTextComponent } from './chat-message-text';
 import { ChatMessageLinkComponent } from './chat-message-link';
@@ -19,20 +11,16 @@ import { CommonModule } from '@angular/common';
   selector: 'ngx-chat-message-text-area',
   templateUrl: './chat-message-text-area.component.html',
   styleUrls: ['chat-message-text-area.component.less'],
-  encapsulation: ViewEncapsulation.ShadowDom,
 })
-export class ChatMessageTextAreaComponent implements AfterViewInit {
+export class ChatMessageTextAreaComponent implements OnInit {
   @Input()
   textContent?: string;
 
-  @ViewChild('textContainerRef', { read: ViewContainerRef })
+  @ViewChild('textContainerRef', { read: ViewContainerRef, static: true })
   textContainerRef!: ViewContainerRef;
 
-  constructor(private cdr: ChangeDetectorRef) {}
-
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.transform();
-    this.cdr.detectChanges();
   }
 
   private transform(): void {
@@ -42,7 +30,6 @@ export class ChatMessageTextAreaComponent implements AfterViewInit {
 
     const message = this.textContent;
     const links = extractUrls(message);
-
     let lastIndex = 0;
     for (const link of links) {
       const currentIndex = message.indexOf(link, lastIndex);

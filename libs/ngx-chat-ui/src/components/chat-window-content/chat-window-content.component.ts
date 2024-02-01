@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectorRef, Component, Inject, Input, ViewChild } from '@angular/core';
+import { Component, Inject, Input, ViewChild } from '@angular/core';
 import type { ChatService, FileUploadHandler, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { Contact, ContactSubscription } from '@pazznetwork/ngx-chat-shared';
 import { ChatWindowInputComponent } from '../chat-window-input';
@@ -7,7 +7,7 @@ import { ChatHistoryComponent } from '../chat-history';
 import { CommonModule } from '@angular/common';
 import { ChatFileDropComponent } from '../chat-file-drop';
 import { CHAT_SERVICE_TOKEN, FILE_UPLOAD_HANDLER_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { combineLatest, map, Observable, of, tap } from 'rxjs';
+import { combineLatest, map, Observable, of } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -31,8 +31,7 @@ export class ChatWindowContentComponent {
 
           // none and undefined no longer checked for pazz
           return isNotBlocked && ContactSubscription.from === subscription;
-        }),
-        tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
+        })
       );
     } else {
       this.pendingRequest$ = of(false);
@@ -55,8 +54,7 @@ export class ChatWindowContentComponent {
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
-    @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler,
-    private readonly cdr: ChangeDetectorRef
+    @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler
   ) {}
 
   async uploadFile(file: File): Promise<void> {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectorRef, Component, Inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnInit } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { combineLatestWith, ReplaySubject, tap } from 'rxjs';
+import { combineLatestWith, ReplaySubject } from 'rxjs';
 import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatAvatarComponent } from '../chat-avatar';
@@ -30,10 +30,7 @@ export class RosterRecipientComponent implements OnInit {
 
   unreadCount$?: Observable<number>;
 
-  constructor(
-    @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
-    private readonly cdr: ChangeDetectorRef
-  ) {}
+  constructor(@Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService) {}
 
   ngOnInit(): void {
     this.unreadCount$ = this.chatService.messageService.jidToUnreadCount$.pipe(
@@ -43,8 +40,7 @@ export class RosterRecipientComponent implements OnInit {
           jidToUnreadCount.get(recipient.jid.bare().toString()) || 0
       ),
       distinctUntilChanged(),
-      debounceTime(20),
-      tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
+      debounceTime(20)
     );
   }
 }

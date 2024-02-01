@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectorRef, Component, Inject, Input } from '@angular/core';
-import { map, Observable, tap } from 'rxjs';
+import { Component, Inject, Input } from '@angular/core';
+import { map, Observable } from 'rxjs';
 import type { ChatService } from '@pazznetwork/ngx-chat-shared';
 import { Contact, Direction, Message } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
@@ -45,8 +45,7 @@ export class ChatHistoryMessagesContactComponent {
         }
 
         return returnArray;
-      }),
-      tap(() => setTimeout(() => this.cdr.detectChanges(), 0))
+      })
     );
   }
 
@@ -56,8 +55,5 @@ export class ChatHistoryMessagesContactComponent {
   messagesGroupedByDate$?: Observable<{ date: Date; messages: Message[] }[]>;
   Direction = Direction;
 
-  constructor(
-    @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
-    private readonly cdr: ChangeDetectorRef
-  ) {}
+  constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
 }

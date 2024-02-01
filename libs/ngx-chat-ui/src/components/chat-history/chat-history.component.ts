@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { ChangeDetectorRef, Component, Inject, Input, OnDestroy } from '@angular/core';
-import { exhaustMap, map, Observable, Subject, tap } from 'rxjs';
+import { exhaustMap, map, Observable, Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import {
   ChatService,
@@ -121,7 +121,6 @@ export class ChatHistoryComponent implements OnDestroy {
             this.isLoadingMessages = false;
           }
         }),
-        tap(() => setTimeout(() => this.changeDetectorRef.detectChanges, 0)),
         takeUntil(this.ngDestroySubject)
       )
       .subscribe();
