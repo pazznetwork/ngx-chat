@@ -112,7 +112,7 @@ export class Connection {
   readonly isOnline$ = merge(
     this.onOnlineStatus$.pipe(map(() => true)),
     this.onOfflineSubject.pipe(map(() => false))
-  ).pipe(startWith(false), shareReplay({ bufferSize: 1, refCount: false }));
+  ).pipe(startWith(false), distinctUntilChanged(), shareReplay({ bufferSize: 1, refCount: false }));
 
   readonly isOffline$ = this.isOnline$.pipe(map((online) => !online));
 
