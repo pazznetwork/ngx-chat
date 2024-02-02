@@ -14,7 +14,14 @@ export const LINK_OPENER_TOKEN = new InjectionToken<LinkOpener>('ngxChatLinkOpen
 
 @Component({
   standalone: true,
-  templateUrl: './chat-message-link.component.html',
+  template: `<a
+    #anchor
+    href="{{ link }}"
+    target="_blank"
+    rel="noopener"
+    (click)="onClick($event)"
+    >{{ text }}</a
+  >`,
 })
 export class ChatMessageLinkComponent {
   @ViewChild('anchor')
@@ -30,6 +37,10 @@ export class ChatMessageLinkComponent {
   ) {}
 
   async onClick($event: Event): Promise<void> {
+    if (!this.linkOpener && !this.isInApp()) {
+      return;
+    }
+
     $event.preventDefault();
     if (this.linkOpener && this.link) {
       this.linkOpener.openLink(this.link);

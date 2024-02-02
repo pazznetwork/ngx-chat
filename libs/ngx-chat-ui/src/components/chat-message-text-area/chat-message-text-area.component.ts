@@ -60,6 +60,10 @@ export class ChatMessageTextAreaComponent implements OnInit {
     const parser = document.createElement('a');
     parser.href = url;
 
+    if (parser.href.length < 50) {
+      return parser.href;
+    }
+
     let shortenedPathname = parser.pathname;
     if (shortenedPathname.length > 17) {
       shortenedPathname =
