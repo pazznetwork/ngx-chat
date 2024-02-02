@@ -1,28 +1,47 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 /* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access */
 import 'zone.js/plugins/task-tracking';
-import { Component, Inject, NgZone, OnDestroy } from '@angular/core';
+import { ApplicationRef, Component, Inject, NgZone, OnDestroy } from '@angular/core';
 import { firstValueFrom, map, merge, Observable, startWith, Subject } from 'rxjs';
 import {
   AuthRequest,
+  ChatBrowserNotificationService,
   ChatService,
   Log,
   LOG_SERVICE_TOKEN,
   LogLevel,
+  OpenChatStateService,
 } from '@pazznetwork/ngx-chat-shared';
 import { takeUntil } from 'rxjs/operators';
 import {
+  CHAT_BACKGROUND_NOTIFICATION_SERVICE_TOKEN,
+  CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
-  ChatBackgroundNotificationService,
-  ChatListStateService,
 } from '@pazznetwork/ngx-xmpp';
 import { XmppService } from '@pazznetwork/xmpp-adapter';
 import { cleanUpJabber } from '../../../../../../libs/ngx-xmpp/src/test/helpers/ejabberd-client';
+import { StanzaComponent } from '../../components/stanza/stanza.component';
+import { ContactManagementComponent } from '../../components/contact-management/contact-management.component';
+import { MucComponent } from '../../components/muc/muc.component';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { ChatComponent } from '@pazznetwork/ngx-chat';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'ngx-chat-index',
   templateUrl: './index.component.html',
-  styleUrls: ['./index.component.css'],
+  standalone: true,
+  imports: [
+    StanzaComponent,
+    ContactManagementComponent,
+    MucComponent,
+    AsyncPipe,
+    NgIf,
+    ChatComponent,
+    FormsModule,
+    RouterLink,
+  ],
 })
 export class IndexComponent implements OnDestroy {
   domain = '';
@@ -39,9 +58,12 @@ export class IndexComponent implements OnDestroy {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     @Inject(LOG_SERVICE_TOKEN) readonly logService: Log,
-    private chatListStateService: ChatListStateService,
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    private chatListStateService: OpenChatStateService,
+    private readonly appRef: ApplicationRef,
     private readonly ngZone: NgZone,
-    private readonly chatBackgroundNotificationService: ChatBackgroundNotificationService
+    @Inject(CHAT_BACKGROUND_NOTIFICATION_SERVICE_TOKEN)
+    private readonly chatBackgroundNotificationService: ChatBrowserNotificationService
   ) {
     const item = localStorage.getItem('data');
     const contactData: {
@@ -78,8 +100,8 @@ export class IndexComponent implements OnDestroy {
     this.ngDestroySubject.next();
   }
 
-  async chatBackgroundNotificationServiceEnable(): Promise<void> {
-    await this.chatBackgroundNotificationService.enable();
+  chatBackgroundNotificationServiceEnable(): void {
+    this.chatBackgroundNotificationService.enable();
   }
 
   watchAngularStability(): void {
@@ -97,7 +119,7 @@ export class IndexComponent implements OnDestroy {
         // eslint-disable-next-line no-console
         console.log({
           microTasks: taskTrackingZone.getTasksFor('microTask'),
-          macroTasks: taskTrackingZone.getTasksFor('macroTask'),
+          macroTasks: JSON.parse(JSON.stringify(taskTrackingZone.getTasksFor('macroTask'))),
           eventTasks: taskTrackingZone
             .getTasksFor('eventTask')
             .filter((task: { eventName: string }) => task.eventName !== 'click'),
@@ -183,7 +205,8 @@ export class IndexComponent implements OnDestroy {
     }
     const jid = this.otherJid?.includes('@') ? this.otherJid : this.otherJid + '@' + this.domain;
     this.chatListStateService.openChat(
-      await this.chatService.contactListService.getOrCreateContactById(jid)
+      await this.chatService.contactListService.getOrCreateContactById(jid),
+      false
     );
   }
 
@@ -192,11 +215,13 @@ export class IndexComponent implements OnDestroy {
   }
 
   async blockContact(): Promise<void> {
-    await this.chatService.contactListService.blockJid(this.otherJid);
+    const jid = this.otherJid?.includes('@') ? this.otherJid : this.otherJid + '@' + this.domain;
+    await this.chatService.contactListService.blockJid(jid);
   }
 
   async unblockContact(): Promise<void> {
-    await this.chatService.contactListService.unblockJid(this.otherJid);
+    const jid = this.otherJid?.includes('@') ? this.otherJid : this.otherJid + '@' + this.domain;
+    await this.chatService.contactListService.unblockJid(jid);
   }
 
   async onUnregister(): Promise<void> {
@@ -208,5 +233,9 @@ export class IndexComponent implements OnDestroy {
 
   cleanUpJabber(): Promise<void> {
     return cleanUpJabber();
+  }
+
+  forceAppUpdate(): void {
+    this.appRef.tick();
   }
 }

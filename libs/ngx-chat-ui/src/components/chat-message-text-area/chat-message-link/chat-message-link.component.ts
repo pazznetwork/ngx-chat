@@ -2,7 +2,6 @@
 import { PlatformLocation } from '@angular/common';
 import { Component, Inject, InjectionToken, Optional, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
 
 export interface LinkOpener {
   openLink(url: string): void;
@@ -15,8 +14,14 @@ export const LINK_OPENER_TOKEN = new InjectionToken<LinkOpener>('ngxChatLinkOpen
 
 @Component({
   standalone: true,
-  imports: [XmppAdapterModule],
-  templateUrl: './chat-message-link.component.html',
+  template: `<a
+    #anchor
+    href="{{ link }}"
+    target="_blank"
+    rel="noopener"
+    (click)="onClick($event)"
+    >{{ text }}</a
+  >`,
 })
 export class ChatMessageLinkComponent {
   @ViewChild('anchor')
@@ -32,6 +37,10 @@ export class ChatMessageLinkComponent {
   ) {}
 
   async onClick($event: Event): Promise<void> {
+    if (!this.linkOpener && !this.isInApp()) {
+      return;
+    }
+
     $event.preventDefault();
     if (this.linkOpener && this.link) {
       this.linkOpener.openLink(this.link);

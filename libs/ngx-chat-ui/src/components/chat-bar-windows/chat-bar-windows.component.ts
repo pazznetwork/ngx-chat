@@ -1,10 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Inject, Input } from '@angular/core';
 import { ChatVideoWindowComponent } from '../chat-video-window';
 import { ChatWindowComponent } from '../chat-window';
-import { ChatListStateService } from '@pazznetwork/ngx-xmpp';
+import { CHAT_LIST_STATE_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
+import { Observable } from 'rxjs';
+import {
+  AttachableTrack,
+  Contact,
+  OpenChatStateService,
+  Recipient,
+  Room,
+} from '@pazznetwork/ngx-chat-shared';
 
 @Component({
   standalone: true,
@@ -33,7 +41,22 @@ import { ChatListStateService } from '@pazznetwork/ngx-xmpp';
 })
 export class ChatBarWindowsComponent {
   @Input()
-  rosterState?: string;
+  rosterState?: 'hidden' | 'shown';
 
-  constructor(public chatListService: ChatListStateService) {}
+  @Input()
+  contacts$?: Observable<Contact[]>;
+
+  @Input()
+  rooms$?: Observable<Room[]>;
+
+  chats$: Observable<{ recipient: Recipient; isCollapsed: boolean }[]>;
+  readonly tracks$: Observable<AttachableTrack[]>;
+
+  constructor(
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    readonly chatListService: OpenChatStateService
+  ) {
+    this.tracks$ = this.chatListService.openTracks$;
+    this.chats$ = this.chatListService.openChats$;
+  }
 }

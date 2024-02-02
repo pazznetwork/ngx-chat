@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
-import { mergeMap } from 'rxjs';
-import type { Contact, Log, Recipient, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
-import type { ChatPlugin, Stanza } from '../core';
-import { Finder, serializeToSubmitForm } from '../core';
+import type { Contact, Recipient, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
+import type { ChatPlugin } from '../core';
+import { serializeToSubmitForm } from '../core';
 import type { XmppService } from '../xmpp.service';
-import { MUC_SUB_EVENT_TYPE, nsRSM } from './multi-user-chat';
-import { nsPubSubEvent } from './publish-subscribe.plugin';
+import { nsRSM } from './multi-user-chat';
 
 const nsMAM = 'urn:xmpp:mam:2';
 
@@ -16,21 +14,9 @@ const nsMAM = 'urn:xmpp:mam:2';
 export class MessageArchivePlugin implements ChatPlugin {
   readonly nameSpace = nsMAM;
 
-  constructor(private readonly chatService: XmppService, private readonly logService: Log) {
-    this.chatService.onOnline$
-      .pipe(
-        mergeMap(async () => {
-          await this.requestNewestMessages();
-          await this.chatService.chatConnectionService.addHandler(
-            (stanza) => this.handleMamMessageStanza(stanza),
-            { name: 'message' }
-          );
-        })
-      )
-      .subscribe();
-  }
+  constructor(private readonly chatService: XmppService) {}
 
-  private async requestNewestMessages(): Promise<void> {
+  async requestNewestMessages(): Promise<void> {
     await this.chatService.chatConnectionService
       .$iq({ type: 'set' })
       .c('query', { xmlns: this.nameSpace })
@@ -70,7 +56,7 @@ export class MessageArchivePlugin implements ChatPlugin {
       .c('set', { xmlns: nsRSM })
       .c('max', {}, '100')
       .cCreateMethod((builder) =>
-        recipient.messageStore.mostRecentMessage
+        recipient.messageStore.mostRecentMessage?.id
           ? builder.c('after', {}, recipient.messageStore.mostRecentMessage.id)
           : builder
       )
@@ -102,71 +88,6 @@ export class MessageArchivePlugin implements ChatPlugin {
         .up()
         .c('after', {}, lastReceivedMessageId)
         .send();
-    }
-  }
-
-  private async handleMamMessageStanza(stanza: Stanza): Promise<boolean> {
-    const messageElement = Finder.create(stanza)
-      .searchByTag('result')
-      .searchByTag('forwarded')
-      .searchByTag('message').result;
-
-    const delayElement = Finder.create(stanza)
-      .searchByTag('result')
-      .searchByTag('forwarded')
-      .searchByTag('delay').result;
-
-    const eventElement = Finder.create(stanza)
-      .searchByTag('result')
-      .searchByTag('forwarded')
-      .searchByTag('message')
-      .searchByTag('event')
-      .searchByNamespace(nsPubSubEvent).result;
-
-    if (!eventElement && messageElement && delayElement) {
-      return this.handleMessage(messageElement, delayElement);
-    }
-
-    const itemsElement = eventElement?.querySelector('items');
-    const itemsNode = itemsElement?.getAttribute('node');
-
-    if (itemsNode !== MUC_SUB_EVENT_TYPE.messages) {
-      this.logService.warn(
-        `Handling of MUC/Sub message types other than ${MUC_SUB_EVENT_TYPE.messages} isn't implemented yet! Stanza was ${stanza.outerHTML}`
-      );
-      return false;
-    }
-
-    if (!itemsElement) {
-      throw new Error('No itemsElement to handle from archive');
-    }
-
-    const itemElements = Array.from(itemsElement.querySelectorAll('item'));
-    const messagesHandled = await Promise.all(
-      itemElements.reduce((acc: Promise<boolean>[], itemEl) => {
-        const message = itemEl.querySelector('message');
-        if (message && delayElement) {
-          acc.push(this.handleMessage(message, delayElement));
-        }
-
-        return acc;
-      }, [])
-    );
-    return messagesHandled.every((val) => val);
-  }
-
-  private async handleMessage(messageElement: Element, delayElement: Element): Promise<boolean> {
-    const type = messageElement.getAttribute('type');
-    if (type === 'chat') {
-      await this.chatService.messageService.handleMessageStanza(messageElement, delayElement);
-      return true;
-    } else if (
-      type === 'groupchat' ||
-      this.chatService.pluginMap.muc.isRoomInvitationStanza(messageElement)
-    ) {
-      throw new Error('type:groupchat NOT IMPLEMENTED');
-    } else {
-      throw new Error(`unknown archived message type: ${String(type)}`);
     }
   }
 }

@@ -403,7 +403,7 @@ export function getDomainFromJid(jid: string): string | null {
   if (!bare) {
     return null;
   }
-  if (bare.indexOf('@') < 0) {
+  if (bare.indexOf('@') === -1) {
     return bare;
   } else {
     const parts = bare.split('@');

@@ -2,6 +2,7 @@
 import {
   BehaviorSubject,
   combineLatest,
+  firstValueFrom,
   merge,
   mergeMap,
   Observable,
@@ -14,6 +15,8 @@ import type { JidToNumber, OpenChatsService, Recipient } from '@pazznetwork/ngx-
 import { Direction, findSortedInsertionIndexLast, Message } from '@pazznetwork/ngx-chat-shared';
 import type { XmppService } from '../xmpp.service';
 import type { BlockPlugin, MultiUserChatPlugin, PublishSubscribePlugin } from '../plugins';
+import { EntityTimePlugin } from '../plugins';
+import { StanzaBuilder } from '../stanza-builder';
 
 const STORAGE_NGX_CHAT_LAST_READ_DATE = 'ngxchat:unreadmessagedate';
 
@@ -35,7 +38,7 @@ export class UnreadMessageCountService {
   /**
    * already debounced to prevent the issues described in {@link UnreadMessageCountService.jidToUnreadCount$}.
    */
-  readonly unreadMessageCountSum$: Observable<number>;
+  unreadMessageCountSum$!: Observable<number>;
 
   private jidToUnreadCountSubject: BehaviorSubject<JidToNumber> = new BehaviorSubject(
     new Map<string, number>()
@@ -53,85 +56,102 @@ export class UnreadMessageCountService {
     private chatService: XmppService,
     private chatMessageListRegistry: OpenChatsService,
     private pubSub: PublishSubscribePlugin,
+    private entityTimePlugin: EntityTimePlugin,
     muc: MultiUserChatPlugin,
     private block: BlockPlugin
   ) {
-    this.chatMessageListRegistry.chatOpened$
-      .pipe(
-        delay(0), // prevent 'Expression has changed after it was checked'
-        mergeMap((recipient): Promise<void> => this.checkForUnreadCountChange(recipient))
-      )
-      .subscribe();
+    this.chatService.zone.run(() => {
+      this.chatMessageListRegistry.chatMessagesViewed$
+        .pipe(
+          delay(0), // prevent 'Expression has changed after it was checked'
+          mergeMap((recipient): Promise<void> => this.checkForUnreadCountChange(recipient))
+        )
+        .subscribe();
 
-    chatService.onOnline$
-      .pipe(
-        switchMap(() =>
-          merge(
-            muc.rooms$,
-            this.chatService.contactListService.contacts$.pipe(
-              pairwise(),
-              filter(([a, b]) => a?.length < b?.length),
-              map(([, b]) => b.at(b.length - 1)),
-              map((contact) => [contact])
+      chatService.onOnline$
+        .pipe(
+          switchMap(() =>
+            merge(
+              muc.rooms$,
+              this.chatService.contactListService.contacts$.pipe(
+                pairwise(),
+                filter(([a, b]) => a?.length < b?.length),
+                map(([, b]) => b.at(b.length - 1)),
+                map((contact) => [contact])
+              )
             )
           )
         )
-      )
-      .subscribe((recipients): void => {
-        for (const recipient of recipients) {
-          if (!recipient) {
-            continue;
+        .subscribe((recipients): void => {
+          for (const recipient of recipients) {
+            if (!recipient) {
+              continue;
+            }
+            const jid = recipient.jid.bare().toString();
+            if (!this.recipientIdToMessageSubscription.has(jid)) {
+              const messages$: Observable<Message[]> = recipient.messageStore.messages$;
+              const updateUnreadCountSubscription = messages$
+                .pipe(
+                  debounceTime(20),
+                  mergeMap(() => this.checkForUnreadCountChange(recipient))
+                )
+                // eslint-disable-next-line rxjs/no-nested-subscribe
+                .subscribe();
+              this.recipientIdToMessageSubscription.set(jid, updateUnreadCountSubscription);
+            }
           }
-          const jid = recipient.jid.toString();
-          if (!this.recipientIdToMessageSubscription.has(jid)) {
-            const messages$: Observable<Message[]> = recipient.messageStore.messages$;
-            const updateUnreadCountSubscription = messages$
-              .pipe(
-                debounceTime(20),
-                mergeMap(() => this.checkForUnreadCountChange(recipient))
-              )
-              // eslint-disable-next-line rxjs/no-nested-subscribe
-              .subscribe();
-            this.recipientIdToMessageSubscription.set(jid, updateUnreadCountSubscription);
-          }
-        }
+        });
+
+      chatService.onOnline$.pipe(switchMap(() => this.fillJidToLastSeenDates())).subscribe();
+
+      pubSub.publishEvent$.subscribe((event): void => {
+        this.handlePubSubEvent(event);
       });
 
-    chatService.onOnline$
-      .pipe(switchMap(() => pubSub.publish$))
-      .subscribe((event): void => this.handlePubSubEvent(event));
-
-    this.unreadMessageCountSum$ = combineLatest([
-      this.jidToUnreadCount$,
-      this.block.blockedContactJIDs$,
-    ]).pipe(
-      debounceTime(20),
-      map(([jidToUnreadCount, blockedContactIdSet]): number => {
-        let sum = 0;
-        for (const [recipientJid, count] of jidToUnreadCount) {
-          if (!blockedContactIdSet.has(recipientJid)) {
-            sum += count;
+      this.unreadMessageCountSum$ = combineLatest([
+        this.jidToUnreadCount$,
+        this.block.blockedContactJIDs$,
+      ]).pipe(
+        debounceTime(20),
+        map(([jidToUnreadCount, blockedContactIdSet]): number => {
+          let sum = 0;
+          for (const [recipientJid, count] of jidToUnreadCount) {
+            if (!blockedContactIdSet.has(recipientJid)) {
+              sum += count;
+            }
           }
-        }
-        return sum;
-      }),
-      distinctUntilChanged(),
-      share()
-    );
+          return sum;
+        }),
+        distinctUntilChanged(),
+        share()
+      );
+    });
+
+    chatService.onOffline$.subscribe(() => this.onOffline());
   }
 
-  private async checkForUnreadCountChange(_recipient: Recipient): Promise<void> {
-    return Promise.resolve();
-    /*if (this.chatMessageListRegistry.isChatOpen(recipient)) {
-                    this.jidToLastReadTimestamp.set(recipient.jid.toString(), await this.entityTimePlugin.getNow());
-                    await this.persistLastSeenDates();
-                }
-                this.updateContactUnreadMessageState(recipient);*/
+  private async checkForUnreadCountChange(recipient: Recipient): Promise<void> {
+    if (this.chatMessageListRegistry.isChatOpen(recipient)) {
+      this.jidToLastReadTimestamp.set(
+        recipient.jid.bare().toString(),
+        await firstValueFrom(this.entityTimePlugin.getNow())
+      );
+      await this.persistLastSeenDates();
+    }
+    this.updateContactUnreadMessageState(recipient);
   }
 
-  async onBeforeOnline(): Promise<any> {
-    const fetchedDates = await this.fetchLastSeenDates();
-    this.mergeJidToDates(fetchedDates);
+  async fillJidToLastSeenDates(): Promise<void> {
+    try {
+      const fetchedDates = await this.fetchLastSeenDates();
+      this.mergeJidToDates(fetchedDates);
+    } catch (e) {
+      if (e?.toString().includes('item-not-found')) {
+        return;
+      }
+
+      throw e;
+    }
   }
 
   onOffline(): void {
@@ -172,7 +192,7 @@ export class UnreadMessageCountService {
   }
 
   updateContactUnreadMessageState(recipient: Recipient): void {
-    const contactJid = recipient.jid.toString();
+    const contactJid = recipient.jid.bare().toString();
     const lastReadDate = this.jidToLastReadTimestamp.get(contactJid) || 0;
     const contactUnreadMessageCount = this.calculateUnreadMessageCount(recipient, lastReadDate);
     const jidToCount = this.jidToUnreadCountSubject.getValue();
@@ -192,19 +212,19 @@ export class UnreadMessageCountService {
       .filter((message): boolean => message.direction === Direction.in).length;
   }
 
-  // private async persistLastSeenDates(): Promise<void> {
-  //   await this.chatService.pluginMap.pubSub.storePrivatePayloadPersistent(
-  //     STORAGE_NGX_CHAT_LAST_READ_DATE,
-  //     'current',
-  //     (builder): StanzaBuilder => {
-  //       const wrapperBuilder = builder.c('entries');
-  //       for (const [jid, date] of this.jidToLastReadTimestamp) {
-  //         wrapperBuilder.c('last-read', { jid, date: date.toString() });
-  //       }
-  //       return wrapperBuilder;
-  //     }
-  //   );
-  // }
+  private async persistLastSeenDates(): Promise<void> {
+    await this.chatService.pluginMap.pubSub.storePrivatePayloadPersistent(
+      STORAGE_NGX_CHAT_LAST_READ_DATE,
+      'current',
+      (builder): StanzaBuilder => {
+        const wrapperBuilder = builder.c('entries');
+        for (const [jid, date] of this.jidToLastReadTimestamp) {
+          wrapperBuilder.c('last-read', { jid, date: date.toString() }).up();
+        }
+        return wrapperBuilder;
+      }
+    );
+  }
 
   private handlePubSubEvent(event: Element): void {
     const itemsWrapper = event.querySelector('items');

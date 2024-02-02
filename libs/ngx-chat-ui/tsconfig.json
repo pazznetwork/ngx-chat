@@ -13,20 +13,23 @@
     }
   ],
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2022",
     "importsNotUsedAsValues": "remove",
     "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
     "strict": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
   },
   "angularCompilerOptions": {
     "skipTemplateCodegen": true,
     "strictMetadataEmit": true,
     "enableResourceInlining": true,
     "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
+    "strictInjectionParameters": true,
+    "strictTemplates ": true
   },
 }

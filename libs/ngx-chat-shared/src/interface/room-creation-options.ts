@@ -19,10 +19,17 @@ export interface RoomConfiguration {
    * Optional name for the room. If none is provided, room will be only identified by its JID.
    */
   name?: string;
+
+  /**
+   * A room that can anyone can join
+   */
+  public?: boolean;
+
   /**
    * A room that can be found by any user through normal means such as searching and service discovery
    */
-  public?: boolean;
+  publicList?: boolean;
+
   /**
    * for true:
    * A room that a user cannot enter without being on the member list.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ChatAvatarComponent } from '../chat-avatar';
 import { CommonModule } from '@angular/common';
 
@@ -9,6 +9,8 @@ import { CommonModule } from '@angular/common';
   selector: 'ngx-chat-bubble',
   templateUrl: './chat-bubble.component.html',
   styleUrls: ['./chat-bubble.component.less'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatBubbleComponent {}
+export class ChatBubbleComponent {
+  @Input()
+  reverse = false;
+}

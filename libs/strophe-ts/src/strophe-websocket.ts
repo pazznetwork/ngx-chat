@@ -101,9 +101,9 @@ export class StropheWebsocket implements ProtocolManager {
   async disconnect(authenticated: boolean): Promise<void> {
     const disconnectPromise = firstValueFrom(this.isConnectedSubject.pipe(filter((val) => !val)));
     if (authenticated) {
-      this.send(presenceUnavailable);
+      this.send(presenceUnavailable());
     }
-    this.send(streamClose);
+    this.send(streamClose());
     await disconnectPromise;
   }
 

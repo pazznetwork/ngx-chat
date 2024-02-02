@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import type { OpenChatsService, Recipient } from '@pazznetwork/ngx-chat-shared';
+import { Injectable } from '@angular/core';
 
 /**
  * Used to determine if a message component for a given recipient is open.
@@ -12,10 +12,17 @@ export class ChatMessageListRegistryService implements OpenChatsService {
   openChats$ = this.openChatsSubject.asObservable();
   private chatOpenedSubject = new Subject<Recipient>();
   chatOpened$ = this.chatOpenedSubject.asObservable();
+
+  private chatMessagesViewedSubject = new ReplaySubject<Recipient>(1);
+  chatMessagesViewed$ = this.chatMessagesViewedSubject.asObservable();
   recipientToOpenMessageListCount = new Map<Recipient, number>();
 
   isChatOpen(recipient: Recipient): boolean {
     return this.getOrDefault(recipient, 0) > 0;
+  }
+
+  viewedChatMessages(recipient: Recipient): void {
+    this.chatMessagesViewedSubject.next(recipient);
   }
 
   incrementOpenWindowCount(recipient: Recipient): void {

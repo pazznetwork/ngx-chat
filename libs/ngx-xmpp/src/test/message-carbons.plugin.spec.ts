@@ -38,12 +38,12 @@ describe('message carbons plugin', () => {
               </received>
             </message>`;
 
-    await ensureRegisteredUser(testUtils.hero);
     const contactsPromise = firstValueFrom(
       testUtils.chatService.contactListService.contacts$.pipe(
         filter((contacts) => contacts.length > 0)
       )
     );
+    await ensureRegisteredUser(testUtils.hero);
     await testUtils.logIn.hero();
 
     await testUtils.fakeWebsocketInStanza(validIncomingCarbonMessage);

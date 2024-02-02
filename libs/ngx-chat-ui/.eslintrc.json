@@ -5,15 +5,12 @@
     {
       "files": ["*.ts"],
       "parserOptions": {
-        "project": [
-          "libs/ngx-chat-ui/tsconfig.*?.json"
-        ]
+        "project": ["libs/ngx-chat-ui/tsconfig.*?.json"]
       },
       "extends": [
-        "plugin:@nrwl/nx/angular",
+        "plugin:@nx/angular",
         "plugin:@angular-eslint/template/process-inline-templates",
-        "plugin:@angular-eslint/ng-cli-compat",
-        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
+        "plugin:@angular-eslint/recommended",
         "plugin:rxjs/recommended"
       ],
       "rules": {
@@ -47,9 +44,7 @@
     {
       "files": ["*.html"],
       "parserOptions": {
-        "project": [
-          "libs/ngx-chat-ui/tsconfig.*?.json"
-        ]
+        "project": ["libs/ngx-chat-ui/tsconfig.*?.json"]
       }
     }
   ]

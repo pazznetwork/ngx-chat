@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
 import type { Connection } from './connection';
-import { NS } from './stanza/namespace';
+import type { Builder } from './stanza';
+import { $build, $pres, getBareJidFromJid, getDomainFromJid, getNodeFromJid, NS } from './stanza';
 import { BoshRequest } from './bosh-request';
-import { $build, $pres } from './stanza/builder-helper';
-import { getBareJidFromJid, getDomainFromJid, getNodeFromJid } from './stanza/xml';
 import { debug, error, warn } from './log';
 import { Status } from './status';
 import { SECONDARY_TIMEOUT, TIMEOUT } from './timeout.const';
 import type { ProtocolManager } from './protocol-manager';
 import { filter, firstValueFrom, share, Subject, switchMap, takeUntil } from 'rxjs';
-import type { Builder } from './stanza/builder';
 import type { BoshOptions } from './bosh-options';
 import { ErrorCondition } from './error';
 import type { SASLMechanism } from './sasl-mechanism';

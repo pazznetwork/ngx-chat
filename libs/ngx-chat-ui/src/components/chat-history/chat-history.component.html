@@ -1,30 +1,17 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<div class="chat-messages" #messageArea>
-  <div class="chat-messages-start" (ngxChatIntersectionObserver)="onTop($event)"></div>
-  <ng-container *ngFor="let entry of messagesGroupedByDate$ | async">
-    <div class="chat-messages-date-group">
-      {{
-        entry.date
-          | date: chatService.translations.dateFormat:undefined:chatService.translations.locale
-      }}
-    </div>
-    <ng-container *ngFor="let message of entry.messages">
-      <ng-container *ngIf="message.direction === Direction.in">
-        <ngx-chat-message-in [showAvatar]="showAvatars" [message]="message" [contact]="recipient">
-        </ngx-chat-message-in>
-      </ng-container>
-      <ng-container *ngIf="message.direction === Direction.out">
-        <ngx-chat-message-out [showAvatar]="!!showAvatars" [message]="message" [contact]="recipient">
-        </ngx-chat-message-out>
-      </ng-container>
-    </ng-container>
+<ngx-chat-history-auto-scroll (scrolledToTop)="scheduleLoadMessages()" [maxHeight]="maxHeight">
+  <ng-container *ngIf="isContact(currentRecipient)">
+    <ngx-chat-history-messages-contact [contact]="asContact(currentRecipient)"
+                                       [messages$]="currentRecipient?.messageStore?.messages$"
+                                       [showAvatars]="showAvatars">
+    </ngx-chat-history-messages-contact>
   </ng-container>
-
+  <ng-container *ngIf="!isContact(currentRecipient)">
+    <ngx-chat-history-messages-room [messages$]="currentRecipient?.messageStore?.messages$"
+                                    [showAvatars]="showAvatars">
+    </ngx-chat-history-messages-room>
+  </ng-container>
   <ngx-chat-message-empty *ngIf="noMessages$ | async"></ngx-chat-message-empty>
-
-  <ngx-chat-message-contact-request
-    *ngIf="pendingRequest$ | async"
-    [contact]="recipientAsContact"
-  ></ngx-chat-message-contact-request>
-  <div class="chat-messages-end" (ngxChatIntersectionObserver)="onBottom($event)"></div>
-</div>
+  <ngx-chat-message-contact-request *ngIf="pendingRequest$ | async"
+                                    [pendingRequestContact]="pendingRequestContact"></ngx-chat-message-contact-request>
+</ngx-chat-history-auto-scroll>

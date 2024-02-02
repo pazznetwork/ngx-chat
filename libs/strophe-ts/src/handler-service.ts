@@ -25,12 +25,23 @@ export class HandlerService {
     const keptHandlers = [];
     let matches = 0;
 
+    const potentialHandlers = [];
+
     for (const handler of this.handlers) {
+      if (!handler.isMatch(child)) {
+        keptHandlers.push(handler);
+      } else {
+        potentialHandlers.push(handler);
+      }
+    }
+
+    // prioritize id handler before any other handler
+    // as this is my intuitively expected behaviour
+    // and would need otherwise ugly workarounds
+    const idHandler = potentialHandlers.find((handler) => !!handler.id);
+
+    const executeHandler = async (handler: Handler): Promise<void> => {
       try {
-        if (!handler.isMatch(child)) {
-          keptHandlers.push(handler);
-          continue;
-        }
         if (await handler.run(child)) {
           keptHandlers.push(handler);
         }
@@ -40,10 +51,21 @@ export class HandlerService {
         throw new Error(
           'Removing Strophe handler ' +
             handler.toString() +
+            'after stanza ' +
+            child.outerHTML +
             ' due to uncaught exception: ' +
             (e as Error).message
         );
       }
+    };
+
+    if (idHandler) {
+      await executeHandler(idHandler);
+      return;
+    }
+
+    for (const handler of potentialHandlers) {
+      await executeHandler(handler);
     }
 
     // If no handler was fired for an incoming IQ with type="set",
@@ -71,9 +93,10 @@ export class HandlerService {
     // If a handler is being deleted while it is being added,
     // prevent it from getting added
     const i = this.addHandlers.indexOf(handRef);
-    if (i >= 0) {
-      this.addHandlers.splice(i, 1);
+    if (i === -1) {
+      return;
     }
+    this.addHandlers.splice(i, 1);
   }
 
   /**
@@ -160,9 +183,10 @@ export class HandlerService {
     while (this.removeHandlers.length > 0) {
       const hand = this.removeHandlers.pop();
       const i = this.handlers.indexOf(hand as Handler);
-      if (i >= 0) {
-        this.handlers.splice(i, 1);
+      if (i === -1) {
+        return;
       }
+      this.handlers.splice(i, 1);
     }
   }
 

@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 })
 export class ChatBubbleFooterComponent {
   @Input()
-  nick?: string;
+  nick?: string | null;
 
   @Input()
   formattedDate?: string | null;

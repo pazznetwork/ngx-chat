@@ -1,33 +1,44 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnInit } from '@angular/core';
 import type { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import type { Recipient } from '@pazznetwork/ngx-chat-shared';
+import { combineLatestWith, ReplaySubject } from 'rxjs';
+import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatAvatarComponent } from '../chat-avatar';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, ChatAvatarComponent],
+  imports: [CommonModule, ChatAvatarComponent],
   selector: 'ngx-chat-roster-recipient',
   templateUrl: './roster-recipient.component.html',
   styleUrls: ['./roster-recipient.component.less'],
 })
 export class RosterRecipientComponent implements OnInit {
+  private recipientChangedSubject = new ReplaySubject<Recipient>(1);
+
+  currentRecipient?: Recipient;
   @Input()
-  recipient!: Recipient;
+  set recipient(value: Recipient) {
+    if (!value) {
+      throw new Error('RosterRecipientComponent recipient was undefined');
+    }
+    this.currentRecipient = value;
+    this.recipientChangedSubject.next(value);
+  }
 
   unreadCount$?: Observable<number>;
 
-  readonly chatService = inject(CHAT_SERVICE_TOKEN);
+  constructor(@Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService) {}
 
   ngOnInit(): void {
-    if (!this.recipient) {
-      throw new Error('recipient cannot be undefined');
-    }
     this.unreadCount$ = this.chatService.messageService.jidToUnreadCount$.pipe(
-      map((jidToUnreadCount) => jidToUnreadCount.get(this.recipient.jid.toString()) || 0),
+      combineLatestWith(this.recipientChangedSubject),
+      map(
+        ([jidToUnreadCount, recipient]) =>
+          jidToUnreadCount.get(recipient.jid.bare().toString()) || 0
+      ),
       distinctUntilChanged(),
       debounceTime(20)
     );

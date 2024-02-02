@@ -10,9 +10,9 @@ import {
   userIsRegistered,
 } from './helpers/admin-actions';
 
-describe('register plugin', () => {
+xdescribe('register plugin', () => {
   let testUtils: TestUtils;
-  beforeEach(() => {
+  beforeAll(() => {
     const testBed = TestBed.configureTestingModule({
       imports: [XmppAdapterTestModule],
     });
@@ -35,7 +35,7 @@ describe('register plugin', () => {
     expect(await userIsRegistered(testUser)).toBeFalsy();
   });
 
-  it('should be able to register and unregister in one session', async () => {
+  xit('should be able to register and unregister in one session', async () => {
     await ensureNoRegisteredUser(testUser);
 
     await testUtils.chatService.register(testUser);

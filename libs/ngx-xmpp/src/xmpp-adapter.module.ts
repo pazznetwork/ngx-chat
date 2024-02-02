@@ -1,26 +1,38 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { NgModule } from '@angular/core';
+import { NgModule, NgZone } from '@angular/core';
 import {
   ChatBackgroundNotificationService,
   ChatListStateService,
   ChatMessageListRegistryService,
   LogService,
 } from './services';
-import type { ChatService, FileUploadHandler, Log } from '@pazznetwork/ngx-chat-shared';
+import type {
+  ChatService,
+  CustomContactFactory,
+  CustomRoomFactory,
+  FileUploadHandler,
+  Log,
+  OpenChatsService,
+} from '@pazznetwork/ngx-chat-shared';
 import { LOG_SERVICE_TOKEN } from '@pazznetwork/ngx-chat-shared';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { XmppService } from '@pazznetwork/xmpp-adapter';
+import { DefaultContactFactory, DefaultRoomFactory, XmppService } from '@pazznetwork/xmpp-adapter';
 import {
+  CHAT_BACKGROUND_NOTIFICATION_SERVICE_TOKEN,
+  CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
+  CUSTOM_CONTACT_FACTORY_TOKEN,
+  CUSTOM_ROOM_FACTORY_TOKEN,
   FILE_UPLOAD_HANDLER_TOKEN,
   OPEN_CHAT_SERVICE_TOKEN,
+  USER_AVATAR_TOKEN,
+  USER_NAME_TOKEN,
 } from './injection-token';
+import { NEVER, Observable, of } from 'rxjs';
 
 @NgModule({
   imports: [HttpClientModule],
   providers: [
-    ChatBackgroundNotificationService,
-    ChatListStateService,
     {
       provide: OPEN_CHAT_SERVICE_TOKEN,
       useClass: ChatMessageListRegistryService,
@@ -29,15 +41,39 @@ import {
       provide: LOG_SERVICE_TOKEN,
       useClass: LogService,
     },
+    { provide: CUSTOM_CONTACT_FACTORY_TOKEN, useClass: DefaultContactFactory },
+    { provide: CUSTOM_ROOM_FACTORY_TOKEN, useClass: DefaultRoomFactory },
+    // eslint-disable-next-line rxjs/finnish
+    { provide: USER_AVATAR_TOKEN, useValue: NEVER },
+    { provide: USER_NAME_TOKEN, useValue: of('') },
     {
       provide: CHAT_SERVICE_TOKEN,
-      deps: [OPEN_CHAT_SERVICE_TOKEN, HttpClient, LOG_SERVICE_TOKEN],
+      deps: [
+        NgZone,
+        HttpClient,
+        USER_AVATAR_TOKEN,
+        USER_NAME_TOKEN,
+        OPEN_CHAT_SERVICE_TOKEN,
+        LOG_SERVICE_TOKEN,
+        CUSTOM_ROOM_FACTORY_TOKEN,
+        CUSTOM_CONTACT_FACTORY_TOKEN,
+      ],
       useFactory: XmppAdapterModule.xmppServiceFactory,
     },
     {
       provide: FILE_UPLOAD_HANDLER_TOKEN,
       deps: [CHAT_SERVICE_TOKEN],
       useFactory: XmppAdapterModule.fileUploadHandlerFactory,
+    },
+    {
+      provide: CHAT_BACKGROUND_NOTIFICATION_SERVICE_TOKEN,
+      useClass: ChatBackgroundNotificationService,
+      deps: [CHAT_SERVICE_TOKEN],
+    },
+    {
+      provide: CHAT_LIST_STATE_SERVICE_TOKEN,
+      useClass: ChatListStateService,
+      deps: [CHAT_SERVICE_TOKEN],
     },
   ],
 })
@@ -47,10 +83,26 @@ export class XmppAdapterModule {
   }
 
   private static xmppServiceFactory(
-    chatMessageListRegistryService: ChatMessageListRegistryService,
+    zone: NgZone,
     httpClient: HttpClient,
-    logService: Log
+    userAvatar$: Observable<string>,
+    userName$: Observable<string>,
+    openChatsService: OpenChatsService,
+    logService: Log,
+    customRoomFactory: CustomRoomFactory,
+    customContactFactory: CustomContactFactory
   ): XmppService {
-    return new XmppService(logService, chatMessageListRegistryService, httpClient);
+    return zone.runOutsideAngular(() =>
+      XmppService.create(
+        zone,
+        logService,
+        userAvatar$,
+        userName$,
+        openChatsService,
+        httpClient,
+        customRoomFactory,
+        customContactFactory
+      )
+    );
   }
 }

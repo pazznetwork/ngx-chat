@@ -10,12 +10,13 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   selector: 'ngx-chat-message-text-area',
   templateUrl: './chat-message-text-area.component.html',
+  styleUrls: ['chat-message-text-area.component.less'],
 })
 export class ChatMessageTextAreaComponent implements OnInit {
   @Input()
-  text?: string;
+  textContent?: string;
 
-  @ViewChild('textContainerRef', { read: ViewContainerRef })
+  @ViewChild('textContainerRef', { read: ViewContainerRef, static: true })
   textContainerRef!: ViewContainerRef;
 
   ngOnInit(): void {
@@ -23,14 +24,12 @@ export class ChatMessageTextAreaComponent implements OnInit {
   }
 
   private transform(): void {
-    const message = this.text;
-
-    if (!message) {
+    if (!this.textContent) {
       return;
     }
 
+    const message = this.textContent;
     const links = extractUrls(message);
-
     let lastIndex = 0;
     for (const link of links) {
       const currentIndex = message.indexOf(link, lastIndex);
@@ -60,6 +59,10 @@ export class ChatMessageTextAreaComponent implements OnInit {
   private shorten(url: string): string {
     const parser = document.createElement('a');
     parser.href = url;
+
+    if (parser.href.length < 50) {
+      return parser.href;
+    }
 
     let shortenedPathname = parser.pathname;
     if (shortenedPathname.length > 17) {

@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "baseUrl": "./",
-    "outDir": "../../dist/out-tsc",
+    "outDir": "../../dist/libs/xmpp-adapter-spec",
     "module": "commonjs",
     "types": ["jest", "node"]
   },

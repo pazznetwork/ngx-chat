@@ -1,0 +1,10 @@
+
+<div>
+  <h2>Send custom Stanzas:</h2>
+  <textarea rows="10" class="form-control" [(ngModel)]="request"></textarea>
+  <button (click)="sendIq()">Send IQ</button>
+  <button (click)="sendMessage()">Send Message</button>
+  <button (click)="sendPresence()">Send Presence</button>
+
+  <pre><code>{{response}}</code></pre>
+</div>

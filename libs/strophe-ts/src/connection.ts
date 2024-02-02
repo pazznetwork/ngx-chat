@@ -19,17 +19,23 @@ import { Bosh } from './bosh';
 import { StropheWebsocket } from './strophe-websocket';
 import type { ProtocolManager } from './protocol-manager';
 import {
+  concatMap,
   distinctUntilChanged,
   filter,
   firstValueFrom,
   merge,
+  mergeMap,
   Observable,
+  of,
   pairwise,
+  partition,
   ReplaySubject,
   share,
   shareReplay,
   startWith,
   Subject,
+  switchMap,
+  takeUntil,
 } from 'rxjs';
 import type { ConnectionOptions } from './connection-options';
 import { AuthenticationMode } from './authentication-mode';
@@ -39,7 +45,6 @@ import { HandlerService } from './handler-service';
 import type { BoshRequest } from './bosh-request';
 import { map } from 'rxjs/operators';
 import { getConnectionsUrls } from './connection-urls';
-import { makeSafeJidString } from '@pazznetwork/ngx-chat-shared';
 import type { BoshOptions } from './bosh-options';
 import { Handler } from './handler';
 import { isValidJID } from './utils';
@@ -66,6 +71,7 @@ import { isValidJID } from './utils';
  *  To send data to the connection, use send().
  */
 export class Connection {
+  private readonly checkHandlerChainSubject = new Subject<Element>();
   private readonly userJidSubject = new ReplaySubject<string>(1);
 
   readonly userJid$: Observable<string> = this.userJidSubject.pipe(
@@ -106,26 +112,38 @@ export class Connection {
   readonly isOnline$ = merge(
     this.onOnlineStatus$.pipe(map(() => true)),
     this.onOfflineSubject.pipe(map(() => false))
-  ).pipe(startWith(false), shareReplay({ bufferSize: 1, refCount: false }));
+  ).pipe(startWith(false), distinctUntilChanged(), shareReplay({ bufferSize: 1, refCount: false }));
 
   readonly isOffline$ = this.isOnline$.pipe(map((online) => !online));
 
-  readonly onOffline$ = this.isOnline$.pipe(
+  private readonly innerOnOffline$ = this.isOnline$.pipe(
     pairwise(),
     filter(([prev, curr]) => prev && !curr),
-    map(() => {
-      return;
-    }),
-    share()
+    map(() => undefined)
   );
 
-  readonly onOnline$ = this.isOnline$.pipe(
+  private readonly innerOnOnline$ = this.isOnline$.pipe(
     pairwise(),
     filter(([prev, curr]) => !prev && curr),
-    map(() => {
-      return;
-    }),
-    share()
+    map(() => undefined)
+  );
+
+  readonly onOffline$ = this.innerOnOffline$.pipe(
+    switchMap(() =>
+      of(undefined).pipe(
+        takeUntil(this.innerOnOnline$),
+        shareReplay({ bufferSize: 1, refCount: true })
+      )
+    )
+  );
+
+  readonly onOnline$ = this.innerOnOnline$.pipe(
+    switchMap(() =>
+      of(undefined).pipe(
+        takeUntil(this.innerOnOffline$),
+        shareReplay({ bufferSize: 1, refCount: true })
+      )
+    )
   );
 
   /**
@@ -231,6 +249,16 @@ export class Connection {
 
     // Call onIdle callback every 1/10th of a second
     this.idleTimeout = setTimeout(() => this.onIdle(), 100);
+
+    const [messages$, nonMessages$] = partition(
+      this.checkHandlerChainSubject,
+      (elem) => elem?.nodeName === 'message'
+    );
+
+    merge(
+      messages$.pipe(concatMap((elem) => this.handlerService.checkHandlerChain(elem))),
+      nonMessages$.pipe(mergeMap((elem) => this.handlerService.checkHandlerChain(elem)))
+    ).subscribe();
   }
 
   /**
@@ -491,7 +519,7 @@ export class Connection {
   private createStanzaResponsePromise(id: string, timeout?: number): Promise<Element> {
     let timeoutHandler: ReturnType<typeof setTimeout>;
 
-    return new Promise<Element>((callback, errback) => {
+    return new Promise<Element>((callback, err) => {
       const handler = this.handlerService.addHandler(
         (stanza) => {
           // remove timeout handler if there is one
@@ -499,7 +527,7 @@ export class Connection {
             clearTimeout(timeoutHandler);
           }
           if (stanza.getAttribute('type') === 'error') {
-            errback(stanza);
+            err(stanza.outerHTML);
           } else {
             callback(stanza);
           }
@@ -517,7 +545,7 @@ export class Connection {
           // get rid of normal handler
           this.handlerService.deleteHandler(handler);
           // call err back on timeout with null stanza
-          errback(null);
+          err(null);
           return false;
         }, timeout);
       }
@@ -954,7 +982,7 @@ export class Connection {
 
     if (elem.getAttribute('type') !== 'terminate') {
       // send each incoming stanza through the handler chain
-      await this.handlerService.checkHandlerChain(elem);
+      this.checkHandlerChainSubject.next(elem);
       return;
     }
 
@@ -975,21 +1003,23 @@ export class Connection {
    *  are ready and keep poll requests going.
    */
   onIdle(): void {
-    clearTimeout(this.idleTimeout);
-    if (this.protocolManager instanceof Bosh) {
-      this.protocolManager.onIdle();
-    }
-
-    if (!this.connected) {
-      return;
-    }
-    // reactivate the timer only if connected
-    this.idleTimeout = setTimeout(() => this.onIdle(), 100);
+    // pollutes the angularZone and currently not in use.
+    // clearTimeout(this.idleTimeout);
+    // if (this.protocolManager instanceof Bosh) {
+    //   this.protocolManager.onIdle();
+    // }
+    //
+    // if (!this.connected) {
+    //   return;
+    // }
+    // // reactivate the timer only if connected
+    // this.idleTimeout = setTimeout(() => this.onIdle(), 100);
   }
 
   static async create(
     domain: string,
     service?: string,
+    saslMechanisms?: string[],
     authenticationMode = AuthenticationMode.LOGIN,
     prebindUrl?: string,
     credentialsUrl?: string
@@ -1013,7 +1043,7 @@ export class Connection {
       credentialsUrl
     );
 
-    connection.sasl.registerSASLMechanisms();
+    connection.sasl.registerSASLMechanisms(saslMechanisms);
     return connection;
   }
 
@@ -1133,7 +1163,7 @@ export class Connection {
     const onOnlinePromise = firstValueFrom(this.onOnline$);
     const onAuthenticatingPromise = firstValueFrom(this.onAuthenticating$);
     const bareUsername = jid.includes('@') ? (jid.split('@')[0] as string) : jid;
-    const safeJid = makeSafeJidString(jid, domain);
+    const safeJid = bareUsername + '@' + domain;
     // anonymous connection
     await this.connectAnonymous(domain);
     await onAuthenticatingPromise;
@@ -1163,7 +1193,7 @@ export class Connection {
   }
 
   async unregister(): Promise<void> {
-    this.protocolManager.send(presenceUnavailable);
+    this.protocolManager.send(presenceUnavailable());
     await this.sendIQ(
       $iq({ type: 'set' }).c('query', { xmlns: this.nsRegister }).c('remove').tree()
     );

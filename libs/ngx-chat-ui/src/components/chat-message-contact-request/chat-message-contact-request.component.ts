@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input, OnInit, Optional } from '@angular/core';
-import { firstValueFrom, map, merge, Observable, Subject } from 'rxjs';
+import { Component, Inject, Input, Optional } from '@angular/core';
+import { map, merge, Observable, startWith, Subject } from 'rxjs';
 import {
+  CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
-  ChatListStateService,
   REPORT_USER_INJECTION_TOKEN,
-  XmppAdapterModule,
 } from '@pazznetwork/ngx-xmpp';
 import type { ChatService, Contact, ReportUserService } from '@pazznetwork/ngx-chat-shared';
-import { ContactSubscription } from '@pazznetwork/ngx-chat-shared';
+import { ContactSubscription, OpenChatStateService } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatBubbleComponent } from '../chat-bubble';
 import { shareReplay } from 'rxjs/operators';
@@ -17,43 +16,35 @@ enum SubscriptionAction {
   PENDING_REQUEST,
   SHOW_BLOCK_ACTIONS,
   // There is no contact request on both sites but only a message
-  BLOCK_FOR_UNAFFILIATED,
+  UNAFFILIATED,
   NO_PENDING_ACTION,
 }
 
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, ChatBubbleComponent],
+  imports: [CommonModule, ChatBubbleComponent],
   selector: 'ngx-chat-message-contact-request',
   templateUrl: './chat-message-contact-request.component.html',
   styleUrls: ['./chat-message-contact-request.component.less'],
 })
-export class ChatMessageContactRequestComponent implements OnInit {
+export class ChatMessageContactRequestComponent {
+  private requestContact?: Contact;
+
   @Input()
-  contact!: Contact;
+  set pendingRequestContact(contact: Contact | undefined) {
+    if (contact == null) {
+      throw new Error('no pending request contact in chat message contact request component');
+    }
 
-  private subscriptionActionSubject = new Subject<SubscriptionAction>();
-  subscriptionAction$!: Observable<SubscriptionAction>;
-  message$!: Observable<string>;
+    this.requestContact = contact;
 
-  showDenyActions$!: Observable<boolean>;
-  isActionDisabled$!: Observable<boolean>;
-  isAffiliated$!: Observable<boolean>;
-
-  constructor(
-    public chatListService: ChatListStateService,
-    @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
-    @Optional() @Inject(REPORT_USER_INJECTION_TOKEN) public reportUserService: ReportUserService
-  ) {}
-
-  ngOnInit(): void {
     this.subscriptionAction$ = merge(
-      this.contact.subscription$.pipe(
+      contact.subscription$.pipe(
         map((subscription) => {
           if (subscription === ContactSubscription.from) {
             return SubscriptionAction.PENDING_REQUEST;
           } else if (subscription === ContactSubscription.none) {
-            return SubscriptionAction.BLOCK_FOR_UNAFFILIATED;
+            return SubscriptionAction.UNAFFILIATED;
           }
           return SubscriptionAction.NO_PENDING_ACTION;
         })
@@ -63,61 +54,67 @@ export class ChatMessageContactRequestComponent implements OnInit {
 
     this.message$ = this.subscriptionAction$.pipe(
       map((sub) => {
-        if (sub === SubscriptionAction.BLOCK_FOR_UNAFFILIATED) {
+        if (sub === SubscriptionAction.UNAFFILIATED) {
           return this.chatService.translations.unaffiliatedMessage;
         }
         return this.chatService.translations.subscriptionRequestMessage;
       })
     );
 
-    this.showDenyActions$ = this.subscriptionAction$.pipe(
-      map((sub) =>
-        [SubscriptionAction.SHOW_BLOCK_ACTIONS, SubscriptionAction.BLOCK_FOR_UNAFFILIATED].includes(
-          sub
-        )
-      )
+    this.showAccept$ = this.subscriptionAction$.pipe(
+      map((sub) => sub === SubscriptionAction.PENDING_REQUEST)
     );
-
-    this.isActionDisabled$ = this.subscriptionAction$.pipe(
-      map((sub) => sub === SubscriptionAction.SHOW_BLOCK_ACTIONS)
-    );
-
-    this.isAffiliated$ = this.subscriptionAction$.pipe(
-      map((sub) => sub !== SubscriptionAction.BLOCK_FOR_UNAFFILIATED)
+    this.showAdd$ = this.subscriptionAction$.pipe(
+      map((sub) => sub === SubscriptionAction.UNAFFILIATED)
     );
   }
+
+  private subscriptionActionSubject = new Subject<SubscriptionAction>();
+  subscriptionAction$!: Observable<SubscriptionAction>;
+  message$!: Observable<string>;
+
+  showAccept$!: Observable<boolean>;
+  showAdd$!: Observable<boolean>;
+  private showAllSubject = new Subject<boolean>();
+  showAll$ = this.showAllSubject.pipe(startWith(true));
+
+  constructor(
+    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
+    public chatListService: OpenChatStateService,
+    @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
+    @Optional() @Inject(REPORT_USER_INJECTION_TOKEN) public reportUserService: ReportUserService
+  ) {}
 
   async acceptSubscriptionRequest(): Promise<void> {
-    const sub = await firstValueFrom(this.subscriptionAction$);
-
-    if (sub !== SubscriptionAction.PENDING_REQUEST) {
-      return;
+    if (!this.requestContact) {
+      throw new Error('no pending request contact in chat message contact request component');
     }
-
-    await this.chatService.contactListService.addContact(this.contact.jid.toString());
+    await this.chatService.contactListService.addContact(this.requestContact.jid.toString());
+    this.showAllSubject.next(false);
   }
 
-  async denySubscriptionRequest(): Promise<void> {
-    const sub = await firstValueFrom(this.subscriptionAction$);
-
-    if (sub !== SubscriptionAction.PENDING_REQUEST) {
-      return;
+  async removeContact(): Promise<void> {
+    if (!this.requestContact) {
+      throw new Error('no pending request contact in chat message contact request component');
     }
-
-    await this.chatService.contactListService.removeContact(this.contact.jid.toString());
+    await this.chatService.contactListService.removeContact(this.requestContact.jid.toString());
+    this.showAllSubject.next(false);
   }
 
-  async blockContact(): Promise<void> {
-    await this.chatService.contactListService.blockJid(this.contact.jid.toString());
-    this.chatListService.closeChat(this.contact);
+  async blockUser(): Promise<void> {
+    if (!this.requestContact) {
+      throw new Error('no pending request contact in chat message contact request component');
+    }
+    await this.chatService.contactListService.blockJid(this.requestContact.jid.toString());
+    this.chatListService.closeChat(this.requestContact);
+    this.showAllSubject.next(false);
   }
 
-  async blockContactAndReport(): Promise<void> {
-    this.reportUserService.reportUser(this.contact);
-    await this.blockContact();
-  }
-
-  dismissBlockOptions(): void {
-    this.subscriptionActionSubject.next(SubscriptionAction.NO_PENDING_ACTION);
+  async blockUserAndReport(): Promise<void> {
+    if (!this.requestContact) {
+      throw new Error('no pending request contact in chat message contact request component');
+    }
+    this.reportUserService.reportUser(this.requestContact);
+    await this.blockUser();
   }
 }

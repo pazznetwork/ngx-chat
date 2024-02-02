@@ -1,56 +1,62 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Inject, Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import type { ChatService, Recipient } from '@pazznetwork/ngx-chat-shared';
+import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
+import type {
+  AttachableTrack,
+  ChatService,
+  ChatWindowState,
+  OpenChatStateService,
+  Recipient,
+} from '@pazznetwork/ngx-chat-shared';
 import { CHAT_SERVICE_TOKEN } from '../injection-token';
-
-export class ChatWindowState {
-  constructor(readonly recipient: Recipient, public isCollapsed: boolean) {}
-}
-
-export interface AttachableTrack {
-  attach(elem: HTMLVideoElement): void;
-}
+import { filter, map, shareReplay } from 'rxjs/operators';
 
 /**
  * Used to open chat windows programmatically.
  */
 @Injectable()
-export class ChatListStateService {
-  private openChatsSubject = new BehaviorSubject<ChatWindowState[]>([]);
+export class ChatListStateService implements OpenChatStateService {
+  private readonly openChatSubject = new Subject<ChatWindowState>();
+  private readonly closeChatSubject = new Subject<string>();
+  private readonly openChatsMap = new Map<string, ChatWindowState>();
+  readonly openChats$: Observable<ChatWindowState[]>;
+
   private openTracksSubject = new BehaviorSubject<AttachableTrack[]>([]);
-  openChats$ = this.openChatsSubject.asObservable();
-  openTracks$ = this.openTracksSubject.asObservable();
+  readonly openTracks$ = this.openTracksSubject.asObservable();
 
   constructor(@Inject(CHAT_SERVICE_TOKEN) private chatService: ChatService) {
-    this.chatService.onOffline$.subscribe(() => {
-      this.openChatsSubject.next([]);
-    });
-
-    this.chatService.contactListService.contactRequestsReceived$.subscribe((contacts) => {
-      for (const contact of contacts) {
-        this.openChat(contact);
-      }
-    });
+    this.openChats$ = merge(
+      this.openChatSubject.pipe(
+        filter((state) => !this.openChatsMap.has(state.recipient.jid.bare().toString())),
+        map((state: ChatWindowState) => {
+          this.openChatsMap.set(state.recipient.jid.bare().toString(), state);
+          return this.openChatsMap;
+        })
+      ),
+      this.closeChatSubject.pipe(
+        map((recipientJid) => {
+          this.openChatsMap.delete(recipientJid);
+          return this.openChatsMap;
+        })
+      ),
+      this.chatService.onOffline$.pipe(
+        map(() => {
+          this.openChatsMap.clear();
+          return this.openChatsMap;
+        })
+      )
+    ).pipe(
+      map((contactMap) => Array.from(contactMap.values())),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
   }
 
-  openChat(recipient: Recipient, collapsedWindow = false): void {
-    if (this.isChatWithRecipientOpen(recipient)) {
-      return;
-    }
-    const openChats = this.openChatsSubject.getValue();
-    const chatWindow = new ChatWindowState(recipient, collapsedWindow);
-    this.openChatsSubject.next([chatWindow].concat(openChats));
+  openChat(recipient: Recipient, isCollapsed = false): void {
+    this.openChatSubject.next({ recipient, isCollapsed });
   }
 
   closeChat(recipient: Recipient): void {
-    const openChats = this.openChatsSubject.getValue();
-    const index = this.findChatWindowStateIndexByRecipient(recipient);
-    if (index >= 0) {
-      const copyWithoutContact = openChats.slice();
-      copyWithoutContact.splice(index, 1);
-      this.openChatsSubject.next(copyWithoutContact);
-    }
+    this.closeChatSubject.next(recipient.jid.bare().toString());
   }
 
   openTrack(track: AttachableTrack): void {
@@ -59,19 +65,5 @@ export class ChatListStateService {
 
   closeTrack(track: AttachableTrack): void {
     this.openTracksSubject.next(this.openTracksSubject.getValue().filter((s) => s !== track));
-  }
-
-  isChatWithRecipientOpen(recipient: Recipient): boolean {
-    return this.findChatWindowStateByRecipient(recipient) !== undefined;
-  }
-
-  private findChatWindowStateIndexByRecipient(recipient: Recipient): number {
-    return this.openChatsSubject
-      .getValue()
-      .findIndex((chatWindowState) => chatWindowState.recipient.equalsJid(recipient));
-  }
-
-  private findChatWindowStateByRecipient(recipient: Recipient): ChatWindowState | undefined {
-    return this.openChatsSubject.getValue().find((chat) => chat.recipient.equalsJid(recipient));
   }
 }

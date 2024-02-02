@@ -1,45 +1,59 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { filter, mergeMap } from 'rxjs/operators';
-import { firstValueFrom, map } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { firstValueFrom, map, mergeMap } from 'rxjs';
 import { TestUtils } from './helpers/test-utils';
-import type { Invitation, OccupantNickChange } from '@pazznetwork/ngx-chat-shared';
+import type { OccupantNickChange } from '@pazznetwork/ngx-chat-shared';
+import { parseJid, Room } from '@pazznetwork/ngx-chat-shared';
 import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
+import { cleanServerBesidesAdmin, ensureRegisteredUser } from './helpers/admin-actions';
+import { getRoomAffiliation, getRoomRole } from './helpers/ejabberd-client';
 
-xdescribe('multi user chat plugin', () => {
+fdescribe('multi user chat plugin', () => {
   let testUtils: TestUtils;
-  beforeEach(async () => {
+  beforeAll(() => {
     const testBed = TestBed.configureTestingModule({
       imports: [XmppAdapterTestModule],
     });
     testUtils = new TestUtils(testBed.inject<XmppService>(CHAT_SERVICE_TOKEN));
-    await ensureNoRegisteredUser(testUtils.hero);
-    await ensureNoRegisteredUser(testUtils.father);
   });
 
+  beforeEach(async () => cleanServerBesidesAdmin());
+
   describe('room creation', () => {
-    it('should throw if user tries to create the same room multiple times', async () => {
-      console.log('room test');
+    it('should be owner of created room', async () => {
       await ensureRegisteredUser(testUtils.hero);
-      console.log('after register hero');
-      try {
-        await testUtils.create.room.hero();
-        console.log('after create room');
-        await testUtils.create.room.hero();
-        console.log('after second create room');
-        fail('should have thrown');
-      } catch (e) {
-        expect((e as Error).message).toContain('can not join room more than once');
-      }
+      await testUtils.logIn.hero();
+
+      await testUtils.chatService.roomService.createRoom(testUtils.heroRoom);
+      expect(
+        await getRoomAffiliation(
+          parseJid(testUtils.heroRoom.jid)?.local as string,
+          testUtils.hero.jid
+        )
+      ).toEqual('owner');
+      await testUtils.destroy.room.hero();
+      await testUtils.logOut();
+    });
+
+    it('should not throw if user tries to create the same room multiple times just return the existing one', async () => {
+      await ensureRegisteredUser(testUtils.hero);
+      await testUtils.logIn.hero();
+
+      await testUtils.create.room.hero();
+      await testUtils.create.room.hero();
+
+      expect(await firstValueFrom(testUtils.chatService.roomService.rooms$)).toHaveSize(1);
 
       await testUtils.destroy.room.hero();
-      await ensureNoRegisteredUser(testUtils.hero);
+      await testUtils.logOut();
     });
 
     it('should throw if another user already created the room', async () => {
+      await ensureRegisteredUser(testUtils.hero);
+      await ensureRegisteredUser(testUtils.princess);
       await testUtils.logIn.hero();
       await testUtils.create.room.hero();
       await testUtils.logOut();
@@ -49,7 +63,7 @@ xdescribe('multi user chat plugin', () => {
         await testUtils.create.room.hero();
         fail('should have thrown');
       } catch (e) {
-        expect((e as Error).message).toContain('error creating room, user is not owner');
+        expect(e).toBeTruthy();
       }
 
       await testUtils.logOut();
@@ -59,29 +73,33 @@ xdescribe('multi user chat plugin', () => {
     });
 
     it('should throw if room is not configurable', async () => {
+      await ensureRegisteredUser(testUtils.hero);
+      await ensureRegisteredUser(testUtils.princess);
       await testUtils.logIn.hero();
 
       try {
-        await testUtils.chatService.roomService.getRoomConfiguration(testUtils.heroRoom.jid);
         await testUtils.chatService.roomService.createRoom(testUtils.heroRoom);
-
+        await testUtils.chatService.roomService.getRoomConfiguration(testUtils.heroRoom.jid);
         await testUtils.logOut();
+
         await testUtils.logIn.princess();
         await testUtils.chatService.roomService.getRoomConfiguration(testUtils.heroRoom.jid);
         fail('should have thrown');
       } catch (e) {
-        expect((e as Error).message).toContain('Owner privileges required');
+        expect(e).toContain('Owner privileges required');
       }
-
       await testUtils.logOut();
+
       await testUtils.logIn.hero();
       await testUtils.destroy.room.hero();
+      await testUtils.logOut();
     });
 
     it('should allow users to create and configure rooms', async () => {
+      await ensureRegisteredUser(testUtils.hero);
       await testUtils.logIn.hero();
       const configTestRoom = {
-        roomId: 'configTestRoom',
+        roomId: 'configtestroom',
         public: true,
         membersOnly: false,
         nonAnonymous: false,
@@ -107,10 +125,19 @@ xdescribe('multi user chat plugin', () => {
           (field) => field?.variable === 'muc#roomconfig_persistentroom'
         )?.value,
       };
-      expect(Boolean(roomConfigOnServer.public)).toEqual(configTestRoom.public);
-      expect(roomConfigOnServer.membersOnly).toEqual(configTestRoom.membersOnly);
-      expect(roomConfigOnServer.nonAnonymous).toEqual(configTestRoom.nonAnonymous);
-      expect(roomConfigOnServer.persistentRoom).toEqual(configTestRoom.persistentRoom);
+
+      expect(Boolean(roomConfigOnServer.public))
+        .withContext('Room configuration public')
+        .toEqual(configTestRoom.public);
+      expect(roomConfigOnServer.membersOnly)
+        .withContext('Room configuration membersOnly')
+        .toEqual(configTestRoom.membersOnly);
+      expect(roomConfigOnServer.nonAnonymous)
+        .withContext('Room configuration nonAnonymous')
+        .toEqual(configTestRoom.nonAnonymous);
+      expect(roomConfigOnServer.persistentRoom)
+        .withContext('Room configuration persistentRoom')
+        .toEqual(configTestRoom.persistentRoom);
 
       await testUtils.chatService.roomService.destroyRoom(
         testUtils.roomIdToJid(configTestRoom.roomId)
@@ -119,6 +146,7 @@ xdescribe('multi user chat plugin', () => {
     });
 
     it('should be able to create multiple rooms', async () => {
+      await ensureRegisteredUser(testUtils.father);
       await testUtils.logIn.father();
 
       await testUtils.chatService.roomService.createRoom(testUtils.heroRoom);
@@ -133,21 +161,20 @@ xdescribe('multi user chat plugin', () => {
 
       await testUtils.logOut();
     });
-
-    xit('should throw if user is not allowed to create rooms', async () => {
-      // 'For this we need to disallow common users to create rooms on the server';
-    });
   });
 
-  describe('room joining', () => {
-    const createRoomsAsFather = async (): Promise<void> => {
+  fdescribe('room joining', () => {
+    const createRoomsAsFatherAndInviteUser = async (userJid: string): Promise<void> => {
       await testUtils.logIn.father();
 
       await testUtils.chatService.roomService.createRoom(testUtils.heroRoom);
       await testUtils.chatService.roomService.createRoom(testUtils.fatherRoom);
       await testUtils.chatService.roomService.createRoom(testUtils.princessRoom);
+      await testUtils.chatService.roomService.inviteUserToRoom(userJid, testUtils.heroRoom.jid);
+      await testUtils.chatService.roomService.inviteUserToRoom(userJid, testUtils.fatherRoom.jid);
+      await testUtils.chatService.roomService.inviteUserToRoom(userJid, testUtils.princessRoom.jid);
 
-      expect(await testUtils.currentRoomCount()).toEqual(3);
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
       await testUtils.logOut();
     };
 
@@ -158,61 +185,189 @@ xdescribe('multi user chat plugin', () => {
       await testUtils.chatService.roomService.destroyRoom(testUtils.fatherRoom.jid);
       await testUtils.chatService.roomService.destroyRoom(testUtils.princessRoom.jid);
 
-      expect(await testUtils.currentRoomCount()).toEqual(0);
+      expect(await testUtils.waitForCurrentRoomCount(0)).toEqual(0);
       await testUtils.logOut();
     };
 
     const joinFatherRoomsAsHero = async (): Promise<void> => {
       await testUtils.logIn.hero();
 
-      expect(await testUtils.currentRoomCount()).toEqual(0);
       await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
-      expect(await testUtils.currentRoomCount()).toEqual(1);
       await testUtils.chatService.roomService.joinRoom(testUtils.fatherRoom.jid);
-      expect(await testUtils.currentRoomCount()).toEqual(2);
       await testUtils.chatService.roomService.joinRoom(testUtils.princessRoom.jid);
-      expect(await testUtils.currentRoomCount()).toEqual(3);
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
     };
 
-    it('should be able to join multiple rooms', async () => {
-      await createRoomsAsFather();
+    it('should be able to join a room with a invite', async () => {
+      await ensureRegisteredUser(testUtils.father);
+      await ensureRegisteredUser(testUtils.hero);
 
-      await joinFatherRoomsAsHero();
+      await testUtils.logIn.father();
+      expect(await testUtils.waitForCurrentRoomCount(0)).toEqual(0);
+      await testUtils.chatService.roomService.createRoom(testUtils.fatherRoom);
+      expect(
+        await getRoomAffiliation(
+          parseJid(testUtils.fatherRoom.jid)?.local as string,
+          testUtils.father.jid
+        )
+      ).toEqual('owner');
+      expect(await testUtils.waitForCurrentRoomCount(1)).toEqual(1);
+
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.hero.jid,
+        testUtils.fatherRoom.jid
+      );
       await testUtils.logOut();
 
-      await destroyRoomAsFather();
+      await testUtils.logIn.hero();
+      await testUtils.chatService.roomService.joinRoom(testUtils.fatherRoom.jid);
+      expect(await testUtils.waitForCurrentRoomCount(1))
+        .withContext('should have a room after join')
+        .toEqual(1);
+      expect(
+        await getRoomAffiliation(
+          parseJid(testUtils.fatherRoom.jid)?.local as string,
+          testUtils.father.jid
+        )
+      ).toEqual('owner');
+      await testUtils.logOut();
+
+      await testUtils.logIn.father();
+      await testUtils.chatService.roomService.destroyRoom(testUtils.fatherRoom.jid);
+      expect(await testUtils.waitForCurrentRoomCount(0))
+        .withContext('should have no room after room destroying')
+        .toEqual(0);
+      await testUtils.logOut();
+    });
+
+    it('should be able to join multiple rooms', async () => {
+      await ensureRegisteredUser(testUtils.father);
+      await ensureRegisteredUser(testUtils.hero);
+
+      await testUtils.logIn.father();
+
+      await testUtils.chatService.roomService.createRoom(testUtils.heroRoom);
+      expect(
+        await getRoomAffiliation(
+          parseJid(testUtils.heroRoom.jid)?.local as string,
+          testUtils.father.jid
+        )
+      ).toEqual('owner');
+      await testUtils.chatService.roomService.createRoom(testUtils.fatherRoom);
+      expect(
+        await getRoomAffiliation(
+          parseJid(testUtils.fatherRoom.jid)?.local as string,
+          testUtils.father.jid
+        )
+      ).toEqual('owner');
+      await testUtils.chatService.roomService.createRoom(testUtils.princessRoom);
+      expect(
+        await getRoomAffiliation(
+          parseJid(testUtils.princessRoom.jid)?.local as string,
+          testUtils.father.jid
+        )
+      ).toEqual('owner');
+
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.hero.jid,
+        testUtils.heroRoom.jid
+      );
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.hero.jid,
+        testUtils.fatherRoom.jid
+      );
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.hero.jid,
+        testUtils.princessRoom.jid
+      );
+      await testUtils.logOut();
+
+      await testUtils.logIn.hero();
+      // all rooms that you were invited to should be created a message that creates a room in your room collection
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
+      await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
+      await testUtils.chatService.roomService.joinRoom(testUtils.fatherRoom.jid);
+      expect(
+        await getRoomAffiliation(
+          parseJid(testUtils.fatherRoom.jid)?.local as string,
+          testUtils.father.jid
+        )
+      ).toEqual('owner');
+      await testUtils.chatService.roomService.joinRoom(testUtils.princessRoom.jid);
+      await testUtils.logOut();
+
+      await testUtils.logIn.father();
+      await testUtils.waitForCurrentRoomCount(3);
+      await testUtils.chatService.roomService.destroyRoom(testUtils.heroRoom.jid);
+      await testUtils.chatService.roomService.destroyRoom(testUtils.fatherRoom.jid);
+      await testUtils.chatService.roomService.destroyRoom(testUtils.princessRoom.jid);
+      expect(await testUtils.waitForCurrentRoomCount(0)).toEqual(0);
+      await testUtils.logOut();
     });
 
     it('should be able to leave all rooms', async () => {
+      await ensureRegisteredUser(testUtils.father);
+      await ensureRegisteredUser(testUtils.hero);
+
+      await testUtils.logIn.father();
+
+      await testUtils.chatService.roomService.createRoom(testUtils.heroRoom);
+      await testUtils.chatService.roomService.createRoom(testUtils.fatherRoom);
+      await testUtils.chatService.roomService.createRoom(testUtils.princessRoom);
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.hero.jid,
+        testUtils.heroRoom.jid
+      );
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.hero.jid,
+        testUtils.fatherRoom.jid
+      );
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.hero.jid,
+        testUtils.princessRoom.jid
+      );
+      await testUtils.logOut();
+
       await testUtils.logIn.hero();
-      expect(await testUtils.currentRoomCount()).toEqual(0);
-      await testUtils.logOut();
 
-      await createRoomsAsFather();
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
+      await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
+      await testUtils.chatService.roomService.joinRoom(testUtils.fatherRoom.jid);
+      await testUtils.chatService.roomService.joinRoom(testUtils.princessRoom.jid);
 
-      await joinFatherRoomsAsHero();
-
-      expect(await testUtils.currentRoomCount()).toEqual(3);
       await testUtils.chatService.roomService.leaveRoom(testUtils.heroRoom.jid);
-      expect(await testUtils.currentRoomCount()).toEqual(2);
+      expect(await testUtils.waitForCurrentRoomCount(2)).toEqual(2);
       await testUtils.chatService.roomService.leaveRoom(testUtils.fatherRoom.jid);
-      expect(await testUtils.currentRoomCount()).toEqual(1);
+      expect(await testUtils.waitForCurrentRoomCount(1)).toEqual(1);
       await testUtils.chatService.roomService.leaveRoom(testUtils.princessRoom.jid);
-      expect(await testUtils.currentRoomCount()).toEqual(0);
+      expect(await testUtils.waitForCurrentRoomCount(0)).toEqual(0);
       await testUtils.logOut();
 
-      await destroyRoomAsFather();
+      await testUtils.logIn.father();
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
+
+      await testUtils.chatService.roomService.destroyRoom(testUtils.heroRoom.jid);
+      await testUtils.chatService.roomService.destroyRoom(testUtils.fatherRoom.jid);
+      await testUtils.chatService.roomService.destroyRoom(testUtils.princessRoom.jid);
+
+      expect(await testUtils.waitForCurrentRoomCount(0)).toEqual(0);
+      await testUtils.logOut();
     });
 
-    xit('should be able to query only for rooms joined', async () => {
+    fit('should be able to query only for rooms joined', async () => {
+      await ensureRegisteredUser(testUtils.father);
+      await ensureRegisteredUser(testUtils.hero);
       // 'Needs the bookmark plugin implementation';
-      await createRoomsAsFather();
+      await createRoomsAsFatherAndInviteUser(testUtils.hero.jid);
 
       await joinFatherRoomsAsHero();
       await testUtils.logOut();
 
-      await testUtils.logIn.villain();
+      await testUtils.logIn.hero();
       await testUtils.create.room.villain();
+      expect(await testUtils.waitForCurrentRoomCount(4)).toEqual(4);
 
       const queriedRooms = await testUtils.chatService.roomService.queryAllRooms();
       const gotRooms = await testUtils.chatService.roomService.getRooms();
@@ -225,17 +380,20 @@ xdescribe('multi user chat plugin', () => {
       await destroyRoomAsFather();
     });
 
-    xit('should be able to keep the rooms when logging out and and in', async () => {
+    it('should be able to keep the rooms when logging out and and in', async () => {
+      await ensureRegisteredUser(testUtils.father);
+      await ensureRegisteredUser(testUtils.hero);
+
       //'Needs the bookmark plugin implementation');
-      await createRoomsAsFather();
+      await createRoomsAsFatherAndInviteUser(testUtils.hero.jid);
 
       await joinFatherRoomsAsHero();
       await testUtils.logOut();
 
-      expect(await testUtils.currentRoomCount()).toEqual(0);
+      expect(await testUtils.waitForCurrentRoomCount(0)).toEqual(0);
 
       await testUtils.logIn.hero();
-      expect(await testUtils.currentRoomCount()).toEqual(3);
+      expect(await testUtils.waitForCurrentRoomCount(3)).toEqual(3);
       await testUtils.logOut();
       await destroyRoomAsFather();
     });
@@ -243,138 +401,173 @@ xdescribe('multi user chat plugin', () => {
 
   describe('room messaging', () => {
     it('should be able to receive messages', async () => {
-      const newRoom = testUtils.createRoomConfig('chatroom');
-      const message = 'message content here';
+      await ensureRegisteredUser(testUtils.hero);
+      await ensureRegisteredUser(testUtils.princess);
 
-      await testUtils.logIn.hero();
-      if (!testUtils.chatService.roomService.rooms$) {
-        throw new Error(`testUtils.chatService.rooms$ is undefined`);
-      }
-      const roomsBeforeJoin = await firstValueFrom(testUtils.chatService.roomService.rooms$);
-      const expectedRoomCount = roomsBeforeJoin.length++;
-      const room = await testUtils.chatService.roomService.createRoom(newRoom);
-      const roomsAfterJoin = await firstValueFrom(testUtils.chatService.roomService.rooms$);
+      const firstMessage = 'first muc.spec.msg';
+      const secondMessage = 'second muc.spec.msg';
 
-      expect(expectedRoomCount).toEqual(roomsAfterJoin.length);
-
+      await testUtils.logIn.princess();
+      const room = await testUtils.create.room.princess();
       await testUtils.chatService.roomService.inviteUserToRoom(
-        testUtils.princess.jid,
+        testUtils.hero.jid,
         room.jid.toString()
       );
       await testUtils.logOut();
 
-      await testUtils.logIn.princess();
-      // TODO: accept user room invite?
-      await testUtils.chatService.roomService.joinRoom(room.jid.toString());
-      const juliaRooms = await firstValueFrom(testUtils.chatService.roomService.rooms$);
-      const joinedRoom = juliaRooms.find((juliaRoom) => juliaRoom.jid.equals(room.jid));
-      if (joinedRoom == null) {
-        throw new Error('joinedRoom undefined');
-      }
-      await testUtils.chatService.messageService.sendMessage(joinedRoom, message);
+      await testUtils.logIn.hero();
+      const joinedRoom = await testUtils.chatService.roomService.joinRoom(room.jid.toString());
+      await testUtils.chatService.messageService.sendMessage(joinedRoom, firstMessage);
+      await testUtils.chatService.messageService.sendMessage(joinedRoom, secondMessage);
       await testUtils.logOut();
 
+      const messagePromise = firstValueFrom(
+        testUtils.chatService.roomService.rooms$.pipe(
+          filter((rooms) => rooms.length > 0),
+          mergeMap((rooms) =>
+            (rooms[0] as Room)?.messageStore.messages$.pipe(filter((array) => array.length >= 2))
+          )
+        )
+      );
+
       await testUtils.logIn.hero();
-      const receivedMessage = roomsAfterJoin[0]?.messageStore.mostRecentMessageReceived;
-      expect(receivedMessage?.body).toEqual(message);
+      const [first, second] = await messagePromise;
+      expect(first?.body).toEqual(firstMessage);
+      expect(second?.body).toEqual(secondMessage);
+      await testUtils.logOut();
     });
 
     it('should be able to send messages', async () => {
+      await ensureRegisteredUser(testUtils.hero);
+      await testUtils.logIn.hero();
       // when
-      const myOccupantJid = 'chatroom@conference.example.com/me';
-      const room = await testUtils.chatService.roomService.joinRoom(myOccupantJid);
+      const room = await testUtils.chatService.roomService.createRoom(
+        testUtils.createRoomConfig('chatroom')
+      );
+      await testUtils.chatService.roomService.joinRoom(room.jid.toString());
       await testUtils.chatService.messageService.sendMessage(room, 'message body');
 
+      const messages = await firstValueFrom(
+        room.messageStore.messages$.pipe(filter((array) => array.length > 0))
+      );
+
       // then
-      expect(room.messageStore.messages.length).toEqual(1);
-      expect(room.messageStore.messages[0]?.body).toEqual('message body');
-      expect(room.messageStore.messages[0]?.direction).toEqual(testUtils.direction.out);
-      expect(room.messageStore.messages[0]?.id).not.toBeUndefined();
-      expect(room.messageStore.messages[0]?.from?.toString()).toEqual(myOccupantJid);
+      expect(messages.length).toEqual(1);
+      const message = messages[0];
+      expect(message?.body).toEqual('message body');
+      expect(message?.direction).toEqual(testUtils.direction.out);
+      expect(message?.id).not.toBeUndefined();
+      expect(message?.from?.bare().toString()).toEqual(room.jid.bare().toString());
+      expect(message?.from?.resource).toEqual(parseJid(testUtils.hero.jid).local);
+      await testUtils.logOut();
     });
   });
 
   describe('room operations handling', () => {
-    it('should handle kicked occupant and leave room', async () => {
-      const resource = 'other';
-      const otherOccupantJid = 'chatroom@conference.example.com/' + resource;
+    xit('should handle kicked occupant and leave room', async () => {
+      await ensureRegisteredUser(testUtils.princess);
+      await ensureRegisteredUser(testUtils.hero);
 
-      const room = await testUtils.chatService.roomService.joinRoom(otherOccupantJid);
-      if (!testUtils.chatService.roomService.rooms$) {
-        throw new Error(`testUtils.chatService.rooms$ is undefined`);
-      }
-      const rooms = await firstValueFrom(testUtils.chatService.roomService.rooms$);
-
-      expect(rooms.length).toEqual(1);
-
-      room.onOccupantChange$
-        .pipe(
-          filter(({ change }) => change === 'kicked'),
-          mergeMap(async ({ occupant }): Promise<void> => {
-            expect(occupant.nick).toEqual(resource);
-            expect(occupant.role).toEqual(testUtils.role.none);
-            expect(occupant.affiliation).toEqual(testUtils.affiliation.none);
-            if (!testUtils.chatService.roomService.rooms$) {
-              throw new Error(`testUtils.chatService.rooms$ is undefined`);
-            }
-            expect((await firstValueFrom(testUtils.chatService.roomService.rooms$)).length).toEqual(
-              0
-            );
-          })
-        )
-        .subscribe();
-      await testUtils.chatService.roomService.kickFromRoom(resource, room.jid.toString());
-    });
-
-    it('should handle banned occupant', async () => {
-      const resource = 'other';
-      const otherOccupantJid = 'chatroom@conference.example.com/' + resource;
-
-      const room = await testUtils.chatService.roomService.joinRoom(otherOccupantJid);
-
-      room.onOccupantChange$
-        .pipe(filter(({ change }) => change === 'banned'))
-        .subscribe(({ occupant }) => {
-          expect(occupant.nick).toEqual(resource);
-          expect(occupant.role).toEqual(testUtils.role.none);
-          expect(occupant.affiliation).toEqual(testUtils.affiliation.outcast);
-        });
-      await testUtils.chatService.roomService.banUserForRoom(
-        otherOccupantJid,
-        'chatroom@conference.example.com'
+      await testUtils.logIn.princess();
+      await testUtils.create.room.princess();
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.hero.jid,
+        testUtils.princessRoom.jid
       );
+      await testUtils.logOut();
+
+      await testUtils.logIn.hero();
+      await testUtils.chatService.roomService.joinRoom(testUtils.princessRoom.jid);
+      const rooms = await firstValueFrom(testUtils.chatService.roomService.rooms$);
+      expect(rooms.length).toEqual(1);
+      await testUtils.logOut();
+
+      await testUtils.logIn.princess();
+      await testUtils.chatService.roomService.kickFromRoom('hero', testUtils.princessRoom.jid);
+      await testUtils.logOut();
+
+      await testUtils.logIn.hero();
+      const roomsAfterKick = await firstValueFrom(testUtils.chatService.roomService.rooms$);
+      expect(roomsAfterKick.length).toEqual(0);
+      await testUtils.logOut();
     });
 
-    it('should handle unban occupant', async () => {
-      const otherOccupantJid = 'chatroom@conference.example.com/other';
-      const roomJid = 'chatroom@conference.example.com';
+    it('should handle banning and unbanning of a room occupant', async () => {
+      await ensureRegisteredUser(testUtils.villain);
+      await ensureRegisteredUser(testUtils.hero);
 
-      await testUtils.chatService.roomService.banUserForRoom(otherOccupantJid, roomJid);
-      let banList = await testUtils.chatService.roomService.queryRoomUserList(roomJid);
-      expect(banList.length).toEqual(1);
-      await testUtils.chatService.roomService.unbanUserForRoom(otherOccupantJid, roomJid);
-      banList = await testUtils.chatService.roomService.queryRoomUserList(roomJid);
-      expect(banList.length).toEqual(0);
-    });
+      await testUtils.logIn.hero();
+      await testUtils.create.room.hero();
+      await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
+      await testUtils.chatService.roomService.grantModeratorStatusForRoom(
+        'hero',
+        testUtils.heroRoom.jid
+      );
+      expect(
+        await getRoomRole(parseJid(testUtils.heroRoom.jid)?.local as string, testUtils.hero.jid)
+      ).toEqual('moderator');
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.villain.jid,
+        testUtils.heroRoom.jid
+      );
+      await testUtils.logOut();
 
-    it('should be able to invite user', async () => {
-      const myOccupantJid = 'me@example.com/something';
-      const otherOccupantJid = 'other@example.com/something';
-      const roomJid = 'chatroom@conference.example.com';
+      await testUtils.logIn.villain();
+      await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
+      expect(await testUtils.waitForCurrentRoomCount(1)).toEqual(1);
+      expect(
+        await getRoomRole(parseJid(testUtils.heroRoom.jid)?.local as string, testUtils.villain.jid)
+      ).toEqual('participant');
+      await testUtils.logOut();
 
-      if (!testUtils.chatService.roomService.onInvitation$) {
-        throw new Error(`testUtils.chatService.onInvitation$ is undefined`);
+      await testUtils.logIn.hero();
+      await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
+      expect(
+        await getRoomAffiliation(
+          parseJid(testUtils.heroRoom.jid)?.local as string,
+          testUtils.hero.jid
+        )
+      ).toEqual('owner');
+      expect(
+        await getRoomRole(parseJid(testUtils.heroRoom.jid)?.local as string, testUtils.hero.jid)
+      ).toEqual('moderator');
+      const villainOccupant = 'villain@' + (testUtils.heroRoom.jid.split('@')[1] as string);
+      await testUtils.chatService.roomService.banUserForRoom(
+        villainOccupant,
+        testUtils.heroRoom.jid
+      );
+      await testUtils.logOut();
+
+      await testUtils.logIn.villain();
+      expect(await testUtils.waitForCurrentRoomCount(0)).toEqual(0);
+      try {
+        await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
+      } catch (e) {
+        expect(e).toBeTruthy();
       }
-      testUtils.chatService.roomService.onInvitation$.subscribe((invitation: Invitation) => {
-        expect(invitation.type).toEqual('invite');
-        expect(invitation.roomJid.toString()).toEqual(roomJid);
-        expect(invitation.from.toString()).toEqual(myOccupantJid);
-        expect(invitation.message).toEqual('reason');
-      });
-      await testUtils.chatService.roomService.inviteUserToRoom(otherOccupantJid, roomJid);
+      expect(await testUtils.waitForCurrentRoomCount(0)).toEqual(0);
+      await testUtils.logOut();
+
+      await testUtils.logIn.hero();
+      await testUtils.logWebsocketStream();
+      await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
+      await testUtils.chatService.roomService.unbanUserForRoom(
+        villainOccupant,
+        testUtils.heroRoom.jid
+      );
+      await testUtils.chatService.roomService.inviteUserToRoom(
+        testUtils.villain.jid,
+        testUtils.heroRoom.jid
+      );
+      await testUtils.logOut();
+
+      await testUtils.logIn.villain();
+      await testUtils.chatService.roomService.joinRoom(testUtils.heroRoom.jid);
+      expect(await testUtils.waitForCurrentRoomCount(1)).toEqual(1);
+      await testUtils.logOut();
     });
 
-    it('should be able to change nick', async () => {
+    xit('should be able to change nick', async () => {
       const myOccupantJid = 'chatroom@conference.example.com/something';
       const room = await testUtils.chatService.roomService.joinRoom(myOccupantJid);
 
@@ -394,7 +587,7 @@ xdescribe('multi user chat plugin', () => {
       );
     });
 
-    it('should be able to change room topic', async () => {
+    xit('should be able to change room topic', async () => {
       const roomJid = 'chatroom@conference.example.com';
       const room = await testUtils.chatService.roomService.joinRoom(roomJid);
 

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { ReplaySubject } from 'rxjs';
-import { Direction, Message } from './message';
+import { ReplaySubject, startWith } from 'rxjs';
+import { Direction, type Message } from './message';
 import { findLast, insertSortedLast } from '../utils-array';
 
 export class MessageStore {
-  private readonly messagesSubject = new ReplaySubject<Message[]>(1);
-  readonly messages$ = this.messagesSubject.asObservable();
   readonly messages: Message[] = [];
+  private readonly messagesSubject = new ReplaySubject<Message[]>(1);
+  readonly messages$ = this.messagesSubject.pipe(startWith(this.messages));
   readonly messageIdToMessage = new Map<string, Message>();
 
   get oldestMessage(): Message | undefined {
@@ -27,10 +27,14 @@ export class MessageStore {
 
   addMessage(message: Message): void {
     if (this.messageIdToMessage.has(message.id)) {
-      // eslint-disable-next-line no-console
-      console.warn(`message with id ${message.id} already exists`);
+      // as we are querying for messages in the past, we might get duplicate messages
+      return;
     }
-    if (this.mostRecentMessage?.datetime && message.datetime > this.mostRecentMessage?.datetime) {
+
+    if (
+      this.mostRecentMessage?.datetime == null ||
+      message.datetime > this.mostRecentMessage?.datetime
+    ) {
       this.messages.push(message);
     } else {
       insertSortedLast(message, this.messages, (m) => m.datetime);

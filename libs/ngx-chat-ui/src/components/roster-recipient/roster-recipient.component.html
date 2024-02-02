@@ -1,11 +1,11 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
-<div class="roster-recipient" [title]="recipient?.name">
+<div class="roster-recipient" [title]="currentRecipient?.name">
   <div class="roster-recipient-avatar">
-    <ngx-chat-avatar [imageUrl]="recipient?.avatar"></ngx-chat-avatar>
+    <ngx-chat-avatar [imageUrl]="currentRecipient?.avatar"></ngx-chat-avatar>
   </div>
 
   <div class="roster-recipient-name">
-    {{ recipient?.name }}
+    {{ currentRecipient?.name }}
   </div>
 
   <div class="roster-recipient-status">

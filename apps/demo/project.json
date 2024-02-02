@@ -20,6 +20,7 @@
       },
       "configurations": {
         "production": {
+          "optimization": true,
           "budgets": [
             {
               "type": "initial",
@@ -60,7 +61,7 @@
         "development": {
           "browserTarget": "demo:build:development",
           "host": "local.entenhausen.pazz.de",
-          "ssl": true,
+          "ssl": false,
           "sslKey": "apps/demo/src/local.entenhausen.pazz.de-key.pem",
           "sslCert": "apps/demo/src/local.entenhausen.pazz.de.pem"
         }
@@ -68,7 +69,7 @@
       "defaultConfiguration": "development"
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "options": {
         "lintFilePatterns": ["apps/demo/**/*.ts", "apps/demo/**/*.html"]
       }

@@ -5,11 +5,13 @@ import { Affiliation, Direction, Role } from '@pazznetwork/ngx-chat-shared';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import type { StropheWebsocket } from '@pazznetwork/strophets';
 import { devXmppDomain } from '../../.secrets-const';
+import { filter } from 'rxjs/operators';
 
 export const testUser: AuthRequest = {
   username: 'test',
   password: 'test',
   domain: devXmppDomain,
+  service: `wss://${devXmppDomain}:5280/websocket`,
 };
 
 interface TestUserConst extends AuthRequest {
@@ -121,6 +123,18 @@ export class TestUtils {
     return firstValueFrom(this.chatService.roomService.rooms$.pipe(map((arr) => arr.length)));
   };
 
+  waitForCurrentRoomCount(count: number): Promise<number> {
+    if (!this.chatService.roomService.rooms$) {
+      throw new Error(`this.chat.rooms$ is undefined`);
+    }
+    return firstValueFrom(
+      this.chatService.roomService.rooms$.pipe(
+        map((arr) => arr.length),
+        filter((c) => c === count)
+      )
+    );
+  }
+
   toJid(auth: AuthRequest): string {
     return `${auth.username}@${auth.domain}`;
   }
@@ -135,7 +149,7 @@ export class TestUtils {
       public: false,
       membersOnly: true,
       nonAnonymous: true,
-      persistentRoom: false,
+      persistentRoom: true,
       jid: this.roomIdToJid(roomId),
     };
   }
@@ -144,5 +158,11 @@ export class TestUtils {
     const connection = await firstValueFrom(this.chatService.chatConnectionService.connection$);
     const webSocket = connection.protocolManager as StropheWebsocket;
     await webSocket?.onMessage(stanza);
+  }
+
+  async logWebsocketStream(): Promise<void> {
+    const connection = await firstValueFrom(this.chatService.chatConnectionService.connection$);
+    // eslint-disable-next-line no-console
+    console.log(connection.debugLog);
   }
 }

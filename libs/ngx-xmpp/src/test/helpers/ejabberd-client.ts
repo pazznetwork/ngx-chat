@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Affiliation, AuthRequest } from '@pazznetwork/ngx-chat-shared';
+import { bareJidStringsEqual } from '@pazznetwork/ngx-chat-shared';
 import { devXmppDomain, devXmppJid, devXmppPassword } from '../../.secrets-const';
 import type { RoomOptions } from './room-options';
 
@@ -75,6 +76,16 @@ export async function unregister({
   if (!(await checkAccountExists(user, host))) {
     return;
   }
+  await unregisterUnsafe({ username: user, domain: host });
+}
+
+export async function unregisterUnsafe({
+  username: user,
+  domain: host,
+}: {
+  username: string;
+  domain: string;
+}): Promise<void> {
   await executeRequest('unregister', {
     user,
     host,
@@ -103,8 +114,47 @@ export async function registeredUsers(host = xmppDomain): Promise<string[]> {
   return executeRequest('registered_users', { host });
 }
 
-export async function getMucRooms(host = 'global'): Promise<string[]> {
-  return executeRequest('muc_online_rooms', { host });
+export async function getMucRooms(): Promise<string[]> {
+  return executeRequest('muc_online_rooms', { service: 'global' });
+}
+
+export async function getRoomAffiliation(
+  name: string,
+  jid: string,
+  service = 'conference.' + xmppDomain
+): Promise<string> {
+  const { affiliation } = await executeRequest<{ affiliation: string }>('get_room_affiliation', {
+    name,
+    jid,
+    service,
+  });
+  return affiliation;
+}
+
+type MucRole = 'participant' | 'moderator' | 'none' | 'visitor';
+export async function getRoomRole(
+  name: string,
+  jid: string,
+  service = 'conference.' + xmppDomain
+): Promise<MucRole> {
+  const occupants = await getRoomOccupants(name, service);
+  return occupants.find((occupant) => bareJidStringsEqual(occupant.jid, jid))?.role ?? 'none';
+}
+
+export async function getRoomOccupants(
+  name: string,
+  service = 'conference.' + xmppDomain
+): Promise<
+  {
+    jid: string;
+    nick: string;
+    role: MucRole;
+  }[]
+> {
+  return executeRequest('get_room_occupants', {
+    name,
+    service,
+  });
 }
 
 export async function changeRoomOption(

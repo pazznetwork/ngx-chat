@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+
+.chat-messages-auto-scroll {
+  display: flex;
+  flex-direction: column-reverse;
+  overflow: auto;
+  overflow-anchor: auto !important; // https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-anchor
+  min-height: 18em;
+  // for the message animation
+  overflow-x: hidden;
+
+  .chat-messages-auto-scroll-content , .chat-messages-auto-scroll-content > * {
+    transform: translateZ(0); // safari scroll update bug fix
+  }
+}
+
+top-intersection {
+  height: 15px;
+}

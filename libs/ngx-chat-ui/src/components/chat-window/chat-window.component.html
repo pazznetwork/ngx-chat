@@ -3,9 +3,10 @@
   <ngx-chat-window-header
     (headerClick)="onClickHeader()"
     (closeClick)="onClickClose()"
-    [chatWindowState]="chatWindowState"
+    [recipient]="currentRecipient"
+    [isCollapsed]="isCollapsed"
   ></ngx-chat-window-header>
 
-  <ngx-chat-window-content *ngIf="isWindowOpen$ | async" [recipient]="chatWindowState?.recipient">
+  <ngx-chat-window-content *ngIf="isWindowOpen$ | async" [recipient]="currentRecipient">
   </ngx-chat-window-content>
 </ngx-chat-window-frame>

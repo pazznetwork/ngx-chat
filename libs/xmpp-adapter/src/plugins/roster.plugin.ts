@@ -2,6 +2,7 @@
 import {
   Contact,
   ContactSubscription,
+  CustomContactFactory,
   JID,
   parseJid,
   Presence,
@@ -12,19 +13,24 @@ import type { XmppService } from '../xmpp.service';
 import { nsMuc } from './multi-user-chat';
 import {
   combineLatest,
+  Connectable,
+  connectable,
   firstValueFrom,
+  forkJoin,
   map,
   merge,
   mergeMap,
   Observable,
+  of,
   OperatorFunction,
   pairwise,
+  ReplaySubject,
   scan,
   startWith,
   Subject,
 } from 'rxjs';
 import { filter, shareReplay, switchMap } from 'rxjs/operators';
-import { NS } from '@pazznetwork/strophets';
+import { Handler, NS } from '@pazznetwork/strophets';
 
 /**
  * Current @TODOS:
@@ -44,64 +50,106 @@ const presenceMapping = {
   xa: Presence.away,
 } as const;
 
+type Action = AddAction | RemoveAction | OfflineAction | OnlineAction;
+
+interface AddAction {
+  type: 'add';
+  value: Contact;
+}
+interface RemoveAction {
+  type: 'remove';
+  value: string;
+}
+
+interface OnlineAction {
+  type: 'online';
+  value: Contact[];
+}
+
+interface OfflineAction {
+  type: 'offline';
+}
+
 /**
  * https://xmpp.org/rfcs/rfc6121.html#roster-add-success
  */
 export class RosterPlugin implements ChatPlugin {
   readonly nameSpace = NS.ROSTER;
 
-  private readonly newContactSubject = new Subject<Contact>();
-  private readonly removeContactByJIDSubject = new Subject<JID>();
-
-  readonly contacts$: Observable<Contact[]>;
+  readonly contacts$: Connectable<Map<string, Contact>>;
   readonly contactsSubscribed$: Observable<Contact[]>;
   readonly contactRequestsReceived$: Observable<Contact[]>;
   readonly contactRequestsSent$: Observable<Contact[]>;
   readonly contactsUnaffiliated$: Observable<Contact[]>;
 
-  constructor(private readonly chatService: XmppService) {
-    this.contacts$ = merge(
-      this.newContactSubject.pipe(
-        map((contact) => (state: Map<string, Contact>) => {
-          state.set(contact.jid.toString(), contact);
-          return state;
-        })
+  private handlers: { iq?: Handler; presence?: Handler; message?: Handler } = {};
+
+  private readonly addContactSubject = new Subject<Contact>();
+  private readonly removeContactSubject = new Subject<string>();
+
+  constructor(
+    private readonly xmppService: XmppService,
+    private readonly customContactFactory: CustomContactFactory
+  ) {
+    this.contacts$ = connectable(
+      merge(
+        this.addContactSubject.pipe(
+          map((contact) => ({ type: 'add', value: contact }) as AddAction)
+        ),
+        this.removeContactSubject.pipe(
+          map((jid) => ({ type: 'remove', value: jid }) as RemoveAction)
+        ),
+        this.xmppService.onOnline$.pipe(
+          switchMap(() => this.getRosterContacts()),
+          switchMap((contactsData) =>
+            contactsData?.length > 0
+              ? forkJoin(
+                  contactsData.map(({ name, subscription, to }) =>
+                    this.createContact(to, name, subscription)
+                  )
+                )
+              : of([])
+          ),
+          map((contacts) => ({ type: 'online', value: contacts }) as OnlineAction)
+        ),
+        this.xmppService.onOffline$.pipe(map(() => ({ type: 'offline' }) as OfflineAction))
+      ).pipe(
+        scan((contactMap, action: Action) => {
+          switch (action.type) {
+            case 'add':
+              if (!contactMap.has(action.value.jid.bare().toString())) {
+                contactMap.set(action.value.jid.bare().toString(), action.value);
+              }
+              break;
+            case 'remove':
+              contactMap.delete(action.value);
+              break;
+            case 'offline':
+              contactMap.clear();
+              break;
+            case 'online':
+              for (const contact of action.value) {
+                contactMap.set(contact.jid.bare().toString(), contact);
+              }
+              break;
+          }
+          return contactMap;
+        }, new Map<string, Contact>()),
+        shareReplay({ bufferSize: 1, refCount: true })
       ),
-      this.removeContactByJIDSubject.pipe(
-        map((jid) => (state: Map<string, Contact>) => {
-          state.delete(jid.toString());
-          return state;
-        })
-      ),
-      this.chatService.onOffline$.pipe(
-        map(() => (state: Map<string, Contact>) => {
-          state.clear();
-          return state;
-        })
-      ),
-      this.chatService.onOnline$.pipe(
-        mergeMap(() => this.getRosterContacts()),
-        map((contacts) => () => {
-          const state = new Map<string, Contact>();
-          contacts.forEach((c) => state.set(c.jid.toString(), c));
-          return state;
-        })
-      )
-    ).pipe(
-      scan((state, innerFun) => innerFun(state), new Map<string, Contact>()),
-      map((contactMap) => Array.from(contactMap.values())),
-      shareReplay({ bufferSize: 1, refCount: false })
+      { connector: () => new ReplaySubject<Map<string, Contact>>(1), resetOnDisconnect: false }
     );
 
-    chatService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
+    xmppService.onOnline$.pipe(switchMap(() => this.registerHandler())).subscribe();
+    xmppService.onOffline$.pipe(switchMap(() => this.unregisterHandler())).subscribe();
 
     const statedContacts$ = this.contacts$.pipe(
+      map((contactMap) => Array.from(contactMap.values())),
       mergeMap((contacts) =>
         combineLatest(
           contacts.map((contact) => contact.subscription$.pipe(map((sub) => ({ contact, sub }))))
         )
-      ),
-      shareReplay({ bufferSize: 1, refCount: false })
+      )
     );
 
     const mapToContactByFilter = (
@@ -126,10 +174,51 @@ export class RosterPlugin implements ChatPlugin {
     this.contactsUnaffiliated$ = statedContacts$.pipe(
       mapToContactByFilter((sub) => sub === ContactSubscription.none)
     );
+
+    //TODO: move to be after service initialization
+    this.contacts$.connect();
+  }
+
+  async registerHandler(): Promise<void> {
+    this.handlers.iq = await this.xmppService.chatConnectionService.addHandler(
+      (stanza) => this.handleRosterPushStanza(stanza),
+      {
+        ns: NS.CLIENT,
+        name: 'iq',
+        type: 'set',
+      }
+    );
+
+    this.handlers.presence = await this.xmppService.chatConnectionService.addHandler(
+      (stanza) => this.handlePresenceStanza(stanza),
+      {
+        name: 'presence',
+      }
+    );
+
+    this.handlers.message = await this.xmppService.chatConnectionService.addHandler(
+      (stanza) => this.handleRosterXPush(stanza),
+      {
+        ns: nsRosterX,
+        name: 'message',
+      }
+    );
+  }
+
+  async unregisterHandler(): Promise<void> {
+    if (this.handlers.iq) {
+      await this.xmppService.chatConnectionService.deleteHandler(this.handlers.iq);
+    }
+    if (this.handlers.presence) {
+      await this.xmppService.chatConnectionService.deleteHandler(this.handlers.presence);
+    }
+    if (this.handlers.message) {
+      await this.xmppService.chatConnectionService.deleteHandler(this.handlers.message);
+    }
   }
 
   private async handleRosterPushStanza(stanza: Stanza): Promise<boolean> {
-    const currentUser = await firstValueFrom(this.chatService.userJid$);
+    const currentUser = await firstValueFrom(this.xmppService.userJid$);
     if (
       Finder.create(stanza).searchByTag('block').result ||
       Finder.create(stanza).searchByTag('unblock').result
@@ -141,6 +230,7 @@ export class RosterPlugin implements ChatPlugin {
     if (!fromAttr) {
       throw new Error(`from is undefined`);
     }
+
     const currentUserJid = parseJid(currentUser).bare();
     const fromJid = parseJid(fromAttr).bare();
 
@@ -165,19 +255,14 @@ export class RosterPlugin implements ChatPlugin {
     }
 
     // acknowledge the reception of the pushed roster stanza
-    await this.chatService.chatConnectionService
+    await this.xmppService.chatConnectionService
       .$iq({ from: fromAttr, id, type: 'result' })
       .sendResponseLess();
 
     const contacts = this.rosterQueryResultToContacts(stanza);
-    for (const contact of contacts) {
+    for (const { to, name, subscription } of contacts) {
       // We need to check if the contact is already in the roster
-      await this.getOrCreateContactById(
-        contact.jid.toString(),
-        contact.name,
-        await firstValueFrom(contact.subscription$),
-        contact.avatar
-      );
+      await this.getOrCreateContactById(to, name, subscription);
     }
     return true;
   }
@@ -202,55 +287,61 @@ export class RosterPlugin implements ChatPlugin {
    *
    * @param rosterIQResult XMl Object from jabber:iq:roster namespace
    */
-  private rosterQueryResultToContacts(rosterIQResult: Stanza): Contact[] {
+  private rosterQueryResultToContacts(
+    rosterIQResult: Stanza
+  ): { to: string; name: string; subscription: ContactSubscription }[] {
     return Finder.create(rosterIQResult)
       .searchByTag('query')
       .searchByTag('item')
       .results.map((rosterItem) => {
+        // The ask attribute in the roster item element is an optional attribute used to indicate an outstanding subscription request.
+        // It can have only the value 'subscribe'.
+        // This value indicates that a subscription request is pending and has been sent to the contact specified by the 'jid' attribute.
         const to = rosterItem.getAttribute('jid') as string;
         const attrName = rosterItem.getAttribute('name') ?? to;
         const name = attrName.includes('@') ? (attrName?.split('@')?.[0] as string) : attrName;
 
-        // The default is to because there is no subscription attribute on roster items,
-        // we assume that the user has subscribed to the contact
-        // when adding him to the roster as does our code
-        // The ask attribute in the roster item element is an optional attribute used to indicate an outstanding subscription request.
-        // I can have only the value 'subscribe'.
-        // This value indicates that a subscription request is pending and has been sent to the contact specified by the 'jid' attribute.
-        const subscription = ContactSubscription.to;
-
-        return new Contact(to, name, undefined, subscription);
+        const subscription = this.processSubscription(rosterItem.getAttribute('subscription'));
+        return { to, name, subscription };
       });
   }
 
-  async initializeHandler(): Promise<void> {
-    await this.chatService.chatConnectionService.addHandler(
-      (stanza) => this.handleRosterPushStanza(stanza),
-      {
-        ns: NS.CLIENT,
-        name: 'iq',
-        type: 'set',
-      }
-    );
-
-    await this.chatService.chatConnectionService.addHandler(
-      (stanza) => this.handlePresenceStanza(stanza),
-      {
-        name: 'presence',
-      }
-    );
-
-    await this.chatService.chatConnectionService.addHandler(
-      (stanza) => this.handleRosterXPush(stanza),
-      {
-        ns: nsRosterX,
-        name: 'message',
-      }
-    );
+  // The default is to because there is no subscription attribute on roster items,
+  // we assume that the user has subscribed to the contact when adding him to the roster as does our code.
+  //
+  // https://xmpp.org/rfcs/rfc6121.html#roster-syntax-items-subscription
+  //The state of the presence subscription is captured in the 'subscription' attribute of the <item/> element. The defined subscription-related values are:
+  //
+  // none:
+  // the user does not have a subscription to the contact's presence, and the contact does not have a subscription to the user's presence; this is the default value, so if the subscription attribute is not included then the state is to be understood as "none"
+  // to:
+  // the user has a subscription to the contact's presence, but the contact does not have a subscription to the user's presence
+  // from:
+  // the contact has a subscription to the user's presence, but the user does not have a subscription to the contact's presence
+  // both:
+  // the user and the contact have subscriptions to each other's presence (also called a "mutual subscription")
+  // In a roster result, the client MUST ignore values of the 'subscription' attribute other than "none", "to", "from", or "both".
+  //
+  // In a roster push, the client MUST ignore values of the 'subscription' attribute other than "none", "to", "from", "both", or "remove".
+  //
+  // In a roster set, the 'subscription' attribute MAY be included with a value of "remove", which indicates that the item is to be removed from the roster; in a roster set the server MUST ignore all values of the 'subscription' attribute other than "remove".
+  //
+  // Inclusion of the 'subscription' attribute is OPTIONAL.
+  private processSubscription(subscription: string | undefined | null): ContactSubscription {
+    if (subscription === 'both') {
+      return ContactSubscription.both;
+    }
+    // We have only a roster item when we added the contact,
+    // in code we also subscribe which means this case occurs when we have a pending subscription
+    // that means we subscribed while the contact was offline and we wait for his approval
+    if (subscription === 'from') {
+      return ContactSubscription.both;
+    }
+    return ContactSubscription.to;
   }
 
   private async handlePresenceStanza(stanza: PresenceStanza): Promise<boolean> {
-    const userJid = await firstValueFrom(this.chatService.userJid$);
+    const userJid = await firstValueFrom(this.xmppService.userJid$);
     const type = stanza.getAttribute('type');
 
     if (type === 'error') {
@@ -265,6 +356,11 @@ export class RosterPlugin implements ChatPlugin {
       );
     }
 
+    const mucService = await this.xmppService.pluginMap.disco.findService('conference', 'text');
+    if (fromJid.includes(mucService.jid)) {
+      return false;
+    }
+
     if (userJid.split('/')[0] === fromJid?.split('/')[0]) {
       return true;
     }
@@ -277,11 +373,11 @@ export class RosterPlugin implements ChatPlugin {
       return false;
     }
 
-    const fromContact = await this.getOrCreateContactById(
-      fromJid,
-      fromJid,
-      ContactSubscription.from
-    );
+    const fromContact = await this.getOrCreateContactById(fromJid, fromJid);
+    const isSubscribed = await firstValueFrom(fromContact.isSubscribed());
+    if (!isSubscribed) {
+      fromContact.newSubscription(ContactSubscription.from);
+    }
 
     const show = Finder.create(stanza).searchByTag('show')?.result?.textContent;
     const handleShowAsDefault = show == null || !Object.keys(presenceMapping).includes(show);
@@ -334,13 +430,15 @@ export class RosterPlugin implements ChatPlugin {
    * @private
    */
   private async sendApprovalSubscription(jid: string): Promise<void> {
-    await this.chatService.chatConnectionService
+    await this.xmppService.chatConnectionService
       .$pres({ to: jid, type: 'subscribed' })
       .sendResponseLess();
   }
 
-  async getRosterContacts(): Promise<Contact[]> {
-    const responseStanza = await this.chatService.chatConnectionService
+  private async getRosterContacts(): Promise<
+    { to: string; name: string; subscription: ContactSubscription }[]
+  > {
+    const responseStanza = await this.xmppService.chatConnectionService
       .$iq({ type: 'get' })
       .c('query', { xmlns: this.nameSpace })
       .send();
@@ -348,9 +446,21 @@ export class RosterPlugin implements ChatPlugin {
     return this.rosterQueryResultToContacts(responseStanza);
   }
 
-  async getContactById(jidPlain: string): Promise<Contact | undefined> {
+  async getContactById(jid: string | JID): Promise<Contact | undefined> {
+    if (typeof jid === 'string') {
+      jid = parseJid(jid);
+    }
     const contacts = await firstValueFrom(this.contacts$);
-    return contacts.find((contact) => contact?.jid.bare()?.equals(parseJid(jidPlain).bare()));
+    return contacts.get(jid.bare().toString());
+  }
+
+  private async createContact(
+    jid: string,
+    name: string,
+    subscription?: ContactSubscription,
+    avatar?: string
+  ): Promise<Contact> {
+    return this.customContactFactory.create(jid, name, avatar, subscription);
   }
 
   async getOrCreateContactById(
@@ -359,25 +469,36 @@ export class RosterPlugin implements ChatPlugin {
     subscription?: ContactSubscription,
     avatar?: string
   ): Promise<Contact> {
-    const definedName = name?.includes('@') ? (name?.split('@')?.[0] as string) : name;
-    const contact = await this.getContactById(jid);
-    if (contact) {
-      return contact;
+    const existingContact = await this.getContactById(jid);
+    if (existingContact == null) {
+      const newContact = await this.createContact(jid, name, subscription, avatar);
+      if (subscription) {
+        newContact.newSubscription(subscription);
+      }
+      this.addContactSubject.next(newContact);
+      return newContact;
     }
-    const newContact = new Contact(jid, definedName, avatar, subscription);
-    this.newContactSubject.next(newContact);
-    return newContact;
+
+    if (subscription == null) {
+      return existingContact;
+    }
+
+    const currentSubscription = await firstValueFrom(existingContact.subscription$);
+    if (currentSubscription === subscription) {
+      return existingContact;
+    }
+
+    existingContact.newSubscription(subscription);
+    return existingContact;
   }
 
   async addContact(jid: string): Promise<void> {
     const existingContact = await this.getContactById(jid);
-    if (existingContact && (await firstValueFrom(existingContact.isSubscribed()))) {
-      return;
-    }
 
     // new contact should come from the server push
     const moreContactsPromise = firstValueFrom(
       this.contacts$.pipe(
+        map((contactMap) => Array.from(contactMap.values())),
         startWith([]),
         pairwise(),
         filter(([a, b]) => a.length < b.length)
@@ -388,10 +509,11 @@ export class RosterPlugin implements ChatPlugin {
     // subscribe is necessary because a subscribed won't be resent to user after getting online
     await this.sendSubscribe(jid);
     await moreContactsPromise;
+    await existingContact?.updateSubscriptionOnRequestSent();
   }
 
   private async sendAddToRoster(jid: string): Promise<Element> {
-    return this.chatService.chatConnectionService
+    return this.xmppService.chatConnectionService
       .$iq({ type: 'set' })
       .c('query', { xmlns: this.nameSpace })
       .c('item', { jid })
@@ -401,11 +523,11 @@ export class RosterPlugin implements ChatPlugin {
   async removeRosterContact(jid: string): Promise<void> {
     await this.sendRemoveFromRoster(jid);
     await this.unauthorizePresenceSubscription(jid);
-    this.removeContactByJIDSubject.next(parseJid(jid));
+    this.removeContactSubject.next(parseJid(jid).bare().toString());
   }
 
   private async sendRemoveFromRoster(jid: string): Promise<void> {
-    await this.chatService.chatConnectionService
+    await this.xmppService.chatConnectionService
       .$iq({ type: 'set' })
       .c('query', { xmlns: this.nameSpace })
       .c('item', { jid, subscription: 'remove' })
@@ -413,7 +535,7 @@ export class RosterPlugin implements ChatPlugin {
   }
 
   private async unauthorizePresenceSubscription(jid: string): Promise<void> {
-    await this.chatService.chatConnectionService
+    await this.xmppService.chatConnectionService
       .$pres({ to: jid, type: 'unsubscribed' })
       .sendResponseLess();
   }
@@ -427,7 +549,7 @@ export class RosterPlugin implements ChatPlugin {
    * @param jid - The Jabber ID of the user to whom one is subscribing
    */
   private async sendAcknowledgeSubscribe(jid: string): Promise<void> {
-    await this.chatService.chatConnectionService.$pres({ to: jid, type: 'subscribe' }).send();
+    await this.xmppService.chatConnectionService.$pres({ to: jid, type: 'subscribe' }).send();
   }
 
   /**
@@ -440,7 +562,7 @@ export class RosterPlugin implements ChatPlugin {
    * @param jid - The Jabber ID of the user who is unsubscribing
    */
   private async sendAcknowledgeUnsubscribe(jid: string): Promise<void> {
-    await this.chatService.chatConnectionService.$pres({ to: jid, type: 'unsubscribe' }).send();
+    await this.xmppService.chatConnectionService.$pres({ to: jid, type: 'unsubscribe' }).send();
   }
 
   private async handleRosterXPush(elem: Element): Promise<boolean> {
@@ -454,7 +576,7 @@ export class RosterPlugin implements ChatPlugin {
   }
 
   private async sendSubscribe(jid: string): Promise<void> {
-    await this.chatService.chatConnectionService
+    await this.xmppService.chatConnectionService
       .$pres({ to: jid, type: 'subscribe' })
       .sendResponseLess();
   }

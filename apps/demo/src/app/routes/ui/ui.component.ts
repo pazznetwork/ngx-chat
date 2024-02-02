@@ -1,38 +1,56 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
   Contact,
   Direction,
   JID,
+  Log,
+  LOG_SERVICE_TOKEN,
+  type Message,
   MessageState,
   parseJid,
+  type Recipient,
   Room,
 } from '@pazznetwork/ngx-chat-shared';
+import { ChatHistoryComponent, ChatMessageOutComponent } from '@pazznetwork/ngx-chat';
+import { NgForOf } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'ngx-chat-ui',
   templateUrl: './ui.component.html',
   styleUrls: ['./ui.component.less'],
+  standalone: true,
+  imports: [ChatMessageOutComponent, ChatHistoryComponent, NgForOf, RouterLink],
 })
 export class UiComponent implements OnInit {
   readonly dummyAvatarContact =
     'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjYwMCIgdmlld0JveD0iMCAwIDYwMCA2MDAiPgogIDxkZWZzPgogICAgPGNsaXBQYXRoIGlkPSJjbGlwLV8xIj4KICAgICAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI2MDAiLz4KICAgIDwvY2xpcFBhdGg+CiAgPC9kZWZzPgogIDxnIGlkPSJfMSIgZGF0YS1uYW1lPSIxIiBjbGlwLXBhdGg9InVybCgjY2xpcC1fMSkiPgogICAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI2MDAiIGZpbGw9IiNmZmYiLz4KICAgIDxnIGlkPSJHcnVwcGVfNzcxNyIgZGF0YS1uYW1lPSJHcnVwcGUgNzcxNyI+CiAgICAgIDxyZWN0IGlkPSJSZWNodGVja18xMzk3IiBkYXRhLW5hbWU9IlJlY2h0ZWNrIDEzOTciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIiBmaWxsPSIjZTVlNmU4Ii8+CiAgICAgIDxlbGxpcHNlIGlkPSJFbGxpcHNlXzI4MyIgZGF0YS1uYW1lPSJFbGxpcHNlIDI4MyIgY3g9IjExNi4yMzEiIGN5PSIxMjUuNjcxIiByeD0iMTE2LjIzMSIgcnk9IjEyNS42NzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4NS4yMzEgMTExLjQ4NSkiIGZpbGw9IiNhZmI0YjgiLz4KICAgICAgPHBhdGggaWQ9IlBmYWRfMjQ5NjIiIGRhdGEtbmFtZT0iUGZhZCAyNDk2MiIgZD0iTTU0Ni4zNTksNTk1LjI3NnMwLTIxNy41NjMtMjQ0LjkwOS0yMTcuNTYzaC0xLjQ1N2MtMjQ0LjkwOSwwLTI0NC45MDksMjE3LjU2My0yNDQuOTA5LDIxNy41NjMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgNC43MjQpIiBmaWxsPSIjYWZiNGI4Ii8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K';
 
-  contact?: Contact;
+  contact!: Contact;
   Direction = Direction;
   MessageState = MessageState;
-  room?: Room;
+  room!: Room;
   private myJid: JID = parseJid('me@example.com');
   private otherContactJid: JID = parseJid('other@example.com');
-  outMessages = [
+  outMessages: { contact: Recipient; message: Message }[] = [
     {
-      contact: {
-        avatar: this.dummyAvatarContact,
-        nick: 'chat partner',
+      // Object were made fast against error may not be in correct state
+      contact: new Contact(this.myJid.toString(), 'chat partner', this.dummyAvatarContact),
+      message: {
+        id: '1',
+        from: this.myJid,
+        direction: Direction.in,
+        body: '',
+        datetime: new Date(),
+        delayed: false,
+        fromArchive: false,
+        /**
+         * if no explicit state is set for the message, use implicit contact message states instead.
+         */
+        state: MessageState.SENT,
       },
-      message: {},
     },
-    {},
     // <ngx-chat-message-out class="chat-message--out"
     //     [avatar]="dummyAvatarContact"
     // formattedDate="2020-06-04 18:35"
@@ -83,9 +101,11 @@ export class UiComponent implements OnInit {
     // </ngx-chat-message-out>
   ];
 
+  constructor(@Inject(LOG_SERVICE_TOKEN) readonly logService: Log) {}
+
   ngOnInit(): void {
     this.contact = new Contact(this.otherContactJid.toString(), 'chat partner name');
-    this.room = new Room(this.myJid);
+    this.room = new Room(this.logService, this.myJid);
 
     this.add({
       body: 'This is an incoming example message',
@@ -154,7 +174,7 @@ export class UiComponent implements OnInit {
     });
   }
 
-  private add(message: { body: string; datetime: Date; direction: Direction }) {
+  private add(message: { body: string; datetime: Date; direction: Direction }): void {
     let startIndex = 0;
     this.contact?.messageStore.addMessage({
       ...message,

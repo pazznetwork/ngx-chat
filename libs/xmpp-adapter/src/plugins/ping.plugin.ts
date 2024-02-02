@@ -13,16 +13,18 @@ export class PingPlugin implements ChatPlugin {
   nameSpace = nsPing;
 
   constructor(private readonly xmppChatAdapter: XmppService) {
-    combineLatest([this.xmppChatAdapter.isOnline$, interval(15_000)])
-      .pipe(
-        filter(([isOnline]) => isOnline),
-        concatMap(() =>
-          this.xmppChatAdapter.chatConnectionService
-            .$iq({ type: 'get' })
-            .c('ping', { xmlns: this.nameSpace })
-            .send()
+    this.xmppChatAdapter.zone.runOutsideAngular(() =>
+      combineLatest([this.xmppChatAdapter.isOnline$, interval(15_000)])
+        .pipe(
+          filter(([isOnline]) => isOnline),
+          concatMap(() =>
+            this.xmppChatAdapter.chatConnectionService
+              .$iq({ type: 'get' })
+              .c('ping', { xmlns: this.nameSpace })
+              .send()
+          )
         )
-      )
-      .subscribe();
+        .subscribe()
+    );
   }
 }

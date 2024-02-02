@@ -2,15 +2,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { SASLMechanism } from './sasl-mechanism';
 import type { Handler } from './handler';
-import { SASLAnonymous } from './sasl-anon';
-import { SASLExternal } from './sasl-external';
-import { SASLOAuthBearer } from './sasl-oauthbearer';
-import { SASLXOAuth2 } from './sasl-xoauth2';
-import { SASLPlain } from './sasl-plain';
-import { SASLSHA1 } from './sasl-sha1';
-import { SASLSHA256 } from './sasl-sha256';
-import { SASLSHA384 } from './sasl-sha384';
-import { SASLSHA512 } from './sasl-sha512';
 import {
   $build,
   $iq,
@@ -28,6 +19,15 @@ import type { ProtocolManager } from './protocol-manager';
 import { ErrorCondition } from './error';
 import type { Subject } from 'rxjs';
 import { Bosh } from './bosh';
+import { SASLAnonymous } from './sasl-anon';
+import { SASLExternal } from './sasl-external';
+import { SASLOAuthBearer } from './sasl-oauthbearer';
+import { SASLXOAuth2 } from './sasl-xoauth2';
+import { SASLPlain } from './sasl-plain';
+import { SASLSHA1 } from './sasl-sha1';
+import { SASLSHA256 } from './sasl-sha256';
+import { SASLSHA384 } from './sasl-sha384';
+import { SASLSHA512 } from './sasl-sha512';
 
 export class Sasl {
   saslData: SaslData = {};
@@ -79,14 +79,19 @@ export class Sasl {
       return [];
     }
 
-    return Array.from(element.getElementsByTagName('mechanism'))
-      .map((m) => {
-        if (!m.textContent) {
-          throw new Error('textContent cannot be undefined');
-        }
-        return this.mechanism[m.textContent]! as SASLMechanism;
-      })
-      .filter((m) => m);
+    const serverSupportedSASLs = Array.from(element.getElementsByTagName('mechanism')).map(
+      (m) => m.textContent!
+    );
+
+    const availableSASLs = Array.from(this.mechanism.values()).filter((m) =>
+      serverSupportedSASLs.includes(m.mechname)
+    );
+
+    if (!crypto?.subtle?.deriveBits) {
+      return availableSASLs.filter((m) => !m.mechname.includes('SHA'));
+    }
+
+    return availableSASLs;
   }
 
   /**
@@ -98,8 +103,8 @@ export class Sasl {
    *    @param mechanisms - Array of SASLMechanism Constructors
    *
    */
-  registerSASLMechanisms(
-    mechanisms: (new () => SASLMechanism)[] = [
+  registerSASLMechanisms(mechanisms?: string[]): void {
+    const all: (new () => SASLMechanism)[] = [
       SASLAnonymous,
       SASLExternal,
       SASLOAuthBearer,
@@ -109,9 +114,8 @@ export class Sasl {
       SASLSHA256,
       SASLSHA384,
       SASLSHA512,
-    ]
-  ): void {
-    mechanisms.forEach((m) => this.registerSASLMechanism(m));
+    ];
+    all.forEach((m) => this.registerSASLMechanism(m, mechanisms));
   }
 
   /**
@@ -120,13 +124,17 @@ export class Sasl {
    *  Parameters:
    *
    *    @param mechanism - Constructor for an object with a SASLMechanism prototype
-   *
+   *    @param configuredMechanisms - Array of allowed mechanisms (strings)
    */
-  registerSASLMechanism<T extends SASLMechanism>(mechanism: new () => T): void {
+  registerSASLMechanism<T extends SASLMechanism>(
+    mechanism: new () => T,
+    configuredMechanisms?: string[]
+  ): void {
     const tmpMechanism = new mechanism();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    this.mechanism[tmpMechanism.mechname] = tmpMechanism;
+    if (configuredMechanisms && !configuredMechanisms.includes(tmpMechanism.mechname)) {
+      return; // Mechanism not enabled.
+    }
+    this.mechanism.set(tmpMechanism.mechname, tmpMechanism);
   }
 
   /**

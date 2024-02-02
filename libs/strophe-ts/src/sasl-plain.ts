@@ -15,14 +15,15 @@ export class SASLPlain extends SASLMechanismBase {
     return sasl.authcid !== null;
   }
 
-  onChallenge(sasl: Sasl, domain: string): Promise<string> {
+  onChallenge(sasl: Sasl, _: string): Promise<string> {
     const { authcid, authzid, pass } = sasl;
-    if (!domain) {
+    if (!sasl.connection.domain) {
       throw new Error('SASLPlain onChallenge: domain is not defined!');
     }
     // Only include authzid if it differs from authcid.
     // See: https://tools.ietf.org/html/rfc6120#section-6.3.8
-    let auth_str: string = authzid !== `${authcid as string}@${domain}` ? (authzid as string) : '';
+    let auth_str: string =
+      authzid !== `${authcid as string}@${sasl.connection.domain}` ? (authzid as string) : '';
     auth_str = auth_str + '\u0000';
     // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
     auth_str = auth_str + authcid;

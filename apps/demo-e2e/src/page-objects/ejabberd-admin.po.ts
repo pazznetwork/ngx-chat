@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { APIRequestContext, expect, Page } from '@playwright/test';
+import {
+  devXmppDomain,
+  devXmppJid,
+  devXmppPassword,
+} from '../../../../libs/ngx-xmpp/src/.secrets-const';
 
+const devUserName = devXmppJid?.split('@')[0] as string;
 export class EjabberdAdminPage {
   private constructor(private readonly host: string, private readonly context: APIRequestContext) {}
   static async getAllJabberUsersBesidesAdmin(
     page: Page,
-    adminUsername: string,
-    adminPassword: string
+    adminUsername = devUserName,
+    adminPassword = devXmppPassword
   ): Promise<string[]> {
     const adminBase =
       'https://' + adminUsername + ':' + adminPassword + '@local-jabber.entenhausen.pazz.de:5280';
@@ -21,8 +27,8 @@ export class EjabberdAdminPage {
 
   static async deleteUsers(
     page: Page,
-    adminUsername: string,
-    adminPassword: string,
+    adminUsername = devUserName,
+    adminPassword = devXmppPassword,
     users: string[]
   ): Promise<void> {
     const adminBase = `https://${adminUsername}:${adminPassword}@local-jabber.entenhausen.pazz.de:5280`;
@@ -41,7 +47,11 @@ export class EjabberdAdminPage {
       await deleteUser();
     }
   }
-  async requestDeleteAllUsersBesidesAdmin(): Promise<void> {
+  async deleteAllBesidesAdminUser(): Promise<void> {
+    const rooms = await this.getMucRooms();
+    for (const room of rooms) {
+      await this.destroyRoom(room.split('@')[0] as string);
+    }
     const users = await this.registeredUsers();
     const withoutAdmin = users.filter((user) => user.toLowerCase() !== 'local-admin');
     for (const user of withoutAdmin) {
@@ -54,6 +64,17 @@ export class EjabberdAdminPage {
       user,
       host: this.host,
     });
+  }
+
+  async destroyRoom(room: string, service = 'conference.' + devXmppDomain): Promise<unknown> {
+    return this.executeRequest('destroy_room', {
+      name: room,
+      service,
+    });
+  }
+
+  async getMucRooms(): Promise<string[]> {
+    return this.executeRequest('muc_online_rooms', { service: 'global' });
   }
 
   async register(user: string, password: string): Promise<void> {
@@ -69,10 +90,10 @@ export class EjabberdAdminPage {
   }
 
   static async create(
-    playwright: typeof import('playwright-core'),
-    host: string,
-    adminUserName: string,
-    adminPassword: string
+    playwright: typeof import('playwright'),
+    host = devXmppDomain,
+    adminUserName = devUserName,
+    adminPassword = devXmppPassword
   ): Promise<EjabberdAdminPage> {
     return new EjabberdAdminPage(
       host,

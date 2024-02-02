@@ -1,0 +1,260 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<div class="grid">
+  <aside>
+    <span *ngIf="(chatService.roomService.rooms$ | async)?.length === 0">(no room joined yet)</span>
+
+    <h4>Rooms:</h4>
+    <div class="list">
+      <div class="list-item" *ngFor="let room of rooms$ | async">
+        <div>
+          <p data-zid="list-room-name">{{ room.name }}</p>
+          <small data-zid="list-room-jid">JID: {{ room.jid.toString() }}</small>
+        </div>
+        <div>
+          <button data-zid="list-room-leave" (click)="leaveRoom()">Leave</button>
+          <button data-zid="list-room-select" (click)="selectRoom(room)">Select</button>
+          <button data-zid="list-room-subscribe" (click)="subscribeWithMucSub(room)">subscribe with MUC/Sub</button>
+          <button data-zid="list-room-unsubscribe" (click)="unsubscribeFromMucSub(room)">unsubscribe from MUC/Sub</button>
+          <button data-zid="list-room-query-user-list" (click)="queryUserList(room)">get user list</button>
+          <button data-zid="list-room-get-room-configuration" (click)="getRoomConfiguration(room)">get room configuration</button>
+          <button data-zid="list-room-destroy-room" (click)="destroyRoom(room)">destroy</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="form-group">
+      <label for="room-join-id">
+        Room id to join
+      </label>
+      <input
+        data-zid="room-join-id"
+        id="room-join-id"
+        name="room-join-id"
+        [(ngModel)]="roomIdToJoin"
+        class="form-control"
+        type="text"
+        placeholder="Room"
+      />
+    </div>
+    <button data-zid="join-room" (click)="joinRoom(roomIdToJoin)">Join Room</button>
+
+    <form (submit)="createRoomOnServer()">
+      <div class="form-group">
+        <input
+          data-zid="room-id"
+          name="roomId"
+          [(ngModel)]="newRoomConfiguration.roomId"
+          class="form-control"
+          type="text"
+          placeholder="Room id"
+          required="required"
+          #roomId="ngModel"
+        />
+        <div [hidden]="roomId.valid || roomId.pristine" class="alert alert-danger">
+          Room id is required
+        </div>
+      </div>
+      <div class="form-group">
+        <input
+          data-zid="new-room-name"
+          name="room-name"
+          class="form-control"
+          [(ngModel)]="newRoomConfiguration.name"
+          type="text"
+          placeholder="Room name"
+        />
+      </div>
+      <label>
+        <input data-zid="room-members-only" name="membersOnly" [(ngModel)]="newRoomConfiguration.membersOnly" type="checkbox" />
+        members only
+      </label>
+      <br />
+      <label>
+        <input data-zid="room-non-anon"  name="nonAnonymous" [(ngModel)]="newRoomConfiguration.nonAnonymous" type="checkbox" />
+        non-anonymous
+      </label>
+      <br />
+      <label>
+        <input data-zid="room-persistent" name="persistentRoom" [(ngModel)]="newRoomConfiguration.persistentRoom" type="checkbox" />
+        persistent
+      </label>
+      <br />
+      <label>
+        <input data-zid="room-public" name="public" [(ngModel)]="newRoomConfiguration.public" type="checkbox" />
+        public
+      </label>
+      <br />
+      <label>
+        <input data-zid="room-allow-sub" name="allowSubscription" [(ngModel)]="newRoomConfiguration.allowSubscription" type="checkbox" />
+        allow subscription
+      </label>
+      <br />
+      <button data-zid="room-create-submit" type="submit">Create room</button>
+    </form>
+
+    <div class="form-group">
+      <label for="room-new-id">
+        Room name
+      </label>
+      <input
+        id="room-new-id"
+        data-zid="room-new-id"
+        name="room-new-id"
+        [(ngModel)]="newRoomName"
+        class="form-control"
+        type="text"
+        placeholder="Room"
+      />
+    </div>
+    <button data-zid="create-room" (click)="onCreateRoom()">Create & Join Room</button>
+
+    <ng-container *ngIf="selectedRoom$ | async as room">
+      <h1 style="text-align: center">
+        {{ room.name }}<br />
+        <small>JID: {{ room.jid.toString() }}</small
+        ><br />
+        <small>Subject: {{ room.subject || "[unset]" }}</small>
+      </h1>
+
+      <h4>Occupants:</h4>
+      <table>
+        <thead>
+        <tr>
+          <th>JID</th>
+          <th>Nicks</th>
+          <th>Affiliation</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let member of roomUserList">
+          <td data-zid="room-member-jid" >{{ displayMemberJid(member) }}</td>
+          <td data-zid="room-member-nick">{{ displayMemberNicks(member) || "[unknown]" }}</td>
+          <td data-zid="room-member-affiliation">{{ member.affiliation }}</td>
+          <td data-zid="room-member-role">{{ member.role }}</td>
+          <td>
+            <button data-zid="room-member-kick" (click)="kick(member)">
+              Kick ({{ member.nick || "[unknown]" }})
+            </button>
+            <button data-zid="room-member-ban-or-unban" (click)="banOrUnban(member, room)">Ban/Unban</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <hr />
+
+      <h2>Actions:</h2>
+
+      <button data-zid="room-get-subs" (click)="getSubscriptions()">get MUC/Sub subscriptions</button>
+
+      <form>
+        <div class="form-group">
+          <label for="room-subject">Room subject:</label>
+          <input
+            [(ngModel)]="subject"
+            class="form-control"
+            data-zid="room-subject"
+            id="room-subject"
+            name="room-subject"
+            placeholder="Enter a new room subject"
+            type="text"
+          />
+          <button data-zid="room-subject-change"  type="button" (click)="changeRoomSubject()">Change</button>
+        </div>
+        <div class="form-group">
+          <label for="change-nick">Change nick:</label>
+          <input
+            [(ngModel)]="nick"
+            class="form-control"
+            data-zid="room-member-nick"
+            id="change-nick"
+            name="change-nick"
+            placeholder="Enter a new nick"
+            type="text"
+          />
+          <button data-zid="room-member-nick-change" type="button" (click)="changeNick()">Change</button>
+        </div>
+        <div class="form-group">
+          <label for="invite-user">Invite user:</label>
+          <input
+            [(ngModel)]="inviteJid"
+            class="form-control"
+            data-zid="room-invite-user-jid"
+            id="invite-user"
+            name="invite-user"
+            placeholder="Enter JID of a user to invite"
+            type="text"
+          />
+          <button data-zid="room-invite-user-action" type="button" (click)="inviteUser()">Invite</button>
+        </div>
+        <div class="form-group">
+          <label for="member">Grant / Revoke Membership affiliation</label>
+          <input
+            [(ngModel)]="memberJid"
+            class="form-control"
+            data-zid="room-membership-user-jid"
+            id="member"
+            name="member"
+            type="text"
+            placeholder="Enter JID of an occupant to grant/revoke membership"
+          />
+          <button data-zid="room-membership-revoke" type="button" (click)="revokeMembership()">Revoke</button>
+          <button data-zid="room-membership-grant" type="button" (click)="grantMembership()">Grant</button>
+        </div>
+        <div class="form-group">
+          <label for="moderator">Grant / Revoke moderator role</label>
+          <input
+            [(ngModel)]="moderatorNick"
+            class="form-control"
+            data-zid="room-moderator-user-jid"
+            id="moderator"
+            name="moderator"
+            type="text"
+            placeholder="Enter nick of an occupant to grant or revoke moderator role"
+          />
+          <button data-zid="room-moderator-revoke" type="button" (click)="revokeModeratorStatus()">Revoke</button>
+          <button data-zid="room-moderator-grant" type="button" (click)="grantModeratorStatus()">Grant</button>
+        </div>
+        <div class="form-group">
+          <label for="admin">Grant / Revoke Admin affiliation</label>
+          <input
+            [(ngModel)]="adminNick"
+            class="form-control"
+            data-zid="room-admin-user-jid"
+            id="admin"
+            name="moderator"
+            type="text"
+            placeholder="Enter id to set affiliation"
+          />
+          <button data-zid="room-admin-revoke" type="button" (click)="revokeAdmin()">Revoke</button>
+          <button data-zid="room-admin-grant" type="button" (click)="grantAdmin()">Grant</button>
+        </div>
+      </form>
+
+      <ng-container *ngIf="(roomConfiguration?.fields?.length || 0) > 0">
+        <p>Configuration of room: {{ room.jid.bare().toString() }}</p>
+        <table>
+          <thead>
+          <tr>
+            <th>Variable</th>
+            <th>Value</th>
+            <th>Label</th>
+          </tr>
+          </thead>
+          <tbody>
+          <ng-container *ngFor="let field of roomConfiguration?.fields">
+            <tr *ngIf="field.type !== 'hidden'">
+              <td data-zid="room-config-variable">{{ field.variable }}</td>
+              <td data-zid="room-config-value">{{ field.value }}</td>
+              <td data-zid="room-config-label">{{ field.label }}</td>
+            </tr>
+          </ng-container>
+          </tbody>
+        </table>
+      </ng-container>
+    </ng-container>
+  </main>
+</div>

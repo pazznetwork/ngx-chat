@@ -22,10 +22,18 @@ export interface ChatService {
   fileUploadHandler: FileUploadHandler;
 
   /**
-   * The avatar of the user. Is used as src attribute of an img-element. Purely cosmetically. Should be set via the
-   * [userAvatar$]{@link ChatService#userAvatar$} @Input-attribute of {@link ChatService}.
+   * The avatar of the user. Is used as src attribute of an img-element. Purely cosmetically.
+   * Can be set by providing an observable<string> for the USER_AVATAR_TOKEN
    */
   userAvatar$: Observable<string>;
+
+  /**
+   * The name of the user. Is used in the outgoing messages if not provided the local part of jid will be used. Purely cosmetically.
+   * Can be set by providing an observable<string> for the USER_NAME_TOKEN
+   */
+  userName$: Observable<string>;
+
+  userJid$: Observable<string>;
 
   /**
    * The current translation. Do NOT write to this attribute, use the [translations]{@link ChatService#translations} @Input-attribute

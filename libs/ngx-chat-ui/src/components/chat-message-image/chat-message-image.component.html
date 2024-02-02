@@ -1,8 +1,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <div
   class="chat-message-image-wrapper"
-  [class.chat-message-image-wrapper--placeholder]="showImagePlaceholder"
-  *ngIf="showImagePlaceholder || (imageLink$ | async) as imageLink"
+  [class.chat-message-image-wrapper--placeholder]="showImagePlaceholder$ | async"
 >
-  <img class="chat-message-image" (load)="afterImageLoaded()" [src]="imageLink" />
+  <img *ngIf="showImage$ | async" alt="chat message image" class="chat-message-image" (load)="afterImageLoaded()" [src]="imageLink$ | async" />
 </div>

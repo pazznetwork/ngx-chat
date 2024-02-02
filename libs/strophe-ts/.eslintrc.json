@@ -5,13 +5,9 @@
     {
       "files": ["*.ts", "*.js"],
       "parserOptions": {
-        "project": [
-          "libs/strophe-ts/tsconfig.*?.json"
-        ]
+        "project": ["libs/strophe-ts/tsconfig.*?.json"]
       },
-      "extends": [
-        "plugin:rxjs/recommended"
-      ]
+      "extends": ["plugin:rxjs/recommended"]
     }
   ]
 }

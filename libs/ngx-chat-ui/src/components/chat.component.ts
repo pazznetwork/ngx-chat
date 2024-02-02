@@ -1,12 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import type { Observable } from 'rxjs';
+import { combineLatest, Subject } from 'rxjs';
 import type { ChatService, Contact, Translations } from '@pazznetwork/ngx-chat-shared';
-import { defaultTranslations } from '@pazznetwork/ngx-chat-shared';
+import { defaultTranslations, Room } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { RosterListComponent } from './roster-list';
 import { ChatBarWindowsComponent } from './chat-bar-windows';
+import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
 
 /**
  * The main UI component. Should be instantiated near the root of your application.
@@ -27,12 +37,18 @@ import { ChatBarWindowsComponent } from './chat-bar-windows';
  */
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, RosterListComponent, ChatBarWindowsComponent],
+  imports: [CommonModule, RosterListComponent, ChatBarWindowsComponent],
   selector: 'ngx-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.less'],
 })
-export class ChatComponent implements OnInit, OnChanges {
+export class ChatComponent implements OnInit, OnDestroy, OnChanges {
+  /**
+   * If supplied, the blocked input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your blocked list.
+   */
+  @Input()
+  blocked$?: Observable<Contact[]>;
+
   /**
    * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your roster list.
    */
@@ -47,24 +63,25 @@ export class ChatComponent implements OnInit, OnChanges {
   contactRequestsReceived$?: Observable<Contact[]>;
 
   /**
-   * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your outgoing contact
-   * requests list.
-   */
-  @Input()
-  contactRequestsSent$?: Observable<Contact[]>;
-
-  /**
    * If supplied, the contacts input attribute takes an [Observable<Contact[]>]{@link Contact} as source for your unaffiliated contact
    * list.
    */
   @Input()
   contactsUnaffiliated$?: Observable<Contact[]>;
 
+  hasNoContacts$?: Observable<boolean>;
+
   /**
    * 'shown' shows roster list, 'hidden' hides it.
    */
   @Input()
   rosterState: 'shown' | 'hidden' = 'hidden';
+
+  /**
+   * If supplied, the rooms input attribute takes an [Observable<Room[]>]{@link rooms$} as source for your rooms list.
+   */
+  @Input()
+  rooms$?: Observable<Room[]>;
 
   /**
    * If supplied, translations contain an object with the structure of the Translations interface.
@@ -86,13 +103,36 @@ export class ChatComponent implements OnInit, OnChanges {
 
   showChatComponent = false;
 
-  constructor(@Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService) {
-    // eslint-disable-next-line rxjs-angular/prefer-takeuntil
-    this.chatService.isOnline$.subscribe((online) => this.onChatStateChange(online));
-  }
+  private readonly ngDestroySubject = new Subject<void>();
+
+  constructor(@Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService) {}
 
   ngOnInit(): void {
+    this.chatService.isOnline$
+      .pipe(takeUntil(this.ngDestroySubject))
+      .subscribe((online) => this.onChatStateChange(online));
+
+    this.rooms$ = this.rooms$ ?? this.chatService.roomService.rooms$;
+    this.contacts$ = this.contacts$ ?? this.chatService.contactListService.contactsSubscribed$;
+    this.contactRequestsReceived$ =
+      this.contactRequestsReceived$ ?? this.chatService.contactListService.contactRequestsReceived$;
+    this.contactsUnaffiliated$ =
+      this.contactsUnaffiliated$ ?? this.chatService.contactListService.contactsUnaffiliated$;
+    this.blocked$ = this.blocked$ ?? this.chatService.contactListService.contactsBlocked$;
+
+    this.hasNoContacts$ = combineLatest([
+      this.rooms$.pipe(map((arr) => arr.length > 0)),
+      this.contacts$.pipe(map((arr) => arr.length > 0)),
+    ]).pipe(
+      map((results) => results.some((hasContacts) => hasContacts)),
+      distinctUntilChanged()
+    );
     this.onRosterStateChanged(this.rosterState);
+  }
+
+  ngOnDestroy(): void {
+    this.ngDestroySubject.next();
+    this.ngDestroySubject.complete();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

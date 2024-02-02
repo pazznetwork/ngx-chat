@@ -9,5 +9,9 @@ export const baseConfig: PlaywrightTestConfig = {
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL,
+    testIdAttribute: 'data-zid',
+    contextOptions: {
+      ignoreHTTPSErrors: true,
+    },
   },
 };

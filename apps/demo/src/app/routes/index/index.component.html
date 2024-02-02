@@ -1,5 +1,9 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <div class="container">
+  <h2>More:</h2>
+  <a routerLink="/ui">Show mock chats</a>
+  <br />
+  <a routerLink="/muc">Show multi user chat</a>
   <div class="form-group">
     <div>
       XMPP domain
@@ -31,7 +35,8 @@
       />
     </div>
   </div>
-
+  <button data-zid="clean-up-jabber" (click)="cleanUpJabber()">Clean Up Jabber</button>
+  <button data-zid="force-update" (click)="forceAppUpdate()">Rerender App</button>
   <form>
     <div class="form-group">
       <label for="username">
@@ -69,7 +74,9 @@
     <button name="register" (click)="onRegister()">Register</button>
     <button name="unregister" (click)="onUnregister()">Unregister</button>
     <button name="reconnect" (click)="onReconnect()">Reconnect</button>
-    <button name="notifications-enable" (click)="chatBackgroundNotificationServiceEnable()">Enable Notifications</button>
+    <button name="notifications-enable" (click)="chatBackgroundNotificationServiceEnable()">
+      Enable Notifications
+    </button>
     <button name="log-ws" (click)="logWebstream()">log ws</button>
   </div>
 
@@ -79,101 +86,20 @@
     <p data-zid="registration-success">{{ message }}</p>
   </div>
 
-  <hr />
-
-  <div class="form-group">
-    <div>Contact Management</div>
-    <div>
-      <input
-        data-zid="contact-jid"
-        [(ngModel)]="otherJid"
-        class="form-control"
-        type="text"
-        placeholder="JID (name@domain)"
-      />
-    </div>
-  </div>
-
-  <button data-zid="add-contact" (click)="onAddContact()">Add contact</button>
-  <button data-zid="remove-contact" (click)="onRemoveContact()">Remove contact</button>
-  <button data-zid="block-contact" (click)="blockContact()">Block contact</button>
-  <button data-zid="unblock-contact" (click)="unblockContact()">Unblock contact</button>
-  <button data-zid="open-chat" (click)="onOpenChat()">Open chat</button>
+  <button name="watch-angular-stable" (click)="watchAngularStability()">Watch Angular Stability</button>
 
   <hr />
+  <div *ngIf="chatService.isOnline$ | async; else offline">
 
-  <button data-zid="clean-up-jabber" (click)="cleanUpJabber()">Clean Up Jabber</button>
+    <ngx-chat-demo-stanza></ngx-chat-demo-stanza>
 
-  <div>
-    <h2>Custom component for a chat session</h2>
-    <ng-container
-      *ngIf="
-        (chatService.isOnline$ | async) &&
-          (chatService.contactListService.contactsSubscribed$ | async)?.length > 0;
-        else messagesComponentInformation
-      "
-    >
-      <ngx-chat-history
-        [recipient]="(chatService.contactListService.contactsSubscribed$ | async)?.[0]"
-        [showAvatars]="true"
-      ></ngx-chat-history>
-      <ngx-chat-window-input
-        [recipient]="(chatService.contactListService.contactsSubscribed$ | async)?.[0]"
-      ></ngx-chat-window-input>
-    </ng-container>
-    <ng-template #messagesComponentInformation
-      >You need to be logged in and have contacts to see this component</ng-template
-    >
+    <ngx-chat-demo-contact-management [domain]="domain"></ngx-chat-demo-contact-management>
+
+    <ngx-chat-demo-muc [domain]="domain"></ngx-chat-demo-muc>
   </div>
-
-  <hr />
-
-    <hr />
-
-    <div class="contact-pending-request-received-wrapper">
-      debug contact requests in:
-      <div
-        class="contact-pending-request-received"
-        *ngFor="let request of chatService.contactListService.contactRequestsReceived$ | async"
-      >
-        {{ request.name }}
-      </div>
-    </div>
-
-    <hr />
-
-    <div class="contact-pending-request-sent-wrapper">
-      debug contact requests out:
-      <div
-        class="contact-pending-request-sent"
-        *ngFor="let request of chatService.contactListService.contactRequestsSent$ | async"
-      >
-        {{ request.name }}
-      </div>
-    </div>
-
-    <hr />
-
-    <p>debug contacts (count: {{ (chatService.contactListService.contacts$ | async)?.length }})<br /></p>
-    <p *ngFor="let contact of chatService.contactListService.contacts$ | async" style="margin-bottom: 1em">
-      <em>{{ contact.name }}:</em><br />
-      subscription={{ contact.subscription$ | async }}<br />
-      presence={{ contact.presence$ | async }}<br />
-    </p>
-
-  <ngx-chat-iq></ngx-chat-iq>
-
-  <ngx-chat-multi-user-chat></ngx-chat-multi-user-chat>
-
-  <div>
-    <h2>Unread messages count:</h2>
-    Sum unread messages: {{ chatService.messageService.unreadMessageCountSum$ | async }}
-    <pre>{{ chatService.messageService.jidToUnreadCount$ | async | keyvalue | json }}</pre>
-  </div>
-  <h2>More:</h2>
-  <a routerLink="/ui">Show mock chats</a>
-  <br />
-  <a routerLink="/muc">Show multi user chat</a>
+  <ng-template #offline>
+    <span *ngIf="chatService.isOffline$ | async">You need to be online.</span>
+  </ng-template>
 </div>
 
 <ngx-chat [rosterState]="'shown'"></ngx-chat>

@@ -2,30 +2,30 @@
 <div
   class="window-header"
   (click)="headerClick.emit()"
-  [attr.data-zid]="chatWindowState?.recipient?.jid"
+  [attr.data-zid]="recipient?.jid"
 >
   <div class="chat-avatar-wrapper" (click)="onContactClick($event)">
-    <ngx-chat-avatar [imageUrl]="chatWindowState?.recipient?.avatar"></ngx-chat-avatar>
+    <ngx-chat-avatar [imageUrl]="recipient?.avatar"></ngx-chat-avatar>
   </div>
 
   <div class="header-middle">
-    <div class="chat-name-wrapper" [title]="chatWindowState?.recipient?.name">
+    <div class="chat-name-wrapper" [title]="recipient?.name">
       <span
         [ngClass]="{
-          'has-click-handler': !chatWindowState?.isCollapsed && !!this.contactClickHandler
+          'has-click-handler': !isCollapsed && !!this.contactClickHandler
         }"
         (click)="onContactClick($event)"
       >
-        {{ chatWindowState?.recipient?.name }}
+        {{ recipient?.name }}
       </span>
     </div>
 
     <div
       class="chat-status-wrapper"
-      *ngIf="!chatWindowState?.isCollapsed && isContactInWindow(chatWindowState)"
+      *ngIf="!isCollapsed && recipientIsContactInWindow()"
     >
       <span class="chat-status">
-        {{ chatService.translations.presence[recipientAsContact.presence$ | async]! }}
+        {{ status$ | async }}
       </span>
     </div>
   </div>

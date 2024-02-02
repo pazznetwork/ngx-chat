@@ -3,15 +3,15 @@
   <ngx-chat-bubble-avatar
     [avatar]="contact?.avatar"
     [avatarClickable]="true"
-    [contact]="contact"
     [showAvatar]="showAvatar"
+    (clicked$)="onContactClick()"
   >
   </ngx-chat-bubble-avatar>
   <ngx-chat-message-text-area [textContent]="message?.body"> </ngx-chat-message-text-area>
   <ngx-chat-message-image [textContent]="message?.body"> </ngx-chat-message-image>
   <ngx-chat-bubble-footer
     [formattedDate]="message?.datetime | date: chatService.translations.timeFormat"
-    [nick]="contact?.name"
+    [nick]="nick ?? contact?.name"
   >
   </ngx-chat-bubble-footer>
 </ngx-chat-bubble>

@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input } from '@angular/core';
+import { Component, Inject, Input, Optional } from '@angular/core';
 import type { ChatService, Message, Recipient } from '@pazznetwork/ngx-chat-shared';
+import { ChatContactClickHandler } from '@pazznetwork/ngx-chat-shared';
 import { CommonModule } from '@angular/common';
 import { ChatBubbleComponent } from '../chat-bubble';
 import { ChatBubbleAvatarComponent } from '../chat-bubble-avatar';
 import { ChatMessageTextAreaComponent } from '../chat-message-text-area';
 import { ChatMessageImageComponent } from '../chat-message-image';
 import { ChatBubbleFooterComponent } from '../chat-bubble-footer';
-import { CHAT_SERVICE_TOKEN, XmppAdapterModule } from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN, CONTACT_CLICK_HANDLER_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
   standalone: true,
   imports: [
     CommonModule,
-    XmppAdapterModule,
     ChatBubbleComponent,
     ChatBubbleAvatarComponent,
     ChatMessageTextAreaComponent,
@@ -34,5 +34,21 @@ export class ChatMessageInComponent {
   @Input()
   showAvatar?: boolean;
 
-  constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
+  @Input()
+  nick?: string;
+
+  constructor(
+    @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
+    @Inject(CONTACT_CLICK_HANDLER_TOKEN)
+    @Optional()
+    public contactClickHandler: ChatContactClickHandler
+  ) {}
+
+  onContactClick(): void {
+    if (!this.contact) {
+      return;
+    }
+
+    this.contactClickHandler.onClick(this.contact);
+  }
 }

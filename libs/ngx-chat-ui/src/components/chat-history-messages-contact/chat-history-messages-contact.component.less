@@ -1,0 +1,67 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+@import (reference) '../../colors';
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-messages-date-group {
+  font-size: 0.7em;
+  font-style: italic;
+  margin: 0.5em 0;
+  text-align: center;
+}
+
+@keyframes ngx-chat-message-in {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes ngx-chat-message-out {
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+ngx-chat-message-in {
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+ngx-chat-message-out {
+  align-self: flex-end;
+  max-width: 100%;
+}
+
+ngx-chat-message-in:last-child, ngx-chat-message-contact-request {
+  animation-name: ngx-chat-message-in;
+}
+
+ngx-chat-message-out:last-child {
+  animation-name: ngx-chat-message-out;
+}
+
+.chat-messages-start,
+.chat-messages-end {
+  min-height: 5px;
+  height: 5px;
+}
+
+.chat-messages-start {
+  margin-top: 5px;
+}
+
+.chat-messages-end {
+  margin-bottom: 5px;
+}

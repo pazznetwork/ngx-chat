@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { filter, switchMap, take, toArray } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { TestUtils } from './helpers/test-utils';
 import { firstValueFrom, map } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
+import {
+  ensureNoRegisteredUser,
+  ensureRegisteredUser,
+  unregisterAllBesidesAdmin,
+} from './helpers/admin-actions';
 
 describe('XmppChatAdapter', () => {
   let testUtils: TestUtils;
@@ -17,6 +21,8 @@ describe('XmppChatAdapter', () => {
     });
     testUtils = new TestUtils(testBed.inject<XmppService>(CHAT_SERVICE_TOKEN));
   });
+
+  beforeEach(() => unregisterAllBesidesAdmin());
 
   describe('contact management', () => {
     it('#getContactById() should ignore resources', async () => {
@@ -35,8 +41,7 @@ describe('XmppChatAdapter', () => {
       );
 
       if (savedContact == null) {
-        fail(new Error('Could not get the contact'));
-        return;
+        throw new Error('Could not get the contact');
       }
 
       expect(savedContact.jid.toString()).toEqual(testUtils.princess.jid);
@@ -104,13 +109,19 @@ describe('XmppChatAdapter', () => {
           map((c) => c.length)
         )
       );
-      const messageContactPromise = firstValueFrom(testUtils.chatService.messageService.message$);
+
+      const villainMessage = 'I will destroy you HERO!!!';
+      const messageContactPromise = firstValueFrom(
+        testUtils.chatService.messageService.message$.pipe(
+          filter((recipient) => recipient.messageStore.mostRecentMessage?.body === villainMessage)
+        )
+      );
       await testUtils.logIn.villain();
 
       const recipient = await testUtils.chatService.contactListService.getOrCreateContactById(
         testUtils.hero.jid
       );
-      const villainMessage = 'I will destroy you HERO!!!';
+
       await testUtils.chatService.messageService.sendMessage(recipient, villainMessage);
       expect(await contactsPromise).toEqual(1);
       const contact = await messageContactPromise;
@@ -121,9 +132,6 @@ describe('XmppChatAdapter', () => {
       expect(contact.messageStore.messages?.[0]?.direction).toEqual(testUtils.direction.out);
 
       await testUtils.logOut();
-
-      await ensureNoRegisteredUser(testUtils.hero);
-      await ensureNoRegisteredUser(testUtils.villain);
     });
 
     it('#messages$ in contact should emit message on received messages', async () => {
@@ -131,7 +139,7 @@ describe('XmppChatAdapter', () => {
       await ensureRegisteredUser(testUtils.villain);
       const contactsPromise = firstValueFrom(
         testUtils.chatService.contactListService.contacts$.pipe(
-          filter((c) => c.length === 1),
+          filter((c) => c.length > 0),
           map((c) => c.length)
         )
       );
@@ -145,14 +153,12 @@ describe('XmppChatAdapter', () => {
       await testUtils.chatService.messageService.sendMessage(villainContact, heroMessage);
       await testUtils.logOut();
 
-      const messagePromise = firstValueFrom(
-        testUtils.chatService.messageService.message$.pipe(
-          filter((c) => c.jid.toString().includes(testUtils.hero.jid)),
-          switchMap((c) => c.messageStore.messages$)
-        )
+      const contactFromMessagePromise = firstValueFrom(
+        testUtils.chatService.messageService.message$
       );
       await testUtils.logIn.villain();
-      const messages = await messagePromise;
+      const contact = await contactFromMessagePromise;
+      const messages = contact.messageStore.messages;
       const message = messages[0];
 
       expect(message?.body).toEqual(heroMessage);
@@ -160,8 +166,6 @@ describe('XmppChatAdapter', () => {
       expect(await contactsPromise).toEqual(1);
 
       await testUtils.logOut();
-      await ensureNoRegisteredUser(testUtils.hero);
-      await ensureNoRegisteredUser(testUtils.villain);
     });
 
     it('#messages$ in contact should emit on sending messages', async () => {
@@ -193,8 +197,6 @@ describe('XmppChatAdapter', () => {
       expect(await contactsPromise).toEqual(1);
 
       await testUtils.logOut();
-      await ensureNoRegisteredUser(testUtils.hero);
-      await ensureNoRegisteredUser(testUtils.villain);
     });
   });
 
@@ -205,30 +207,57 @@ describe('XmppChatAdapter', () => {
       await ensureRegisteredUser(testUtils.friend);
       await ensureRegisteredUser(testUtils.hero);
 
-      const contactsLength$ = testUtils.chatService.contactListService.contacts$.pipe(
-        map((c) => c.length),
-        take(8),
-        toArray()
-      );
-      const contactsLengthPromise = firstValueFrom(contactsLength$);
+      const promiseContactsWithLength = (length: number): Promise<string[]> =>
+        firstValueFrom(
+          testUtils.chatService.contactListService.contacts$.pipe(
+            filter((c) => c.length === length),
+            map((contacts) => contacts.map((c) => c.jid.toString()))
+          )
+        );
+
+      const zeroAfterLoginPromise = promiseContactsWithLength(0);
+      const oneAfterAddPromise = promiseContactsWithLength(1);
+      const twoAfterAddPromise = promiseContactsWithLength(2);
+      const threeAfterAddPromise = promiseContactsWithLength(3);
 
       await testUtils.logIn.hero();
 
-      await testUtils.chatService.contactListService.addContact(testUtils.princess.jid.toString());
-      await testUtils.chatService.contactListService.addContact(testUtils.father.jid.toString());
-      await testUtils.chatService.contactListService.addContact(testUtils.friend.jid.toString());
+      expect((await zeroAfterLoginPromise).length).toBe(0);
 
+      const princessJid = testUtils.princess.jid.toString();
+      const fatherJid = testUtils.father.jid.toString();
+      const friendJid = testUtils.friend.jid.toString();
+
+      await testUtils.chatService.contactListService.addContact(princessJid);
+      const one = await oneAfterAddPromise;
+      expect(one.length).toBe(1);
+      expect(one[0]).toBe(princessJid);
+
+      await testUtils.chatService.contactListService.addContact(fatherJid);
+      const two = await twoAfterAddPromise;
+      expect(two.length).toBe(2);
+      expect(two).toContain(princessJid);
+      expect(two).toContain(fatherJid);
+
+      await testUtils.chatService.contactListService.addContact(friendJid);
+      const three = await threeAfterAddPromise;
+      expect(three.length).toBe(3);
+      expect(three).toContain(princessJid);
+      expect(three).toContain(fatherJid);
+      expect(three).toContain(friendJid);
+
+      const zeroAfterLogoutPromise = promiseContactsWithLength(0);
       await testUtils.logOut();
+      expect((await zeroAfterLogoutPromise).length).toBe(0);
+
+      const threeAfterReLoginPromise = promiseContactsWithLength(3);
 
       await testUtils.logIn.hero();
+      expect((await threeAfterReLoginPromise).length).toBe(3);
+      const zeroAfterReLogoutPromise = promiseContactsWithLength(0);
 
       await testUtils.logOut();
-      expect(await contactsLengthPromise).toEqual([0, 0, 1, 2, 3, 0, 3, 0]);
-
-      await ensureNoRegisteredUser(testUtils.princess);
-      await ensureNoRegisteredUser(testUtils.father);
-      await ensureNoRegisteredUser(testUtils.friend);
-      await ensureNoRegisteredUser(testUtils.hero);
+      expect((await zeroAfterReLogoutPromise).length).toEqual(0);
     });
   });
 });

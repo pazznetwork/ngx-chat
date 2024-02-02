@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, EventEmitter, Inject, Input, Optional, Output } from '@angular/core';
-import {
-  CHAT_SERVICE_TOKEN,
-  ChatWindowState,
-  CONTACT_CLICK_HANDLER_TOKEN,
-  XmppAdapterModule,
-} from '@pazznetwork/ngx-xmpp';
+import { CHAT_SERVICE_TOKEN, CONTACT_CLICK_HANDLER_TOKEN } from '@pazznetwork/ngx-xmpp';
 import type { ChatContactClickHandler, ChatService } from '@pazznetwork/ngx-chat-shared';
-import { Contact, isContact } from '@pazznetwork/ngx-chat-shared';
+import { Contact, isContact, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { ChatAvatarComponent } from '../chat-avatar';
 import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, XmppAdapterModule, ChatAvatarComponent],
+  imports: [CommonModule, ChatAvatarComponent],
   selector: 'ngx-chat-window-header',
   templateUrl: './chat-window-header.component.html',
   styleUrls: ['./chat-window-header.component.less'],
 })
 export class ChatWindowHeaderComponent {
   @Input()
-  chatWindowState?: ChatWindowState;
+  recipient?: Recipient;
+
+  @Input()
+  isCollapsed!: boolean;
 
   @Output()
   closeClick = new EventEmitter<void>();
@@ -28,8 +28,10 @@ export class ChatWindowHeaderComponent {
   @Output()
   headerClick = new EventEmitter<void>();
 
-  get recipientAsContact(): Contact {
-    return this.chatWindowState?.recipient as Contact;
+  get status$(): Observable<string> {
+    return (this.recipient as Contact).presence$.pipe(
+      map((presence) => this.chatService.translations.presence[presence])
+    );
   }
 
   constructor(
@@ -40,24 +42,18 @@ export class ChatWindowHeaderComponent {
   ) {}
 
   onContactClick($event: MouseEvent): void {
-    if (
-      !this.contactClickHandler ||
-      this.chatWindowState?.isCollapsed ||
-      !this.chatWindowState?.recipient
-    ) {
+    if (!this.contactClickHandler || this.isCollapsed || !this.recipient) {
       return;
     }
 
     $event.stopPropagation();
-    this.contactClickHandler.onClick(this.chatWindowState.recipient);
+    this.contactClickHandler.onClick(this.recipient);
   }
 
-  isContactInWindow(
-    chatWindowState: ChatWindowState | undefined
-  ): chatWindowState is { recipient: Contact; isCollapsed: boolean } {
-    if (!chatWindowState) {
-      throw new Error(`chatWindowState is undefined, ${JSON.stringify(chatWindowState)}`);
+  recipientIsContactInWindow(): boolean {
+    if (!this.recipient) {
+      return false;
     }
-    return isContact(chatWindowState.recipient);
+    return isContact(this.recipient);
   }
 }

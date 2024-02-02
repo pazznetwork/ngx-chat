@@ -8,7 +8,11 @@ import { devXmppDomain } from '../.secrets-const';
 import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
+import {
+  ensureNoRegisteredUser,
+  ensureRegisteredUser,
+  unregisterAllBesidesAdmin,
+} from './helpers/admin-actions';
 import { filter, shareReplay, take, toArray } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 
@@ -99,7 +103,9 @@ describe('roster plugin', () => {
 
   it('should handle adding a contact with a pending request to roster', async () => {
     const contactsPromise = firstValueFrom(
-      testUtils.chatService.contactListService.contacts$.pipe(skip(1))
+      testUtils.chatService.contactListService.contacts$.pipe(
+        filter((contacts) => contacts.length === 1)
+      )
     );
     await ensureRegisteredUser(bobLogin);
 
@@ -353,8 +359,7 @@ describe('roster plugin', () => {
     const contact = contacts[0];
 
     if (contact == null) {
-      fail('contact is undefined');
-      return;
+      throw new Error('contact is undefined');
     }
     expect(contact.jid.toString()).toEqual(newSubJid);
     expect(await firstValueFrom(contact.subscription$)).toEqual(ContactSubscription.from);
@@ -391,9 +396,8 @@ describe('roster plugin', () => {
   });
 
   it('should have only one contact if switching between 2 users from which one made a contact request', async () => {
-    await ensureNoRegisteredUser(testUtils.friend);
+    await unregisterAllBesidesAdmin();
     await ensureRegisteredUser(testUtils.friend);
-    await ensureNoRegisteredUser(testUtils.hero);
     await ensureRegisteredUser(testUtils.hero);
     const contactCountPromise = firstValueFrom(
       testUtils.chatService.contactListService.contacts$.pipe(
@@ -413,7 +417,6 @@ describe('roster plugin', () => {
 
     expect(await contactCountPromise).toEqual([0, 0, 1, 0, 0]);
 
-    await ensureNoRegisteredUser(testUtils.hero);
-    await ensureNoRegisteredUser(testUtils.friend);
+    await unregisterAllBesidesAdmin();
   });
 });

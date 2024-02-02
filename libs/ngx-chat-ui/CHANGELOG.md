@@ -116,7 +116,7 @@
 
 ### BREAKING CHANGES
 
-- replace ChatRoomMessagesComponent with ChatHistoryComponent. The contact property of ChatHistoryComponent has renamed the contact property to recipient. The usage is the same!
+- replace ChatRoomMessagesComponent with ChatHistoryAutoScrollComponent. The contact property of ChatHistoryAutoScrollComponent has renamed the contact property to recipient. The usage is the same!
 
 <a name="0.11.3"></a>
 

@@ -2,6 +2,7 @@
 import type { Presence } from './presence';
 
 export interface Translations {
+  addUser: string;
   acceptSubscriptionRequest: string;
   block: string;
   blockAndReport: string;
@@ -10,8 +11,8 @@ export interface Translations {
   contactRequestOut: string;
   contacts: string;
   contactsUnaffiliated: string;
+  contactsBlocked: string;
   dateFormat: string;
-  denySubscriptionRequest: string;
   dismiss: string;
   dropMessage: string;
   locale?: string;
@@ -19,6 +20,7 @@ export interface Translations {
   noMessages: string;
   placeholder: string;
   presence: { [P in Presence]: string };
+  removeContact: string;
   rooms: string;
   subscriptionRequestMessage: string;
   unaffiliatedMessage: string;

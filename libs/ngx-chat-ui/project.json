@@ -6,14 +6,15 @@
   "prefix": "ngx-chat",
   "targets": {
     "build": {
-      "executor": "@nrwl/angular:package",
+      "executor": "@nx/angular:package",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
-        "project": "libs/ngx-chat-ui/ng-package.json"
+        "project": "libs/ngx-chat-ui/ng-package.json",
+        "updateBuildableProjectDepsInPackageJson": true
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.json"
+          "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.prod.json"
         },
         "development": {
           "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.json"
@@ -32,13 +33,13 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "options": {
         "lintFilePatterns": ["libs/ngx-chat-ui/**/*.ts", "libs/ngx-chat-ui/**/*.html"]
       }
     },
     "test": {
-      "executor": "@nrwl/angular:karma",
+      "executor": "@nx/angular:karma",
       "options": {
         "lintFilePatterns": ["libs/ngx-chat-ui/**/*.ts", "libs/ngx-chat-ui/**/*.html"]
       }
