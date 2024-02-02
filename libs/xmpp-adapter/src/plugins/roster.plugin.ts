@@ -115,25 +115,27 @@ export class RosterPlugin implements ChatPlugin {
         this.xmppService.onOffline$.pipe(map(() => ({ type: 'offline' }) as OfflineAction))
       ).pipe(
         scan((contactMap, action: Action) => {
-          if (action.type === 'add') {
-            const contact = action.value;
-            const key = contact.jid.bare().toString();
-            if (!contactMap.has(key)) {
-              contactMap.set(key, contact);
-            }
-          } else if (action.type === 'remove') {
-            contactMap.delete(action.value);
-          } else if (action.type === 'offline') {
-            contactMap.clear();
-          } else if (action.type === 'online') {
-            for (const contact of action.value) {
-              contactMap.set(contact.jid.bare().toString(), contact);
-            }
+          switch (action.type) {
+            case 'add':
+              if (!contactMap.has(action.value.jid.bare().toString())) {
+                contactMap.set(action.value.jid.bare().toString(), action.value);
+              }
+              break;
+            case 'remove':
+              contactMap.delete(action.value);
+              break;
+            case 'offline':
+              contactMap.clear();
+              break;
+            case 'online':
+              for (const contact of action.value) {
+                contactMap.set(contact.jid.bare().toString(), contact);
+              }
+              break;
           }
           return contactMap;
         }, new Map<string, Contact>()),
-        // startWith(new Map<string, Contact>()),
-        shareReplay({ bufferSize: 1, refCount: false })
+        shareReplay({ bufferSize: 1, refCount: true })
       ),
       { connector: () => new ReplaySubject<Map<string, Contact>>(1), resetOnDisconnect: false }
     );

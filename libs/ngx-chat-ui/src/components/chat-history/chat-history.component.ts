@@ -77,7 +77,7 @@ export class ChatHistoryComponent implements OnDestroy {
   noMessages$!: Observable<boolean>;
 
   constructor(
-    @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
+    @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     private changeDetectorRef: ChangeDetectorRef,
     @Inject(OPEN_CHAT_SERVICE_TOKEN) private openChatsService: OpenChatsService
   ) {}
