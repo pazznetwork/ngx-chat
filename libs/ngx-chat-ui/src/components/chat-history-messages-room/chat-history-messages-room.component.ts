@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input } from '@angular/core';
-import { mergeMap, Observable } from 'rxjs';
-import type { ChatService } from '@pazznetwork/ngx-chat-shared';
+import { Component, Inject, Input, NgZone } from '@angular/core';
+import { mergeMap, Observable, throttleTime } from 'rxjs';
 import {
+  ChatService,
   Contact,
   ContactSubscription,
   CustomContactFactory,
   Direction,
   Message,
+  runInZone,
 } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageInComponent } from '../chat-message-in';
 import { CommonModule } from '@angular/common';
@@ -29,6 +30,7 @@ export class ChatHistoryMessagesRoomComponent {
     }
 
     this.messagesGroupedByDate$ = value$.pipe(
+      throttleTime(200),
       mergeMap(async (messages) => {
         messages.sort((a, b) => a?.datetime?.getTime() - b?.datetime?.getTime());
         const messageMap = new Map<string, { message: Message; contact: Contact }[]>();
@@ -72,7 +74,8 @@ export class ChatHistoryMessagesRoomComponent {
         }
 
         return returnArray;
-      })
+      }),
+      runInZone(this.zone)
     );
   }
 
@@ -87,8 +90,13 @@ export class ChatHistoryMessagesRoomComponent {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService,
     @Inject(CUSTOM_CONTACT_FACTORY_TOKEN)
-    private readonly customContactFactory: CustomContactFactory
+    private readonly customContactFactory: CustomContactFactory,
+    private zone: NgZone
   ) {}
+
+  trackByIndex(index: number): number {
+    return index;
+  }
 
   getNickFromContact(contact: Contact): string | undefined {
     return contact.name ?? contact.jid.resource;

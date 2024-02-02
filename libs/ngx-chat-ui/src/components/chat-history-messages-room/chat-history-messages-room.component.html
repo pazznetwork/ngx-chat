@@ -1,13 +1,13 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <ng-container *ngIf="messagesGroupedByDate$ | async as messages">
-  <ng-container *ngFor="let entry of messages ">
+  <ng-container *ngFor="let entry of messages; trackBy: trackByIndex">
     <div class="chat-messages-date-group">
       {{
       entry.date
         | date : chatService.translations.dateFormat : undefined : chatService.translations.locale
       }}
     </div>
-    <ng-container *ngFor="let messageWithContact of entry.messagesWithContact">
+    <ng-container *ngFor="let messageWithContact of entry.messagesWithContact; trackBy: trackByIndex">
       <ng-container *ngIf="messageWithContact.message.direction === Direction.in">
         <ngx-chat-message-in
           [showAvatar]="showAvatars"

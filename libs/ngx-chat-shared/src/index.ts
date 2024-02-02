@@ -7,3 +7,4 @@ export * from './log.token';
 export * from './utils-array';
 export * from './utils-file';
 export * from './utils-links';
+export * from './zone-rxjs-operator';

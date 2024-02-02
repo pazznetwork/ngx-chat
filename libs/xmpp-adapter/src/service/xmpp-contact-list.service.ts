@@ -4,10 +4,10 @@ import type {
   ContactListService,
   ContactSubscription,
 } from '@pazznetwork/ngx-chat-shared';
+import { runInZone } from '@pazznetwork/ngx-chat-shared';
 import { combineLatest, map, Observable } from 'rxjs';
 import type { BlockPlugin, RosterPlugin } from '@pazznetwork/xmpp-adapter';
 import { NgZone } from '@angular/core';
-import { runInZone } from '../core/zone-rxjs-operator';
 
 export class XmppContactListService implements ContactListService {
   readonly blockedContactJIDs$: Observable<Set<string>>;

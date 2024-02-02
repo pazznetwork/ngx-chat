@@ -7,6 +7,7 @@ import {
   MessageState,
   parseJid,
   type Recipient,
+  runInZone,
 } from '@pazznetwork/ngx-chat-shared';
 import {
   Connectable,
@@ -31,7 +32,6 @@ import {
 } from '@pazznetwork/xmpp-adapter';
 import { shareReplay } from 'rxjs/operators';
 import { getUniqueId } from '@pazznetwork/strophets';
-import { runInZone } from '../core/zone-rxjs-operator';
 
 /**
  * Part of the XMPP Core Specification

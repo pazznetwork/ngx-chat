@@ -12,6 +12,7 @@ import {
   CustomContactFactory,
   CustomRoomFactory,
   defaultTranslations,
+  runInZone,
 } from '@pazznetwork/ngx-chat-shared';
 import type { HttpClient } from '@angular/common/http';
 import {
@@ -23,7 +24,6 @@ import {
 import type { PluginMap } from './core';
 import { createPluginMap } from './core';
 import { NgZone } from '@angular/core';
-import { runInZone } from './core/zone-rxjs-operator';
 
 export class XmppService implements ChatService {
   static instance: XmppService;

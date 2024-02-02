@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { ChangeDetectorRef, Component, Inject, Input, OnDestroy } from '@angular/core';
 import { exhaustMap, map, Observable, Subject } from 'rxjs';
-import { debounceTime, filter, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
 import {
   ChatService,
   Contact,
@@ -39,7 +39,10 @@ export class ChatHistoryComponent implements OnDestroy {
       throw new Error('ChatHistoryComponent: recipient was null or undefined');
     }
 
-    this.noMessages$ = value.messageStore.messages$.pipe(map((messages) => messages.length === 0));
+    this.noMessages$ = value.messageStore.messages$.pipe(
+      map((messages) => messages.length === 0),
+      distinctUntilChanged()
+    );
     this.currentRecipient = value;
 
     this.loadMessagesOnScrollToTop();

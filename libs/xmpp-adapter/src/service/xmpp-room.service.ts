@@ -5,12 +5,11 @@ import type {
   RoomCreationOptions,
   RoomService,
 } from '@pazznetwork/ngx-chat-shared';
-import { parseJid, RoomOccupant, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
+import { parseJid, RoomOccupant, runInZone, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { MucSubPlugin, MultiUserChatPlugin } from '@pazznetwork/xmpp-adapter';
 import { filter } from 'rxjs/operators';
-import { runInZone } from '../core/zone-rxjs-operator';
 import { NgZone } from '@angular/core';
 
 export class XmppRoomService implements RoomService {

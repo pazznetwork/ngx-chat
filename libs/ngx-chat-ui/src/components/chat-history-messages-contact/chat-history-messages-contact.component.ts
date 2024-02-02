@@ -56,4 +56,8 @@ export class ChatHistoryMessagesContactComponent {
   Direction = Direction;
 
   constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: ChatService) {}
+
+  trackByIndex(index: number): number {
+    return index;
+  }
 }

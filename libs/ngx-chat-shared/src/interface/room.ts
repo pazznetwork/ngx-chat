@@ -53,7 +53,11 @@ export class Room implements Recipient {
     this._name = name != null ? name : this.jid.local;
   }
 
-  constructor(private readonly logService: Log, roomJid: JID, name?: string) {
+  constructor(
+    private readonly logService: Log,
+    roomJid: JID,
+    name?: string
+  ) {
     this.jid = roomJid.bare();
     this.name = name;
   }
