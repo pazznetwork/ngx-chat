@@ -3,5 +3,11 @@
   "dest": "../../dist/libs/ngx-chat-ui",
   "lib": {
     "entryFile": "src/index.ts"
-  }
+  },
+  "allowedNonPeerDependencies": [
+    "@pazznetwork/ngx-chat-shared",
+    "@pazznetwork/ngx-xmpp",
+    "@pazznetwork/strophe-ts",
+    "@pazznetwork/xmpp-adapter"
+  ]
 }

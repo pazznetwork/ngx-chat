@@ -12,18 +12,9 @@
     "e2e": "nx e2e demo-e2e",
     "e2e:debug": "nx e2e-debug demo-e2e",
     "install:browsers": "npx playwright install",
-    "publish:internal:all": "npm run build:all && npm run publish:internal:strophe && npm run publish:internal:shared && npm run publish:internal:adapter && npm run publish:internal:xmpp && npm run publish:internal:ui",
-    "publish:internal:strophe": "cd dist/libs/strophe-ts && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/",
-    "publish:internal:shared": "cd dist/libs/ngx-chat-shared && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/",
-    "publish:internal:adapter": "cd dist/libs/xmpp-adapter && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/",
-    "publish:internal:xmpp": "cd dist/libs/ngx-xmpp && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/",
-    "publish:internal:ui": "cd dist/libs/ngx-chat-ui && npm version patch && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/",
-    "publish:all": "npm run build:all && npm run publish:strophe && npm run publish:shared && npm run publish:adapter && npm run publish:xmpp && npm run publish:ui",
-    "publish:strophe": "cd dist/libs/strophe-ts && npm version patch && npm publish",
-    "publish:shared": "cd dist/libs/ngx-chat-shared && npm version patch && npm publish",
-    "publish:adapter": "cd dist/libs/xmpp-adapter && npm version patch && npm publish",
-    "publish:xmpp": "cd dist/libs/ngx-xmpp && npm version patch && npm publish",
-    "publish:ui": "cd dist/libs/ngx-chat-ui && npm version patch && npm publish"
+    "publish:all": "nx run-many --target=publish --parallel=false",
+    "publish:internal:all": "nx run-many --target=publish-internal --parallel=false",
+    "version:all": "nx run-many --target=version --parallel=false"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "16.2.11",

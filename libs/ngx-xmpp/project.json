@@ -42,7 +42,30 @@
       }
     },
     "version": {
-      "executor": "@jscutlery/semver:version"
+      "executor": "@jscutlery/semver:version",
+      "dependsOn": [
+        "build"
+      ]
+    },
+    "publish-internal": {
+      "command": "npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/",
+      "options": {
+        "cwd": "dist/libs/ngx-xmpp"
+      },
+      "dependsOn": [
+        "version",
+        "build"
+      ]
+    },
+    "publish": {
+      "command": "npm publish",
+      "options": {
+        "cwd": "dist/libs/ngx-xmpp"
+      },
+      "dependsOn": [
+        "version",
+        "build"
+      ]
     }
   },
   "tags": []
