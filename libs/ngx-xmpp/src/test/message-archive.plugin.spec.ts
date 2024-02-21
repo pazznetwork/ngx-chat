@@ -4,7 +4,7 @@ import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import { TestUtils } from './helpers/test-utils';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import { CHAT_SERVICE_TOKEN, LogService } from '@pazznetwork/ngx-xmpp';
-import { $msg } from '@pazznetwork/strophets';
+import { $msg } from '@pazznetwork/strophe-ts';
 import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
 import { Direction, parseJid, Room } from '@pazznetwork/ngx-chat-shared';
 import { firstValueFrom } from 'rxjs';

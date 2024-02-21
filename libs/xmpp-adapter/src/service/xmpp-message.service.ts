@@ -31,7 +31,7 @@ import {
   XmppService,
 } from '@pazznetwork/xmpp-adapter';
 import { shareReplay } from 'rxjs/operators';
-import { getUniqueId } from '@pazznetwork/strophets';
+import { getUniqueId } from '@pazznetwork/strophe-ts';
 
 /**
  * Part of the XMPP Core Specification

@@ -55,13 +55,13 @@ These instructions require Angular 14.
 First install ngx-chat and its dependencies via npm:
 
 ```bash
-npm install --save @pazznetwork/strophets @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat rxjs@7.5.7
+npm install --save @pazznetwork/strophe-ts @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat rxjs@7.5.7
 ```
 
 or via yarn:
 
 ```bash
-yarn add @pazznetwork/strophets @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat
+yarn add @pazznetwork/strophe-ts @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat
 ```
 
 After that, import ngx-chat in the layer from which you want to use it:

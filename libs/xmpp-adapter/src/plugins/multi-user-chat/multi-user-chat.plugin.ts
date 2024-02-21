@@ -47,7 +47,7 @@ import {
   nsRSM,
 } from './multi-user-chat-constants';
 import { filter, map, shareReplay } from 'rxjs/operators';
-import type { Handler } from '@pazznetwork/strophets';
+import type { Handler } from '@pazznetwork/strophe-ts';
 import type { StanzaBuilder } from '../../stanza-builder';
 import { OtherStatusCode } from './other-status-code';
 import { EnteringRoomStatusCode } from './entering-room-status-code';

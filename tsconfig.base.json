@@ -27,7 +27,7 @@
       "@pazznetwork/ngx-xmpp": [
         "libs/ngx-xmpp/src/index.ts"
       ],
-      "@pazznetwork/strophets": [
+      "@pazznetwork/strophe-ts": [
         "libs/strophe-ts/src/index.ts"
       ],
       "@pazznetwork/xmpp-adapter": [

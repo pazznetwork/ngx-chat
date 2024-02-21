@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { $iq } from '@pazznetwork/strophets';
+import { $iq } from '@pazznetwork/strophe-ts';
 import { TestUtils } from './helpers/test-utils';
 import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';

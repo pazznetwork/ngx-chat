@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-import type { Builder } from '@pazznetwork/strophets';
+import type { Builder } from '@pazznetwork/strophe-ts';
 
 export class StanzaBuilder {
   constructor(

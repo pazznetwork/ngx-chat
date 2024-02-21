@@ -1007,7 +1007,7 @@ import {
   parseToXml,
   serialize,
   stanzaMatch,
-} from '@pazznetwork/strophets';
+} from '@pazznetwork/strophe-ts';
 
 describe('ensure functional stanza handling', () => {
   it('serialize should return correct string for open element', () => {

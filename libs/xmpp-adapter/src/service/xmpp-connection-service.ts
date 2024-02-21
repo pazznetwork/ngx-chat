@@ -4,7 +4,7 @@ import type { AuthRequest, Log } from '@pazznetwork/ngx-chat-shared';
 import { makeSafeJidString } from '@pazznetwork/ngx-chat-shared';
 import { StanzaBuilder } from '../stanza-builder';
 import { first, shareReplay } from 'rxjs/operators';
-import { $build, Connection, Handler } from '@pazznetwork/strophets';
+import { $build, Connection, Handler } from '@pazznetwork/strophe-ts';
 
 /**
  * Implementation of the XMPP specification according to RFC 6121.

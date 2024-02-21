@@ -3,7 +3,7 @@ import { AuthRequest, Contact, ContactSubscription, Presence } from '@pazznetwor
 import { TestUtils } from './helpers/test-utils';
 import { firstValueFrom, map, merge, scan, skip } from 'rxjs';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
-import { $pres } from '@pazznetwork/strophets';
+import { $pres } from '@pazznetwork/strophe-ts';
 import { devXmppDomain } from '../.secrets-const';
 import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';

@@ -1,5 +1,5 @@
 {
-  "name": "@pazznetwork/strophets",
+  "name": "@pazznetwork/strophe-ts",
   "description": "Strophe.ts is an XMPP library for TypeScript",
   "version": "1.0.3",
   "homepage": "https://github.com/pazznetwork/strophets",

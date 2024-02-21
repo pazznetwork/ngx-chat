@@ -30,7 +30,7 @@ import {
   Subject,
 } from 'rxjs';
 import { filter, shareReplay, switchMap } from 'rxjs/operators';
-import { Handler, NS } from '@pazznetwork/strophets';
+import { Handler, NS } from '@pazznetwork/strophe-ts';
 
 /**
  * Current @TODOS:

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { NS, parseToXml, stanzaMatch } from '@pazznetwork/strophets';
+import { NS, parseToXml, stanzaMatch } from '@pazznetwork/strophe-ts';
 
 describe('handler', () => {
   it('async handler and regular handler should match roster handler', async () => {

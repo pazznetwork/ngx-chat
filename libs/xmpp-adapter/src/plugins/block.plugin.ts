@@ -3,7 +3,7 @@ import type { XmppService } from '../xmpp.service';
 import { firstValueFrom, map, merge, mergeMap, Observable, ReplaySubject, startWith } from 'rxjs';
 import type { ChatPlugin } from '../core';
 import { shareReplay, switchMap } from 'rxjs/operators';
-import { getUniqueId, NS } from '@pazznetwork/strophets';
+import { getUniqueId, NS } from '@pazznetwork/strophe-ts';
 import { parseJid } from '@pazznetwork/ngx-chat-shared';
 
 export const nsBlocking = 'urn:xmpp:blocking';
