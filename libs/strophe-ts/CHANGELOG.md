@@ -1,3 +1,11 @@
+# Changelog
+
+This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
+
+## [1.0.4](https://github.com/pazznetwork/ngx-chat/compare/strophe-ts-1.0.3...strophe-ts-1.0.4) (2024-02-21)
+
+
+
 # Strophe.ts Change Log
 
 ## Version 1.6.0 - (Unreleased)
