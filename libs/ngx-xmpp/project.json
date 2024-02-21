@@ -40,6 +40,9 @@
       "options": {
         "lintFilePatterns": ["libs/ngx-xmpp/**/*.ts", "libs/ngx-xmpp/**/*.html"]
       }
+    },
+    "version": {
+      "executor": "@jscutlery/semver:version"
     }
   },
   "tags": []

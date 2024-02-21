@@ -43,6 +43,9 @@
       "options": {
         "lintFilePatterns": ["libs/ngx-chat-ui/**/*.ts", "libs/ngx-chat-ui/**/*.html"]
       }
+    },
+    "version": {
+      "executor": "@jscutlery/semver:version"
     }
   },
   "tags": []

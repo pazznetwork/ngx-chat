@@ -4,7 +4,10 @@
       "analyzeSourceFiles": true
     }
   },
-  "npmScope": "ngx-chat",
+  "npmScope": "pazznetwork",
+  "affected": {
+    "defaultBase": "master"
+  },
   "namedInputs": {
     "production": [
       "default",

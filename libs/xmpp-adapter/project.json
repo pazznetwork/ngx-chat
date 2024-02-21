@@ -31,6 +31,9 @@
       "options": {
         "lintFilePatterns": ["libs/xmpp-adapter/src/**/*.{ts,tsx,js,jsx}"]
       }
+    },
+    "version": {
+      "executor": "@jscutlery/semver:version"
     }
   },
   "tags": []

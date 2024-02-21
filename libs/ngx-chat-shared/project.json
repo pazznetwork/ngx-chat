@@ -28,6 +28,9 @@
         "jestConfig": "libs/ngx-chat-shared/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "version": {
+      "executor": "@jscutlery/semver:version"
     }
   },
   "tags": []

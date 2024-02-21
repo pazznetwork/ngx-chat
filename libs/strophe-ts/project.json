@@ -30,6 +30,9 @@
       "options": {
         "lintFilePatterns": ["libs/strophe-ts/src/**/*.{ts,tsx,js,jsx}"]
       }
+    },
+    "version": {
+      "executor": "@jscutlery/semver:version"
     }
   },
   "tags": ["scope:strophe-ts"]
