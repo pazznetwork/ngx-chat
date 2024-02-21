@@ -1,18 +1,20 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "license": "MIT",
-  "peerDependencies": {
-    "@angular/cdk": "^16.2.12",
-    "@angular/common": "^16.2.12",
-    "@angular/router": "^16.2.12",
-    "@angular/core": "^16.2.12",
-    "@angular/animations": "^16.2.12",
+  "dependencies": {
     "@pazznetwork/ngx-chat-shared": "^1.16.1",
     "@pazznetwork/ngx-xmpp": "^1.16.1",
-    "@pazznetwork/xmpp-adapter": "^1.0.0-beta",
-    "@pazznetwork/strophe-ts": "^1.0.3-beta",
-    "rxjs": "7.8.1"
+    "@pazznetwork/strophe-ts": "^1.0.3",
+    "@pazznetwork/xmpp-adapter": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@angular/animations": "^16.2.12",
+    "@angular/cdk": "^16.2.12",
+    "@angular/common": "^16.2.12",
+    "@angular/core": "^16.2.12",
+    "@angular/router": "^16.2.12",
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "tslib": "^2.3.0"

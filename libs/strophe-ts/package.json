@@ -1,7 +1,7 @@
 {
   "name": "@pazznetwork/strophets",
   "description": "Strophe.ts is an XMPP library for TypeScript",
-  "version": "1.0.3-beta",
+  "version": "1.0.3",
   "homepage": "https://github.com/pazznetwork/strophets",
   "type": "module",
   "repository": {
@@ -40,6 +40,6 @@
   ],
   "license": "MIT",
   "peerDependencies": {
-    "rxjs": "^7.5.7"
+    "rxjs": "^7.8.1"
   }
 }
