@@ -46,14 +46,15 @@
       }
     },
     "publish": {
-      "command": "npm publish",
+      "executor": "nx:run-commands",
       "options": {
-        "cwd": "dist/libs/strophe-ts"
-      },
-      "dependsOn": [
-        "version",
-        "build"
-      ]
+        "parallel": false,
+        "commands": [
+          "nx version strophe-ts",
+          "nx build strophe-ts",
+          "cd dist/libs/strophe-ts && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/"
+        ]
+      }
     }
   },
   "tags": ["scope:strophe-ts"]

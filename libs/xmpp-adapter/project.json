@@ -47,14 +47,15 @@
       }
     },
     "publish": {
-      "command": "npm publish",
+      "executor": "nx:run-commands",
       "options": {
-        "cwd": "dist/libs/xmpp-adapter"
-      },
-      "dependsOn": [
-        "version",
-        "build"
-      ]
+        "parallel": false,
+        "commands": [
+          "nx version xmpp-adapter",
+          "nx build xmpp-adapter",
+          "cd dist/libs/xmpp-adapter && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/"
+        ]
+      }
     }
   },
   "tags": []

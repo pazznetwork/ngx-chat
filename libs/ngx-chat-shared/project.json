@@ -6,24 +6,34 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/ngx-chat-shared",
         "main": "libs/ngx-chat-shared/src/index.ts",
         "tsConfig": "libs/ngx-chat-shared/tsconfig.lib.json",
-        "assets": ["libs/ngx-chat-shared/*.md"]
+        "assets": [
+          "libs/ngx-chat-shared/*.md"
+        ]
       }
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/ngx-chat-shared/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/ngx-chat-shared/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "libs/ngx-chat-shared/jest.config.ts",
         "passWithNoTests": true
@@ -44,14 +54,15 @@
       }
     },
     "publish": {
-      "command": "npm publish",
+      "executor": "nx:run-commands",
       "options": {
-        "cwd": "dist/libs/ngx-chat-shared"
-      },
-      "dependsOn": [
-        "version",
-        "build"
-      ]
+        "parallel": false,
+        "commands": [
+          "nx version ngx-chat-shared",
+          "nx build ngx-chat-shared",
+          "cd dist/libs/ngx-chat-shared && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/"
+        ]
+      }
     }
   },
   "tags": []

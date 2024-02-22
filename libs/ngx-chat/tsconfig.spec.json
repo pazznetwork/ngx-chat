@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/ngx-chat-ui",
+    "outDir": "../../dist/ngx-chat",
     "module": "commonjs",
     "types": ["jest", "node"]
   },

@@ -5,7 +5,7 @@
     {
       "files": ["*.ts"],
       "parserOptions": {
-        "project": ["libs/ngx-chat-ui/tsconfig.*?.json"]
+        "project": ["libs/ngx-chat/tsconfig.*?.json"]
       },
       "extends": [
         "plugin:@nx/angular",
@@ -44,7 +44,7 @@
     {
       "files": ["*.html"],
       "parserOptions": {
-        "project": ["libs/ngx-chat-ui/tsconfig.*?.json"]
+        "project": ["libs/ngx-chat/tsconfig.*?.json"]
       }
     }
   ]

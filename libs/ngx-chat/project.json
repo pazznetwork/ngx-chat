@@ -2,22 +2,22 @@
   "name": "ngx-chat",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/ngx-chat-ui/src",
+  "sourceRoot": "libs/ngx-chat/src",
   "prefix": "ngx-chat",
   "targets": {
     "build": {
       "executor": "@nx/angular:package",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
-        "project": "libs/ngx-chat-ui/ng-package.json",
+        "project": "libs/ngx-chat/ng-package.json",
         "updateBuildableProjectDepsInPackageJson": true
       },
       "configurations": {
         "production": {
-          "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.prod.json"
+          "tsConfig": "libs/ngx-chat/tsconfig.lib.prod.json"
         },
         "development": {
-          "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.json"
+          "tsConfig": "libs/ngx-chat/tsconfig.lib.json"
         }
       },
       "defaultConfiguration": "production",
@@ -31,7 +31,7 @@
       "options": {
         "commands": [
           {
-            "command": "tsc --build --force --verbose libs/ngx-chat-ui/tsconfig.json"
+            "command": "tsc --build --force --verbose libs/ngx-chat/tsconfig.json"
           }
         ]
       }
@@ -39,18 +39,17 @@
     "lint": {
       "executor": "@nx/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/ngx-chat-ui/**/*.ts", "libs/ngx-chat-ui/**/*.html"]
+        "lintFilePatterns": ["libs/ngx-chat/**/*.ts", "libs/ngx-chat/**/*.html"]
       }
     },
     "test": {
       "executor": "@nx/angular:karma",
       "options": {
-        "lintFilePatterns": ["libs/ngx-chat-ui/**/*.ts", "libs/ngx-chat-ui/**/*.html"]
+        "lintFilePatterns": ["libs/ngx-chat/**/*.ts", "libs/ngx-chat/**/*.html"]
       }
     },
     "version": {
-      "executor": "@jscutlery/semver:version",
-      "dependsOn": ["update-dependencies"]
+      "executor": "@jscutlery/semver:version"
     },
     "publish-internal": {
       "executor": "nx:run-commands",
@@ -59,22 +58,20 @@
         "commands": [
           "nx version ngx-chat",
           "nx build ngx-chat",
-          "cd dist/libs/ngx-chat-ui && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/"
+          "cd dist/libs/ngx-chat && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/"
         ]
       }
     },
     "publish": {
-      "command": "npm publish",
+      "executor": "nx:run-commands",
       "options": {
-        "cwd": "dist/libs/ngx-chat-ui"
-      },
-      "dependsOn": [
-        "version",
-        "build"
-      ]
-    },
-    "update-dependencies": {
-      "command": "node libs/ngx-chat-ui/update-dependencies.mjs"
+        "parallel": false,
+        "commands": [
+          "nx version ngx-chat",
+          "nx build ngx-chat",
+          "cd dist/libs/ngx-chat && npm publish"
+        ]
+      }
     }
   },
   "tags": []

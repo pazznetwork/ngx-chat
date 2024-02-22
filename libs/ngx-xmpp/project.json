@@ -56,14 +56,15 @@
       }
     },
     "publish": {
-      "command": "npm publish",
+      "executor": "nx:run-commands",
       "options": {
-        "cwd": "dist/libs/ngx-xmpp"
-      },
-      "dependsOn": [
-        "version",
-        "build"
-      ]
+        "parallel": false,
+        "commands": [
+          "nx version ngx-xmpp",
+          "nx build ngx-xmpp",
+          "cd dist/libs/ngx-xmpp && npm publish"
+        ]
+      }
     }
   },
   "tags": []

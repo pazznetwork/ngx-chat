@@ -19,7 +19,7 @@
     "exactOptionalPropertyTypes": false,
     "paths": {
       "@pazznetwork/ngx-chat": [
-        "libs/ngx-chat-ui/src/index.ts"
+        "libs/ngx-chat/src/index.ts"
       ],
       "@pazznetwork/ngx-chat-shared": [
         "libs/ngx-chat-shared/src/index.ts"
