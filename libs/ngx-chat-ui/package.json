@@ -1,6 +1,6 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "1.16.2",
+  "version": "1.16.3",
   "license": "MIT",
   "dependencies": {
     "@pazznetwork/ngx-chat-shared": "^1.16.3",
