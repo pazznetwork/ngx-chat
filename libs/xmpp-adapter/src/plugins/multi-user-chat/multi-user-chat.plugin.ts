@@ -287,7 +287,11 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
 
     const fieldName = getField<TextualFormField>(roomInfo, 'muc#roomconfig_roomname')?.value;
 
-    room.name = fieldName != null && fieldName != '' ? fieldName : roomJid.local;
+    if (fieldName) {
+      room.name = fieldName;
+    } else if (!room.name) {
+      room.name = roomJid.local;
+    }
     room.description =
       getField<TextualFormField>(roomInfo, 'muc#roominfo_description')?.value ?? '';
     this.createdRoomSubject.next(room);
