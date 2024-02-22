@@ -1,5 +1,5 @@
 {
-  "version": "1.16.2",
+  "version": "1.16.3",
   "name": "@pazznetwork/ngx-chat-shared",
   "publishConfig": {
     "access": "restricted"
