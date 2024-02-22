@@ -20,7 +20,11 @@
           "tsConfig": "libs/ngx-chat-ui/tsconfig.lib.json"
         }
       },
-      "defaultConfiguration": "production"
+      "defaultConfiguration": "production",
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{projectRoot}/package.json"
+      ]
     },
     "ts-check": {
       "executor": "nx:run-commands",
@@ -46,17 +50,18 @@
     },
     "version": {
       "executor": "@jscutlery/semver:version",
-      "dependsOn": ["build"]
+      "dependsOn": ["update-dependencies"]
     },
     "publish-internal": {
-      "command": "npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/",
+      "executor": "nx:run-commands",
       "options": {
-        "cwd": "dist/libs/ngx-chat-ui"
-      },
-      "dependsOn": [
-        "version",
-        "build"
-      ]
+        "parallel": false,
+        "commands": [
+          "nx version ngx-chat",
+          "nx build ngx-chat",
+          "cd dist/libs/ngx-chat-ui && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/"
+        ]
+      }
     },
     "publish": {
       "command": "npm publish",
@@ -67,6 +72,9 @@
         "version",
         "build"
       ]
+    },
+    "update-dependencies": {
+      "command": "node libs/ngx-chat-ui/update-dependencies.mjs"
     }
   },
   "tags": []

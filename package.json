@@ -12,8 +12,8 @@
     "e2e": "nx e2e demo-e2e",
     "e2e:debug": "nx e2e-debug demo-e2e",
     "install:browsers": "npx playwright install",
-    "publish:all": "nx run-many --target=publish --parallel=false",
-    "publish:internal:all": "nx run-many --target=publish-internal --parallel=false",
+    "publish:all": "nx run-many --target=publish --parallel=false --projects=xmpp-adapter,strophe-ts,ngx-xmpp,ngx-chat-shared,ngx-chat",
+    "publish:internal:all": "nx run-many --target=publish-internal --parallel=false --projects=xmpp-adapter,strophe-ts,ngx-xmpp,ngx-chat-shared,ngx-chat",
     "version:all": "nx run-many --target=version --parallel=false"
   },
   "devDependencies": {

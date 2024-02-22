@@ -32,18 +32,18 @@
       }
     },
     "version": {
-      "executor": "@jscutlery/semver:version",
-      "dependsOn": ["build"]
+      "executor": "@jscutlery/semver:version"
     },
     "publish-internal": {
-      "command": "npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/",
+      "executor": "nx:run-commands",
       "options": {
-        "cwd": "dist/libs/strophe-ts"
-      },
-      "dependsOn": [
-        "version",
-        "build"
-      ]
+        "parallel": false,
+        "commands": [
+          "nx version strophe-ts",
+          "nx build strophe-ts",
+          "cd dist/libs/strophe-ts && npm publish --registry https://repoproxy.entenhausen.pazz.de/repository/npm-internal/"
+        ]
+      }
     },
     "publish": {
       "command": "npm publish",
