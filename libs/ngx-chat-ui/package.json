@@ -3,10 +3,10 @@
   "version": "1.16.2",
   "license": "MIT",
   "dependencies": {
-    "@pazznetwork/ngx-chat-shared": "^1.16.1",
-    "@pazznetwork/ngx-xmpp": "^1.16.1",
-    "@pazznetwork/strophe-ts": "^1.0.3",
-    "@pazznetwork/xmpp-adapter": "^1.0.0"
+    "@pazznetwork/ngx-chat-shared": "^1.16.3",
+    "@pazznetwork/ngx-xmpp": "^1.16.3",
+    "@pazznetwork/strophe-ts": "^1.0.5",
+    "@pazznetwork/xmpp-adapter": "^1.0.2"
   },
   "peerDependencies": {
     "@angular/animations": "^16.2.12",
