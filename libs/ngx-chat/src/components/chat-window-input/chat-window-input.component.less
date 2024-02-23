@@ -10,36 +10,37 @@
 
 .chat-input-container {
   display: flex;
+  align-items: flex-end;
   padding: 0.5em;
   border-top: 1px solid @general-border-color;
   background: #fff;
   cursor: text;
+  gap: 0.5em;
 
   ngx-chat-message-input {
     flex-grow: 1;
   }
 
   .chat-input {
-    border: none;
-    width: 100%;
-    font-size: 1em;
-    padding: 0;
     display: block;
-    resize: none;
+    width: 100%;
+    align-self: flex-start;
+    padding: 0;
+    border: none;
+    font-size: 1em;
     overflow-x: hidden;
     outline: none;
   }
 
   .chat-action {
     cursor: pointer;
-    align-self: center;
     text-align: center;
   }
 
   .chat-window-send, .chat-window-upload {
     background-color: #fff;
-    border-color: #fff;
-    color: #000;
+    color: #222;
+    border: none;
     width: 1.5em;
 
     &:active {

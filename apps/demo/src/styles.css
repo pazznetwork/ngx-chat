@@ -1,5 +1,7 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 /* You can add global styles to this file, and also import other style files */
+@import "../../../node_modules/@angular/cdk/text-field-prebuilt.css";
+
 body {
   transition-property: padding-right;
   transition-duration: 0.4s;
