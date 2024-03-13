@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.1.0](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.0.4...xmpp-adapter-1.1.0) (2024-03-13)
+
+
+### Features
+
+* expose unsubscribeJidFromRoom function to room-service.ts ([f1bae8d](https://github.com/pazznetwork/ngx-chat/commit/f1bae8db61d1de29eb41c37ac1561030c6e79910))
+
+
+
 ## [1.0.4](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.0.3...xmpp-adapter-1.0.4) (2024-02-22)
 
 
