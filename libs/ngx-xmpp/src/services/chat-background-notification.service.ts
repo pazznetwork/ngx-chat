@@ -5,7 +5,6 @@ import {
   ChatBrowserNotificationService,
   ChatService,
   Contact,
-  JID,
   Room,
 } from '@pazznetwork/ngx-chat-shared';
 
@@ -53,13 +52,13 @@ export class ChatBackgroundNotificationService implements ChatBrowserNotificatio
     }
   }
 
-  private async receivedGroupMessage(room: Room): Promise<void> {
+  private receivedGroupMessage(room: Room): void {
     if (this.shouldDisplayNotification()) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const message = room.messageStore.mostRecentMessage!.body;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const sender = room.messageStore.mostRecentMessage!.from!;
-      const options = await this.customizeGroupMessage(sender, message, room);
+      const sender = room.messageStore.mostRecentMessage!.from!.resource!;
+      const options = this.customizeGroupMessage(sender, message, room);
       const notification = new Notification(room.name as string, options);
       notification.addEventListener('click', () => {
         window.focus();
@@ -68,12 +67,12 @@ export class ChatBackgroundNotificationService implements ChatBrowserNotificatio
     }
   }
 
-  protected async customizeGroupMessage(
-    sender: JID,
+  protected customizeGroupMessage(
+    senderJid: string,
     message: string,
-    _room: Room
-  ): Promise<{ body: string }> {
-    return { body: `${sender.toString()}: ${message}` };
+    room: Room
+  ): NotificationOptions {
+    return { body: `${senderJid}: ${message}`, icon: room?.avatar };
   }
 
   private shouldDisplayNotification(): boolean {
