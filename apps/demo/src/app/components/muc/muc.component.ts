@@ -221,7 +221,6 @@ export class MucComponent implements OnInit, OnDestroy {
   }
 
   private getFullMemberJid(): string {
-    debugger;
     return this.memberJid?.includes('@')
       ? this.memberJid
       : this.memberJid + '@' + (this.domain as string);
