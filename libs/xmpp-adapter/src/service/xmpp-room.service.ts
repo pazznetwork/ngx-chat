@@ -55,6 +55,10 @@ export class XmppRoomService implements RoomService {
     return this.mucSubPlugin.unsubscribeRoom(roomJid);
   }
 
+  async unsubscribeJidFromRoom(roomJid: string, jid: string): Promise<void> {
+    return this.mucSubPlugin.unsubscribeJidFromRoom(roomJid, jid);
+  }
+
   async kickFromRoom(nick: string, roomJid: string, reason?: string): Promise<void> {
     await this.multiUserPlugin.kickFromRoom(nick, parseJid(roomJid), reason);
   }

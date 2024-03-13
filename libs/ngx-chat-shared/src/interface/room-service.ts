@@ -22,6 +22,8 @@ export interface RoomService {
 
   unsubscribeRoom(roomJid: string): Promise<void>;
 
+  unsubscribeJidFromRoom(roomJid: string, jid: string): Promise<void>;
+
   destroyRoom(roomJid: string): Promise<void>;
 
   createRoom(options: RoomCreationOptions): Promise<Room>;
@@ -30,7 +32,7 @@ export interface RoomService {
 
   banUserForRoom(occupantJid: string, roomJid: string, reason?: string): Promise<void>;
 
-  leaveRoom(occupantJid: string, status?: string): Promise<void>;
+  leaveRoom(roomJid: string, status?: string): Promise<void>;
 
   declineRoomInvite(jid: string): void;
 
