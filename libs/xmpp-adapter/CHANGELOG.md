@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.1.1](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.0...xmpp-adapter-1.1.1) (2024-03-26)
+
+
+### Bug Fixes
+
+* **xmpp-adapter:** prevent multiple room instances from the same room ([5fb91fc](https://github.com/pazznetwork/ngx-chat/commit/5fb91fca5e8ac5fbd09ff2d72fce4907f7ee70da))
+
+
+
 # [1.1.0](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.0.4...xmpp-adapter-1.1.0) (2024-03-13)
 
 
