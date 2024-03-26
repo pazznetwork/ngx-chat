@@ -95,12 +95,9 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         this.createdRoomSubject.pipe(
           map((createdRoom) => {
             const key = createdRoom.jid.bare().toString();
-            if (this.roomsMap.has(key)) {
-              const existingContact = this.roomsMap.get(key) as Room;
-              this.roomsMap.set(key, existingContact);
-              return this.roomsMap;
+            if (!this.roomsMap.has(key)) {
+              this.roomsMap.set(key, createdRoom);
             }
-            this.roomsMap.set(key, createdRoom);
             return this.roomsMap;
           })
         ),
@@ -122,8 +119,13 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         ),
         this.xmppService.onOnline$.pipe(
           mergeMap(async () => this.getRooms()),
-          map((contacts) => {
-            contacts.forEach((c) => this.roomsMap.set(c.jid.bare().toString(), c));
+          map((rooms) => {
+            rooms.forEach((room) => {
+              const roomBareJid = room.jid.bare().toString();
+              if (!this.roomsMap.has(roomBareJid)) {
+                this.roomsMap.set(roomBareJid, room);
+              }
+            });
             return this.roomsMap;
           }),
           tap(() => this.roomsFetchedSubject.next(true))
@@ -136,7 +138,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
           tap(() => this.roomsFetchedSubject.next(false))
         )
       ).pipe(
-        map((contactMap) => Array.from(contactMap.values())),
+        map((roomMap) => Array.from(roomMap.values())),
         startWith([]),
         shareReplay({ bufferSize: 1, refCount: false })
       ),
@@ -922,18 +924,30 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     return true;
   }
 
+  private readonly roomLocks = new Map<string, Promise<any>>();
+
   private async getOrCreateRoom(roomJid: JID): Promise<Room> {
     roomJid = roomJid.bare();
-    let room = await firstValueFrom(this.getRoomByJid(roomJid));
-    if (!room) {
-      room = await this.customRoomFactory.create(this.logService, roomJid);
-      this.createdRoomSubject.next(room);
+
+    if (!this.roomLocks.get(roomJid.toString())) {
+      this.roomLocks.set(
+        roomJid.toString(),
+        (async () => {
+          let room = await firstValueFrom(this.getRoomByJid(roomJid));
+          if (!room) {
+            room = await this.customRoomFactory.create(this.logService, roomJid, roomJid.local);
+            this.createdRoomSubject.next(room);
+          }
+          this.roomLocks.delete(roomJid.toString());
+          return room;
+        })()
+      );
     }
-    return room;
+    return this.roomLocks.get(roomJid.toString());
   }
 
-  private extractRoomSummariesFromResponse(iq: IqResponseStanza): Promise<Room[]> {
-    return Promise.all(
+  private async extractRoomSummariesFromResponse(iq: IqResponseStanza): Promise<Room[]> {
+    const rooms = await Promise.all(
       Finder.create(iq)
         .searchByTag('query')
         .searchByNamespace(nsDiscoItems)
@@ -943,6 +957,10 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
           return this.customRoomFactory.create(this.logService, jid, jid.local);
         })
     );
+    for (const room of rooms) {
+      this.createdRoomSubject.next(room);
+    }
+    return rooms;
   }
 
   async handleRoomMessageStanza(
@@ -1005,6 +1023,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
         fromArchive: stanza.querySelector('archived') == null,
       };
       room.messageStore.addMessage(message);
+      this.updateRoomSubject.next(room);
 
       if (!message.delayed) {
         this.messageReceivedSubject.next(room);
