@@ -60,4 +60,8 @@ export class ChatHistoryMessagesContactComponent {
   trackByIndex(index: number): number {
     return index;
   }
+
+  trackByMessage(_index: number, message: Message): string {
+    return message.id;
+  }
 }
