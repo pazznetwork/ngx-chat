@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.16.8](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-1.16.7...ngx-chat-1.16.8) (2024-04-03)
+
+
+### Bug Fixes
+
+* **ngx-chat:** track by id of messages not by index ([0d44769](https://github.com/pazznetwork/ngx-chat/commit/0d44769f1a2eac61e20427085a9566d1e6d36675))
+
+
+
 ## [1.16.7](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-1.16.6...ngx-chat-1.16.7) (2024-04-03)
 
 
