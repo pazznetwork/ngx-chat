@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.16.7](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-1.16.6...ngx-chat-1.16.7) (2024-04-03)
+
+
+### Bug Fixes
+
+* **ngx-chat:** fix rendering of text message ([6692d28](https://github.com/pazznetwork/ngx-chat/commit/6692d28f6ee058abae56ed8e17516ae58ee32b01))
+
+
+
 ## [1.16.6](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-1.16.5...ngx-chat-1.16.6) (2024-03-13)
 
 

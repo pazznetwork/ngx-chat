@@ -1,6 +1,6 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "1.16.6",
+  "version": "1.16.7",
   "license": "MIT",
   "peerDependencies": {
     "@angular/animations": "^16.2.12",
