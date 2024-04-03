@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom, map, startWith } from 'rxjs';
 import type { AuthRequest, RoomCreationOptions } from '@pazznetwork/ngx-chat-shared';
 import { Affiliation, Direction, Role } from '@pazznetwork/ngx-chat-shared';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
-import type { StropheWebsocket } from '@pazznetwork/strophets';
+import type { StropheWebsocket } from '@pazznetwork/strophe-ts';
 import { devXmppDomain } from '../../.secrets-const';
 import { filter } from 'rxjs/operators';
 
@@ -129,6 +129,7 @@ export class TestUtils {
     }
     return firstValueFrom(
       this.chatService.roomService.rooms$.pipe(
+        startWith([]),
         map((arr) => arr.length),
         filter((c) => c === count)
       )

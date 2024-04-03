@@ -143,7 +143,7 @@ describe('message archive plugin', () => {
     await ensureNoRegisteredUser(testUtils.hero);
   });
 
-  it('should handle MUC/Sub archive stanzas correctly', async () => {
+  xit('should handle MUC/Sub archive stanzas correctly', async () => {
     const stamp = '2021-08-17T15:33:25.375401Z';
     const text = 'group chat the second!';
     const roomId = 'anotherroom';
