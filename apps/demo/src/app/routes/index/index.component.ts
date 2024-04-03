@@ -8,6 +8,7 @@ import {
   ChatBrowserNotificationService,
   ChatService,
   Contact,
+  type FileUploadHandler,
   Log,
   LOG_SERVICE_TOKEN,
   LogLevel,
@@ -19,6 +20,7 @@ import {
   CHAT_BACKGROUND_NOTIFICATION_SERVICE_TOKEN,
   CHAT_LIST_STATE_SERVICE_TOKEN,
   CHAT_SERVICE_TOKEN,
+  FILE_UPLOAD_HANDLER_TOKEN,
 } from '@pazznetwork/ngx-xmpp';
 import { XmppService } from '@pazznetwork/xmpp-adapter';
 import { cleanUpJabber } from '../../../../../../libs/ngx-xmpp/src/test/helpers/ejabberd-client';
@@ -26,7 +28,12 @@ import { StanzaComponent } from '../../components/stanza/stanza.component';
 import { ContactManagementComponent } from '../../components/contact-management/contact-management.component';
 import { MucComponent } from '../../components/muc/muc.component';
 import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
-import { ChatComponent, ChatFileDropComponent, ChatHistoryComponent } from '@pazznetwork/ngx-chat';
+import {
+  ChatComponent,
+  ChatFileDropComponent,
+  ChatHistoryComponent,
+  ChatWindowInputComponent,
+} from '@pazznetwork/ngx-chat';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -46,6 +53,7 @@ import { RouterLink } from '@angular/router';
     NgForOf,
     ChatFileDropComponent,
     ChatHistoryComponent,
+    ChatWindowInputComponent,
   ],
 })
 export class IndexComponent implements OnDestroy {
@@ -69,7 +77,8 @@ export class IndexComponent implements OnDestroy {
     private readonly appRef: ApplicationRef,
     private readonly ngZone: NgZone,
     @Inject(CHAT_BACKGROUND_NOTIFICATION_SERVICE_TOKEN)
-    private readonly chatBackgroundNotificationService: ChatBrowserNotificationService
+    private readonly chatBackgroundNotificationService: ChatBrowserNotificationService,
+    @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler
   ) {
     const item = localStorage.getItem('data');
     const contactData: {
@@ -245,8 +254,18 @@ export class IndexComponent implements OnDestroy {
     this.appRef.tick();
   }
 
-  openChat(contact: Contact) {
-    if (!contact) return;
+  openChat(contact: Contact): void {
+    if (!contact) {
+      return;
+    }
     this.selectedContact = contact;
+  }
+
+  async uploadFile(file: File): Promise<void> {
+    if (!this.selectedContact) {
+      return;
+    }
+    const url = await this.fileUploadHandler.upload(file);
+    await this.chatService.messageService.sendMessage(this.selectedContact, url);
   }
 }

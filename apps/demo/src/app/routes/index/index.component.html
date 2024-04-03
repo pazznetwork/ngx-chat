@@ -97,6 +97,7 @@
 
       <ngx-chat-file-drop *ngIf="selectedContact">
           <ngx-chat-history [recipient]="selectedContact"></ngx-chat-history>
+          <ngx-chat-window-input [recipient]="selectedContact" (fileUploaded)="uploadFile($event)" />
       </ngx-chat-file-drop>
 
     <ngx-chat-demo-stanza />
