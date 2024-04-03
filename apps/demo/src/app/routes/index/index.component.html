@@ -3,7 +3,6 @@
   <h2>More:</h2>
   <a routerLink="/ui">Show mock chats</a>
   <br />
-  <a routerLink="/muc">Show multi user chat</a>
   <div class="form-group">
     <div>
       XMPP domain
@@ -91,11 +90,20 @@
   <hr />
   <div *ngIf="chatService.isOnline$ | async; else offline">
 
-    <ngx-chat-demo-stanza></ngx-chat-demo-stanza>
+      <h1>Contacts chat</h1>
+      <button *ngFor="let contact of chatService.contactListService.contacts$ | async" (click)="openChat(contact)">
+          {{ contact.name }}
+      </button>
 
-    <ngx-chat-demo-contact-management [domain]="domain"></ngx-chat-demo-contact-management>
+      <ngx-chat-file-drop *ngIf="selectedContact">
+          <ngx-chat-history [recipient]="selectedContact"></ngx-chat-history>
+      </ngx-chat-file-drop>
 
-    <ngx-chat-demo-muc [domain]="domain"></ngx-chat-demo-muc>
+    <ngx-chat-demo-stanza />
+
+    <ngx-chat-demo-contact-management [domain]="domain" />
+
+    <ngx-chat-demo-muc [domain]="domain" />
   </div>
   <ng-template #offline>
     <span *ngIf="chatService.isOffline$ | async">You need to be online.</span>

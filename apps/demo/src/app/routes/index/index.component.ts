@@ -7,10 +7,12 @@ import {
   AuthRequest,
   ChatBrowserNotificationService,
   ChatService,
+  Contact,
   Log,
   LOG_SERVICE_TOKEN,
   LogLevel,
   OpenChatStateService,
+  Recipient,
 } from '@pazznetwork/ngx-chat-shared';
 import { takeUntil } from 'rxjs/operators';
 import {
@@ -23,8 +25,8 @@ import { cleanUpJabber } from '../../../../../../libs/ngx-xmpp/src/test/helpers/
 import { StanzaComponent } from '../../components/stanza/stanza.component';
 import { ContactManagementComponent } from '../../components/contact-management/contact-management.component';
 import { MucComponent } from '../../components/muc/muc.component';
-import { AsyncPipe, NgIf } from '@angular/common';
-import { ChatComponent } from '@pazznetwork/ngx-chat';
+import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { ChatComponent, ChatFileDropComponent, ChatHistoryComponent } from '@pazznetwork/ngx-chat';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -41,6 +43,9 @@ import { RouterLink } from '@angular/router';
     ChatComponent,
     FormsModule,
     RouterLink,
+    NgForOf,
+    ChatFileDropComponent,
+    ChatHistoryComponent,
   ],
 })
 export class IndexComponent implements OnDestroy {
@@ -54,6 +59,7 @@ export class IndexComponent implements OnDestroy {
 
   private readonly ngDestroySubject = new Subject<void>();
   state$: Observable<string>;
+  selectedContact: Recipient | undefined;
 
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
@@ -237,5 +243,10 @@ export class IndexComponent implements OnDestroy {
 
   forceAppUpdate(): void {
     this.appRef.tick();
+  }
+
+  openChat(contact: Contact) {
+    if (!contact) return;
+    this.selectedContact = contact;
   }
 }
