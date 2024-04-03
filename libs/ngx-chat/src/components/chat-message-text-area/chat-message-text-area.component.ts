@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import { extractUrls } from '@pazznetwork/ngx-chat-shared';
 import { ChatMessageTextComponent } from './chat-message-text';
 import { ChatMessageLinkComponent } from './chat-message-link';
@@ -12,14 +19,14 @@ import { CommonModule } from '@angular/common';
   templateUrl: './chat-message-text-area.component.html',
   styleUrls: ['chat-message-text-area.component.less'],
 })
-export class ChatMessageTextAreaComponent implements OnInit {
+export class ChatMessageTextAreaComponent implements OnChanges {
   @Input()
   textContent?: string;
 
   @ViewChild('textContainerRef', { read: ViewContainerRef, static: true })
   textContainerRef!: ViewContainerRef;
 
-  ngOnInit(): void {
+  ngOnChanges(_changes: SimpleChanges): void {
     this.transform();
   }
 
@@ -27,6 +34,7 @@ export class ChatMessageTextAreaComponent implements OnInit {
     if (!this.textContent) {
       return;
     }
+    this.textContainerRef.clear();
 
     const message = this.textContent;
     const links = extractUrls(message);
