@@ -94,7 +94,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       merge(
         this.createdRoomSubject.pipe(
           map((createdRoom) => {
-            const key = createdRoom.jid.bare().toString();
+            const key = createdRoom.jid.bare().toString().toLowerCase();
             if (!this.roomsMap.has(key)) {
               this.roomsMap.set(key, createdRoom);
             }

@@ -333,7 +333,10 @@ describe('roster plugin', () => {
       }).toString()
     );
     expect(contact.jid.toString()).toEqual(testJid);
-    expect(await firstValueFrom(contact.subscription$)).toEqual(ContactSubscription.both);
+    // we need to skip the first emit because it is always "to" cause subscription$ is using a ReplaySubject underneath.
+    expect(await firstValueFrom(contact.subscription$.pipe(skip(1)))).toEqual(
+      ContactSubscription.both
+    );
 
     await testUtils.logOut();
     await ensureNoRegisteredUser(testUtils.villain);
@@ -342,7 +345,6 @@ describe('roster plugin', () => {
 
   it('should handle subscribe from a contact and promote subscription from "none" to "from" as villain', async () => {
     await ensureRegisteredUser(testUtils.villain);
-    const contactsSubscription = testUtils.chatService.contactListService.contacts$.subscribe();
     await testUtils.chatService.logIn(testUtils.villain);
 
     const newSubJid = 'new-sub-jid@example.com';
@@ -355,18 +357,22 @@ describe('roster plugin', () => {
       }).toString()
     );
 
-    const contacts = await firstValueFrom(chatService.contactListService.contacts$);
+    const contacts = await firstValueFrom(
+      chatService.contactListService.contacts$.pipe(filter((c) => c.length > 0))
+    );
     const contact = contacts[0];
 
     if (contact == null) {
       throw new Error('contact is undefined');
     }
+    // we need to skip the first emit because it is always "none" cause subscription$ is using a ReplaySubject underneath.
+    const subscription = await firstValueFrom(contact.subscription$.pipe(skip(1)));
+
     expect(contact.jid.toString()).toEqual(newSubJid);
-    expect(await firstValueFrom(contact.subscription$)).toEqual(ContactSubscription.from);
+    expect(subscription).toEqual(ContactSubscription.from);
 
     await testUtils.logOut();
     await ensureNoRegisteredUser(testUtils.villain);
-    contactsSubscription.unsubscribe();
   });
 
   it('should not handle muc presence stanzas as villain', async () => {

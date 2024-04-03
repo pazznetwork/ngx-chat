@@ -11,7 +11,7 @@ import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { cleanServerBesidesAdmin, ensureRegisteredUser } from './helpers/admin-actions';
 import { getRoomAffiliation, getRoomRole } from './helpers/ejabberd-client';
 
-fdescribe('multi user chat plugin', () => {
+describe('multi user chat plugin', () => {
   let testUtils: TestUtils;
   beforeAll(() => {
     const testBed = TestBed.configureTestingModule({
@@ -163,7 +163,7 @@ fdescribe('multi user chat plugin', () => {
     });
   });
 
-  fdescribe('room joining', () => {
+  describe('room joining', () => {
     const createRoomsAsFatherAndInviteUser = async (userJid: string): Promise<void> => {
       await testUtils.logIn.father();
 
@@ -356,7 +356,7 @@ fdescribe('multi user chat plugin', () => {
       await testUtils.logOut();
     });
 
-    fit('should be able to query only for rooms joined', async () => {
+    it('should be able to query only for rooms joined', async () => {
       await ensureRegisteredUser(testUtils.father);
       await ensureRegisteredUser(testUtils.hero);
       // 'Needs the bookmark plugin implementation';
@@ -424,8 +424,9 @@ fdescribe('multi user chat plugin', () => {
       const messagePromise = firstValueFrom(
         testUtils.chatService.roomService.rooms$.pipe(
           filter((rooms) => rooms.length > 0),
-          mergeMap((rooms) =>
-            (rooms[0] as Room)?.messageStore.messages$.pipe(filter((array) => array.length >= 2))
+          mergeMap(
+            (rooms) =>
+              (rooms[0] as Room)?.messageStore.messages$.pipe(filter((array) => array.length >= 2))
           )
         )
       );
