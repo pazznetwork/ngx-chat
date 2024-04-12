@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 import {
-  concatMap,
   Connectable,
   connectable,
   firstValueFrom,
@@ -94,11 +93,10 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     this.rooms$ = connectable(
       merge(
         this.createdRoomSubject.pipe(
-          concatMap(async (createdRoom) => {
+          map((createdRoom) => {
             const key = createdRoom.jid.bare().toString().toLowerCase();
             if (!this.roomsMap.has(key)) {
               this.roomsMap.set(key, createdRoom);
-              await this.xmppService.messageService.loadMostRecentMessages(createdRoom);
             }
             return this.roomsMap;
           })
@@ -310,6 +308,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
       },
       true
     );
+    await this.xmppService.messageService.loadMostRecentMessages(room);
 
     return room;
   }
