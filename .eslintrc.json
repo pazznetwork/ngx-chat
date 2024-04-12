@@ -52,19 +52,6 @@
           }
         ],
         "@typescript-eslint/member-delimiter-style": "error",
-        "@typescript-eslint/member-ordering": [
-          "warn",
-          {
-            "classes": [
-              "decorated-field",
-              ["decorated-get", "decorated-set"],
-              "field",
-              ["get", "set"],
-              "constructor",
-              "method"
-            ]
-          }
-        ],
         "@typescript-eslint/naming-convention": [
           "warn",
           {
@@ -136,7 +123,13 @@
         "id-match": "off",
         "import/no-deprecated": "warn",
         "jsdoc/check-alignment": "error",
-        "jsdoc/newline-after-description": "error",
+        "jsdoc/tag-lines": [
+          "error",
+          "any",
+          {
+            "startLines": 1
+          }
+        ],
         "no-console": ["error", {}],
         "no-trailing-spaces": "off",
         "no-underscore-dangle": "off",
@@ -172,7 +165,7 @@
         "rxjs-angular/prefer-takeuntil": [
           "error",
           {
-            "alias": ["first", "take"],
+            "alias": ["first", "take", "takeUntilDestroyed"],
             "checkComplete": false,
             "checkDecorators": ["Component"],
             "checkDestroy": false
