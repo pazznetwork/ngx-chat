@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.18.0](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-shared-1.17.0...ngx-chat-shared-1.18.0) (2024-04-12)
+
+
+### Features
+
+* **ngx-chat-shared:** Update message loading methods in message-service ([1bc4c20](https://github.com/pazznetwork/ngx-chat/commit/1bc4c20ff4e8da498a105f5bb7462b4ee7f02a0b))
+
+
+
 # [1.17.0](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-shared-1.16.4...ngx-chat-shared-1.17.0) (2024-03-13)
 
 
