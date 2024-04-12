@@ -31,7 +31,9 @@ export interface MessageService {
    */
   loadCompleteHistory(): Promise<void>;
 
-  loadMostRecentUnloadedMessages(recipient: Recipient): Promise<void>;
+  loadMessagesBeforeOldestMessage(recipient: Recipient): Promise<void>;
+
+  loadMostRecentMessages(recipient: Recipient): Promise<void>;
 
   getContactMessageState(message: Message, contactJid: string): MessageState;
 }
