@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.1.2](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.1...xmpp-adapter-1.1.2) (2024-04-12)
+
+
+### Bug Fixes
+
+* **xmpp-adapter:** fix and refactor message loading ([c32ae12](https://github.com/pazznetwork/ngx-chat/commit/c32ae12aa3c2333b0affbf0f362e575683d76cfc))
+
+
+
 ## [1.1.1](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.0...xmpp-adapter-1.1.1) (2024-03-26)
 
 
