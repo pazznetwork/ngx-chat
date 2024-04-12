@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.16.9](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-1.16.8...ngx-chat-1.16.9) (2024-04-12)
+
+
+### Bug Fixes
+
+* **ngx-chat:** fix chat message infinite scroll loading and display ([e89ddd8](https://github.com/pazznetwork/ngx-chat/commit/e89ddd8779f872265baf219217c3358b127e63ec))
+
+
+
 ## [1.16.8](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-1.16.7...ngx-chat-1.16.8) (2024-04-03)
 
 
