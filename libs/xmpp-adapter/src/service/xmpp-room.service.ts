@@ -67,8 +67,8 @@ export class XmppRoomService implements RoomService {
     return this.multiUserPlugin.queryAllRooms();
   }
 
-  async getRooms(): Promise<Room[]> {
-    return this.multiUserPlugin.getRooms();
+  async getPublicOrJoinedRooms(): Promise<Room[]> {
+    return this.multiUserPlugin.getPublicOrJoinedRooms();
   }
 
   async banUserForRoom(occupantJid: string, roomJid: string, reason?: string): Promise<void> {

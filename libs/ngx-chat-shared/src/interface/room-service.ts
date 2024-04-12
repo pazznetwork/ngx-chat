@@ -70,7 +70,7 @@ export interface RoomService {
 
   retrieveRoomSubscriptions(): Promise<Map<string, string[]>>;
 
-  getRooms(): Promise<Room[]>;
+  getPublicOrJoinedRooms(): Promise<Room[]>;
 
   getRoomByJid(roomJid: string): Promise<Room | undefined>;
 

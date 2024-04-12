@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 import {
+  concatMap,
   Connectable,
   connectable,
   firstValueFrom,
@@ -93,10 +94,11 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
     this.rooms$ = connectable(
       merge(
         this.createdRoomSubject.pipe(
-          map((createdRoom) => {
+          concatMap(async (createdRoom) => {
             const key = createdRoom.jid.bare().toString().toLowerCase();
             if (!this.roomsMap.has(key)) {
               this.roomsMap.set(key, createdRoom);
+              await this.xmppService.messageService.loadMostRecentMessages(createdRoom);
             }
             return this.roomsMap;
           })
@@ -118,7 +120,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
           })
         ),
         this.xmppService.onOnline$.pipe(
-          mergeMap(async () => this.getRooms()),
+          mergeMap(async () => this.getPublicOrJoinedRooms()),
           map((rooms) => {
             rooms.forEach((room) => {
               const roomBareJid = room.jid.bare().toString();
@@ -365,14 +367,10 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
   //   return rooms;
   // }
 
-  async getRooms(): Promise<Room[]> {
+  async getPublicOrJoinedRooms(): Promise<Room[]> {
     const roomQueryResponse = await this.getRoomsQuery();
 
-    const rooms = await this.extractRoomSummariesFromResponse(roomQueryResponse);
-    for (const room of rooms) {
-      await this.xmppService.messageService.loadMostRecentMessages(room);
-    }
-    return rooms;
+    return this.extractRoomSummariesFromResponse(roomQueryResponse);
   }
 
   /**

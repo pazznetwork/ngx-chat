@@ -370,7 +370,7 @@ describe('multi user chat plugin', () => {
       expect(await testUtils.waitForCurrentRoomCount(4)).toEqual(4);
 
       const queriedRooms = await testUtils.chatService.roomService.queryAllRooms();
-      const gotRooms = await testUtils.chatService.roomService.getRooms();
+      const gotRooms = await testUtils.chatService.roomService.getPublicOrJoinedRooms();
 
       expect(queriedRooms.length).toEqual(4);
       expect(gotRooms.length).toEqual(4);
