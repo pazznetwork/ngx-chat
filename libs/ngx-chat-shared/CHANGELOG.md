@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.18.1](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-shared-1.18.0...ngx-chat-shared-1.18.1) (2024-04-12)
+
+
+### Bug Fixes
+
+* fix race condition on initial room messages ([a3670b1](https://github.com/pazznetwork/ngx-chat/commit/a3670b1ec50854b1e6dca34fc2f4e11cfc397ee1))
+
+
+
 # [1.18.0](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-shared-1.17.0...ngx-chat-shared-1.18.0) (2024-04-12)
 
 
