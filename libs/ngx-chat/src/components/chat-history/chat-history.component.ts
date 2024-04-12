@@ -116,7 +116,7 @@ export class ChatHistoryComponent implements OnDestroy {
           try {
             // improve performance when loading lots of old messages
             this.changeDetectorRef.detach();
-            await this.chatService.messageService.loadMostRecentUnloadedMessages(
+            await this.chatService.messageService.loadMessagesBeforeOldestMessage(
               this.currentRecipient
             );
           } finally {

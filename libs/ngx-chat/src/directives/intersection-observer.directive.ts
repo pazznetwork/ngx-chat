@@ -1,34 +1,50 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Directive, ElementRef, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 
 @Directive({
   standalone: true,
   selector: '[ngxChatIntersectionObserver]',
 })
-export class IntersectionObserverDirective implements OnDestroy {
+export class IntersectionObserverDirective implements OnDestroy, OnInit {
+  private readonly el = inject<ElementRef<Element>>(ElementRef);
+
+  @Input({ required: true })
+  rootElement!: HTMLElement;
+
   @Output()
-  ngxChatIntersectionObserver = new EventEmitter<IntersectionObserverEntry[]>();
+  ngxChatIntersectionObserver = new EventEmitter<void>();
 
-  @Input()
-  // even if user is not pixel-perfect at the bottom of a chat message list we still want to
-  // react to new messages, hence we have a buffer of 150px around the bottom of the chat message list
-  rootMargin = '150px 0px 150px 0px';
+  private intersectionObserver?: IntersectionObserver;
 
-  private intersectionObserver: IntersectionObserver;
-
-  constructor(el: ElementRef<Element>) {
+  ngOnInit(): void {
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
-        this.ngxChatIntersectionObserver.emit(entries);
+        entries.forEach((entry) => {
+          if (
+            (entry.isIntersecting && this.el.nativeElement.nextElementSibling?.clientHeight) ??
+            0 > 0
+          ) {
+            this.ngxChatIntersectionObserver.emit();
+          }
+        });
       },
       {
-        rootMargin: this.rootMargin,
+        root: this.rootElement,
       }
     );
-    this.intersectionObserver.observe(el.nativeElement);
+    this.intersectionObserver.observe(this.el.nativeElement);
   }
 
   ngOnDestroy(): void {
-    this.intersectionObserver.disconnect();
+    this.intersectionObserver?.disconnect();
   }
 }

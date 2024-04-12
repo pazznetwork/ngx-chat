@@ -1,12 +1,12 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <ngx-chat-bubble [reverse]="true">
-  <ngx-chat-bubble-avatar [showAvatar]="showAvatar" [avatar]="chatService.userAvatar$ | async"></ngx-chat-bubble-avatar>
-  <ngx-chat-message-text-area [textContent]="message?.body"> </ngx-chat-message-text-area>
-  <ngx-chat-message-image [textContent]="message?.body"> </ngx-chat-message-image>
+  <ngx-chat-bubble-avatar [showAvatar]="showAvatar" [avatar]="chatService.userAvatar$ | async" />
+  <ngx-chat-message-text-area [textContent]="message?.body" />
+  <ngx-chat-message-image [textContent]="message?.body" />
   <ngx-chat-bubble-footer
-    [formattedDate]="message?.datetime | date : chatService.translations.timeFormat"
+    [formattedDate]="message?.datetime | date: chatService.translations.timeFormat"
     [nick]="nick$ | async"
   >
-    <ngx-chat-message-state-icon [messageState]="getMessageState()"></ngx-chat-message-state-icon>
+    <ngx-chat-message-state-icon [messageState]="getMessageState()" />
   </ngx-chat-bubble-footer>
 </ngx-chat-bubble>
