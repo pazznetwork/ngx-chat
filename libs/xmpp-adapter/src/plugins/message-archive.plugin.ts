@@ -34,7 +34,7 @@ export class MessageArchivePlugin implements ChatPlugin {
     );
   }
 
-  async loadMostRecentUnloadedMessages(recipient: Recipient): Promise<void> {
+  async loadMostRecentMessages(recipient: Recipient): Promise<void> {
     await this.loadMessages(recipient, (builder) =>
       recipient.messageStore.mostRecentMessage?.id
         ? builder.c('after', {}, recipient.messageStore.mostRecentMessage.id)

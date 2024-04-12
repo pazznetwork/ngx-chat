@@ -105,7 +105,7 @@ export class XmppMessageService implements MessageService {
   }
 
   async loadMostRecentMessages(recipient: Recipient): Promise<void> {
-    return this.messageArchivePlugin.loadMostRecentUnloadedMessages(recipient);
+    return this.messageArchivePlugin.loadMostRecentMessages(recipient);
   }
 
   getContactMessageState(_message: Message, _contactJid: string): MessageState {
