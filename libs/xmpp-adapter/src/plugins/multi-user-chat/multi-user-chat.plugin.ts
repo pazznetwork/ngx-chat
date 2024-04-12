@@ -370,7 +370,7 @@ export class MultiUserChatPlugin implements StanzaHandlerChatPlugin {
 
     const rooms = await this.extractRoomSummariesFromResponse(roomQueryResponse);
     for (const room of rooms) {
-      await this.xmppService.messageService.loadMostRecentUnloadedMessages(room);
+      await this.xmppService.messageService.loadMostRecentMessages(room);
     }
     return rooms;
   }

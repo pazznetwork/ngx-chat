@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-import type { Contact, Recipient, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
-import type { ChatPlugin } from '../core';
-import { serializeToSubmitForm } from '../core';
+import { Contact, Recipient, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
+import { ChatPlugin, serializeToSubmitForm } from '../core';
 import type { XmppService } from '../xmpp.service';
 import { nsRSM } from './multi-user-chat';
+import { StanzaBuilder } from '../stanza-builder';
 
 const nsMAM = 'urn:xmpp:mam:2';
 
@@ -22,46 +22,24 @@ export class MessageArchivePlugin implements ChatPlugin {
       .c('query', { xmlns: this.nameSpace })
       .c('set', { xmlns: nsRSM })
       .c('max', {}, '250')
-      .up()
       .c('before')
       .send();
   }
 
+  async loadMessagesBeforeOldestMessage(recipient: Recipient): Promise<void> {
+    await this.loadMessages(recipient, (builder) =>
+      recipient.messageStore.oldestMessage?.id
+        ? builder.c('before', {}, recipient.messageStore.oldestMessage.id)
+        : builder
+    );
+  }
+
   async loadMostRecentUnloadedMessages(recipient: Recipient): Promise<void> {
-    // for user-to-user chats no to-attribute is necessary, in case of multi-user-chats it has to be set to the bare room jid
-    const to = recipient.recipientType === 'room' ? recipient.jid.toString() : undefined;
-
-    const form: XmlSchemaForm = {
-      type: 'submit',
-      instructions: [],
-      fields: [
-        { type: 'hidden', variable: 'FORM_TYPE', value: this.nameSpace },
-        ...(recipient.recipientType === 'contact'
-          ? ([
-              {
-                type: 'jid-single',
-                variable: 'with',
-                value: (recipient as Contact).jid.toString(),
-              },
-            ] as const)
-          : []),
-      ],
-    };
-
-    await this.chatService.chatConnectionService
-      .$iq({ type: 'set', ...(to ? { to } : {}) })
-      .c('query', { xmlns: this.nameSpace })
-      .cCreateMethod((builder) => serializeToSubmitForm(builder, form))
-      .up()
-      .c('set', { xmlns: nsRSM })
-      .c('max', {}, '100')
-      .cCreateMethod((builder) =>
-        recipient.messageStore.mostRecentMessage?.id
-          ? builder.c('after', {}, recipient.messageStore.mostRecentMessage.id)
-          : builder
-      )
-      .up()
-      .send();
+    await this.loadMessages(recipient, (builder) =>
+      recipient.messageStore.mostRecentMessage?.id
+        ? builder.c('after', {}, recipient.messageStore.mostRecentMessage.id)
+        : builder.c('before')
+    );
   }
 
   async loadAllMessages(): Promise<void> {
@@ -89,5 +67,39 @@ export class MessageArchivePlugin implements ChatPlugin {
         .c('after', {}, lastReceivedMessageId)
         .send();
     }
+  }
+
+  private async loadMessages(
+    recipient: Recipient,
+    retrieveMessageFunc: (builder: StanzaBuilder) => StanzaBuilder
+  ): Promise<void> {
+    const to = recipient.recipientType === 'room' ? recipient.jid.toString() : undefined;
+    const form: XmlSchemaForm = {
+      type: 'submit',
+      instructions: [],
+      fields: [
+        { type: 'hidden', variable: 'FORM_TYPE', value: this.nameSpace },
+        ...(recipient.recipientType === 'contact'
+          ? ([
+              {
+                type: 'jid-single',
+                variable: 'with',
+                value: (recipient as Contact).jid.toString(),
+              },
+            ] as const)
+          : []),
+      ],
+    };
+
+    await this.chatService.chatConnectionService
+      .$iq({ type: 'set', ...(to ? { to } : {}) })
+      .c('query', { xmlns: this.nameSpace })
+      .cCreateMethod((builder) => serializeToSubmitForm(builder, form))
+      .up()
+      .c('set', { xmlns: nsRSM })
+      .c('max', {}, '20')
+      .cCreateMethod(retrieveMessageFunc)
+      .up()
+      .send();
   }
 }

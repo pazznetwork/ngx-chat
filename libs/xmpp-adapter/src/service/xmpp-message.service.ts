@@ -100,7 +100,11 @@ export class XmppMessageService implements MessageService {
     }
   }
 
-  async loadMostRecentUnloadedMessages(recipient: Recipient): Promise<void> {
+  loadMessagesBeforeOldestMessage(recipient: Recipient): Promise<void> {
+    return this.messageArchivePlugin.loadMessagesBeforeOldestMessage(recipient);
+  }
+
+  async loadMostRecentMessages(recipient: Recipient): Promise<void> {
     return this.messageArchivePlugin.loadMostRecentUnloadedMessages(recipient);
   }
 
