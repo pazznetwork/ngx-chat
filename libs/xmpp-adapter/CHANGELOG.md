@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.1.4](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.3...xmpp-adapter-1.1.4) (2024-04-12)
+
+
+### Bug Fixes
+
+* **xmpp-adapter:** load multi-user chat messages after room creation ([000facc](https://github.com/pazznetwork/ngx-chat/commit/000facc84eeebe0fc9cfaa8602ed99051c19f1d3))
+
+
+
 ## [1.1.3](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.2...xmpp-adapter-1.1.3) (2024-04-12)
 
 
