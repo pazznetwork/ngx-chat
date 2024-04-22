@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.17.0](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-1.16.9...ngx-chat-1.17.0) (2024-04-22)
+
+
+### Features
+
+* **ngx-chat:** Add platform checks to intersection and resize directives ([46df8d3](https://github.com/pazznetwork/ngx-chat/commit/46df8d3dc9a43529a2cb34f5af6a9b3fd7617a7c))
+
+
+
 ## [1.16.10](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-1.16.9...ngx-chat-1.16.10) (2024-04-12)
 
 
