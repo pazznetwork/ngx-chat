@@ -8,7 +8,9 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  PLATFORM_ID,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Directive({
   standalone: true,
@@ -16,6 +18,7 @@ import {
 })
 export class IntersectionObserverDirective implements OnDestroy, OnInit {
   private readonly el = inject<ElementRef<Element>>(ElementRef);
+  private readonly isPlatformBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   @Input({ required: true })
   rootElement!: HTMLElement;
@@ -26,22 +29,24 @@ export class IntersectionObserverDirective implements OnDestroy, OnInit {
   private intersectionObserver?: IntersectionObserver;
 
   ngOnInit(): void {
-    this.intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (
-            (entry.isIntersecting && this.el.nativeElement.nextElementSibling?.clientHeight) ??
-            0 > 0
-          ) {
-            this.ngxChatIntersectionObserver.emit();
-          }
-        });
-      },
-      {
-        root: this.rootElement,
-      }
-    );
-    this.intersectionObserver.observe(this.el.nativeElement);
+    if (this.isPlatformBrowser) {
+      this.intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (
+              (entry.isIntersecting && this.el.nativeElement.nextElementSibling?.clientHeight) ??
+              0 > 0
+            ) {
+              this.ngxChatIntersectionObserver.emit();
+            }
+          });
+        },
+        {
+          root: this.rootElement,
+        }
+      );
+      this.intersectionObserver.observe(this.el.nativeElement);
+    }
   }
 
   ngOnDestroy(): void {

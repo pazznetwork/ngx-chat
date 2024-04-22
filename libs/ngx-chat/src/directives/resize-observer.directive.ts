@@ -7,7 +7,9 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  PLATFORM_ID,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Directive({
   standalone: true,
@@ -15,6 +17,7 @@ import {
 })
 export class ResizeObserverDirective implements OnDestroy, OnInit {
   private readonly el = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly isPlatformBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   @Output('ngxChatResizeObserver')
   resized = new EventEmitter<void>();
@@ -22,9 +25,11 @@ export class ResizeObserverDirective implements OnDestroy, OnInit {
   private resizeObserver?: ResizeObserver;
 
   ngOnInit(): void {
-    this.resizeObserver = new ResizeObserver(() => this.resized.emit());
+    if (this.isPlatformBrowser) {
+      this.resizeObserver = new ResizeObserver(() => this.resized.emit());
 
-    this.resizeObserver.observe(this.el.nativeElement);
+      this.resizeObserver.observe(this.el.nativeElement);
+    }
   }
 
   ngOnDestroy(): void {
