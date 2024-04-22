@@ -2,6 +2,10 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.1.5](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.4...xmpp-adapter-1.1.5) (2024-04-22)
+
+
+
 ## [1.1.4](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.3...xmpp-adapter-1.1.4) (2024-04-12)
 
 
