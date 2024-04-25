@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.1.7](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.6...xmpp-adapter-1.1.7) (2024-04-25)
+
+
+### Bug Fixes
+
+* **xmpp-adapter:** revert contactsSubscribed$ changes ([61c9e8e](https://github.com/pazznetwork/ngx-chat/commit/61c9e8ecf255de984b032c5dc1349d64bd7e168b))
+
+
+
 ## [1.1.6](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.5...xmpp-adapter-1.1.6) (2024-04-25)
 
 
