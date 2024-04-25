@@ -22,47 +22,49 @@
 
 <hr />
 
-
 <div>
   <h2>Custom component for a chat session</h2>
   <ng-container
     *ngIf="
-        (chatService.isOnline$ | async) &&
-          (chatService.contactListService.contactsSubscribed$ | async) as contacts
-      "
+      (chatService.isOnline$ | async) &&
+      (chatService.contactListService.contactsSubscribed$ | async) as contacts
+    "
   >
-    <ng-container *ngIf="contacts.length > 0 && !!contacts[0]; else messagesComponentInformation">
-      <ngx-chat-window-content [recipient]="contacts[0]" [showAvatars]="true"></ngx-chat-window-content>
-    </ng-container>
+    <ngx-chat-window-content
+      *ngIf="contacts.length > 0; else noContacts"
+      [recipient]="contacts[0]!"
+      [showAvatars]="true"
+    />
   </ng-container>
-  <ng-template #messagesComponentInformation
-  >You need contacts to see this component
-  </ng-template
-  >
+  <ng-template #noContacts>You currently have no contacts.</ng-template>
 </div>
 
 <hr />
 
 <div class="contact-pending-request-received-wrapper">
   debug contact requests in:
-  <div
-    class="contact-pending-request-received"
-    *ngFor="let request of chatService.contactListService.contactRequestsReceived$ | async"
-  >
-    {{ request.name }}
-  </div>
+  <ul>
+    <li
+      class="contact-pending-request-received"
+      *ngFor="let request of chatService.contactListService.contactRequestsReceived$ | async"
+    >
+      {{ request.name }}
+    </li>
+  </ul>
 </div>
 
 <hr />
 
 <div class="contact-pending-request-sent-wrapper">
   debug contact requests out:
-  <div
-    class="contact-pending-request-sent"
-    *ngFor="let request of chatService.contactListService.contactRequestsSent$ | async"
-  >
-    {{ request.name }}
-  </div>
+  <ul>
+    <li
+      class="contact-pending-request-sent"
+      *ngFor="let request of chatService.contactListService.contactRequestsSent$ | async"
+    >
+      {{ request.name }}
+    </li>
+  </ul>
 </div>
 
 <div>

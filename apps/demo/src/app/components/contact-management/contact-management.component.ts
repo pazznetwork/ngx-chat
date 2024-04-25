@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { Component, Inject, Input } from '@angular/core';
-import {
-  ChatService,
-  Log,
-  LOG_SERVICE_TOKEN,
-  OpenChatStateService,
-} from '@pazznetwork/ngx-chat-shared';
+import { Component, inject, Input } from '@angular/core';
 import { CHAT_LIST_STATE_SERVICE_TOKEN, CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, JsonPipe, KeyValuePipe, NgForOf, NgIf } from '@angular/common';
@@ -26,17 +20,13 @@ import { ChatWindowContentComponent } from '@pazznetwork/ngx-chat';
   ],
 })
 export class ContactManagementComponent {
-  otherJid = '';
+  private readonly chatListStateService = inject(CHAT_LIST_STATE_SERVICE_TOKEN);
+  readonly chatService = inject(CHAT_SERVICE_TOKEN);
 
   @Input()
   domain?: string;
 
-  constructor(
-    @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
-    @Inject(LOG_SERVICE_TOKEN) readonly logService: Log,
-    @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
-    private chatListStateService: OpenChatStateService
-  ) {}
+  otherJid = '';
 
   async onAddContact(): Promise<void> {
     await this.chatService.contactListService.addContact(this.ensureFullJid());
