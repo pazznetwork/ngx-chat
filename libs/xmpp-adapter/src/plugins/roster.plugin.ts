@@ -164,7 +164,9 @@ export class RosterPlugin implements ChatPlugin {
       );
 
     this.contactsSubscribed$ = statedContacts$.pipe(
-      mapToContactByFilter((sub) => sub === ContactSubscription.both)
+      mapToContactByFilter(
+        (sub) => sub === ContactSubscription.both || sub === ContactSubscription.to
+      )
     );
 
     this.contactRequestsReceived$ = statedContacts$.pipe(
