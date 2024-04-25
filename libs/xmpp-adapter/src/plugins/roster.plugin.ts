@@ -15,6 +15,7 @@ import {
   combineLatest,
   Connectable,
   connectable,
+  filter,
   firstValueFrom,
   forkJoin,
   map,
@@ -28,8 +29,8 @@ import {
   scan,
   startWith,
   Subject,
+  switchMap,
 } from 'rxjs';
-import { filter, shareReplay, switchMap } from 'rxjs/operators';
 import { Handler, NS } from '@pazznetwork/strophe-ts';
 
 /**
@@ -134,8 +135,7 @@ export class RosterPlugin implements ChatPlugin {
               break;
           }
           return contactMap;
-        }, new Map<string, Contact>()),
-        shareReplay({ bufferSize: 1, refCount: true })
+        }, new Map<string, Contact>())
       ),
       { connector: () => new ReplaySubject<Map<string, Contact>>(1), resetOnDisconnect: false }
     );
@@ -146,9 +146,13 @@ export class RosterPlugin implements ChatPlugin {
     const statedContacts$ = this.contacts$.pipe(
       map((contactMap) => Array.from(contactMap.values())),
       mergeMap((contacts) =>
-        combineLatest(
-          contacts.map((contact) => contact.subscription$.pipe(map((sub) => ({ contact, sub }))))
-        )
+        contacts?.length > 0
+          ? combineLatest(
+              contacts.map((contact) =>
+                contact.subscription$.pipe(map((sub) => ({ contact, sub })))
+              )
+            )
+          : of([])
       )
     );
 
@@ -160,9 +164,7 @@ export class RosterPlugin implements ChatPlugin {
       );
 
     this.contactsSubscribed$ = statedContacts$.pipe(
-      mapToContactByFilter(
-        (sub) => sub === ContactSubscription.both || sub === ContactSubscription.to
-      )
+      mapToContactByFilter((sub) => sub === ContactSubscription.both)
     );
 
     this.contactRequestsReceived$ = statedContacts$.pipe(
@@ -472,9 +474,6 @@ export class RosterPlugin implements ChatPlugin {
     const existingContact = await this.getContactById(jid);
     if (existingContact == null) {
       const newContact = await this.createContact(jid, name, subscription, avatar);
-      if (subscription) {
-        newContact.newSubscription(subscription);
-      }
       this.addContactSubject.next(newContact);
       return newContact;
     }
