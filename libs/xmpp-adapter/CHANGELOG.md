@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.2.1](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.2.0...xmpp-adapter-1.2.1) (2024-05-03)
+
+
+### Bug Fixes
+
+* **xmpp-adapter:** move initialization of messageSent$ and messageReceived$ into the constructor ([89b720a](https://github.com/pazznetwork/ngx-chat/commit/89b720a54dfcdfd0572dd74bcac327275232e3c7))
+
+
+
 # [1.2.0](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.7...xmpp-adapter-1.2.0) (2024-05-03)
 
 
