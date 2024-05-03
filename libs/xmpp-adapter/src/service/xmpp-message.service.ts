@@ -44,15 +44,9 @@ export class XmppMessageService implements MessageService {
   readonly message$: Connectable<Recipient>;
   readonly unreadMessageCountSum$: Observable<number>;
 
-  readonly messageSent$ = this.messageSentSubject.pipe(
-    shareReplay({ refCount: false, bufferSize: 1 }),
-    runInZone(this.chatService.zone)
-  );
+  readonly messageSent$: Observable<Recipient>;
 
-  readonly messageReceived$ = this.messageReceivedSubject.pipe(
-    shareReplay({ refCount: false, bufferSize: 1 }),
-    runInZone(this.chatService.zone)
-  );
+  readonly messageReceived$: Observable<Recipient>;
 
   constructor(
     private readonly chatService: XmppService,
@@ -70,6 +64,16 @@ export class XmppMessageService implements MessageService {
       ).pipe(shareReplay({ bufferSize: 1, refCount: false }), runInZone(chatService.zone))
     );
     this.message$.connect();
+
+    this.messageSent$ = this.messageSentSubject.pipe(
+      shareReplay({ refCount: false, bufferSize: 1 }),
+      runInZone(this.chatService.zone)
+    );
+
+    this.messageReceived$ = this.messageReceivedSubject.pipe(
+      shareReplay({ refCount: false, bufferSize: 1 }),
+      runInZone(this.chatService.zone)
+    );
 
     this.jidToUnreadCount$ = unreadMessageCount.jidToUnreadCount$.pipe(runInZone(chatService.zone));
     this.unreadMessageCountSum$ = unreadMessageCount.unreadMessageCountSum$.pipe(
