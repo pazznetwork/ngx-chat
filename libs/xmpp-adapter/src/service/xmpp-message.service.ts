@@ -44,6 +44,16 @@ export class XmppMessageService implements MessageService {
   readonly message$: Connectable<Recipient>;
   readonly unreadMessageCountSum$: Observable<number>;
 
+  readonly messageSent$ = this.messageSentSubject.pipe(
+    shareReplay({ refCount: false, bufferSize: 1 }),
+    runInZone(this.chatService.zone)
+  );
+
+  readonly messageReceived$ = this.messageReceivedSubject.pipe(
+    shareReplay({ refCount: false, bufferSize: 1 }),
+    runInZone(this.chatService.zone)
+  );
+
   constructor(
     private readonly chatService: XmppService,
     private readonly messageArchivePlugin: MessageArchivePlugin,
