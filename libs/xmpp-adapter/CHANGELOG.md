@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.2.0](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.7...xmpp-adapter-1.2.0) (2024-05-03)
+
+
+### Features
+
+* **xmpp-adapter:** crete new public observables messageSent$ & messageReceived$ ([f7ddb1b](https://github.com/pazznetwork/ngx-chat/commit/f7ddb1bc711dfe1d1fdf912b703646e5770d34eb))
+
+
+
 ## [1.1.7](https://github.com/pazznetwork/ngx-chat/compare/xmpp-adapter-1.1.6...xmpp-adapter-1.1.7) (2024-04-25)
 
 
