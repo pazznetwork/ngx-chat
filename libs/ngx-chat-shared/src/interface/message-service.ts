@@ -11,6 +11,20 @@ export interface MessageService {
   message$: Observable<Recipient>;
 
   /**
+   * Observable representing the stream of "messageReceived" events.
+   *
+   * @typedef {import("rxjs").Observable<Recipient>} messageReceived$
+   */
+  messageReceived$: Observable<Recipient>;
+
+  /**
+   * Represents an Observable that emits the details of a message being sent to a recipient.
+   *
+   * @typedef {Observable<Recipient>} messageSent$
+   */
+  messageSent$: Observable<Recipient>;
+
+  /**
    * emits as soon as the unread message count changes, you might want to debounce it with e.g. half a second, as
    * new messages might be acknowledged in another session.
    */
