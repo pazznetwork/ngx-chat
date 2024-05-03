@@ -2,6 +2,15 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+# [1.19.0](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-shared-1.18.1...ngx-chat-shared-1.19.0) (2024-05-03)
+
+
+### Features
+
+* **ngx-chat-shared:** add new observables to message service ([b82d31c](https://github.com/pazznetwork/ngx-chat/commit/b82d31c60cacb2d7446fc5518462e43fd0602c23))
+
+
+
 ## [1.18.1](https://github.com/pazznetwork/ngx-chat/compare/ngx-chat-shared-1.18.0...ngx-chat-shared-1.18.1) (2024-04-12)
 
 
