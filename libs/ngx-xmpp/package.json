@@ -1,6 +1,6 @@
 {
   "name": "@pazznetwork/ngx-xmpp",
-  "version": "1.16.7",
+  "version": "1.16.8",
   "peerDependencies": {
     "@angular/common": "^17.3.0",
     "@angular/core": "^17.3.0",
