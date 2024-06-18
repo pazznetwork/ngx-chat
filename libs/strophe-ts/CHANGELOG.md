@@ -2,6 +2,10 @@
 
 This file was generated using [@jscutlery/semver](https://github.com/jscutlery/semver).
 
+## [1.0.7](https://github.com/pazznetwork/ngx-chat/compare/strophe-ts-1.0.6...strophe-ts-1.0.7) (2024-06-18)
+
+
+
 ## [1.0.6](https://github.com/pazznetwork/ngx-chat/compare/strophe-ts-1.0.5...strophe-ts-1.0.6) (2024-02-22)
 
 
