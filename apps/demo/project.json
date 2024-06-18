@@ -4,6 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/demo/src",
   "prefix": "app",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",
@@ -56,24 +57,20 @@
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
-          "browserTarget": "demo:build:production"
+          "buildTarget": "demo:build:production"
         },
         "development": {
-          "browserTarget": "demo:build:development",
           "host": "local.entenhausen.pazz.de",
           "ssl": false,
           "sslKey": "apps/demo/src/local.entenhausen.pazz.de-key.pem",
-          "sslCert": "apps/demo/src/local.entenhausen.pazz.de.pem"
+          "sslCert": "apps/demo/src/local.entenhausen.pazz.de.pem",
+          "buildTarget": "demo:build:development"
         }
       },
       "defaultConfiguration": "development"
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "options": {
-        "lintFilePatterns": ["apps/demo/**/*.ts", "apps/demo/**/*.html"]
-      }
+      "executor": "@nx/eslint:lint"
     }
-  },
-  "tags": []
+  }
 }

@@ -3,37 +3,25 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/ngx-chat-shared/src",
   "projectType": "library",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/ngx-chat-shared",
         "main": "libs/ngx-chat-shared/src/index.ts",
         "tsConfig": "libs/ngx-chat-shared/tsconfig.lib.json",
-        "assets": [
-          "libs/ngx-chat-shared/*.md"
-        ]
+        "assets": ["libs/ngx-chat-shared/*.md"]
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
-      "options": {
-        "lintFilePatterns": [
-          "libs/ngx-chat-shared/**/*.ts"
-        ]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "libs/ngx-chat-shared/jest.config.ts",
         "passWithNoTests": true
@@ -64,6 +52,5 @@
         ]
       }
     }
-  },
-  "tags": []
+  }
 }

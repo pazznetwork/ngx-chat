@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/xmpp-adapter/src",
   "projectType": "library",
+  "tags": [],
   "namedInputs": {},
   "targets": {
     "build": {
@@ -26,11 +27,8 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/xmpp-adapter/src/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "version": {
       "executor": "@jscutlery/semver:version"
@@ -57,6 +55,5 @@
         ]
       }
     }
-  },
-  "tags": []
+  }
 }

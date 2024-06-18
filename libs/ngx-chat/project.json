@@ -4,6 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/ngx-chat/src",
   "prefix": "ngx-chat",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/angular:package",
@@ -21,10 +22,7 @@
         }
       },
       "defaultConfiguration": "production",
-      "inputs": [
-        "{projectRoot}/**/*",
-        "{projectRoot}/package.json"
-      ]
+      "inputs": ["{projectRoot}/**/*", "{projectRoot}/package.json"]
     },
     "ts-check": {
       "executor": "nx:run-commands",
@@ -37,10 +35,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "options": {
-        "lintFilePatterns": ["libs/ngx-chat/**/*.ts", "libs/ngx-chat/**/*.html"]
-      }
+      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@nx/angular:karma",
@@ -73,6 +68,5 @@
         ]
       }
     }
-  },
-  "tags": []
+  }
 }

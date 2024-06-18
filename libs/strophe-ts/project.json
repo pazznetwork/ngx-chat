@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/strophe-ts/src",
   "projectType": "library",
+  "tags": ["scope:strophe-ts"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -25,11 +26,8 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/strophe-ts/src/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "version": {
       "executor": "@jscutlery/semver:version"
@@ -56,6 +54,5 @@
         ]
       }
     }
-  },
-  "tags": ["scope:strophe-ts"]
+  }
 }

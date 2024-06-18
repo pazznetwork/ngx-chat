@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/demo-e2e/src",
   "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["demo"],
   "targets": {
     "e2e": {
       "executor": "@mands/nx-playwright:playwright-executor",
@@ -42,13 +44,8 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/demo-e2e/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     }
-  },
-  "tags": [],
-  "implicitDependencies": ["demo"]
+  }
 }

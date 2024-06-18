@@ -57,3 +57,5 @@ playwright-report/
 apps/demo/src/*.pem
 apps/demo/src/local.entenhausen.pazz.de-key.pem
 apps/demo/src/local.entenhausen.pazz.de.pem
+
+.nx/cache

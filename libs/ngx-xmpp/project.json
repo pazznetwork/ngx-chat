@@ -4,6 +4,7 @@
   "projectType": "library",
   "sourceRoot": "libs/ngx-xmpp/src",
   "prefix": "ngx-chat",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@nx/angular:package",
@@ -36,10 +37,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "options": {
-        "lintFilePatterns": ["libs/ngx-xmpp/**/*.ts", "libs/ngx-xmpp/**/*.html"]
-      }
+      "executor": "@nx/eslint:lint"
     },
     "version": {
       "executor": "@jscutlery/semver:version"
@@ -66,6 +64,5 @@
         ]
       }
     }
-  },
-  "tags": []
+  }
 }
