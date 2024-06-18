@@ -3,15 +3,15 @@
   "version": "1.17.1",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/animations": "^16.2.12",
-    "@angular/cdk": "^16.2.12",
-    "@angular/common": "^16.2.12",
-    "@angular/core": "^16.2.12",
-    "@angular/router": "^16.2.12",
+    "@angular/animations": "^17.3.0",
+    "@angular/cdk": "^17.3.0",
+    "@angular/common": "^17.3.0",
+    "@angular/core": "^17.3.0",
+    "@angular/router": "^17.3.0",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.6.2"
   },
   "keywords": [
     "ngx-chat",
