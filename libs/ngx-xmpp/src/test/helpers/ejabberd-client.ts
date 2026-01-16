@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Affiliation, AuthRequest } from '@pazznetwork/ngx-chat-shared';
 import { bareJidStringsEqual } from '@pazznetwork/ngx-chat-shared';
-import { devXmppDomain, devXmppJid, devXmppPassword } from '../../.secrets-const';
+// import { devXmppJid, devXmppPassword } from '../../.secrets-const';
 import type { RoomOptions } from './room-options';
 
 export interface RoomAffiliation {
@@ -11,12 +11,16 @@ export interface RoomAffiliation {
   reason: string;
 }
 
-const xmppDomain = devXmppDomain;
+// const adminUserName = devXmppJid;
+// const adminPassword = devXmppPassword;
+const adminUserName = 'local-admin@local-jabber.entenhausen.pazz.de';
+const adminPassword = 'AdminLocalPassword123!';
 
-const adminUserName = devXmppJid;
-const adminPassword = devXmppPassword;
+// const xmppDomain = devXmppDomain;
+const xmppDomain = 'local-jabber.entenhausen.pazz.de';
 
-const apiUrl = `http://${xmppDomain}:52810/api/`;
+// const apiUrl = `http://${xmppDomain}:52810/api/`;
+const apiUrl = `http://localhost:52810/api/`;
 
 export async function getConnectedUsersNumber(): Promise<number> {
   const { num_sessions } = await executeRequest<{ num_sessions: number }>('connected_users_number');
@@ -161,7 +165,7 @@ export async function changeRoomOption(
   name: string,
   service: string,
   option: string,
-  value: string
+  value: string | boolean
 ): Promise<unknown> {
   return executeRequest('change_room_option', {
     name,
@@ -233,7 +237,10 @@ export async function setRoomAffiliation(
   });
 }
 
-export async function cleanUpJabber(domain = xmppDomain): Promise<void> {
+/**
+ * @deprecated DANGEROUS: This deletes ALL users and rooms. Do NOT use in tests unless you want to wipe the server.
+ */
+export async function DANGEROUS_cleanUpJabber(domain = xmppDomain): Promise<void> {
   const rooms = await getMucRooms();
   for (const room of rooms) {
     await destroyRoom(room.split('@')[0] as string);
@@ -249,7 +256,7 @@ export async function destroyRoom(
   room: string,
   service = 'conference.' + xmppDomain
 ): Promise<unknown> {
-  return executeRequest('destroy_room', {
+  return await executeRequest('destroy_room', {
     name: room,
     service,
   });
@@ -291,13 +298,26 @@ export async function executeRequest<TReturn>(
   headers['X-Admin'] = 'true';
   headers['Content-Type'] = 'application/json';
   headers['Authorization'] = `Basic ${btoa(String(adminUserName) + ':' + String(adminPassword))}`;
-  const response = await fetch(apiUrl + path, {
-    headers,
-    method: 'POST',
-    body: JSON.stringify(json),
-  });
-
-  return (await response.json()) as Promise<TReturn>;
+  // console.log(`[Ejabberd API] Requesting ${path} from ${apiUrl} with user ${adminUserName}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+  try {
+    const response = await fetch(apiUrl + path, {
+      headers,
+      method: 'POST',
+      body: JSON.stringify(json),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    // console.log(`[Ejabberd API] Response ${path}: ${response.status} ${response.statusText}`);
+    const text = await response.text();
+    // console.log(`[Ejabberd API] Body: ${text}`);
+    return JSON.parse(text) as TReturn;
+  } catch (e) {
+    clearTimeout(timeoutId);
+    console.error(`[Ejabberd API] Error ${path}:`, e);
+    throw e;
+  }
 }
 
 export function deleteOldMamMessages(type = 'chat', olderThan = 0): Promise<unknown> {

@@ -10,15 +10,14 @@
       "executor": "@nx/angular:package",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
-        "project": "libs/ngx-chat/ng-package.json"
+        "project": "libs/ngx-chat/ng-package.json",
+        "tsConfig": "libs/ngx-chat/tsconfig.lib.json"
       },
       "configurations": {
         "production": {
           "tsConfig": "libs/ngx-chat/tsconfig.lib.prod.json"
         },
-        "development": {
-          "tsConfig": "libs/ngx-chat/tsconfig.lib.json"
-        }
+        "development": {}
       },
       "defaultConfiguration": "production",
       "inputs": ["{projectRoot}/**/*", "{projectRoot}/package.json"]
@@ -37,9 +36,10 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@nx/angular:karma",
+      "executor": "@angular-devkit/build-angular:karma",
       "options": {
-        "lintFilePatterns": ["libs/ngx-chat/**/*.ts", "libs/ngx-chat/**/*.html"]
+        "tsConfig": "libs/ngx-chat/tsconfig.spec.json",
+        "karmaConfig": "libs/ngx-chat/karma.conf.js"
       }
     },
     "version": {

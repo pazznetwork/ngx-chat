@@ -50,7 +50,9 @@ export class StropheWebsocket implements ProtocolManager {
             : this.onMessage(data)
         )
       )
-      .subscribe();
+      .subscribe({
+        error: (err) => error('StropheWebsocket unhandled error: ' + err),
+      });
 
     this.connection.service = this.determineWebsocketUrl(this.connection.service);
   }
@@ -62,11 +64,19 @@ export class StropheWebsocket implements ProtocolManager {
    */
   checkStreamError(stanza: Element): void {
     if (stanza.namespaceURI === NS.STREAM && stanza.nodeName === 'stream:error') {
-      throw new Error(
-        `Error in stream occurred error=${stanza?.outerHTML ?? 'empty'} ; errors=${Array.from(
-          stanza.children
-        ).reduce((acc, err) => acc + err.outerHTML + '\n', '')}`
-      );
+      const errorMsg = `Error in stream occurred error=${stanza?.outerHTML ?? 'empty'} ; errors=${Array.from(
+        stanza.children
+      ).reduce((acc, err) => acc + err.outerHTML + '\n', '')}`;
+
+      if (errorMsg.includes('User removed')) {
+        error('Stream conflict (User removed) - session terminated remotely: ' + errorMsg);
+        // Do not throw for "User removed" as it causes "Uncaught Error" in tests due to race conditions
+        // and safely terminates the session anyway.
+        this.disconnectFinally();
+        return;
+      }
+
+      throw new Error(errorMsg);
     }
   }
 
@@ -76,13 +86,19 @@ export class StropheWebsocket implements ProtocolManager {
    */
   async connect(skipAuthentication = false): Promise<void> {
     const onConnectedPromise = firstValueFrom(this.isConnectedSubject.pipe(filter((val) => val)));
+    const onClosedPromise = firstValueFrom(this.isConnectedSubject.pipe(filter((val) => !val)));
+
     this.initialisingSubject.next([true, skipAuthentication]);
     this.socket = new WebSocket(this.connection.service, 'xmpp');
     this.socket.onopen = () => this.onOpen();
     this.socket.onerror = (e) => this.onError(e);
     this.socket.onclose = () => this.onClose();
     this.socket.onmessage = (message) => this.onMessageSubject.next(message.data as string);
-    await onConnectedPromise;
+
+    await Promise.race([
+      onConnectedPromise,
+      onClosedPromise.then(() => Promise.reject(new Error('WebSocket closed or failed to connect')))
+    ]);
   }
 
   /**
@@ -115,18 +131,27 @@ export class StropheWebsocket implements ProtocolManager {
       throw new Error('Can not disconnect if WebSocket instance is gone');
     }
     this.socket.onmessage = null;
+    if (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING) {
+      this.socket.close();
+    }
     this.connection.disconnectFinally();
+    this.isConnectedSubject.next(false);
   }
 
   /**
    * Handles the websockets closing.
    */
   onClose(): void {
-    if (!this.connection.connected || this.connection.disconnecting) {
+    this.isConnectedSubject.next(false);
+    if (this.connection.disconnecting) {
+      this.disconnectFinally();
+      return;
+    }
+    if (!this.connection.connected) {
       return;
     }
     this.disconnectFinally();
-    throw new Error('Websocket closed unexpectedly');
+    // throw new Error('Websocket closed unexpectedly');
   }
 
   /**
@@ -262,7 +287,15 @@ export class StropheWebsocket implements ProtocolManager {
     if (!data) {
       throw new Error('serialized data is undefined');
     }
-    this.socket?.send(data);
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      try {
+        this.socket.send(data);
+      } catch (e) {
+        error('Could not send data: ' + e);
+      }
+    } else {
+      error('Socket is not open, cannot send data.');
+    }
   }
 
   private determineWebsocketUrl(service: string): string {

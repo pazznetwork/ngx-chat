@@ -13,6 +13,7 @@ describe('login and logout', () => {
   let testUtils: TestUtils;
 
   beforeEach(() => {
+    TestUtils.clean();
     const testBed = TestBed.configureTestingModule({
       imports: [XmppAdapterTestModule],
     });

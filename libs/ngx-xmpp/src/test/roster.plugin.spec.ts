@@ -4,7 +4,7 @@ import { TestUtils } from './helpers/test-utils';
 import { firstValueFrom, map, merge, scan, skip } from 'rxjs';
 import type { XmppService } from '@pazznetwork/xmpp-adapter';
 import { $pres } from '@pazznetwork/strophe-ts';
-import { devXmppDomain } from '../.secrets-const';
+
 import { TestBed } from '@angular/core/testing';
 import { XmppAdapterTestModule } from '../xmpp-adapter-test.module';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
@@ -16,23 +16,28 @@ import {
 import { filter, shareReplay, take, toArray } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 
+const devXmppDomain = 'local-jabber.entenhausen.pazz.de';
+
 const timLogin: AuthRequest = {
   domain: devXmppDomain,
   username: 'tim',
   password: 'tim',
+  service: 'ws://localhost:5280/websocket',
 };
 
 const bobLogin: AuthRequest = {
   domain: devXmppDomain,
   username: 'bob',
   password: 'bob',
+  service: 'ws://localhost:5280/websocket',
 };
 
 describe('roster plugin', () => {
   let testUtils: TestUtils;
   let chatService: XmppService;
 
-  beforeAll(() => {
+  beforeEach(() => {
+    TestUtils.clean();
     const testBed = TestBed.configureTestingModule({
       imports: [XmppAdapterTestModule],
     });
@@ -413,15 +418,17 @@ describe('roster plugin', () => {
       )
     );
 
-    await testUtils.chatService.logIn(testUtils.hero);
+    await testUtils.logIn.hero();
 
     await chatService.contactListService.addContact(testUtils.friend.jid);
     await testUtils.logOut();
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    await testUtils.chatService.logIn(testUtils.friend);
+    await testUtils.logIn.friend();
     await testUtils.logOut();
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(await contactCountPromise).toEqual([0, 0, 1, 0, 0]);
+    expect(await contactCountPromise).toEqual([0, 1, 0, 0, 0]);
 
     await unregisterAllBesidesAdmin();
   });

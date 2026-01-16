@@ -9,6 +9,9 @@ export class MessageStore {
   readonly messages$ = this.messagesSubject.pipe(startWith(this.messages));
   readonly messageIdToMessage = new Map<string, Message>();
 
+  constructor() {
+  }
+
   get oldestMessage(): Message | undefined {
     return this.messages[0];
   }
@@ -31,10 +34,9 @@ export class MessageStore {
       return;
     }
 
-    if (
-      this.mostRecentMessage?.datetime == null ||
-      message.datetime > this.mostRecentMessage?.datetime
-    ) {
+
+    const mostRecent = this.mostRecentMessage;
+    if (mostRecent == null || message.datetime >= mostRecent.datetime) {
       this.messages.push(message);
     } else {
       insertSortedLast(message, this.messages, (m) => m.datetime);

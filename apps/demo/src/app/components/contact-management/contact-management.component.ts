@@ -6,18 +6,17 @@ import { AsyncPipe, JsonPipe, KeyValuePipe, NgForOf, NgIf } from '@angular/commo
 import { ChatWindowContentComponent } from '@pazznetwork/ngx-chat';
 
 @Component({
-  selector: 'ngx-chat-demo-contact-management',
-  templateUrl: './contact-management.component.html',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgIf,
-    ChatWindowContentComponent,
-    AsyncPipe,
-    NgForOf,
-    KeyValuePipe,
-    JsonPipe,
-  ],
+    selector: 'ngx-chat-demo-contact-management',
+    templateUrl: './contact-management.component.html',
+    imports: [
+        FormsModule,
+        NgIf,
+        ChatWindowContentComponent,
+        AsyncPipe,
+        NgForOf,
+        KeyValuePipe,
+        JsonPipe,
+    ]
 })
 export class ContactManagementComponent {
   private readonly chatListStateService = inject(CHAT_LIST_STATE_SERVICE_TOKEN);

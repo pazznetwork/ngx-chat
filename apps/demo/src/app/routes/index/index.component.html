@@ -9,13 +9,7 @@
       <small>(e.g. jabber.example.com)</small>
     </div>
     <div>
-      <input
-        name="domain"
-        [(ngModel)]="domain"
-        class="form-control"
-        type="text"
-        placeholder="jabber.example.com"
-      />
+      <input name="domain" [(ngModel)]="domain" class="form-control" type="text" placeholder="jabber.example.com" />
     </div>
   </div>
 
@@ -25,16 +19,11 @@
       <small>(e.g. wss://jabber.example.com:5280/websocket)</small>
     </div>
     <div>
-      <input
-        name="service"
-        [(ngModel)]="service"
-        class="form-control"
-        type="text"
-        placeholder="wss://jabber.example.com:5280/websocket"
-      />
+      <input name="service" [(ngModel)]="service" class="form-control" type="text"
+        placeholder="wss://jabber.example.com:5280/websocket" />
     </div>
   </div>
-  <button data-zid="clean-up-jabber" (click)="cleanUpJabber()">Clean Up Jabber</button>
+
   <button data-zid="force-update" (click)="forceAppUpdate()">Rerender App</button>
   <form>
     <div class="form-group">
@@ -42,28 +31,14 @@
         Username
         <small>(e.g. test if test&#64;jabber.example.com is your full JID)</small>
       </label>
-      <input
-        id="username"
-        name="username"
-        [(ngModel)]="username"
-        class="form-control"
-        type="text"
-        placeholder="test"
-        autocomplete="username"
-      />
+      <input id="username" name="username" [(ngModel)]="username" class="form-control" type="text" placeholder="test"
+        autocomplete="username" />
     </div>
 
     <div class="form-group">
       <label for="password">Password</label>
-      <input
-        id="password"
-        name="password"
-        [(ngModel)]="password"
-        class="form-control"
-        type="password"
-        placeholder="Password"
-        autocomplete="current-password"
-      />
+      <input id="password" name="password" [(ngModel)]="password" class="form-control" type="password"
+        placeholder="Password" autocomplete="current-password" />
     </div>
   </form>
 
@@ -90,15 +65,15 @@
   <hr />
   <div *ngIf="chatService.isOnline$ | async; else offline">
 
-      <h1>Contacts chat</h1>
-      <button *ngFor="let contact of chatService.contactListService.contacts$ | async" (click)="openChat(contact)">
-          {{ contact.name }}
-      </button>
+    <h1>Contacts chat</h1>
+    <button *ngFor="let contact of chatService.contactListService.contacts$ | async" (click)="openChat(contact)">
+      {{ contact.name }}
+    </button>
 
-      <ngx-chat-file-drop *ngIf="selectedContact">
-          <ngx-chat-history [recipient]="selectedContact"></ngx-chat-history>
-          <ngx-chat-window-input [recipient]="selectedContact" (fileUploaded)="uploadFile($event)" />
-      </ngx-chat-file-drop>
+    <ngx-chat-file-drop *ngIf="selectedContact">
+      <ngx-chat-history [recipient]="selectedContact"></ngx-chat-history>
+      <ngx-chat-window-input [recipient]="selectedContact" (fileUploaded)="uploadFile($event)" />
+    </ngx-chat-file-drop>
 
     <ngx-chat-demo-stanza />
 

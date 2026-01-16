@@ -1,0 +1,15 @@
+{
+  "extends": ["../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": ["apps/demo-e2e/tsconfig.*?.json"]
+      },
+      "rules": {
+        "jest/no-done-callback": "off"
+      }
+    }
+  ]
+}

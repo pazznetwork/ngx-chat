@@ -1,17 +1,9 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <ngx-chat-history-auto-scroll (scrolledToTop)="scheduleLoadMessages()" [maxHeight]="maxHeight">
-    <ngx-chat-history-messages-contact *ngIf="isContact(currentRecipient)"
-      [contact]="asContact(currentRecipient)"
-      [messages$]="currentRecipient?.messageStore?.messages$"
-      [showAvatars]="showAvatars"
-    />
-    <ngx-chat-history-messages-room *ngIf="!isContact(currentRecipient)"
-      [messages$]="currentRecipient?.messageStore?.messages$"
-      [showAvatars]="showAvatars"
-    />
+  <ngx-chat-history-messages-contact *ngIf="isContact(currentRecipient)" [contact]="asContact(currentRecipient)"
+    [messages$]="currentRecipient?.messageStore?.messages$" [showAvatars]="showAvatars" />
+  <ngx-chat-history-messages-room *ngIf="!isContact(currentRecipient)"
+    [messages$]="currentRecipient?.messageStore?.messages$" [showAvatars]="showAvatars" />
   <ngx-chat-message-empty *ngIf="noMessages$ | async" />
-  <ngx-chat-message-contact-request
-    *ngIf="pendingRequest$ | async"
-    [pendingRequestContact]="pendingRequestContact"
-  />
+  <ngx-chat-message-contact-request *ngIf="pendingRequest$ | async" [pendingRequestContact]="pendingRequestContact" />
 </ngx-chat-history-auto-scroll>

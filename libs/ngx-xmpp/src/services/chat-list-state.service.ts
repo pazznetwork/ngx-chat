@@ -49,9 +49,17 @@ export class ChatListStateService implements OpenChatStateService {
       map((contactMap) => Array.from(contactMap.values())),
       shareReplay({ bufferSize: 1, refCount: false })
     );
+
+    // this.chatService.messageService.messageReceived$.subscribe((recipient) => {
+    //   // TODO: logic to not open chat for MUCs or other types if desired, but for now specific to contact
+    //   if (recipient.recipientType === 'contact' && !this.openChatsMap.has(recipient.jid.bare().toString())) {
+    //     this.openChat(recipient);
+    //   }
+    // });
   }
 
   openChat(recipient: Recipient, isCollapsed = false): void {
+    this.chatService.messageService.loadMostRecentMessages(recipient);
     this.openChatSubject.next({ recipient, isCollapsed });
   }
 
@@ -67,3 +75,4 @@ export class ChatListStateService implements OpenChatStateService {
     this.openTracksSubject.next(this.openTracksSubject.getValue().filter((s) => s !== track));
   }
 }
+

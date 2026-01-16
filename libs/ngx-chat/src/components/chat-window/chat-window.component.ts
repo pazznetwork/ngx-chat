@@ -20,16 +20,15 @@ import { ChatWindowContentComponent } from '../chat-window-content';
 import { filter, map } from 'rxjs/operators';
 
 @Component({
-  standalone: true,
-  imports: [
-    CommonModule,
-    ChatWindowFrameComponent,
-    ChatWindowHeaderComponent,
-    ChatWindowContentComponent,
-  ],
-  selector: 'ngx-chat-window',
-  templateUrl: './chat-window.component.html',
-  styleUrls: ['./chat-window.component.less'],
+    imports: [
+        CommonModule,
+        ChatWindowFrameComponent,
+        ChatWindowHeaderComponent,
+        ChatWindowContentComponent,
+    ],
+    selector: 'ngx-chat-window',
+    templateUrl: './chat-window.component.html',
+    styleUrls: ['./chat-window.component.less']
 })
 export class ChatWindowComponent implements OnInit, OnDestroy {
   currentRecipient!: Recipient;
@@ -64,10 +63,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy {
     @Inject(OPEN_CHAT_SERVICE_TOKEN) public openChatsService: OpenChatsService,
     @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
     private readonly openChatStateService: OpenChatStateService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.openChatsService.incrementOpenWindowCount(this.currentRecipient);
+    this.openChatsService.viewedChatMessages(this.currentRecipient);
   }
 
   ngOnDestroy(): void {

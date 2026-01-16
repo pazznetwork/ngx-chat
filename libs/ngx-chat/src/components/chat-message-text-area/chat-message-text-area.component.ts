@@ -13,11 +13,10 @@ import { ChatMessageLinkComponent } from './chat-message-link';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule],
-  selector: 'ngx-chat-message-text-area',
-  templateUrl: './chat-message-text-area.component.html',
-  styleUrls: ['chat-message-text-area.component.less'],
+    imports: [CommonModule],
+    selector: 'ngx-chat-message-text-area',
+    templateUrl: './chat-message-text-area.component.html',
+    styleUrls: ['chat-message-text-area.component.less']
 })
 export class ChatMessageTextAreaComponent implements OnChanges {
   @Input()

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dual Chat Demo</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            font-family: sans-serif;
+        }
+
+        .pane {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid #ccc;
+        }
+
+        .pane:last-child {
+            border-right: none;
+        }
+
+        .header {
+            padding: 8px;
+            background: #333;
+            color: white;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pane">
+        <div class="header" id="header1">User 1</div>
+        <iframe id="frame1"></iframe>
+    </div>
+    <div class="pane">
+        <div class="header" id="header2">User 2</div>
+        <iframe id="frame2"></iframe>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const u1 = params.get('u1') || 'snowwhite';
+        const p1 = params.get('p1') || 'snowwhite';
+        const u2 = params.get('u2') || 'sleepy';
+        const p2 = params.get('p2') || 'sleepy';
+        const service = params.get('service') || 'ws://localhost:5280/websocket';
+
+        document.getElementById('header1').textContent = u1;
+        document.getElementById('header2').textContent = u2;
+
+        document.getElementById('frame1').src = `/?username=${u1}&password=${p1}&service=${service}`;
+        document.getElementById('frame2').src = `/?username=${u2}&password=${p2}&service=${service}`;
+    </script>
+</body>
+
+</html>

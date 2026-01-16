@@ -8,7 +8,7 @@ import { $msg } from '@pazznetwork/strophe-ts';
 import { ensureNoRegisteredUser, ensureRegisteredUser } from './helpers/admin-actions';
 import { Direction, parseJid, Room } from '@pazznetwork/ngx-chat-shared';
 import { firstValueFrom } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, timeout } from 'rxjs/operators';
 
 describe('message archive plugin', () => {
   let testUtils: TestUtils;
@@ -17,6 +17,7 @@ describe('message archive plugin', () => {
   const userJid = 'me@example.com/myresource';
 
   beforeEach(() => {
+    TestUtils.clean();
     const testBed = TestBed.configureTestingModule({
       imports: [XmppAdapterTestModule],
     });
@@ -49,12 +50,23 @@ describe('message archive plugin', () => {
     expect(contacts.length).toBe(1);
     expect(contacts[0]?.jid.toString()).toEqual(userJid);
 
-    const messages = contacts[0]?.messageStore.messages;
-    expect(messages?.length).toBe(1);
-    expect(messages?.[0]?.body).toBe('message text');
-    expect(messages?.[0]?.direction).toBe(Direction.in);
-    expect(messages?.[0]?.datetime).toEqual(new Date('2018-07-18T08:47:44.233057Z'));
-    expect(messages?.[0]?.fromArchive).toBe(true);
+    const recipient = contacts[0];
+    if (!recipient) {
+      throw new Error('recipient not found');
+    }
+
+    const messages = await firstValueFrom(
+      recipient.messageStore.messages$.pipe(
+        filter((msgs) => msgs.length > 0),
+        timeout(10000)
+      )
+    );
+
+    expect(messages.length).toBe(1);
+    expect(messages[0]?.body).toBe('message text');
+    expect(messages[0]?.direction).toBe(Direction.in);
+    expect(messages[0]?.datetime).toEqual(new Date('2018-07-18T08:47:44.233057Z'));
+    expect(messages[0]?.fromArchive).toBe(true);
 
     await testUtils.logOut();
 

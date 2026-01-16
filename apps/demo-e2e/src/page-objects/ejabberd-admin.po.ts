@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { APIRequestContext, expect, Page } from '@playwright/test';
-import {
-  devXmppDomain,
-  devXmppJid,
-  devXmppPassword,
-} from '../../../../libs/ngx-xmpp/src/.secrets-const';
+// Default test credentials matching local dev environment
+const devXmppDomain = 'local-jabber.entenhausen.pazz.de';
+const devXmppJid = 'local-admin@local-jabber.entenhausen.pazz.de';
+const devXmppPassword = 'AdminLocalPassword123!';
 
 const devUserName = devXmppJid?.split('@')[0] as string;
 export class EjabberdAdminPage {
-  private constructor(private readonly host: string, private readonly context: APIRequestContext) {}
+  private constructor(private readonly host: string, private readonly context: APIRequestContext) { }
   static async getAllJabberUsersBesidesAdmin(
     page: Page,
     adminUsername = devUserName,
@@ -47,16 +46,12 @@ export class EjabberdAdminPage {
       await deleteUser();
     }
   }
-  async deleteAllBesidesAdminUser(): Promise<void> {
+  async deleteUsers(users: string[]): Promise<void> {
     const rooms = await this.getMucRooms();
     for (const room of rooms) {
       await this.destroyRoom(room.split('@')[0] as string);
     }
-    const users = await this.registeredUsers();
-    const withoutAdmin = users.filter((user) => user.toLowerCase() !== 'local-admin');
-    for (const user of withoutAdmin) {
-      await this.unregister(user);
-    }
+    await Promise.all(users.map((user) => this.unregister(user)));
   }
 
   async unregister(user: string): Promise<void> {
@@ -99,7 +94,8 @@ export class EjabberdAdminPage {
       host,
       await playwright.request.newContext({
         // All requests we send go to this API endpoint.
-        baseURL: `http://${host}:52810/api/`,
+        // The server is exposed on localhost, even if the XMPP domain is different.
+        baseURL: `http://localhost:52810/api/`,
         extraHTTPHeaders: {
           'X-Admin': 'true',
           'Content-Type': 'application/json',

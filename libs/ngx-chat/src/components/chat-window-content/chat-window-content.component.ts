@@ -7,14 +7,13 @@ import { ChatHistoryComponent } from '../chat-history';
 import { CommonModule } from '@angular/common';
 import { ChatFileDropComponent } from '../chat-file-drop';
 import { CHAT_SERVICE_TOKEN, FILE_UPLOAD_HANDLER_TOKEN } from '@pazznetwork/ngx-xmpp';
-import { combineLatest, map, Observable, of } from 'rxjs';
+import { combineLatest, map, Observable, of, startWith } from 'rxjs';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ChatFileDropComponent, ChatHistoryComponent, ChatWindowInputComponent],
-  selector: 'ngx-chat-window-content',
-  templateUrl: './chat-window-content.component.html',
-  styleUrls: ['./chat-window-content.component.less'],
+    imports: [CommonModule, ChatFileDropComponent, ChatHistoryComponent, ChatWindowInputComponent],
+    selector: 'ngx-chat-window-content',
+    templateUrl: './chat-window-content.component.html',
+    styleUrls: ['./chat-window-content.component.less']
 })
 export class ChatWindowContentComponent {
   currentRecipient!: Recipient;
@@ -23,14 +22,13 @@ export class ChatWindowContentComponent {
   set recipient(value: Recipient) {
     if (value instanceof Contact) {
       this.pendingRequest$ = combineLatest([
-        this.chatService.contactListService.contactsBlocked$,
+        this.chatService.contactListService.contactsBlocked$.pipe(startWith([])),
         value.subscription$,
       ]).pipe(
         map(([blockedContacts, subscription]) => {
           const isNotBlocked = !blockedContacts.find((b) => b.jid.bare().equals(value?.jid.bare()));
-
-          // none and undefined no longer checked for pazz
-          return isNotBlocked && ContactSubscription.from === subscription;
+          return isNotBlocked &&
+            (ContactSubscription.from === subscription || ContactSubscription.none === subscription);
         })
       );
     } else {
@@ -55,7 +53,7 @@ export class ChatWindowContentComponent {
   constructor(
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     @Inject(FILE_UPLOAD_HANDLER_TOKEN) readonly fileUploadHandler: FileUploadHandler
-  ) {}
+  ) { }
 
   async uploadFile(file: File): Promise<void> {
     if (!this.currentRecipient) {

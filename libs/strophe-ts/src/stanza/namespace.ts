@@ -54,5 +54,5 @@ export enum NS {
  *    @param value - The actual namespace.
  */
 export function addNamespace(name: string, value: string): void {
-  NS[name] = value;
+  (NS as any)[name] = value;
 }

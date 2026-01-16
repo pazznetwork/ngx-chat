@@ -9,11 +9,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ChatAvatarComponent],
-  selector: 'ngx-chat-window-header',
-  templateUrl: './chat-window-header.component.html',
-  styleUrls: ['./chat-window-header.component.less'],
+    imports: [CommonModule, ChatAvatarComponent],
+    selector: 'ngx-chat-window-header',
+    templateUrl: './chat-window-header.component.html',
+    styleUrls: ['./chat-window-header.component.less']
 })
 export class ChatWindowHeaderComponent {
   @Input()

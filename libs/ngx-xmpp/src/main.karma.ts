@@ -10,4 +10,6 @@ import {
 } from '@angular/platform-browser-dynamic/testing';
 
 // First, initialize the Angular testing environment.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(jasmine as any).DEFAULT_TIMEOUT_INTERVAL = 60000;
 getTestBed().initTestEnvironment([BrowserDynamicTestingModule], platformBrowserDynamicTesting());

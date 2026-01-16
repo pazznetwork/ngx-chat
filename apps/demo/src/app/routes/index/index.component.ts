@@ -23,7 +23,7 @@ import {
   FILE_UPLOAD_HANDLER_TOKEN,
 } from '@pazznetwork/ngx-xmpp';
 import { XmppService } from '@pazznetwork/xmpp-adapter';
-import { cleanUpJabber } from '../../../../../../libs/ngx-xmpp/src/test/helpers/ejabberd-client';
+
 import { StanzaComponent } from '../../components/stanza/stanza.component';
 import { ContactManagementComponent } from '../../components/contact-management/contact-management.component';
 import { MucComponent } from '../../components/muc/muc.component';
@@ -38,23 +38,22 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'ngx-chat-index',
-  templateUrl: './index.component.html',
-  standalone: true,
-  imports: [
-    StanzaComponent,
-    ContactManagementComponent,
-    MucComponent,
-    AsyncPipe,
-    NgIf,
-    ChatComponent,
-    FormsModule,
-    RouterLink,
-    NgForOf,
-    ChatFileDropComponent,
-    ChatHistoryComponent,
-    ChatWindowInputComponent,
-  ],
+    selector: 'ngx-chat-index',
+    templateUrl: './index.component.html',
+    imports: [
+        StanzaComponent,
+        ContactManagementComponent,
+        MucComponent,
+        AsyncPipe,
+        NgIf,
+        ChatComponent,
+        FormsModule,
+        RouterLink,
+        NgForOf,
+        ChatFileDropComponent,
+        ChatHistoryComponent,
+        ChatWindowInputComponent,
+    ]
 })
 export class IndexComponent implements OnDestroy {
   domain = '';
@@ -86,7 +85,7 @@ export class IndexComponent implements OnDestroy {
       service: string;
       password: string;
       username: string;
-    } = item ? JSON.parse(item) : { domain: '', password: '', service: '', username: '' };
+    } = item ? JSON.parse(item) : { domain: 'local-jabber.entenhausen.pazz.de', password: 'password', service: 'ws://localhost:4200/websocket', username: '' };
     this.logService.logLevel = LogLevel.Debug;
     this.domain = contactData.domain;
     this.service = contactData.service;
@@ -246,9 +245,7 @@ export class IndexComponent implements OnDestroy {
     });
   }
 
-  cleanUpJabber(): Promise<void> {
-    return cleanUpJabber();
-  }
+
 
   forceAppUpdate(): void {
     this.appRef.tick();

@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main, fix/*, feat/* ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+
+      - name: Create .env file for Docker
+        run: |
+          echo "POSTGRES_DB=ejabberd" > docker/test-env/.env
+          echo "POSTGRES_USER=postgres" >> docker/test-env/.env
+          echo "POSTGRES_PASSWORD=postgres" >> docker/test-env/.env
+
+      - name: Prepare Docker Data and SSL
+        run: |
+          mkdir -p docker/test-env/data/backup
+          mkdir -p docker/test-env/data/upload
+          mkdir -p docker/test-env/data/database
+          mkdir -p docker/test-env/ssl/jabber
+          
+          echo "Generating Self-Signed SSL Certificates..."
+          openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 \
+            -keyout docker/test-env/ssl/jabber/key.pem \
+            -out docker/test-env/ssl/jabber/cert.pem \
+            -subj "/CN=local-jabber.entenhausen.pazz.de"
+            
+          chmod -R 777 docker/test-env/data
+          chmod -R 777 docker/test-env/ssl
+
+      - name: Start Test Environment
+        run: |
+          docker compose -f docker/test-env/docker-compose.yml up -d
+          # Wait for services to be healthy/ready
+          echo "Waiting for ejabberd to be healthy..."
+          # Manual loop with 60 attempts * 5s = 300s (5 minutes) timeout
+          cnt=0
+          while true; do
+            container_id=$(docker compose -f docker/test-env/docker-compose.yml ps -q ejabberd)
+            
+            if [ -n "$container_id" ]; then
+              status=$(docker inspect --format '{{.State.Health.Status}}' "$container_id")
+              echo "Attempt $cnt: Container $container_id status is '$status'"
+              if [ "$status" = "healthy" ]; then
+                echo "Ejabberd is healthy!"
+                break
+              fi
+            else
+              echo "Attempt $cnt: Container ejabberd not yet created/found..."
+            fi
+
+            cnt=$((cnt+1))
+            if [ $cnt -ge 60 ]; then
+              echo "Timed out waiting for ejabberd!"
+              echo "--- DOCKER PS ---"
+              docker compose -f docker/test-env/docker-compose.yml ps -a
+              echo "--- EJABBERD LOGS ---"
+              docker compose -f docker/test-env/docker-compose.yml logs ejabberd
+              exit 1
+            fi
+            sleep 5
+            # Force refresh to ensure we don't get stale state? usually not needed for ps
+          done
+          docker compose -f docker/test-env/docker-compose.yml ps
+
+      - name: Register Admin User
+        run: |
+          echo "Registering local-admin user..."
+          docker compose -f docker/test-env/docker-compose.yml exec -T ejabberd /home/ejabberd/bin/ejabberdctl --node ejabberd@local-jabber.entenhausen.pazz.de register local-admin local-jabber.entenhausen.pazz.de AdminLocalPassword123!
+
+      - name: Configure Hosts
+        run: echo "127.0.0.1 local-jabber.entenhausen.pazz.de" | sudo tee -a /etc/hosts
+
+      - name: Cache Node Modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            ~/.cache/puppeteer
+          key: node_modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            node_modules-${{ runner.os }}-
+
+      - name: Install Dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Puppeteer Version
+        run: node node_modules/puppeteer/install.js
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Check Connectivity
+        run: |
+          echo "Checking netstat..."
+          docker exec local-jabber.entenhausen.pazz.de netstat -tuln
+          echo "Checking http://local-jabber.entenhausen.pazz.de:5280/websocket..."
+          curl -v --fail --connect-timeout 5 --retry 30 --retry-delay 2 --retry-connrefused http://localhost:5280/websocket || echo "Curl http failed!"
+
+
+      - name: Run ngx-xmpp Tests
+        run: npx nx test ngx-xmpp --browsers=ChromeHeadlessInsecure --watch=false
+
+      - name: Run ngx-chat-shared Tests
+        run: npx nx test ngx-chat-shared --watch=false
+
+      - name: Run xmpp-adapter Tests
+        run: npx nx test xmpp-adapter --watch=false
+
+      - name: Run E2E Tests
+        run: npx nx e2e ngx-chat-e2e-new
+        env:
+          CI: true
+        timeout-minutes: 30
+
+      - name: Run Old E2E Tests
+        run: npx nx e2e demo-e2e
+        env:
+          CI: true
+        timeout-minutes: 30
+
+      - name: Dump Ejabberd Logs on Failure
+        if: failure()
+        run: |
+          echo "--- EJABBERD LOGS ---"
+          docker compose -f docker/test-env/docker-compose.yml logs ejabberd
+
+
+
+      - name: Stop Test Environment
+        if: always()
+        run: |
+          cd docker/test-env
+          docker compose down --volumes

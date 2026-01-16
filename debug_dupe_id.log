@@ -1,0 +1,266 @@
+
+> nx run ngx-chat-e2e-new:e2e --grep dual-connect
+
+[1m[33mWarning: Running a server with --disable-host-check is a security risk. See https://medium.com/webpack/webpack-dev-server-middleware-security-issues-1489d950874a for more information.[39m[22m
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+- Generating browser application bundles (phase: setup)...
+[32m✔[39m Browser application bundle generation complete.
+[37m[0m[0m[39m
+[37m[0m[1mInitial chunk files[22m  [2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m[0m[39m
+[37m[0m[32mvendor.js[39m[37m            [2m | [22m[2mvendor[22m       [2m | [22m  [36m3.22 MB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mmain.js[39m[37m              [2m | [22m[2mmain[22m         [2m | [22m[36m969.30 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mpolyfills.js[39m[37m         [2m | [22m[2mpolyfills[22m    [2m | [22m[36m343.91 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mstyles.css, styles.js[39m[37m[2m | [22m[2mstyles[22m       [2m | [22m[36m230.69 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mruntime.js[39m[37m           [2m | [22m[2mruntime[22m      [2m | [22m  [36m6.51 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[0m[39m
+[37m[0m[1m [22m                    [2m | [22m[1mInitial total[22m[2m | [22m  [1m4.73 MB[22m[0m[39m
+[37m[0m[0m[39m
+[37m[0mBuild at: [1m[37m2025-12-23T14:00:25.600Z[39m[37m[22m - Hash: [1m[37md509c389ffbb9b9d[39m[37m[22m - Time: [1m[37m2789[39m[37m[22mms[0m[39m
+[37m[39m
+[37m** Angular Live Development Server is listening on 0.0.0.0:4201, open your browser on http://localhost:4201/ **[39m
+[37m[39m
+[37m[39m
+[37m[92m✔[39m[37m Compiled successfully.[39m
+[1m[33m[39m[22m
+[1m[33m[0m[33mWarning: [39m[33m[0m/Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/demo-new/src/app/nx-welcome.ts is part of the TypeScript compilation but it's unused.[39m[22m
+[1m[33mAdd only entry points to the 'files' or 'include' properties in your tsconfig.[39m[22m
+[1m[33m[39m[22m
+[1m[33m[0m[33mWarning: [39m[33m[0m/Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/demo-new/src/environments/environment.interface.ts is part of the TypeScript compilation but it's unused.[39m[22m
+[1m[33mAdd only entry points to the 'files' or 'include' properties in your tsconfig.[39m[22m
+[1m[33m[39m[22m
+[1m[33m[0m[33mWarning: [39m[33m[0m/Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/demo-new/src/environments/environment.prod.ts is part of the TypeScript compilation but it's unused.[39m[22m
+[1m[33mAdd only entry points to the 'files' or 'include' properties in your tsconfig.[39m[22m
+[1m[33m[39m[22m
+[1m[33m[0m[33mWarning: [39m[33m[0m/Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/demo-new/src/environments/environment.ts is part of the TypeScript compilation but it's unused.[39m[22m
+[1m[33mAdd only entry points to the 'files' or 'include' properties in your tsconfig.[39m[22m
+[1m[33m[39m[22m
+[1m[33m[39m[22m
+[32m✔[39m Browser application bundle generation complete.
+[37m[0m[0m[39m
+[37m[0m[1mInitial chunk files[22m[2m | [22m[1mNames[22m  [2m | [22m[1mRaw size[22m[0m[39m
+[37m[0m[32mruntime.js[39m[37m         [2m | [22m[2mruntime[22m[2m | [22m [36m6.51 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[0m[39m
+[37m[0m4 unchanged chunks[0m[39m
+[37m[0m[0m[39m
+[37m[0mBuild at: [1m[37m2025-12-23T14:00:26.195Z[39m[37m[22m - Hash: [1m[37md8e99d54fe182c3b[39m[37m[22m - Time: [1m[37m513[39m[37m[22mms[0m[39m
+[37m[39m
+[37m[92m✔[39m[37m Compiled successfully.[39m
+DEBUG: test object: [36m<ref *1>[39m [Function (anonymous)] {
+  expect: [Function: oe] {
+    extend: [36m[Function (anonymous)][39m,
+    addEqualityTesters: [36m[Function (anonymous)][39m,
+    anything: [36m[Function: tE][39m,
+    any: [36m[Function: eE][39m,
+    not: {
+      arrayContaining: [36m[Function: nE][39m,
+      closeTo: [36m[Function: fE][39m,
+      objectContaining: [36m[Function: iE][39m,
+      stringContaining: [36m[Function: oE][39m,
+      stringMatching: [36m[Function: cE][39m,
+      toBeAttached: [36m[Function: value][39m,
+      toBeChecked: [36m[Function: value][39m,
+      toBeDisabled: [36m[Function: value][39m,
+      toBeEditable: [36m[Function: value][39m,
+      toBeEmpty: [36m[Function: value][39m,
+      toBeEnabled: [36m[Function: value][39m,
+      toBeFocused: [36m[Function: value][39m,
+      toBeHidden: [36m[Function: value][39m,
+      toBeInViewport: [36m[Function: value][39m,
+      toBeOK: [36m[Function: value][39m,
+      toBeVisible: [36m[Function: value][39m,
+      toContainText: [36m[Function: value][39m,
+      toHaveAttribute: [36m[Function: value][39m,
+      toHaveClass: [36m[Function: value][39m,
+      toHaveCount: [36m[Function: value][39m,
+      toHaveCSS: [36m[Function: value][39m,
+      toHaveId: [36m[Function: value][39m,
+      toHaveJSProperty: [36m[Function: value][39m,
+      toHaveText: [36m[Function: value][39m,
+      toHaveTitle: [36m[Function: value][39m,
+      toHaveURL: [36m[Function: value][39m,
+      toHaveValue: [36m[Function: value][39m,
+      toHaveValues: [36m[Function: value][39m,
+      toHaveScreenshot: [36m[Function: value][39m,
+      toPass: [36m[Function: value][39m,
+      toMatchSnapshot: [36m[Function: value][39m
+    },
+    arrayContaining: [36m[Function: rE][39m,
+    closeTo: [36m[Function: lE][39m,
+    objectContaining: [36m[Function: sE][39m,
+    stringContaining: [36m[Function: uE][39m,
+    stringMatching: [36m[Function: aE][39m,
+    assertions: [36m[Function: oh][39m,
+    hasAssertions: [36m[Function: ah][39m,
+    getState: [36m[Function: Hy][39m,
+    setState: [36m[Function: Uy][39m,
+    extractExpectedAssertionsErrors: [36m[Function: hE][39m,
+    toBeAttached: [36m[Function: value][39m,
+    toBeChecked: [36m[Function: value][39m,
+    toBeDisabled: [36m[Function: value][39m,
+    toBeEditable: [36m[Function: value][39m,
+    toBeEmpty: [36m[Function: value][39m,
+    toBeEnabled: [36m[Function: value][39m,
+    toBeFocused: [36m[Function: value][39m,
+    toBeHidden: [36m[Function: value][39m,
+    toBeInViewport: [36m[Function: value][39m,
+    toBeOK: [36m[Function: value][39m,
+    toBeVisible: [36m[Function: value][39m,
+    toContainText: [36m[Function: value][39m,
+    toHaveAttribute: [36m[Function: value][39m,
+    toHaveClass: [36m[Function: value][39m,
+    toHaveCount: [36m[Function: value][39m,
+    toHaveCSS: [36m[Function: value][39m,
+    toHaveId: [36m[Function: value][39m,
+    toHaveJSProperty: [36m[Function: value][39m,
+    toHaveText: [36m[Function: value][39m,
+    toHaveTitle: [36m[Function: value][39m,
+    toHaveURL: [36m[Function: value][39m,
+    toHaveValue: [36m[Function: value][39m,
+    toHaveValues: [36m[Function: value][39m,
+    toHaveScreenshot: [36m[Function: value][39m,
+    toPass: [36m[Function: value][39m,
+    toMatchSnapshot: [36m[Function: value][39m
+  },
+  only: [36m[Function (anonymous)][39m,
+  describe: [Function (anonymous)] {
+    only: [36m[Function (anonymous)][39m,
+    configure: [36m[Function (anonymous)][39m,
+    fixme: [36m[Function (anonymous)][39m,
+    parallel: [Function (anonymous)] { only: [36m[Function (anonymous)][39m },
+    serial: [Function (anonymous)] { only: [36m[Function (anonymous)][39m },
+    skip: [36m[Function (anonymous)][39m
+  },
+  beforeEach: [36m[Function (anonymous)][39m,
+  afterEach: [36m[Function (anonymous)][39m,
+  beforeAll: [36m[Function (anonymous)][39m,
+  afterAll: [36m[Function (anonymous)][39m,
+  skip: [36m[Function (anonymous)][39m,
+  fixme: [36m[Function (anonymous)][39m,
+  fail: [36m[Function (anonymous)][39m,
+  slow: [36m[Function (anonymous)][39m,
+  setTimeout: [36m[Function (anonymous)][39m,
+  step: [36m[Function: bound _step] AsyncFunction[39m,
+  use: [36m[Function (anonymous)][39m,
+  extend: [36m[Function (anonymous)][39m,
+  info: [36m[Function (anonymous)][39m,
+  [[32mSymbol(testType)[39m]: TestTypeImpl { fixtures: [ [36m[Object][39m ], test: [36m[Circular *1][39m }
+}
+[2mRunning [22m1[2m test using [22m1[2m worker[22m
+[1A[2K[1/1] [chromium] › dual-connect.spec.ts:10:5 › should facilitate chat between two users via dual.html with extended message flow
+[1A[2K[2m[chromium] › dual-connect.spec.ts:10:5 › should facilitate chat between two users via dual.html with extended message flow[22m
+BROWSER: [webpack-dev-server] Server started: Hot Module Replacement disabled, Live Reloading enabled, Progress disabled, Overlay enabled.
+[1A[2KBROWSER: DEBUG: App component initialized, exposed as window.app App
+[1A[2KBROWSER: Angular is running in development mode.
+[1A[2KBROWSER: [webpack-dev-server] Server started: Hot Module Replacement disabled, Live Reloading enabled, Progress disabled, Overlay enabled.
+[1A[2KBROWSER: DEBUG: App component initialized, exposed as window.app App
+[1A[2KBROWSER: Angular is running in development mode.
+[1A[2KBROWSER: DEBUG: App login called with: snowwhite
+[1A[2KBROWSER: DEBUG: App login called with: sleepy
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Sending ID=1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Sending ID=eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2KBROWSER: DEBUG_ID_CHECK: Receive ID=eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- OriginID=eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- StanzaID=eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de-
+[1A[2K[31m  1) [chromium] › dual-connect.spec.ts:10:5 › should facilitate chat between two users via dual.html with extended message flow [39m
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoHaveCount[2m([22m[32mexpected[39m[2m)[22m
+    Locator: locator('ngx-chat-message-out').filter({ hasText: 'SnowWhite Message 1 1766498430358' })
+    Expected: [32m1[39m
+    Received: [31m2[39m
+    Call log:
+      [2m- expect.toHaveCount with timeout 10000ms[22m
+    [2m  - waiting for locator('ngx-chat-message-out').filter({ hasText: 'SnowWhite Message 1 1766498430358' })[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [0m [90m 69 |[39m[0m
+    [0m [90m 70 |[39m     [90m// Verify SnowWhite sees them sent (out)[39m[0m
+    [0m[31m[1m>[22m[39m[90m 71 |[39m     [36mawait[39m expect(snowWhiteFrame[33m.[39mlocator([32m'ngx-chat-message-out'[39m[33m,[39m { hasText[33m:[39m msgA1 }))[33m.[39mtoHaveCount([35m1[39m)[33m;[39m[0m
+    [0m [90m    |[39m                                                                                      [31m[1m^[22m[39m[0m
+    [0m [90m 72 |[39m     [36mawait[39m expect(snowWhiteFrame[33m.[39mlocator([32m'ngx-chat-message-out'[39m[33m,[39m { hasText[33m:[39m msgA2 }))[33m.[39mtoHaveCount([35m1[39m)[33m;[39m[0m
+    [0m [90m 73 |[39m[0m
+    [0m [90m 74 |[39m     [90m// Sleepy: Open chat and verify receipt[39m[0m
+    [2m    at /Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/ngx-chat-e2e-new/src/dual-connect.spec.ts:71:86[22m
+[1A[2K[31m  1 failed[39m
+[31m    [chromium] › dual-connect.spec.ts:10:5 › should facilitate chat between two users via dual.html with extended message flow [39m
+[36m  Serving HTML report at http://localhost:61887. Press Ctrl+C to quit.[39m
+[32m✔[39m Browser application bundle generation complete.
+[37m[0m[0m[39m
+[37m[0m[1mInitial chunk files[22m[2m | [22m[1mNames[22m  [2m | [22m [1mRaw size[22m[0m[39m
+[37m[0m[32mmain.js[39m[37m            [2m | [22m[2mmain[22m   [2m | [22m[36m969.30 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mruntime.js[39m[37m         [2m | [22m[2mruntime[22m[2m | [22m  [36m6.51 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[0m[39m
+[37m[0m3 unchanged chunks[0m[39m
+[37m[0m[0m[39m
+[37m[0mBuild at: [1m[37m2025-12-23T14:01:37.640Z[39m[37m[22m - Hash: [1m[37ma3288fee6c75a1a0[39m[37m[22m - Time: [1m[37m1474[39m[37m[22mms[0m[39m
+[37m[39m
+[37m[92m✔[39m[37m Compiled successfully.[39m
+[32m✔[39m Browser application bundle generation complete.
+[37m[0m[0m[39m
+[37m[0m[1mInitial chunk files[22m[2m | [22m[1mNames[22m  [2m | [22m [1mRaw size[22m[0m[39m
+[37m[0m[32mmain.js[39m[37m            [2m | [22m[2mmain[22m   [2m | [22m[36m969.30 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mruntime.js[39m[37m         [2m | [22m[2mruntime[22m[2m | [22m  [36m6.51 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[0m[39m
+[37m[0m3 unchanged chunks[0m[39m
+[37m[0m[0m[39m
+[37m[0mBuild at: [1m[37m2025-12-23T14:01:38.668Z[39m[37m[22m - Hash: [1m[37m0d2c92f97c0b3bbe[39m[37m[22m - Time: [1m[37m374[39m[37m[22mms[0m[39m
+[37m[39m
+[37m[92m✔[39m[37m Compiled successfully.[39m
+
+
+
+ NX   Running target e2e for project ngx-chat-e2e-new failed
+
+Failed tasks:
+
+- ngx-chat-e2e-new:e2e
+
+Hint: run the command with --verbose for more details.
+

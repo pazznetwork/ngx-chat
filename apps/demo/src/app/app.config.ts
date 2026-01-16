@@ -11,6 +11,7 @@ import { UiComponent } from './routes/ui/ui.component';
 import {
   CUSTOM_CONTACT_FACTORY_TOKEN,
   CUSTOM_ROOM_FACTORY_TOKEN,
+  REPORT_USER_INJECTION_TOKEN,
   USER_AVATAR_TOKEN,
 } from '@pazznetwork/ngx-xmpp';
 import { CustomContact } from './service/custom-contact';
@@ -41,5 +42,10 @@ function provideNgxChat(): EnvironmentProviders {
 }
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideAnimations(), provideRouter(routes), provideNgxChat()],
+  providers: [
+    provideAnimations(),
+    provideRouter(routes),
+    provideNgxChat(),
+    { provide: REPORT_USER_INJECTION_TOKEN, useValue: { reportUser: () => { } } },
+  ],
 };

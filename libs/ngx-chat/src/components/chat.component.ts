@@ -36,11 +36,10 @@ import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
  * ```
  */
 @Component({
-  standalone: true,
-  imports: [CommonModule, RosterListComponent, ChatBarWindowsComponent],
-  selector: 'ngx-chat',
-  templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.less'],
+    imports: [CommonModule, RosterListComponent, ChatBarWindowsComponent],
+    selector: 'ngx-chat',
+    templateUrl: './chat.component.html',
+    styleUrls: ['./chat.component.less']
 })
 export class ChatComponent implements OnInit, OnDestroy, OnChanges {
   /**

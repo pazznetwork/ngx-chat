@@ -4,11 +4,10 @@ import { ChatAvatarComponent } from '../chat-avatar';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ChatAvatarComponent],
-  selector: 'ngx-chat-bubble',
-  templateUrl: './chat-bubble.component.html',
-  styleUrls: ['./chat-bubble.component.less'],
+    imports: [CommonModule, ChatAvatarComponent],
+    selector: 'ngx-chat-bubble',
+    templateUrl: './chat-bubble.component.html',
+    styleUrls: ['./chat-bubble.component.less']
 })
 export class ChatBubbleComponent {
   @Input()

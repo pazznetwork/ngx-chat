@@ -21,13 +21,13 @@ enum SubscriptionAction {
 }
 
 @Component({
-  standalone: true,
-  imports: [ChatBubbleComponent, NgIf, AsyncPipe],
-  selector: 'ngx-chat-message-contact-request',
-  templateUrl: './chat-message-contact-request.component.html',
-  styleUrls: ['./chat-message-contact-request.component.less'],
+    imports: [ChatBubbleComponent, NgIf, AsyncPipe],
+    selector: 'ngx-chat-message-contact-request',
+    templateUrl: './chat-message-contact-request.component.html',
+    styleUrls: ['./chat-message-contact-request.component.less']
 })
 export class ChatMessageContactRequestComponent {
+
   private readonly chatListStateService: OpenChatStateService = inject(
     CHAT_LIST_STATE_SERVICE_TOKEN
   );
@@ -46,7 +46,9 @@ export class ChatMessageContactRequestComponent {
     this.subscriptionAction$ = merge(
       contact.subscription$.pipe(map((sub) => this.getSubActionFromSubscription(sub))),
       this.subscriptionActionSubject
-    ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    ).pipe(
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
 
     this.message$ = this.subscriptionAction$.pipe(map((sub) => this.getMessageFromSubAction(sub)));
 

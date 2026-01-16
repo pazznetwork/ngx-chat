@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, Inject, Input, NgZone } from '@angular/core';
-import { mergeMap, Observable, throttleTime } from 'rxjs';
+import { map, Observable, switchMap, throttleTime } from 'rxjs';
 import {
   ChatService,
   Contact,
@@ -16,11 +16,10 @@ import { ChatMessageOutComponent } from '../chat-message-out';
 import { CHAT_SERVICE_TOKEN, CUSTOM_CONTACT_FACTORY_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ChatMessageInComponent, ChatMessageOutComponent],
-  selector: 'ngx-chat-history-messages-room',
-  templateUrl: './chat-history-messages-room.component.html',
-  styleUrls: ['./chat-history-messages-room.component.less'],
+    imports: [CommonModule, ChatMessageInComponent, ChatMessageOutComponent],
+    selector: 'ngx-chat-history-messages-room',
+    templateUrl: './chat-history-messages-room.component.html',
+    styleUrls: ['./chat-history-messages-room.component.less']
 })
 export class ChatHistoryMessagesRoomComponent {
   @Input()
@@ -30,8 +29,9 @@ export class ChatHistoryMessagesRoomComponent {
     }
 
     this.messagesGroupedByDate$ = value$.pipe(
-      throttleTime(200),
-      mergeMap(async (messages) => {
+      throttleTime(100, undefined, { leading: true, trailing: true }),
+      switchMap(async (messagesInput: Message[]) => {
+        const messages = [...messagesInput];
         messages.sort((a, b) => a?.datetime?.getTime() - b?.datetime?.getTime());
         const messageMap = new Map<string, { message: Message; contact: Contact }[]>();
         for (const message of messages) {
@@ -63,7 +63,9 @@ export class ChatHistoryMessagesRoomComponent {
             messageMap.set(key, [messageWithContact]);
           }
         }
-
+        return messageMap;
+      }),
+      map((messageMap) => {
         const returnArray = new Array<{
           date: Date;
           messagesWithContact: { message: Message; contact: Contact }[];
@@ -92,7 +94,7 @@ export class ChatHistoryMessagesRoomComponent {
     @Inject(CUSTOM_CONTACT_FACTORY_TOKEN)
     private readonly customContactFactory: CustomContactFactory,
     private zone: NgZone
-  ) {}
+  ) { }
 
   trackByIndex(index: number): number {
     return index;

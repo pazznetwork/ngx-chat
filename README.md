@@ -37,7 +37,7 @@ application.
 ## Get Started
 
 ### Compatibility
-
+- Angular 19 (ngx-chat 1.19.x)
 - Angular 14 (ngx-chat 0.14.x)
 - Angular 13 (ngx-chat 0.13.x)
 - Angular 12 (ngx-chat 0.12.x)
@@ -50,12 +50,12 @@ application.
 
 ### Installation and usage
 
-These instructions require Angular 14.
+These instructions require Angular 19.
 
 First install ngx-chat and its dependencies via npm:
 
 ```bash
-npm install --save @pazznetwork/strophe-ts @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat rxjs@7.5.7
+npm install --save @pazznetwork/strophe-ts @pazznetwork/ngx-chat-shared @pazznetwork/xmpp-adapter @pazznetwork/ngx-xmpp @pazznetwork/ngx-chat
 ```
 
 or via yarn:

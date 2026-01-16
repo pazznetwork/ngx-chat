@@ -1,9 +1,9 @@
 {
   "name": "@pazznetwork/ngx-xmpp",
-  "version": "1.16.8",
+  "version": "1.19.0",
   "peerDependencies": {
-    "@angular/common": "^17.3.0",
-    "@angular/core": "^17.3.0",
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
     "rxjs": "^7.8.1"
   },
   "sideEffects": false,

@@ -26,28 +26,28 @@ export class BlockPlugin implements ChatPlugin {
         mergeMap(() => this.requestBlockedJIDs()),
         map((blocked) => {
           blocked.forEach((b) => this.blockedContactMap.add(parseJid(b).bare().toString()));
-          return this.blockedContactMap;
+          return new Set(this.blockedContactMap);
         })
       ),
       this.blockContactJIDSubject.pipe(
         map((value) => {
           this.blockedContactMap.add(parseJid(value).bare().toString());
-          return this.blockedContactMap;
+          return new Set(this.blockedContactMap);
         })
       ),
       this.unblockContactJIDSubject.pipe(
         map((jid) => {
           this.blockedContactMap.delete(jid);
-          return this.blockedContactMap;
+          return new Set(this.blockedContactMap);
         })
       ),
       xmppService.onOffline$.pipe(
         map(() => {
           this.blockedContactMap = new Set<string>();
-          return this.blockedContactMap;
+          return new Set(this.blockedContactMap);
         })
       )
-    ).pipe(shareReplay({ bufferSize: 1, refCount: false }), startWith(this.blockedContactMap));
+    ).pipe(shareReplay({ bufferSize: 1, refCount: false }), startWith(new Set(this.blockedContactMap)));
 
     xmppService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
   }
@@ -61,27 +61,24 @@ export class BlockPlugin implements ChatPlugin {
   }
 
   async blockJid(jid: string): Promise<void> {
-    const blockPromise = firstValueFrom(this.blockContactJIDSubject);
-
     const from = await firstValueFrom(this.xmppService.userJid$);
     await this.xmppService.chatConnectionService
       .$iq({ type: 'set', id: getUniqueId('block') })
       .c('block', { xmlns: this.nameSpace })
       .c('item', { from, jid })
-      .sendResponseLess();
+      .send();
 
-    await blockPromise;
+    this.blockContactJIDSubject.next(jid);
   }
 
   async unblockJid(jid: string): Promise<void> {
-    const unblockPromise = firstValueFrom(this.unblockContactJIDSubject);
-
     await this.xmppService.chatConnectionService
       .$iq({ type: 'set', id: getUniqueId('block') })
       .c('unblock', { xmlns: this.nameSpace })
       .c('item', { jid })
-      .sendResponseLess();
-    await unblockPromise;
+      .send();
+
+    this.unblockContactJIDSubject.next(jid);
   }
 
   private async requestBlockedJIDs(): Promise<Set<string>> {

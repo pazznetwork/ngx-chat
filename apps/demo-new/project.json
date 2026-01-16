@@ -1,0 +1,94 @@
+{
+  "name": "demo-new",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/demo-new/src",
+  "prefix": "app",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:browser",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/apps/demo-new",
+        "index": "apps/demo-new/src/index.html",
+        "main": "apps/demo-new/src/main.ts",
+        "polyfills": "apps/demo-new/src/polyfills.ts",
+        "tsConfig": "apps/demo-new/tsconfig.app.json",
+        "assets": [
+          "apps/demo-new/src/favicon.ico",
+          "apps/demo-new/src/assets",
+          {
+            "glob": "**/*",
+            "input": "apps/demo-new/public",
+            "output": "./"
+          }
+        ],
+        "styles": [
+          "apps/demo-new/src/styles.less"
+        ],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "10kb",
+              "maximumError": "20kb"
+            }
+          ],
+          "fileReplacements": [
+            {
+              "replace": "apps/demo-new/src/environments/environment.ts",
+              "with": "apps/demo-new/src/environments/environment.prod.ts"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "port": 4201,
+        "proxyConfig": "apps/demo-new/proxy.conf.json",
+        "disableHostCheck": true
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "demo-new:build:production"
+        },
+        "development": {
+          "host": "0.0.0.0",
+          "ssl": false,
+          "sslKey": "apps/demo-new/src/local.entenhausen.pazz.de-key.pem",
+          "sslCert": "apps/demo-new/src/local.entenhausen.pazz.de.pem",
+          "buildTarget": "demo-new:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "continuous": true
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

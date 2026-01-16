@@ -1,15 +1,15 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/apps/demo-e2e",
-    "sourceMap": true,
+    "outDir": "../../dist/out-tsc",
     "allowJs": true,
     "types": [
       "node"
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.js"
+    "src/**/*.ts",
+    "src/**/*.js",
+    "playwright.config.ts"
   ]
 }

@@ -55,19 +55,24 @@
     },
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "proxyConfig": "apps/demo/proxy.conf.json",
+        "disableHostCheck": true
+      },
       "configurations": {
         "production": {
           "buildTarget": "demo:build:production"
         },
         "development": {
-          "host": "local.entenhausen.pazz.de",
+          "host": "0.0.0.0",
           "ssl": false,
           "sslKey": "apps/demo/src/local.entenhausen.pazz.de-key.pem",
           "sslCert": "apps/demo/src/local.entenhausen.pazz.de.pem",
           "buildTarget": "demo:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "continuous": true
     },
     "lint": {
       "executor": "@nx/eslint:lint"

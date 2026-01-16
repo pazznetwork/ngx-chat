@@ -6,11 +6,10 @@ import { Subject, withLatestFrom } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  standalone: true,
-  imports: [IntersectionObserverDirective, ResizeObserverDirective],
-  selector: 'ngx-chat-history-auto-scroll',
-  templateUrl: './chat-history-auto-scroll.component.html',
-  styleUrls: ['./chat-history-auto-scroll.component.less'],
+    imports: [IntersectionObserverDirective, ResizeObserverDirective],
+    selector: 'ngx-chat-history-auto-scroll',
+    templateUrl: './chat-history-auto-scroll.component.html',
+    styleUrls: ['./chat-history-auto-scroll.component.less']
 })
 export class ChatHistoryAutoScrollComponent {
   private readonly resizedSubject = new Subject<void>();

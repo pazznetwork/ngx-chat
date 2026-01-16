@@ -5,11 +5,10 @@ import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ChatAvatarComponent],
-  selector: 'ngx-chat-bubble-avatar',
-  templateUrl: './chat-bubble-avatar.component.html',
-  styleUrls: ['./chat-bubble-avatar.component.less'],
+    imports: [CommonModule, ChatAvatarComponent],
+    selector: 'ngx-chat-bubble-avatar',
+    templateUrl: './chat-bubble-avatar.component.html',
+    styleUrls: ['./chat-bubble-avatar.component.less']
 })
 export class ChatBubbleAvatarComponent {
   @Input()

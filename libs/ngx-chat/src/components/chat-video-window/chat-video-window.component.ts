@@ -5,11 +5,10 @@ import { ChatWindowFrameComponent } from '../chat-window-frame';
 import { AttachableTrack } from '@pazznetwork/ngx-chat-shared';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ChatWindowFrameComponent],
-  selector: 'ngx-chat-video-window',
-  templateUrl: './chat-video-window.component.html',
-  styleUrls: ['./chat-video-window.component.less'],
+    imports: [CommonModule, ChatWindowFrameComponent],
+    selector: 'ngx-chat-video-window',
+    templateUrl: './chat-video-window.component.html',
+    styleUrls: ['./chat-video-window.component.less']
 })
 export class ChatVideoWindowComponent implements AfterViewInit {
   @ViewChild('video')

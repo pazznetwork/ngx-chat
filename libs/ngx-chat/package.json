@@ -1,13 +1,13 @@
 {
   "name": "@pazznetwork/ngx-chat",
-  "version": "1.17.2",
+  "version": "1.19.0",
   "license": "MIT",
   "peerDependencies": {
-    "@angular/animations": "^17.3.0",
-    "@angular/cdk": "^17.3.0",
-    "@angular/common": "^17.3.0",
-    "@angular/core": "^17.3.0",
-    "@angular/router": "^17.3.0",
+    "@angular/animations": "^19.0.0",
+    "@angular/cdk": "^19.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/router": "^19.0.0",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {

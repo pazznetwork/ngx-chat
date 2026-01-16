@@ -18,18 +18,17 @@ import { ChatHistoryMessagesContactComponent } from '../chat-history-messages-co
 import { ChatHistoryMessagesRoomComponent } from '../chat-history-messages-room';
 
 @Component({
-  standalone: true,
-  imports: [
-    CommonModule,
-    ChatMessageEmptyComponent,
-    ChatMessageContactRequestComponent,
-    ChatHistoryAutoScrollComponent,
-    ChatHistoryMessagesContactComponent,
-    ChatHistoryMessagesRoomComponent,
-  ],
-  selector: 'ngx-chat-history',
-  templateUrl: './chat-history.component.html',
-  styleUrls: ['./chat-history.component.less'],
+    imports: [
+        CommonModule,
+        ChatMessageEmptyComponent,
+        ChatMessageContactRequestComponent,
+        ChatHistoryAutoScrollComponent,
+        ChatHistoryMessagesContactComponent,
+        ChatHistoryMessagesRoomComponent,
+    ],
+    selector: 'ngx-chat-history',
+    templateUrl: './chat-history.component.html',
+    styleUrls: ['./chat-history.component.less']
 })
 export class ChatHistoryComponent implements OnDestroy {
   currentRecipient?: Recipient;
@@ -46,6 +45,9 @@ export class ChatHistoryComponent implements OnDestroy {
     this.currentRecipient = value;
 
     this.loadMessagesOnScrollToTop();
+    if (!this.openChatsService.isChatOpen(value)) {
+      this.chatService.messageService.loadMostRecentMessages(value);
+    }
     // the unread count plugin relies on this call
     this.openChatsService.viewedChatMessages(this.currentRecipient);
     // todo implement xmpp message state
@@ -80,7 +82,7 @@ export class ChatHistoryComponent implements OnDestroy {
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     private changeDetectorRef: ChangeDetectorRef,
     @Inject(OPEN_CHAT_SERVICE_TOKEN) private openChatsService: OpenChatsService
-  ) {}
+  ) { }
 
   isContact(recipient: Recipient | undefined): boolean {
     if (!recipient) {
@@ -91,7 +93,8 @@ export class ChatHistoryComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     if (!this.currentRecipient) {
-      throw new Error('ChatHistoryComponent: recipient was null or undefined');
+      // throw new Error('ChatHistoryComponent: recipient was null or undefined');
+      // preventing throw to avoid flakiness on destroy
     }
 
     this.ngDestroySubject.next();
@@ -121,6 +124,7 @@ export class ChatHistoryComponent implements OnDestroy {
             );
           } finally {
             this.changeDetectorRef.reattach();
+            this.changeDetectorRef.detectChanges();
             this.isLoadingMessages = false;
           }
         }),

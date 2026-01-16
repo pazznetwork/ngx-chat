@@ -605,6 +605,18 @@ export class Connection {
     this.connectionStatusChangedSubject.next({ status: Status.DISCONNECTED, reason });
     this.connected = false;
 
+    if (this.protocolManager instanceof StropheWebsocket) {
+      if (
+        this.protocolManager.socket &&
+        (this.protocolManager.socket.readyState === WebSocket.OPEN ||
+          this.protocolManager.socket.readyState === WebSocket.CONNECTING)
+      ) {
+        this.protocolManager.socket.close();
+      }
+    } else if (this.protocolManager instanceof Bosh) {
+      this.protocolManager.abortAllRequests();
+    }
+
     // Properly tear down the session so that it's possible to manually connect again.
     log(LogLevel.DEBUG, 'DISCONNECTED');
     this.reset();
@@ -855,7 +867,7 @@ export class Connection {
     if (!this.sasl.doSession) {
       throw new Error(
         `Strophe.Connection.prototype._establishSession ` +
-          `called but apparently ${NS.SESSION} wasn't advertised by the server`
+        `called but apparently ${NS.SESSION} wasn't advertised by the server`
       );
     }
     this.handlerService.addSysHandler(
@@ -1115,7 +1127,7 @@ export class Connection {
       }
 
       this.userJidSubject.next(creds.id);
-      return { jid: creds.id, password: creds['password'] as string };
+      return { jid: creds.id, password: (creds as any)['password'] as string };
     } catch (e) {
       log(LogLevel.ERROR, (e as Error).toString());
     }

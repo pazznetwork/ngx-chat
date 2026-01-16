@@ -55,8 +55,7 @@ const valueParsers = {
 export function parseForm(formEl: Element): XmlSchemaForm {
   if (formEl.nodeName !== 'x' || formEl.getAttribute('xmlns') !== nsXForm) {
     throw new Error(
-      `Provided element is not a form element: elementName=${formEl.tagName}, xmlns=${
-        formEl?.getAttribute('xmlns') as string
+      `Provided element is not a form element: elementName=${formEl.tagName}, xmlns=${formEl?.getAttribute('xmlns') as string
       }, form=${formEl.toString()}`
     );
   }
@@ -68,8 +67,8 @@ export function parseForm(formEl: Element): XmlSchemaForm {
     title: formEl.getAttribute('title') ?? undefined,
     instructions: instructionsNodes
       ? (Array.from(instructionsNodes)
-          .map((descEl) => descEl?.textContent)
-          .filter((s) => !s) as string[])
+        .map((descEl) => descEl?.textContent)
+        .filter((s) => !s) as string[])
       : ([] as string[]),
     fields: Array.from(formEl.querySelectorAll('field')).map((fieldEl) => {
       const rawType = fieldEl.getAttribute('type');
@@ -124,8 +123,7 @@ export function setFieldValue<
 
   if (field && field.type !== type) {
     throw new Error(
-      `type mismatch setting field value: variable=${field?.variable as string}, field.type=${
-        field?.type as string
+      `type mismatch setting field value: variable=${field?.variable as string}, field.type=${field?.type as string
       }, requested type=${type}`
     );
   }
@@ -153,7 +151,7 @@ function serializeTextualMultiField(field: ListMultiFormField | TextMultiFormFie
 
 const valueSerializers = {
   fixed: serializeTextualField,
-  boolean: (field: BooleanFormField) => (field.value != null ? [String(field.value)] : []),
+  boolean: (field: BooleanFormField) => (field.value != null ? [field.value ? '1' : '0'] : []),
   hidden: serializeTextualField,
   'jid-single': (field: JidSingleFormField) => (field.value ? [field.value.toString()] : []),
   'jid-multi': (field: JidMultiFormField) => field.value?.map((jid) => jid.toString()) ?? [],
@@ -185,7 +183,7 @@ export function serializeToSubmitForm(builder: StanzaBuilder, form: XmlSchemaFor
 
   const childBuilder = builder.c('x', { xmlns: nsXForm, type: 'submit' });
   serializedFields.map(([variable, values, type]) => {
-    const attrs = { var: variable };
+    const attrs: { var: string; type?: string } = { var: variable };
     if (['hidden', 'fixed', 'boolean'].includes(type)) {
       attrs['type'] = type;
     }

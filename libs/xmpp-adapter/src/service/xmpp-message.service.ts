@@ -21,6 +21,7 @@ import {
 import type {
   MessageArchivePlugin,
   MessageCarbonsPlugin,
+  MessageStatePlugin,
   MultiUserChatPlugin,
   UnreadMessageCountService,
 } from '@pazznetwork/xmpp-adapter';
@@ -48,10 +49,13 @@ export class XmppMessageService implements MessageService {
 
   readonly messageReceived$: Observable<Recipient>;
 
+  private queuedMessages: { recipient: Recipient; body: string }[] = [];
+
   constructor(
     private readonly chatService: XmppService,
     private readonly messageArchivePlugin: MessageArchivePlugin,
     private readonly multiUserPlugin: MultiUserChatPlugin,
+    private readonly messageStatePlugin: MessageStatePlugin,
     messageCarbonPlugin: MessageCarbonsPlugin,
     unreadMessageCount: UnreadMessageCountService
   ) {
@@ -81,6 +85,7 @@ export class XmppMessageService implements MessageService {
     );
 
     this.chatService.onOnline$.pipe(switchMap(() => this.initializeHandler())).subscribe();
+    this.chatService.onOnline$.subscribe(() => this.flushQueuedMessages());
   }
 
   async initializeHandler(): Promise<void> {
@@ -100,18 +105,55 @@ export class XmppMessageService implements MessageService {
     if (trimmedBody.length === 0) {
       return;
     }
-    switch (recipient.recipientType) {
-      case 'room':
-        await this.multiUserPlugin.sendMessage(recipient.jid.toString(), trimmedBody);
-        this.messageSentSubject.next(recipient);
-        break;
-      case 'contact':
-        await this.sendMessageToContact(recipient, trimmedBody);
-        this.messageSentSubject.next(recipient);
-        break;
-      default:
-        throw new Error(`invalid recipient type: ${recipient?.recipientType as string}`);
+
+    const isOnline = await firstValueFrom(this.chatService.isOnline$);
+
+    if (!isOnline) {
+      this.queuedMessages.push({ recipient, body: trimmedBody });
+      if (recipient.recipientType === 'contact') {
+        await this.addOptimisticMessage(recipient, trimmedBody);
+      }
+      return;
     }
+
+    try {
+      switch (recipient.recipientType) {
+        case 'room':
+          await this.multiUserPlugin.sendMessage(recipient.jid.toString(), trimmedBody);
+          this.messageSentSubject.next(recipient);
+          break;
+        case 'contact':
+          await this.sendMessageToContact(recipient, trimmedBody);
+          this.messageSentSubject.next(recipient);
+          break;
+        default:
+          throw new Error(`invalid recipient type: ${recipient?.recipientType as string}`);
+      }
+    } catch (e) {
+      // If send fails, queue it
+      this.queuedMessages.push({ recipient, body: trimmedBody });
+    }
+  }
+
+  private async flushQueuedMessages(): Promise<void> {
+    const messages = [...this.queuedMessages];
+    this.queuedMessages = [];
+    for (const msg of messages) {
+      await this.sendMessage(msg.recipient, msg.body);
+    }
+  }
+
+  private async addOptimisticMessage(recipient: Recipient, body: string): Promise<void> {
+    const message = {
+      id: getUniqueId('msg-' + recipient.jid.toString() + '-'),
+      direction: Direction.out,
+      body,
+      datetime: new Date(), // Use local time for optimistic
+      delayed: false,
+      fromArchive: false,
+      state: MessageState.SENDING,
+    };
+    recipient.messageStore.addMessage(message);
   }
 
   loadMessagesBeforeOldestMessage(recipient: Recipient): Promise<void> {
@@ -122,21 +164,22 @@ export class XmppMessageService implements MessageService {
     return this.messageArchivePlugin.loadMostRecentMessages(recipient);
   }
 
-  getContactMessageState(_message: Message, _contactJid: string): MessageState {
-    throw new Error('Not implemented getContactMessageState');
-    // todo implement xmpp message state
-    // return this.chatService.pluginMap.messageState.getContactMessageState(message, contactJid);
+  getContactMessageState(message: Message, contactJid: string): MessageState {
+    return this.messageStatePlugin.getContactMessageState(message, contactJid);
   }
 
   private async sendMessageToContact(recipient: Recipient, body: string): Promise<void> {
     const from = await firstValueFrom(this.chatService.chatConnectionService.userJid$);
+    const id = getUniqueId('msg-' + recipient.jid.toString() + '-');
     const messageBuilder = this.chatService.chatConnectionService
-      .$msg({ to: recipient.jid.toString(), from, type: 'chat' })
+      .$msg({ to: recipient.jid.toString(), from, type: 'chat', id })
+      .c('origin-id', { xmlns: 'urn:xmpp:sid:0', id })
+      .up()
       .c('body')
       .t(body);
 
     const message = {
-      id: getUniqueId('msg-' + recipient.jid.toString() + '-'),
+      id,
       direction: Direction.out,
       body,
       datetime: new Date(await firstValueFrom(this.chatService.pluginMap.entityTime.getNow())),
@@ -149,8 +192,7 @@ export class XmppMessageService implements MessageService {
     try {
       await messageBuilder.send();
       recipient.messageStore.addMessage(message);
-      // todo implement xmpp message state
-      // await this.chatService.pluginMap.messageState.afterSendMessage(recipient.jid, message);
+      await this.messageStatePlugin.afterSendMessage(recipient.jid, message);
     } catch (rej) {
       throw new Error(
         `rejected message; message=${JSON.stringify(message)}, rejection=${JSON.stringify(rej)}`
@@ -163,6 +205,11 @@ export class XmppMessageService implements MessageService {
    * @param stanza message to handle from connection, mam or other message extending plugins
    */
   async handleMessageStanza(stanza: MessageWithBodyStanza): Promise<boolean> {
+    const mamResult = stanza.querySelector('result');
+    if (mamResult) {
+      // MAM Result handling if needed
+    }
+
     if (stanza.querySelector('error')) {
       // The recipient's account does not exist on the server.
       // The recipient is offline and the server is not configured to store offline messages for later delivery.
@@ -175,15 +222,11 @@ export class XmppMessageService implements MessageService {
       return true;
     }
 
-    // todo implement xmpp message state
-    /*if (this.chatService.pluginMap.messageState.isMessageState(stanza)) {
-      return this.chatService.pluginMap.messageState.handleStanza(stanza);
-    }*/
+    if (this.messageStatePlugin.isMessageState(stanza)) {
+      return this.messageStatePlugin.handleStanza(stanza);
+    }
 
-    // can be wrapped in result from a query, or in a message received carbons
-    const messageElement = Finder.create(stanza)
-      .searchByTag('forwarded')
-      .searchByTag('message').result;
+
 
     const delayElement = Finder.create(stanza).searchByTag('delay').result;
 
@@ -195,19 +238,17 @@ export class XmppMessageService implements MessageService {
       .searchByNamespace(nsPubSubEvent).result;
 
     // if is from archive get the inner message with type attribute
-    const archiveMessage = Finder.create(stanza)
-      .searchByTag('forwarded')
-      .searchByTag('message').result;
+    const archiveMessage =
+      Finder.create(stanza).searchByTag('result').searchByTag('forwarded').searchByTag('message')
+        .result ??
+      Finder.create(stanza).searchByTag('forwarded').searchByTag('message').result;
 
-    const messageFromArchive = !!archiveMessage;
+    const isCarbon = stanza.getElementsByTagName('received').length > 0 ||
+      stanza.getElementsByTagName('sent').length > 0;
+    const messageFromArchive = !!archiveMessage && !isCarbon;
 
     const messageStanza = eventElement?.querySelector('message') ?? archiveMessage ?? stanza;
 
-    // result as first child comes from mam should call directly from there with the archive delay
-    // received as first child comes from carbons should call directly from there with the archive delay
-    if (messageStanza.querySelector('received') && !messageElement) {
-      return true;
-    }
 
     if (!messageFromArchive && !eventElement) {
       return this.handleSingleMessage(messageStanza, delayElement, messageFromArchive);
@@ -264,8 +305,15 @@ export class XmppMessageService implements MessageService {
       contactJid as string
     );
 
+    const stanzaId = messageStanza.querySelector('stanza-id')?.getAttribute('id') ?? undefined;
+    const id =
+      messageStanza.querySelector('origin-id')?.getAttribute('id') ??
+      messageStanza.getAttribute('id') ??
+      stanzaId as string;
+
     const message = {
-      id: messageStanza.querySelector('stanza-id')?.id as string,
+      id,
+      stanzaId,
       // body can be missing on type=chat messageElements
       body: messageStanza.querySelector('body')?.textContent?.trim() as string,
       direction,
@@ -276,8 +324,7 @@ export class XmppMessageService implements MessageService {
     };
 
     contact.messageStore.addMessage(message);
-    // todo implement xmpp message state
-    // await this.chatService.pluginMap.messageState.afterReceiveMessage(contact, message);
+    await this.messageStatePlugin.afterReceiveMessage(contact, message);
 
     if (direction === Direction.in && !messageFromArchive) {
       this.messageReceivedSubject.next(contact);

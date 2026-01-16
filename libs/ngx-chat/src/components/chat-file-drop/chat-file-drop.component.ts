@@ -3,11 +3,10 @@ import { Component, EventEmitter, HostListener, Input, Output } from '@angular/c
 import { CommonModule } from '@angular/common';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule],
-  selector: 'ngx-chat-file-drop',
-  templateUrl: './chat-file-drop.component.html',
-  styleUrls: ['./chat-file-drop.component.less'],
+    imports: [CommonModule],
+    selector: 'ngx-chat-file-drop',
+    templateUrl: './chat-file-drop.component.html',
+    styleUrls: ['./chat-file-drop.component.less']
 })
 export class ChatFileDropComponent {
   @Output()

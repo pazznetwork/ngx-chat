@@ -6,7 +6,7 @@
 const { join } = require('path');
 const { constants } = require('karma');
 process.env['CHROME_BIN'] = require('puppeteer').executablePath();
-const browser = process.env['DEBUG'] ? 'DebugChrome' : 'Chrome';
+const browser = process.env['DEBUG'] ? 'DebugChrome' : 'ChromeHeadless';
 
 module.exports = () => {
   return {
@@ -36,6 +36,7 @@ module.exports = () => {
         // or set a specific seed with `seed: 4321`
         random: false,
         stopSpecOnExpectationFailure: true,
+        timeoutInterval: 60000,
       },
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
     },
@@ -64,9 +65,11 @@ module.exports = () => {
     port: 9876,
     colors: true,
     logLevel: constants.LOG_INFO,
-    autoWatch: true,
+    browserNoActivityTimeout: 120000,
+    browserDisconnectTolerance: 2,
+    autoWatch: false,
     browsers: [browser],
-    singleRun: false,
+    singleRun: true,
     restartOnFileChange: true,
   };
 };

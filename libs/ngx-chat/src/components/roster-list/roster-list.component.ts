@@ -10,45 +10,32 @@ import { RosterRecipientComponent } from '../roster-recipient';
 import { RosterRecipientPresenceComponent } from '../roster-recipient-presence';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, RosterRecipientComponent, RosterRecipientPresenceComponent],
-  selector: 'ngx-chat-roster-list',
-  templateUrl: './roster-list.component.html',
-  styleUrls: ['./roster-list.component.less'],
-  animations: [
-    trigger('rosterVisibility', [
-      state(
-        'hidden',
-        style({
-          right: '-14em',
-        })
-      ),
-      state(
-        'shown',
-        style({
-          right: '0em',
-        })
-      ),
-      transition('hidden => shown', animate('400ms ease')),
-      transition('shown => hidden', animate('400ms ease')),
-    ]),
-    trigger('drawerVisibility', [
-      state(
-        'hidden',
-        style({
-          right: '0em',
-        })
-      ),
-      state(
-        'shown',
-        style({
-          right: '14em',
-        })
-      ),
-      transition('hidden => shown', animate('400ms ease')),
-      transition('shown => hidden', animate('400ms ease')),
-    ]),
-  ],
+    imports: [CommonModule, RosterRecipientComponent, RosterRecipientPresenceComponent],
+    selector: 'ngx-chat-roster-list',
+    templateUrl: './roster-list.component.html',
+    styleUrls: ['./roster-list.component.less'],
+    animations: [
+        trigger('rosterVisibility', [
+            state('hidden', style({
+                right: '-14em',
+            })),
+            state('shown', style({
+                right: '0em',
+            })),
+            transition('hidden => shown', animate('400ms ease')),
+            transition('shown => hidden', animate('400ms ease')),
+        ]),
+        trigger('drawerVisibility', [
+            state('hidden', style({
+                right: '0em',
+            })),
+            state('shown', style({
+                right: '14em',
+            })),
+            transition('hidden => shown', animate('400ms ease')),
+            transition('shown => hidden', animate('400ms ease')),
+        ]),
+    ]
 })
 export class RosterListComponent {
   @Input()
@@ -79,7 +66,7 @@ export class RosterListComponent {
     @Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService,
     @Inject(CHAT_LIST_STATE_SERVICE_TOKEN)
     private readonly chatListService: OpenChatStateService
-  ) {}
+  ) { }
 
   onClickRecipient(recipient: Recipient): void {
     this.chatListService.openChat(recipient, false);
@@ -88,5 +75,9 @@ export class RosterListComponent {
   toggleVisibility(): void {
     const newState = this.rosterState === 'shown' ? 'hidden' : 'shown';
     this.rosterStateChanged.emit(newState);
+  }
+
+  trackByRecipient(_index: number, recipient: Recipient): string {
+    return recipient.jid.toString();
   }
 }

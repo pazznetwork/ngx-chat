@@ -5,7 +5,7 @@ import type {
   ContactSubscription,
 } from '@pazznetwork/ngx-chat-shared';
 import { runInZone } from '@pazznetwork/ngx-chat-shared';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, map, Observable, startWith } from 'rxjs';
 import type { BlockPlugin, RosterPlugin } from '@pazznetwork/xmpp-adapter';
 import { NgZone } from '@angular/core';
 
@@ -34,21 +34,29 @@ export class XmppContactListService implements ContactListService {
       rosterPlugin.contactsUnaffiliated$,
       this.blockPlugin.blockedContactJIDs$,
     ]).pipe(
-      map(([contacts, blockedJIDs]) =>
-        contacts.filter((c) => !blockedJIDs.has(c.jid.bare().toString()))
-      ),
+      map(([contacts, blockedJIDs]) => {
+        const filtered = contacts.filter((c) => !blockedJIDs.has(c.jid.bare().toString()));
+        return filtered;
+      }),
       runInZone(zone)
     );
     this.blockedContactJIDs$ = blockPlugin.blockedContactJIDs$.pipe(runInZone(zone));
 
     this.contactsBlocked$ = combineLatest([
       this.contacts$,
+      rosterPlugin.contactsUnaffiliated$,
       this.blockPlugin.blockedContactJIDs$,
     ]).pipe(
-      map(([contacts, blockedJIDs]) =>
-        contacts.filter((c) => blockedJIDs.has(c.jid.bare().toString()))
-      ),
-      runInZone(zone)
+      map(([contacts, unaffiliated, blockedJIDs]) => {
+        // Merge and dedup by JID
+        const allContacts = new Map<string, Contact>();
+        contacts.forEach(c => allContacts.set(c.jid.bare().toString(), c));
+        unaffiliated.forEach(c => allContacts.set(c.jid.bare().toString(), c));
+
+        return Array.from(allContacts.values()).filter((c) => blockedJIDs.has(c.jid.bare().toString()));
+      }),
+      runInZone(zone),
+      startWith([])
     );
   }
 

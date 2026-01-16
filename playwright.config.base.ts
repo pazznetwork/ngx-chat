@@ -1,6 +1,6 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 
-const baseURL = 'https://local.entenhausen.pazz.de:4200/';
+const baseURL = 'http://localhost:4200/';
 
 export const baseConfig: PlaywrightTestConfig = {
   retries: 3,

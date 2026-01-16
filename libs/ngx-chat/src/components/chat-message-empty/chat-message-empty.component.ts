@@ -5,11 +5,10 @@ import { CommonModule } from '@angular/common';
 import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule],
-  selector: 'ngx-chat-message-empty',
-  templateUrl: './chat-message-empty.component.html',
-  styleUrls: ['./chat-message-empty.component.less'],
+    imports: [CommonModule],
+    selector: 'ngx-chat-message-empty',
+    templateUrl: './chat-message-empty.component.html',
+    styleUrls: ['./chat-message-empty.component.less']
 })
 export class ChatMessageEmptyComponent {
   constructor(@Inject(CHAT_SERVICE_TOKEN) readonly chatService: ChatService) {}

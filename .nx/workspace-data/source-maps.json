@@ -1,0 +1,2072 @@
+{
+  "libs/ngx-chat": {
+    "root": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:ngx-chat": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:xmpp": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:angular": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:chat": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:component": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:service": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:library": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:jabber": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageVersion": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "libs/ngx-chat/package.json",
+      "nx/core/package-json"
+    ],
+    "$schema": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "prefix": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.executor": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.outputs": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.defaultConfiguration": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.inputs": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.project": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.tsConfig": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.tsConfig": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.executor": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options.commands": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.executor": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.tsConfig": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.karmaConfig": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version.executor": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.executor": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.parallel": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.commands": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.executor": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.parallel": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.commands": [
+      "libs/ngx-chat/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "libs/ngx-chat-shared": {
+    "root": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageVersion": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "libs/ngx-chat-shared/package.json",
+      "nx/core/package-json"
+    ],
+    "$schema": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.executor": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.outputs": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.outputPath": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.main": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.tsConfig": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.assets": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.outputs": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.executor": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.outputs": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.jestConfig": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.passWithNoTests": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.tsConfig": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version.executor": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.executor": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.parallel": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.commands": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.executor": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.parallel": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.commands": [
+      "libs/ngx-chat-shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "libs/ngx-xmpp": {
+    "root": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageVersion": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "libs/ngx-xmpp/package.json",
+      "nx/core/package-json"
+    ],
+    "$schema": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "prefix": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.executor": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.outputs": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.defaultConfiguration": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.project": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.tsConfig": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.tsConfig": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.executor": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.tsConfig": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.karmaConfig": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.polyfills": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.main": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.include": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.styles": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.scripts": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.assets": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.browsers": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version.executor": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.executor": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.parallel": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.commands": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.executor": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.parallel": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.commands": [
+      "libs/ngx-xmpp/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "libs/strophe-ts": {
+    "root": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:xmpp": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:message": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:bosh": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:websocket": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:browser": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageVersion": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "libs/strophe-ts/package.json",
+      "nx/core/package-json"
+    ],
+    "$schema": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:strophe-ts": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.executor": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.outputs": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.outputPath": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.main": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.tsConfig": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.assets": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.executor": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options.commands": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.outputs": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version.executor": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.executor": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.parallel": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.commands": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.executor": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.parallel": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.commands": [
+      "libs/strophe-ts/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "libs/xmpp-adapter": {
+    "root": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageVersion": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "libs/xmpp-adapter/package.json",
+      "nx/core/package-json"
+    ],
+    "$schema": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "namedInputs": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.executor": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.outputs": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.outputPath": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.main": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.tsConfig": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.assets": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.executor": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options.commands": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.executor": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.outputs": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.jestConfig": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.passWithNoTests": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.tsConfig": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.outputs": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.version.executor": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.executor": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.parallel": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish-internal.options.commands": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.executor": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.parallel": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.publish.options.commands": [
+      "libs/xmpp-adapter/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "apps/demo": {
+    "root": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "prefix": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.executor": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.outputs": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.defaultConfiguration": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.outputPath": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.index": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.main": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.polyfills": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.tsConfig": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.assets": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.styles": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.scripts": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.optimization": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.budgets": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.fileReplacements": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.outputHashing": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.buildOptimizer": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.optimization": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.vendorChunk": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.extractLicenses": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.sourceMap": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.namedChunks": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.executor": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.defaultConfiguration": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.continuous": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options.proxyConfig": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options.disableHostCheck": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.production": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.production.buildTarget": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.host": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.ssl": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.sslKey": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.sslCert": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.buildTarget": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "apps/demo/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "apps/demo-e2e": {
+    "root": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "implicitDependencies": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "implicitDependencies.demo": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.executor": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.configurations": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options.e2eFolder": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options.devServerTarget": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options.packageRunner": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.configurations.production": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.configurations.production.devServerTarget": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.executor": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.configurations": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options.e2eFolder": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options.devServerTarget": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options.packageRunner": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options.debug": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.configurations.production": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.configurations.production.devServerTarget": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.executor": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options.commands": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.outputs": [
+      "apps/demo-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.e2e.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.e2e.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "apps/demo-new": {
+    "root": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "prefix": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.executor": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.outputs": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.defaultConfiguration": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.outputPath": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.index": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.main": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.polyfills": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.tsConfig": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.assets": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.styles": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.scripts": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.optimization": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.budgets": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.fileReplacements": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.production.outputHashing": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.buildOptimizer": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.optimization": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.vendorChunk": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.extractLicenses": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.sourceMap": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.configurations.development.namedChunks": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.executor": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.defaultConfiguration": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.continuous": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options.port": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options.proxyConfig": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options.disableHostCheck": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.production": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.production.buildTarget": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.host": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.ssl": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.sslKey": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.sslCert": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.buildTarget": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "apps/demo-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "apps/ngx-chat-e2e-new": {
+    "root": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "implicitDependencies": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "implicitDependencies.demo-new": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.executor": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.configurations": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options.e2eFolder": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options.devServerTarget": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options.packageRunner": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.configurations.production": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.configurations.production.devServerTarget": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.executor": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.configurations": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options.e2eFolder": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options.devServerTarget": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options.packageRunner": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.options.debug": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.configurations.production": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e-debug.configurations.production.devServerTarget": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.executor": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.ts-check.options.commands": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.executor": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint.outputs": [
+      "apps/ngx-chat-e2e-new/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.e2e.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.e2e.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+    // 4. Create Conversation (Simulate 'Add' or receiving invite)
+    await snowWhiteFrame.evaluate(({ roomJid }) => {
+        const convList = (window as any).ng.getComponent(document.querySelector('ngx-chat-conversation-list'));
+        if (convList) {
+             const zone = (window as any).Zone.current;
+             zone.run(() => convList.conversationState.createConversation(roomJid));
+        }
+    }, { roomJid });
+
+    await sleepyFrame.evaluate(({ roomJid }) => {
+        const convList = (window as any).ng.getComponent(document.querySelector('ngx-chat-conversation-list'));
+        if (convList) {
+             const zone = (window as any).Zone.current;
+             zone.run(() => convList.conversationState.createConversation(roomJid));
+        }
+    }, { roomJid });
+
+    // 5. Open Chat Window to Trigger Auto-Join
+    const snowConversation = snowWhiteFrame.locator(`ngx-chat-conversation-list .conversation-list-item`, { hasText: roomName });
+    await snowConversation.waitFor({ state: 'visible', timeout: 5000 });
+    await snowConversation.click();
+
+    const sleepyConversation = sleepyFrame.locator(`ngx-chat-conversation-list .conversation-list-item`, { hasText: roomName });
+    await sleepyConversation.waitFor({ state: 'visible', timeout: 5000 });
+    await sleepyConversation.click();
+    
+    // Wait for Auto-Join presence exchange
+    await page.waitForTimeout(2000);
+
+    // 6. Seed Conversation verify (Message Test)
+    // Now that they are joined, messages should flow.

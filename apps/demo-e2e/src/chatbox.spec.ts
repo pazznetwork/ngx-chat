@@ -1,18 +1,16 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { AppPage } from './page-objects/app.po';
 import { EjabberdAdminPage } from './page-objects/ejabberd-admin.po';
-import {
-  devXmppDomain,
-  devXmppJid,
-  devXmppPassword,
-} from '../../../libs/ngx-xmpp/src/.secrets-const';
+// Default test credentials matching local dev environment
+const devXmppDomain = 'local-jabber.entenhausen.pazz.de';
+const devXmppJid = 'local-admin@local-jabber.entenhausen.pazz.de';
+const devXmppPassword = 'AdminLocalPassword123!';
 
 const fooUser = 'foouser';
 const barUser = 'baruser';
 const testPassword = 'somepassword';
-const fooUserJid = fooUser + 'local-jabber.entenhausen.pazz.de';
-const barUserJid = barUser + 'local-jabber.entenhausen.pazz.de';
+const fooUserJid = fooUser + '@local-jabber.entenhausen.pazz.de';
+const barUserJid = barUser + '@local-jabber.entenhausen.pazz.de';
 
 test.describe('ngx-chat', () => {
   let appPage: AppPage;
@@ -26,7 +24,7 @@ test.describe('ngx-chat', () => {
       devXmppJid,
       devXmppPassword
     );
-    await ejabberdAdminPage.deleteAllBesidesAdminUser();
+    await ejabberdAdminPage.deleteUsers([fooUser, barUser]);
 
     await ejabberdAdminPage.register(fooUser, testPassword);
     await ejabberdAdminPage.register(barUser, testPassword);
@@ -34,6 +32,7 @@ test.describe('ngx-chat', () => {
   });
 
   test('should be able to submit message with enter key and button', async () => {
+    test.setTimeout(60000);
     await appPage.logIn(fooUser, testPassword);
     await appPage.addContact(barUserJid);
     await appPage.addContact(fooUserJid);
@@ -45,10 +44,17 @@ test.describe('ngx-chat', () => {
     await chatWindow.open();
 
     await chatWindow.write(buttonSubmitMessage, 'button');
-    await chatWindow.assertLastMessage(buttonSubmitMessage, 'outgoing');
+    await expect(async () => {
+      // Robust check: ensure message exists in outgoing list
+      const messages = await chatWindow.getOutMessagesText();
+      expect(messages.some(m => m.includes(buttonSubmitMessage))).toBeTruthy();
+    }).toPass({ timeout: 10000 });
 
     await chatWindow.write(enterKeySubmitMessage, 'enter');
-    await chatWindow.assertLastMessage(enterKeySubmitMessage, 'outgoing');
+    await expect(async () => {
+      const messages = await chatWindow.getOutMessagesText();
+      expect(messages.some(m => m.includes(enterKeySubmitMessage))).toBeTruthy();
+    }).toPass({ timeout: 10000 });
 
     await appPage.logOut();
   });

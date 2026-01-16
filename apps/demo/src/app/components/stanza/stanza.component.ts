@@ -7,14 +7,13 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'ngx-chat-demo-stanza',
   templateUrl: './stanza.component.html',
-  standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule]
 })
 export class StanzaComponent {
   request?: string;
   response?: string;
 
-  constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: XmppService) {}
+  constructor(@Inject(CHAT_SERVICE_TOKEN) public chatService: XmppService) { }
 
   async sendIq(): Promise<void> {
     if (!this.request) {
@@ -59,7 +58,7 @@ export class StanzaComponent {
     const attributes = attributeArray.reduce((acc, val) => {
       acc[`${val.name}`] = val.value;
       return acc;
-    }, {});
+    }, {} as Record<string, string>);
 
     return { attributes, element };
   }

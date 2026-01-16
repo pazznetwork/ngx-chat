@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { firstValueFrom, Observable, shareReplay, startWith, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, shareReplay, startWith, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import {
   Affiliation,
@@ -15,11 +15,10 @@ import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ngx-chat-demo-muc',
-  templateUrl: './muc.component.html',
-  styleUrls: ['./muc.component.css'],
-  standalone: true,
-  imports: [AsyncPipe, FormsModule, NgIf, NgForOf],
+    selector: 'ngx-chat-demo-muc',
+    templateUrl: './muc.component.html',
+    styleUrls: ['./muc.component.css'],
+    imports: [AsyncPipe, FormsModule, NgIf, NgForOf]
 })
 export class MucComponent implements OnInit, OnDestroy {
   @Input()
@@ -41,7 +40,7 @@ export class MucComponent implements OnInit, OnDestroy {
   moderatorNick = '';
   adminNick = '';
 
-  private readonly roomsSubject = new Subject<Room[]>();
+  private readonly roomsSubject = new BehaviorSubject<Room[]>([]);
   rooms$ = this.roomsSubject.asObservable();
 
   occupants$?: Observable<RoomOccupant[]>;
@@ -61,7 +60,7 @@ export class MucComponent implements OnInit, OnDestroy {
 
   private readonly ngDestroySubject = new Subject<void>();
 
-  constructor(@Inject(CHAT_SERVICE_TOKEN) readonly chatService: XmppService) {}
+  constructor(@Inject(CHAT_SERVICE_TOKEN) readonly chatService: XmppService) { }
 
   async ngOnInit(): Promise<void> {
     this.roomsSubject.next(await this.chatService.roomService.queryAllRooms());
@@ -126,8 +125,25 @@ export class MucComponent implements OnInit, OnDestroy {
     await this.chatService.roomService.joinRoom(fullJid);
   }
 
-  async leaveRoom(): Promise<void> {
-    await this.chatService.roomService.leaveRoom(await this.getSelectedRoomJid());
+  async leaveRoom(room?: Room): Promise<void> {
+    const jid = room ? room.jid.toString() : await this.getSelectedRoomJid();
+
+    // Optimistic UI Update: Remove immediately from list
+    const currentRooms = this.roomsSubject.getValue();
+    const optimisticRooms = currentRooms.filter((r: Room) => r.jid.toString() !== jid);
+    this.roomsSubject.next(optimisticRooms);
+
+    try {
+      await this.chatService.roomService.leaveRoom(jid);
+    } finally {
+      // Eventually sync with server source of truth
+      await this.queryAllRooms();
+    }
+
+    const selected = await firstValueFrom(this.selectedRoom$);
+    if (selected && selected.jid.toString() === jid) {
+      this.selectedRoomSubject.next(null);
+    }
   }
 
   async changeRoomSubject(): Promise<void> {

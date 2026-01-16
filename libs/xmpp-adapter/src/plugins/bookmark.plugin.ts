@@ -4,6 +4,7 @@ import { removeDuplicates } from '@pazznetwork/ngx-chat-shared';
 import { Subject } from 'rxjs';
 import type { XmppService } from '../xmpp.service';
 import type { XmppConnectionService } from '../service';
+
 import type { StanzaBuilder } from '../stanza-builder';
 
 export interface SavedConference {
@@ -29,12 +30,10 @@ export class BookmarkPlugin implements ChatPlugin {
 
   private pendingAddConference: Promise<IqResponseStanza<'result'>> | null = null;
 
-  constructor(private readonly chatAdapter: XmppService) {
-    // chatAdapter.onOnline$.subscribe(async () => this.bookmarkSubject.next(await this.getBooksMarks()))
-  }
+  constructor(private readonly chatAdapter: XmppService) { }
 
-  registerHandler(_connection: XmppConnectionService): Promise<void> {
-    throw new Error('Method not implemented.');
+  async registerHandler(_connection: XmppConnectionService): Promise<void> {
+    // no-op
   }
 
   onOffline(): void {
@@ -64,7 +63,13 @@ export class BookmarkPlugin implements ChatPlugin {
   }
 
   async retrieveMultiUserChatRooms(): Promise<SavedConference[]> {
-    const nodeItems = await this.chatAdapter.pluginMap.pubSub.retrieveNodeItems(nsBookmarks);
+    let nodeItems: Element[] = [];
+    try {
+      nodeItems = await this.chatAdapter.pluginMap.pubSub.retrieveNodeItems(nsBookmarks);
+    } catch (e) {
+      console.warn('Could not retrieve bookmarks, assumming empty:', e);
+      return [];
+    }
 
     if (nodeItems[0] == null) {
       return [];

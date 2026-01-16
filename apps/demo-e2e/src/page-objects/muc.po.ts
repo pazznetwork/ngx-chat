@@ -122,6 +122,10 @@ export class MucPageObject {
     return all[index]?.textContent();
   }
 
+  async getRoomCount(): Promise<number> {
+    return this.listRoomNameLocator.count();
+  }
+
   async getRoomJid(index = 0): Promise<string | null | undefined> {
     const all = await this.listRoomJidLocator.all();
     return all[index]?.textContent();
@@ -134,8 +138,26 @@ export class MucPageObject {
   }
 
   async leaveRoom(index = 0): Promise<void> {
+    // Angular might re-render the view when data updates, causing "element detached" errors (flaky click).
+    // waiting briefly for the UI to settle.
+    await this.listRoomNameLocator.page().waitForTimeout(500);
     const all = await this.listRoomLeaveButtonLocator.all();
-    await all[index]?.click();
+    const button = all[index];
+    if (button) {
+      // Retry loop for stubborn UI
+      for (let i = 0; i < 3; i++) {
+        try {
+          await button.evaluate((b: HTMLElement) => b.click());
+          await button.waitFor({ state: 'detached', timeout: 2000 });
+          return; // Success!
+        } catch (e) {
+          // Button still there, retry
+          console.log(`Leave click attempt ${i + 1} failed to detach button, retrying...`);
+          await this.listRoomNameLocator.page().waitForTimeout(1000);
+        }
+      }
+      throw new Error('Failed to leave room after 3 attempts');
+    }
   }
 
   async subscribeToRoom(index = 0): Promise<void> {
@@ -278,6 +300,9 @@ export class MucPageObject {
 
   async inviteUser(userJid: string): Promise<void> {
     await this.roomInviteUserJidInputLocator.fill(userJid);
+    // Angular might re-render the view when data updates, causing "element detached" errors.
+    // waiting briefly for the UI to settle.
+    await this.listRoomNameLocator.page().waitForTimeout(500);
     await this.roomInviteUserActionButtonLocator.click();
     await this.grantMembership(userJid);
   }
@@ -288,11 +313,38 @@ export class MucPageObject {
   }
 
   async kickUser(userJid: string): Promise<void> {
-    await this.roomMemberJidLocator.fill(userJid);
-    await this.roomMemberKickButtonLocator.click();
+    await this.roomMemberJidLocator.first().waitFor();
+    const count = await this.roomMemberJidLocator.count();
+    for (let i = 0; i < count; i++) {
+      const text = await this.roomMemberJidLocator.nth(i).textContent();
+      if (text?.includes(userJid)) {
+        await this.roomMemberKickButtonLocator.nth(i).click();
+        return;
+      }
+    }
+    throw new Error(`User ${userJid} not found in room member list`);
   }
+
+
 
   async destroy(): Promise<void> {
     await this.listRoomDestroyRoomButtonLocator.click();
+  }
+
+  async waitForUserToDisappearFromList(nick: string): Promise<void> {
+    await this.roomMemberNickLocator.page().waitForFunction(
+      (args: any) => {
+        const [n, selector] = args;
+        const elements = document.querySelectorAll(selector);
+        for (let i = 0; i < elements.length; i++) {
+          if (elements[i].textContent?.trim() === n) {
+            return false; // User still present
+          }
+        }
+        return true; // User gone
+      },
+      [nick, `[data-zid="room-member-nick"]`],
+      { timeout: 10000 }
+    );
   }
 }

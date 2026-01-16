@@ -1,11 +1,11 @@
 {
-  "version": "1.19.1",
+  "version": "1.19.0",
   "name": "@pazznetwork/ngx-chat-shared",
   "publishConfig": {
     "access": "restricted"
   },
   "peerDependencies": {
-    "@angular/core": "^17.3.0",
+    "@angular/core": "^19.0.0",
     "rxjs": "^7.8.1"
   },
   "type": "module"

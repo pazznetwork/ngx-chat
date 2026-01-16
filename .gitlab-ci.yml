@@ -1,0 +1,29 @@
+image: node:20
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375
+
+cache:
+  paths:
+    - node_modules/
+
+stages:
+  - test
+
+test_e2e:
+  stage: test
+  before_script:
+    - apt-get update && apt-get install -y docker-compose
+    - cd docker/test-env
+    - docker compose up -d
+    - cd ../..
+    - npm install
+  script:
+    - npx nx e2e ngx-chat-e2e-new
+  after_script:
+    - cd docker/test-env
+    - docker compose down --volumes

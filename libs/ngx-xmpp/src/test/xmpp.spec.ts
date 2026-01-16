@@ -15,11 +15,13 @@ import {
 describe('XmppChatAdapter', () => {
   let testUtils: TestUtils;
 
-  beforeAll(() => {
+  beforeEach(() => {
+    TestUtils.clean();
     const testBed = TestBed.configureTestingModule({
       imports: [XmppAdapterTestModule],
     });
     testUtils = new TestUtils(testBed.inject<XmppService>(CHAT_SERVICE_TOKEN));
+    unregisterAllBesidesAdmin();
   });
 
   beforeEach(() => unregisterAllBesidesAdmin());

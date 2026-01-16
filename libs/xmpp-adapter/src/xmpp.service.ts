@@ -62,12 +62,12 @@ export class XmppService implements ChatService {
   ) {
     this.chatConnectionService = new XmppConnectionService(log);
 
-    this.onAuthenticating$ = this.chatConnectionService.onAuthenticating$.pipe(runInZone(zone));
-    this.onOnline$ = this.chatConnectionService.onOnline$.pipe(runInZone(zone));
-    this.onOffline$ = this.chatConnectionService.onOffline$.pipe(runInZone(zone));
-    this.isOnline$ = this.chatConnectionService.isOnline$.pipe(runInZone(zone));
-    this.isOffline$ = this.chatConnectionService.isOffline$.pipe(runInZone(zone));
-    this.userJid$ = this.chatConnectionService.userJid$.pipe(runInZone(zone));
+    this.onAuthenticating$ = this.chatConnectionService.onAuthenticating$.pipe(runInZone<void>(zone));
+    this.onOnline$ = this.chatConnectionService.onOnline$.pipe(runInZone<void>(zone));
+    this.onOffline$ = this.chatConnectionService.onOffline$.pipe(runInZone<void>(zone));
+    this.isOnline$ = this.chatConnectionService.isOnline$.pipe(runInZone<boolean>(zone));
+    this.isOffline$ = this.chatConnectionService.isOffline$.pipe(runInZone<boolean>(zone));
+    this.userJid$ = this.chatConnectionService.userJid$.pipe(runInZone<string>(zone));
 
     this.pluginMap = createPluginMap(
       this,
@@ -82,7 +82,7 @@ export class XmppService implements ChatService {
       this,
       this.pluginMap.mam,
       this.pluginMap.muc,
-      // this.pluginMap.messageState,
+      this.pluginMap.messageState,
       this.pluginMap.messageCarbon,
       this.pluginMap.unreadMessageCount
     );
@@ -125,18 +125,44 @@ export class XmppService implements ChatService {
     return XmppService.instance;
   }
 
+
+
   async logIn(logInRequest: AuthRequest): Promise<void> {
     if (await firstValueFrom(this.isOnline$)) {
       return;
     }
 
     await this.zone.runOutsideAngular(async () => {
+      if (
+        this.lastLogInRequest &&
+        logInRequest.username !== this.lastLogInRequest.username
+      ) {
+        this.pluginMap.roster.clear();
+      }
       this.lastLogInRequest = logInRequest;
       const onOnlinePromise = firstValueFrom(this.onOnline$);
       await this.chatConnectionService.logIn(logInRequest);
-      await onOnlinePromise;
+      try {
+        await Promise.race([
+          onOnlinePromise,
+          firstValueFrom(this.onOffline$).then(() => {
+            throw new Error('Login failed: Connection went offline immediately');
+          }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('timeout waiting for onOnline$')), 60000)
+          ),
+        ]);
+      } catch (e) {
+        throw e;
+      }
+
       await this.pluginMap.disco.ensureServicesAreDiscovered(logInRequest.domain);
       await firstValueFrom(this.pluginMap.disco.servicesInitialized$);
+      try {
+        await this.pluginMap.mam.enableArchiving();
+      } catch (e) {
+        this.log.warn('Start up warning: could not enable archive: ' + e);
+      }
       // redundant because default type is available, but better for documentation purposes
       await this.chatConnectionService.$pres({ type: 'available' }).sendResponseLess();
     });
@@ -145,8 +171,12 @@ export class XmppService implements ChatService {
   async logOut(): Promise<void> {
     await this.zone.runOutsideAngular(async () => {
       const offlinePromise = firstValueFrom(this.onOffline$);
+      this.pluginMap.roster.clear();
       await this.chatConnectionService.logOut();
-      await offlinePromise;
+      await Promise.race([
+        offlinePromise,
+        new Promise((resolve) => setTimeout(resolve, 20000))
+      ]);
     });
   }
 

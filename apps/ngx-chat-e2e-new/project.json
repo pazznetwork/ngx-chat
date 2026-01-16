@@ -1,0 +1,55 @@
+{
+  "name": "ngx-chat-e2e-new",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/ngx-chat-e2e-new/src",
+  "projectType": "application",
+  "tags": [],
+  "implicitDependencies": [
+    "demo-new"
+  ],
+  "targets": {
+    "e2e": {
+      "executor": "@mands/nx-playwright:playwright-executor",
+      "options": {
+        "e2eFolder": "apps/ngx-chat-e2e-new",
+        "devServerTarget": "demo-new:serve",
+        "packageRunner": "npx"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "demo-new:serve:production"
+        }
+      }
+    },
+    "e2e-debug": {
+      "executor": "@mands/nx-playwright:playwright-executor",
+      "options": {
+        "e2eFolder": "apps/ngx-chat-e2e-new",
+        "devServerTarget": "demo-new:serve",
+        "packageRunner": "npx",
+        "debug": true
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "demo-new:serve:development"
+        }
+      }
+    },
+    "ts-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "tsc --build --force --verbose apps/ngx-chat-e2e-new/tsconfig.json"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ]
+    }
+  }
+}

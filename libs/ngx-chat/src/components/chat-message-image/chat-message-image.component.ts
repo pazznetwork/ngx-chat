@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { Component, Input, OnInit } from '@angular/core';
 import { extractUrls } from '@pazznetwork/ngx-chat-shared';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {
   filter,
   finalize,
@@ -18,11 +18,9 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, HttpClientModule, NgOptimizedImage],
-  selector: 'ngx-chat-message-image',
-  templateUrl: './chat-message-image.component.html',
-  styleUrls: ['./chat-message-image.component.less'],
+    selector: 'ngx-chat-message-image',
+    templateUrl: './chat-message-image.component.html',
+    styleUrls: ['./chat-message-image.component.less'], imports: [CommonModule, NgOptimizedImage]
 })
 export class ChatMessageImageComponent implements OnInit {
   @Input()
@@ -70,7 +68,7 @@ export class ChatMessageImageComponent implements OnInit {
 
   private readonly checkedHttpLinksSubject = new ReplaySubject<void>(1);
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) { }
 
   ngOnInit(): void {
     if (!this.textContent) {

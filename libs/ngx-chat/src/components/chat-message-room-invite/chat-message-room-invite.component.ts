@@ -7,11 +7,10 @@ import { CHAT_SERVICE_TOKEN } from '@pazznetwork/ngx-xmpp';
 import { ChatMessageInComponent } from '../chat-message-in';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ChatMessageInComponent],
-  selector: 'ngx-chat-message-room-invite',
-  templateUrl: './chat-message-room-invite.component.html',
-  styleUrls: ['./chat-message-room-invite.component.less'],
+    imports: [CommonModule, ChatMessageInComponent],
+    selector: 'ngx-chat-message-room-invite',
+    templateUrl: './chat-message-room-invite.component.html',
+    styleUrls: ['./chat-message-room-invite.component.less']
 })
 export class ChatMessageRoomInviteComponent {
   @Input()

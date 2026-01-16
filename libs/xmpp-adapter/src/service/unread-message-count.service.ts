@@ -10,7 +10,7 @@ import {
   Subscription,
   switchMap,
 } from 'rxjs';
-import { debounceTime, delay, distinctUntilChanged, filter, map, share } from 'rxjs/operators';
+import { debounceTime, delay, distinctUntilChanged, filter, map, share, startWith } from 'rxjs/operators';
 import type { JidToNumber, OpenChatsService, Recipient } from '@pazznetwork/ngx-chat-shared';
 import { Direction, findSortedInsertionIndexLast, Message } from '@pazznetwork/ngx-chat-shared';
 import type { XmppService } from '../xmpp.service';
@@ -74,30 +74,23 @@ export class UnreadMessageCountService {
             merge(
               muc.rooms$,
               this.chatService.contactListService.contacts$.pipe(
+                startWith([]),
                 pairwise(),
                 filter(([a, b]) => a?.length < b?.length),
-                map(([, b]) => b.at(b.length - 1)),
-                map((contact) => [contact])
+                map(([, b]) => b)
+              ),
+              this.chatService.messageService.messageReceived$.pipe(
+                filter((recipient) => !!recipient),
+                map((recipient) => [recipient])
               )
             )
           )
         )
+
         .subscribe((recipients): void => {
           for (const recipient of recipients) {
-            if (!recipient) {
-              continue;
-            }
-            const jid = recipient.jid.bare().toString();
-            if (!this.recipientIdToMessageSubscription.has(jid)) {
-              const messages$: Observable<Message[]> = recipient.messageStore.messages$;
-              const updateUnreadCountSubscription = messages$
-                .pipe(
-                  debounceTime(20),
-                  mergeMap(() => this.checkForUnreadCountChange(recipient))
-                )
-                // eslint-disable-next-line rxjs/no-nested-subscribe
-                .subscribe();
-              this.recipientIdToMessageSubscription.set(jid, updateUnreadCountSubscription);
+            if (recipient) {
+              this.trackRecipient(recipient);
             }
           }
         });
@@ -134,7 +127,7 @@ export class UnreadMessageCountService {
     if (this.chatMessageListRegistry.isChatOpen(recipient)) {
       this.jidToLastReadTimestamp.set(
         recipient.jid.bare().toString(),
-        await firstValueFrom(this.entityTimePlugin.getNow())
+        await firstValueFrom(this.entityTimePlugin.getNow()) + 10
       );
       await this.persistLastSeenDates();
     }
@@ -197,7 +190,9 @@ export class UnreadMessageCountService {
     const contactUnreadMessageCount = this.calculateUnreadMessageCount(recipient, lastReadDate);
     const jidToCount = this.jidToUnreadCountSubject.getValue();
     if (jidToCount.get(contactJid) !== contactUnreadMessageCount) {
-      this.jidToUnreadCountSubject.next(jidToCount.set(contactJid, contactUnreadMessageCount));
+      const newMap = new Map(jidToCount);
+      newMap.set(contactJid, contactUnreadMessageCount);
+      this.jidToUnreadCountSubject.next(newMap);
     }
   }
 
@@ -242,6 +237,23 @@ export class UnreadMessageCountService {
       if (!oldLastReadDate || oldLastReadDate < date) {
         this.jidToLastReadTimestamp.set(jid, date);
       }
+    }
+  }
+
+  private trackRecipient(recipient: Recipient): void {
+    const jid = recipient.jid.bare().toString();
+    if (!this.recipientIdToMessageSubscription.has(jid)) {
+      const messages$: Observable<Message[]> = recipient.messageStore.messages$;
+      const updateUnreadCountSubscription = messages$
+        .pipe(
+          debounceTime(20),
+          mergeMap(() => {
+            return this.checkForUnreadCountChange(recipient);
+          })
+        )
+        // eslint-disable-next-line rxjs/no-nested-subscribe
+        .subscribe();
+      this.recipientIdToMessageSubscription.set(jid, updateUnreadCountSubscription);
     }
   }
 }

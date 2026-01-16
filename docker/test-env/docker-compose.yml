@@ -1,0 +1,71 @@
+services:
+    ejabberd:
+        hostname: local-jabber.entenhausen.pazz.de
+        image: "ejabberd/ecs:21.12"
+        container_name: local-jabber.entenhausen.pazz.de
+        restart: "always"
+        command: "--node ejabberd@local-jabber.entenhausen.pazz.de foreground"
+        ports:
+            # used for fileUpload
+            - "127.0.0.1:5269:5269" # ejabberd_s2s_in server 2 server
+            - "127.0.0.1:5280:5280" # ejabberd_http
+            - "127.0.0.1:5443:5443" # ejabberd_http
+            - "127.0.0.1:52810:5281" # ejabberd_http_api, exported via nginx / basic auth
+        volumes:
+            - "./ejabberd.yml:/home/ejabberd/conf/ejabberd.yml"
+            - "./data/backup:/home/ejabberd/backup"
+            - "./data/upload:/home/ejabberd/upload"
+            - "./data/database:/home/ejabberd/database"
+            - "./ssl/jabber:/home/ejabberd/ssl:ro"
+        networks:
+            - default
+            - local-entenhausen-pazz-de
+        healthcheck:
+            test:
+                - "CMD-SHELL"
+                - "/home/ejabberd/bin/ejabberdctl --node ejabberd@local-jabber.entenhausen.pazz.de status | grep -q 'status: started'"
+            interval: 30s
+            timeout: 10s
+            retries: 4
+            start_period: 30s
+            start_interval: 2s
+        depends_on:
+            postgres:
+                condition: service_healthy
+
+    postgres:
+        image: postgres:12.15
+        env_file: .env
+        restart: always
+        # set shared memory limit when using docker-compose
+        shm_size: 512mb
+        ports:
+            - "127.0.0.1:5432:5432"
+        volumes:
+            - "./postgres-db-init:/docker-entrypoint-initdb.d"
+            - "postgres_data:/var/lib/postgresql/data"
+        networks:
+            - default
+            - local-entenhausen-pazz-de
+        healthcheck:
+            test: [ "CMD-SHELL", '/usr/bin/pg_isready -q -d "$POSTGRES_DB" -U "$POSTGRES_USER"' ]
+            interval: 30s
+            timeout: 10s
+            retries: 4
+            start_period: 30s
+            start_interval: 2s
+
+volumes:
+    postgres_data:
+
+
+networks:
+    default:
+    local-entenhausen-pazz-de:
+        external: false
+        # Changed to false or remove external: true if we want it isolated?
+        # User said "mirrors the prod one".
+        # If I make it internal, it won't conflict with prod's network name if namespaced by folder using docker-compose.
+        # However, `ejabberd.yml` config refers to `local-jabber.entenhausen.pazz.de`.
+        # Docker's service name provides this DNS within the network.
+

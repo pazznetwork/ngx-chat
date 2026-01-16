@@ -2,19 +2,19 @@
 import type { Locator, Page } from 'playwright';
 import { ChatWindowPage } from './chat-window.po';
 import type { AuthRequest } from '@pazznetwork/ngx-chat-shared';
-import {
-  devXmppDomain,
-  devXmppJid,
-  devXmppPassword,
-} from '../../../../libs/ngx-xmpp/src/.secrets-const';
 import { Browser } from '@playwright/test';
 import { MucPageObject } from './muc.po';
+
+// Default test credentials matching local dev environment
+const devXmppDomain = 'local-jabber.entenhausen.pazz.de';
+const devXmppJid = 'local-admin@local-jabber.entenhausen.pazz.de';
+const devXmppPassword = 'AdminLocalPassword123!';
 
 const adminLogin: AuthRequest = {
   domain: devXmppDomain,
   username: devXmppJid?.split('@')[0] as string,
   password: devXmppPassword,
-  service: `wss://${devXmppDomain}:5280/websocket`,
+  service: `ws://localhost:5280/websocket`,
 };
 
 export class AppPage {
@@ -68,7 +68,7 @@ export class AppPage {
     this.rosterListBlockedHeader = page.locator('[data-zid="roster-group-header-blocked"]');
 
     this.createRoosterEntrySelector = (username) =>
-      `.roster-recipient[title="${username.toLowerCase()}"]`;
+      `.roster-recipient[title*="${username.toLowerCase()}"]`;
     this.createRoosterEntryLocator = (username) =>
       page.locator(this.createRoosterEntrySelector(username));
     this.createChatBoxInputLocator = (username) =>
@@ -97,6 +97,10 @@ export class AppPage {
     await this.page.pause();
   }
 
+  async waitForTimeout(timeout: number): Promise<void> {
+    await this.page.waitForTimeout(timeout);
+  }
+
   async setupForTest(): Promise<void> {
     await this.navigateToIndex();
     await this.setDomain(adminLogin.domain);
@@ -122,7 +126,7 @@ export class AppPage {
   async newPage(): Promise<AppPage> {
     const context = await this.browser.newContext();
     const newPage = await context.newPage();
-    await newPage.goto('https://local.entenhausen.pazz.de:4200/');
+    await newPage.goto('http://localhost:4200/');
     const newAppPage = new AppPage(this.browser, newPage);
     await newAppPage.setupForTest();
     return newAppPage;
@@ -138,12 +142,13 @@ export class AppPage {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
-    await this.rosterList.isVisible();
+    await this.rosterList.waitFor();
+    await this.contactJid.waitFor();
   }
 
   async logOut(): Promise<void> {
     await this.logoutButton.click();
-    await this.page.locator(this.connectionStateSelector, { hasText: 'offline' }).isVisible();
+    await this.page.locator(this.connectionStateSelector, { hasText: 'offline' }).waitFor();
     // fails without this pause, no time to investigate
     await this.page.waitForTimeout(100);
   }
@@ -151,6 +156,7 @@ export class AppPage {
   async addContact(jid: string): Promise<void> {
     await this.contactJid.fill(jid);
     await this.addContactButton.click();
+    await this.page.waitForTimeout(500); // Throttle to prevent "element detached" during rapid updates
   }
 
   async removeContact(jid: string): Promise<void> {
@@ -210,7 +216,9 @@ export class AppPage {
     const locator = this.createRoosterEntryLocator(jid);
     await locator.first().waitFor();
     await locator.nth(0).click();
-    return this.getChatWindow(jid);
+    const window = this.getChatWindow(jid);
+    await window.waitForVisible();
+    return window;
   }
 
   getChatWindow(jid: string): ChatWindowPage {
@@ -218,14 +226,19 @@ export class AppPage {
   }
 
   async openChatWithUnaffiliatedContact(jid: string): Promise<ChatWindowPage> {
+    await this.contactJid.waitFor();
     await this.contactJid.fill(jid);
     await this.openChatButton.click();
-    return this.getChatWindow(jid);
+    const window = this.getChatWindow(jid);
+    await window.waitForVisible();
+    return window;
   }
 
   async openChatWith(jid: string): Promise<ChatWindowPage> {
     await this.rosterList.getByText(jid).click();
-    return this.getChatWindow(jid);
+    const window = this.getChatWindow(jid);
+    await window.waitForVisible();
+    return window;
   }
 
   async reload(): Promise<void> {

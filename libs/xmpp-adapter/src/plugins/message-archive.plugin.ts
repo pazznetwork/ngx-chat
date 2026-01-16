@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-import { Contact, Recipient, XmlSchemaForm } from '@pazznetwork/ngx-chat-shared';
+import { Recipient, XmlSchemaForm, parseJid } from '@pazznetwork/ngx-chat-shared';
 import { ChatPlugin, serializeToSubmitForm } from '../core';
 import type { XmppService } from '../xmpp.service';
 import { nsRSM } from './multi-user-chat';
@@ -14,24 +14,31 @@ const nsMAM = 'urn:xmpp:mam:2';
 export class MessageArchivePlugin implements ChatPlugin {
   readonly nameSpace = nsMAM;
 
-  constructor(private readonly chatService: XmppService) {}
+  constructor(private readonly chatService: XmppService) { }
+
+  async enableArchiving(): Promise<void> {
+    await this.chatService.chatConnectionService
+      .$iq({ type: 'set' })
+      .c('prefs', { xmlns: this.nameSpace, default: 'always' })
+      .send();
+  }
 
   async requestNewestMessages(): Promise<void> {
     await this.chatService.chatConnectionService
       .$iq({ type: 'set' })
       .c('query', { xmlns: this.nameSpace })
       .c('set', { xmlns: nsRSM })
-      .c('max', {}, '250')
+      .c('max', {}, '20')
       .c('before')
       .send();
   }
 
   async loadMessagesBeforeOldestMessage(recipient: Recipient): Promise<void> {
-    await this.loadMessages(recipient, (builder) =>
-      recipient.messageStore.oldestMessage?.id
-        ? builder.c('before', {}, recipient.messageStore.oldestMessage.id)
-        : builder
-    );
+    await this.loadMessages(recipient, (builder) => {
+      const oldestMessage = recipient.messageStore.oldestMessage;
+      const beforeId = oldestMessage?.stanzaId || oldestMessage?.id;
+      return beforeId ? builder.c('before', {}, beforeId) : builder;
+    });
   }
 
   async loadMostRecentMessages(recipient: Recipient): Promise<void> {
@@ -73,25 +80,35 @@ export class MessageArchivePlugin implements ChatPlugin {
     recipient: Recipient,
     retrieveMessageFunc: (builder: StanzaBuilder) => StanzaBuilder
   ): Promise<void> {
-    const to = recipient.recipientType === 'room' ? recipient.jid.toString() : undefined;
+    let recipientType = recipient.recipientType;
+    if (recipientType !== 'room' && 'affiliations' in recipient) {
+      recipientType = 'room';
+    }
+
+    const to = recipientType === 'room' ? recipient.jid.toString() : undefined;
+
+
     const form: XmlSchemaForm = {
       type: 'submit',
       instructions: [],
       fields: [
-        { type: 'hidden', variable: 'FORM_TYPE', value: this.nameSpace },
-        ...(recipient.recipientType === 'contact'
-          ? ([
-              {
-                type: 'jid-single',
-                variable: 'with',
-                value: (recipient as Contact).jid.toString(),
-              },
-            ] as const)
-          : []),
+        { type: 'hidden', variable: 'FORM_TYPE', value: 'urn:xmpp:mam:2' }
       ],
     };
 
-    await this.chatService.chatConnectionService
+    // ... class definition ...
+
+    if (to) {
+      // filtering by 'with' is not supported for MUC rooms
+    } else {
+      form.fields.push({
+        type: 'jid-single',
+        variable: 'with',
+        value: parseJid(recipient.jid.toString()).bare().toString()
+      });
+    }
+
+    const request = this.chatService.chatConnectionService
       .$iq({ type: 'set', ...(to ? { to } : {}) })
       .c('query', { xmlns: this.nameSpace })
       .cCreateMethod((builder) => serializeToSubmitForm(builder, form))
@@ -99,7 +116,8 @@ export class MessageArchivePlugin implements ChatPlugin {
       .c('set', { xmlns: nsRSM })
       .c('max', {}, '20')
       .cCreateMethod(retrieveMessageFunc)
-      .up()
-      .send();
+      .up();
+
+    await request.send();
   }
 }

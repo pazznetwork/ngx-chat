@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGX-Chat Showcase</title>
+    <style>
+        :root {
+            --bg-glass: rgba(255, 255, 255, 0.8);
+            --bg-body: #E0E7FF;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-body);
+            background-image: radial-gradient(#C7D2FE 1px, transparent 1px);
+            background-size: 20px 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        h1 {
+            color: #3730A3;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            height: 100%;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .device-frame {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+            height: 700px;
+            min-height: 500px;
+        }
+
+        .device-frame:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .device-header {
+            background: #F9FAFB;
+            padding: 8px 16px;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #6B7280;
+            font-weight: 600;
+        }
+
+        .device-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.red {
+            background: #EF4444;
+        }
+
+        .dot.yellow {
+            background: #F59E0B;
+        }
+
+        .dot.green {
+            background: #10B981;
+        }
+
+        iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .btn {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #4338CA;
+            transform: translateY(-1px);
+        }
+
+        .btn-close {
+            background: transparent;
+            color: #9CA3AF;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .btn-close:hover {
+            color: #EF4444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>
+            <span>🚀</span> NGX-Chat Showcase
+        </h1>
+        <button class="btn" onclick="addSession()">+ Add Session</button>
+    </header>
+
+    <div class="grid" id="grid">
+        <!-- Sessions will be injected here -->
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        let sessionCount = 0;
+
+        function addSession(username = '', autoLogin = false) {
+            sessionCount++;
+            const id = `session-${sessionCount}`;
+
+            const frame = document.createElement('div');
+            frame.className = 'device-frame';
+            frame.id = id;
+
+            let url = '/';
+            if (username && autoLogin) {
+                url += `?username=${username}&password=${username}`; // Default password same as username for demo
+            }
+
+            frame.innerHTML = `
+                <div class="device-header">
+                    <div class="device-controls">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <span>Session ${sessionCount} ${username ? '(' + username + ')' : ''}</span>
+                    <button class="btn-close" onclick="removeSession('${id}')">✕</button>
+                </div>
+                <iframe src="${url}"></iframe>
+            `;
+
+            grid.appendChild(frame);
+        }
+
+        function removeSession(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.remove();
+            }
+        }
+
+        // Initialize with 2 default sessions
+        addSession('snowwhite', true);
+        addSession('sleepy', true);
+
+    </script>
+</body>
+
+</html>

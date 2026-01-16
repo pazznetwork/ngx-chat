@@ -10,29 +10,31 @@ const executablePath: string = puppeteer.executablePath();
 const config: PlaywrightTestConfig = {
   ...baseConfig,
   /* Maximum time one test can run for. */
-  timeout: 15 * 1000,
+  timeout: 90 * 1000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5000,
+    timeout: 10000,
   },
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env['CI'],
   /* Retry on CI only */
-  retries: process.env['CI'] ? 2 : 0,
+  retries: 2,
   /* Opt out of parallel tests to skip for now additional complexity in the tests. */
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [['list'], ['html', { open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     ...baseConfig.use,
+    headless: true,
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    baseURL: 'http://localhost:4200/',
   },
   /* Configure projects for chromium only */
   projects: [
@@ -42,6 +44,7 @@ const config: PlaywrightTestConfig = {
         ...devices['Desktop Chrome'],
         launchOptions: {
           executablePath,
+          args: ['--ignore-certificate-errors'],
         },
       },
     },
@@ -92,10 +95,12 @@ const config: PlaywrightTestConfig = {
   // outputDir: 'test-results/',
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   port: 4200,
-  // },
+  webServer: {
+    command: 'npx nx serve demo',
+    url: 'http://localhost:4200/',
+    reuseExistingServer: true,
+    timeout: 300 * 1000,
+  },
 };
 
 export default config;

@@ -15,29 +15,22 @@ import {
 } from '@pazznetwork/ngx-chat-shared';
 
 @Component({
-  standalone: true,
-  imports: [CommonModule, ChatVideoWindowComponent, ChatWindowComponent],
-  selector: 'ngx-chat-bar-windows',
-  templateUrl: './chat-bar-windows.component.html',
-  styleUrls: ['./chat-bar-windows.component.less'],
-  animations: [
-    trigger('rosterVisibility', [
-      state(
-        'hidden',
-        style({
-          right: '1em',
-        })
-      ),
-      state(
-        'shown',
-        style({
-          right: '15em',
-        })
-      ),
-      transition('hidden => shown', animate('400ms ease')),
-      transition('shown => hidden', animate('400ms ease')),
-    ]),
-  ],
+    imports: [CommonModule, ChatVideoWindowComponent, ChatWindowComponent],
+    selector: 'ngx-chat-bar-windows',
+    templateUrl: './chat-bar-windows.component.html',
+    styleUrls: ['./chat-bar-windows.component.less'],
+    animations: [
+        trigger('rosterVisibility', [
+            state('hidden', style({
+                right: '1em',
+            })),
+            state('shown', style({
+                right: '15em',
+            })),
+            transition('hidden => shown', animate('400ms ease')),
+            transition('shown => hidden', animate('400ms ease')),
+        ]),
+    ]
 })
 export class ChatBarWindowsComponent {
   @Input()

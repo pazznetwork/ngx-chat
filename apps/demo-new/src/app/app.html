@@ -1,0 +1,110 @@
+<!-- Auth View -->
+<div *ngIf="state !== 'online'; else mainView" class="auth-wrapper" data-zid="auth-view">
+    <div class="auth-card">
+        <h1>Welcome Back</h1>
+        <div class="auth-form">
+            <input name="username" [(ngModel)]="username" placeholder="Username" autocomplete="off">
+            <input name="password" [(ngModel)]="password" type="password" placeholder="Password" autocomplete="off">
+            <div class="flex gap-2">
+                <input name="domain" [(ngModel)]="domain" placeholder="Domain" class="flex-1">
+                <input name="service" [(ngModel)]="service" placeholder="Service URL" class="flex-1">
+            </div>
+            <button type="button" name="login" (click)="login()">Sign In</button>
+            <button type="button" name="register" class="secondary" (click)="register()">Create Account</button>
+        </div>
+        <div *ngIf="registrationSuccess" class="text-sm success p-4" data-zid="registration-success"
+            style="color: var(--success); margin-top: 1rem;">
+            Account created for {{registrationSuccess}}
+        </div>
+        <div *ngIf="loginError" class="text-sm error p-4" data-zid="login-error"
+            style="color: var(--error); margin-top: 1rem; background-color: #fee;">
+            Login Failed: {{loginError}}
+        </div>
+    </div>
+</div>
+
+<!-- Main View -->
+<ng-template #mainView>
+    <div class="app-container" data-zid="main-view">
+        <div class="top-bar">
+            <div class="brand">
+                <span style="font-size: 1.5rem;">💬</span>
+                <span>NGX Chat Demo (Migrated)</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="status-badge connected" data-zid="chat-connection-state">{{ state }}</div>
+                <div class="text-sm font-bold">{{ username }}</div>
+                <button class="secondary text-sm" name="logout" (click)="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="main-content" style="flex-direction: column; overflow-y: auto;">
+            <!-- Granular components not supported in ngx-chat-old yet. Using Monolith. -->
+            <div class="controls-container" style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1rem;">
+                <div class="contact-management"
+                    style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #eee; flex: 1; min-width: 300px;">
+                    <h3>Contact Management</h3>
+                    <input [(ngModel)]="selectedJid" data-zid="contact-jid" placeholder="JID"
+                        style="margin-right: 0.5rem; padding: 0.5rem;">
+                    <div style="margin-top: 0.5rem;">
+                        <button (click)="addContact(selectedJid)" data-zid="add-contact"
+                            style="margin-right: 0.5rem;">Add</button>
+                        <button (click)="removeContact(selectedJid)" data-zid="remove-contact"
+                            style="margin-right: 0.5rem;">Remove</button>
+                        <button (click)="blockContact(selectedJid)" data-zid="block-contact"
+                            style="margin-right: 0.5rem;">Block</button>
+                        <button (click)="unblockContact(selectedJid)" data-zid="unblock-contact"
+                            style="margin-right: 0.5rem;">Unblock</button>
+                    </div>
+                </div>
+
+                <div class="muc-management"
+                    style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #eee; flex: 1; min-width: 300px;">
+                    <h3>MUC Management</h3>
+                    <input [(ngModel)]="mucRoomName" data-zid="muc-room-name" placeholder="Room Name (e.g. room1)"
+                        style="margin-right: 0.5rem; padding: 0.5rem;">
+                    <input [(ngModel)]="mucUserJid" data-zid="muc-user-jid" placeholder="User JID"
+                        style="margin-right: 0.5rem; padding: 0.5rem;">
+                    <div style="margin-top: 0.5rem;">
+                        <button (click)="createRoom(mucRoomName)" data-zid="muc-create"
+                            style="margin-right: 0.5rem;">Create Room</button>
+                        <button (click)="selectRoom(mucRoomName)" data-zid="muc-select"
+                            style="margin-right: 0.5rem;">Select Room</button>
+                        <button (click)="grantMembership(mucRoomName, mucUserJid)" data-zid="muc-grant"
+                            style="margin-right: 0.5rem;">Grant Membership</button>
+                        <button (click)="inviteUser(mucRoomName, mucUserJid)" data-zid="muc-invite">Invite User</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wrapper for Custom/Mobile Demo UI -->
+            <div class="custom-ui-wrapper" style="padding: 1rem; background: white;">
+                <div class="separate-roster-list" style="margin-bottom: 2rem;">
+                    <h1>Contacts chat</h1>
+                    <button *ngFor="let contact of chatService.contactListService.contacts$ | async"
+                        (click)="openBigChat(contact.jid.toString())"
+                        [attr.data-zid]="'manual-open-chat-' + contact.jid.toString()"
+                        style="display: block; margin: 0.5rem 0;">
+                        {{ contact.name }}
+                    </button>
+                </div>
+
+                <!-- Manual Chat View (Mobile Mode Demo) -->
+                <div class="manual-chat-view">
+                    <ng-container *ngFor="let chat of customChats">
+                        <div class="manual-chat-container" [attr.data-zid]="'manual-chat-window-' + chat.jid.toString()"
+                            style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                            <h3>Custom Chat: {{ chat.name }}</h3>
+                            <ngx-chat-file-drop>
+                                <ngx-chat-history [recipient]="chat"></ngx-chat-history>
+                                <ngx-chat-window-input [recipient]="chat"></ngx-chat-window-input>
+                            </ngx-chat-file-drop>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+
+            <ngx-chat *ngIf="showWidget" [rosterState]="rosterState"></ngx-chat>
+        </div>
+    </div>
+</ng-template>

@@ -67,13 +67,14 @@ export class XmppResponseError extends Error {
     ].join(', ');
 
     // eslint-disable-next-line no-console
-    console.log(
+    // eslint-disable-next-line no-console
+    /*console.log(
       'FOUND IN ERROR: ',
       Finder.create(stanza)
         ?.searchByTag('error')
         ?.searchByTag('text')
         ?.searchByNamespace(XmppResponseError.ERROR_ELEMENT_NS)?.result
-    );
+    );*/
 
     const stanzaError = Finder.create(stanza)
       ?.searchByTag('error')

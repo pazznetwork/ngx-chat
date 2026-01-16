@@ -1,0 +1,501 @@
+
+> nx run ngx-chat-e2e-new:e2e --grep dual-connect
+
+[1m[33mWarning: Running a server with --disable-host-check is a security risk. See https://medium.com/webpack/webpack-dev-server-middleware-security-issues-1489d950874a for more information.[39m[22m
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+- Generating browser application bundles (phase: setup)...
+[32m✔[39m Browser application bundle generation complete.
+[37m[0m[0m[39m
+[37m[0m[1mInitial chunk files[22m  [2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m[0m[39m
+[37m[0m[32mvendor.js[39m[37m            [2m | [22m[2mvendor[22m       [2m | [22m  [36m3.22 MB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mmain.js[39m[37m              [2m | [22m[2mmain[22m         [2m | [22m[36m969.73 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mpolyfills.js[39m[37m         [2m | [22m[2mpolyfills[22m    [2m | [22m[36m343.91 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mstyles.css, styles.js[39m[37m[2m | [22m[2mstyles[22m       [2m | [22m[36m230.69 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mruntime.js[39m[37m           [2m | [22m[2mruntime[22m      [2m | [22m  [36m6.51 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[0m[39m
+[37m[0m[1m [22m                    [2m | [22m[1mInitial total[22m[2m | [22m  [1m4.73 MB[22m[0m[39m
+[37m[0m[0m[39m
+[37m[0mBuild at: [1m[37m2025-12-23T14:06:31.850Z[39m[37m[22m - Hash: [1m[37me01bf2a9979ea0f3[39m[37m[22m - Time: [1m[37m2769[39m[37m[22mms[0m[39m
+[37m[39m
+[37m** Angular Live Development Server is listening on 0.0.0.0:4201, open your browser on http://localhost:4201/ **[39m
+[37m[39m
+[37m[39m
+[37m[92m✔[39m[37m Compiled successfully.[39m
+[1m[33m[39m[22m
+[1m[33m[0m[33mWarning: [39m[33m[0m/Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/demo-new/src/app/nx-welcome.ts is part of the TypeScript compilation but it's unused.[39m[22m
+[1m[33mAdd only entry points to the 'files' or 'include' properties in your tsconfig.[39m[22m
+[1m[33m[39m[22m
+[1m[33m[0m[33mWarning: [39m[33m[0m/Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/demo-new/src/environments/environment.interface.ts is part of the TypeScript compilation but it's unused.[39m[22m
+[1m[33mAdd only entry points to the 'files' or 'include' properties in your tsconfig.[39m[22m
+[1m[33m[39m[22m
+[1m[33m[0m[33mWarning: [39m[33m[0m/Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/demo-new/src/environments/environment.prod.ts is part of the TypeScript compilation but it's unused.[39m[22m
+[1m[33mAdd only entry points to the 'files' or 'include' properties in your tsconfig.[39m[22m
+[1m[33m[39m[22m
+[1m[33m[0m[33mWarning: [39m[33m[0m/Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/demo-new/src/environments/environment.ts is part of the TypeScript compilation but it's unused.[39m[22m
+[1m[33mAdd only entry points to the 'files' or 'include' properties in your tsconfig.[39m[22m
+[1m[33m[39m[22m
+[1m[33m[39m[22m
+[32m✔[39m Browser application bundle generation complete.
+[37m[0m[0m[39m
+[37m[0m[1mInitial chunk files[22m[2m | [22m[1mNames[22m  [2m | [22m[1mRaw size[22m[0m[39m
+[37m[0m[32mruntime.js[39m[37m         [2m | [22m[2mruntime[22m[2m | [22m [36m6.51 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[0m[39m
+[37m[0m4 unchanged chunks[0m[39m
+[37m[0m[0m[39m
+[37m[0mBuild at: [1m[37m2025-12-23T14:06:32.340Z[39m[37m[22m - Hash: [1m[37mdcca72fcb899dde5[39m[37m[22m - Time: [1m[37m408[39m[37m[22mms[0m[39m
+[37m[39m
+[37m[92m✔[39m[37m Compiled successfully.[39m
+DEBUG: test object: [36m<ref *1>[39m [Function (anonymous)] {
+  expect: [Function: oe] {
+    extend: [36m[Function (anonymous)][39m,
+    addEqualityTesters: [36m[Function (anonymous)][39m,
+    anything: [36m[Function: tE][39m,
+    any: [36m[Function: eE][39m,
+    not: {
+      arrayContaining: [36m[Function: nE][39m,
+      closeTo: [36m[Function: fE][39m,
+      objectContaining: [36m[Function: iE][39m,
+      stringContaining: [36m[Function: oE][39m,
+      stringMatching: [36m[Function: cE][39m,
+      toBeAttached: [36m[Function: value][39m,
+      toBeChecked: [36m[Function: value][39m,
+      toBeDisabled: [36m[Function: value][39m,
+      toBeEditable: [36m[Function: value][39m,
+      toBeEmpty: [36m[Function: value][39m,
+      toBeEnabled: [36m[Function: value][39m,
+      toBeFocused: [36m[Function: value][39m,
+      toBeHidden: [36m[Function: value][39m,
+      toBeInViewport: [36m[Function: value][39m,
+      toBeOK: [36m[Function: value][39m,
+      toBeVisible: [36m[Function: value][39m,
+      toContainText: [36m[Function: value][39m,
+      toHaveAttribute: [36m[Function: value][39m,
+      toHaveClass: [36m[Function: value][39m,
+      toHaveCount: [36m[Function: value][39m,
+      toHaveCSS: [36m[Function: value][39m,
+      toHaveId: [36m[Function: value][39m,
+      toHaveJSProperty: [36m[Function: value][39m,
+      toHaveText: [36m[Function: value][39m,
+      toHaveTitle: [36m[Function: value][39m,
+      toHaveURL: [36m[Function: value][39m,
+      toHaveValue: [36m[Function: value][39m,
+      toHaveValues: [36m[Function: value][39m,
+      toHaveScreenshot: [36m[Function: value][39m,
+      toPass: [36m[Function: value][39m,
+      toMatchSnapshot: [36m[Function: value][39m
+    },
+    arrayContaining: [36m[Function: rE][39m,
+    closeTo: [36m[Function: lE][39m,
+    objectContaining: [36m[Function: sE][39m,
+    stringContaining: [36m[Function: uE][39m,
+    stringMatching: [36m[Function: aE][39m,
+    assertions: [36m[Function: oh][39m,
+    hasAssertions: [36m[Function: ah][39m,
+    getState: [36m[Function: Hy][39m,
+    setState: [36m[Function: Uy][39m,
+    extractExpectedAssertionsErrors: [36m[Function: hE][39m,
+    toBeAttached: [36m[Function: value][39m,
+    toBeChecked: [36m[Function: value][39m,
+    toBeDisabled: [36m[Function: value][39m,
+    toBeEditable: [36m[Function: value][39m,
+    toBeEmpty: [36m[Function: value][39m,
+    toBeEnabled: [36m[Function: value][39m,
+    toBeFocused: [36m[Function: value][39m,
+    toBeHidden: [36m[Function: value][39m,
+    toBeInViewport: [36m[Function: value][39m,
+    toBeOK: [36m[Function: value][39m,
+    toBeVisible: [36m[Function: value][39m,
+    toContainText: [36m[Function: value][39m,
+    toHaveAttribute: [36m[Function: value][39m,
+    toHaveClass: [36m[Function: value][39m,
+    toHaveCount: [36m[Function: value][39m,
+    toHaveCSS: [36m[Function: value][39m,
+    toHaveId: [36m[Function: value][39m,
+    toHaveJSProperty: [36m[Function: value][39m,
+    toHaveText: [36m[Function: value][39m,
+    toHaveTitle: [36m[Function: value][39m,
+    toHaveURL: [36m[Function: value][39m,
+    toHaveValue: [36m[Function: value][39m,
+    toHaveValues: [36m[Function: value][39m,
+    toHaveScreenshot: [36m[Function: value][39m,
+    toPass: [36m[Function: value][39m,
+    toMatchSnapshot: [36m[Function: value][39m
+  },
+  only: [36m[Function (anonymous)][39m,
+  describe: [Function (anonymous)] {
+    only: [36m[Function (anonymous)][39m,
+    configure: [36m[Function (anonymous)][39m,
+    fixme: [36m[Function (anonymous)][39m,
+    parallel: [Function (anonymous)] { only: [36m[Function (anonymous)][39m },
+    serial: [Function (anonymous)] { only: [36m[Function (anonymous)][39m },
+    skip: [36m[Function (anonymous)][39m
+  },
+  beforeEach: [36m[Function (anonymous)][39m,
+  afterEach: [36m[Function (anonymous)][39m,
+  beforeAll: [36m[Function (anonymous)][39m,
+  afterAll: [36m[Function (anonymous)][39m,
+  skip: [36m[Function (anonymous)][39m,
+  fixme: [36m[Function (anonymous)][39m,
+  fail: [36m[Function (anonymous)][39m,
+  slow: [36m[Function (anonymous)][39m,
+  setTimeout: [36m[Function (anonymous)][39m,
+  step: [36m[Function: bound _step] AsyncFunction[39m,
+  use: [36m[Function (anonymous)][39m,
+  extend: [36m[Function (anonymous)][39m,
+  info: [36m[Function (anonymous)][39m,
+  [[32mSymbol(testType)[39m]: TestTypeImpl { fixtures: [ [36m[Object][39m ], test: [36m[Circular *1][39m }
+}
+[2mRunning [22m1[2m test using [22m1[2m worker[22m
+[1A[2K[1/1] [chromium] › dual-connect.spec.ts:10:5 › should facilitate chat between two users via dual.html with extended message flow
+[1A[2K[2m[chromium] › dual-connect.spec.ts:10:5 › should facilitate chat between two users via dual.html with extended message flow[22m
+BROWSER_PAGE: info [webpack-dev-server] Server started: Hot Module Replacement disabled, Live Reloading enabled, Progress disabled, Overlay enabled.
+[1A[2KBROWSER_PAGE: log DEBUG: App component initialized, exposed as window.app App
+[1A[2KBROWSER_PAGE: log Angular is running in development mode.
+[1A[2KBROWSER_PAGE: info [webpack-dev-server] Server started: Hot Module Replacement disabled, Live Reloading enabled, Progress disabled, Overlay enabled.
+[1A[2KBROWSER_PAGE: log DEBUG: App component initialized, exposed as window.app App
+[1A[2KBROWSER_PAGE: log Angular is running in development mode.
+[1A[2KBROWSER_PAGE: log DEBUG: App login called with: snowwhite
+[1A[2KBROWSER_PAGE: log DEBUG: App login called with: sleepy
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=12
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=75835
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=75823
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=75863
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=75851
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=28
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=158963
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=158951
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=83128
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=83100
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=158982
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=158970
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=83147
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=83119
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=19
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=241695
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=241683
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=165860
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=165832
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=82732
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=82713
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=241712
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=241700
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=165877
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=165849
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=82749
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=82730
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=17
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.794Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=311694
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=311682
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=235859
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=235831
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=152731
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=152712
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=69999
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z | Diff=69982
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.816Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=311716
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=311704
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=235881
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=235853
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=152753
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=152734
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=70021
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z | Diff=70004
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.794Z | Diff=22
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.075Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=382975
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=382963
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=307140
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=307112
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=224012
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=223993
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=141280
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z | Diff=141263
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.794Z | Diff=71281
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.816Z | Diff=71259
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.092Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=382992
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=382980
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=307157
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=307129
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=224029
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=224010
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=141297
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z | Diff=141280
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.794Z | Diff=71298
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.816Z | Diff=71276
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.075Z | Diff=17
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg ff9e45c0-b10b-4316-8a2e-7107bac16e20:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498702710' | Dir=out | Date=2025-12-23T00:56:02.072Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=433972
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=433960
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=358137
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=358109
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=275009
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=274990
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=192277
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z | Diff=192260
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.794Z | Diff=122278
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.816Z | Diff=122256
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.075Z | Diff=50997
+[1A[2KBROWSER_PAGE: error   Candidate: 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.092Z | Diff=50980
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 229d5d7b-5120-4a6a-8c6c-67b3ae3db09b:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498702710' | Dir=out | Date=2025-12-23T00:56:02.090Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=433990
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=433978
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=358155
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=358127
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=275027
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=275008
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=192295
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z | Diff=192278
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.794Z | Diff=122296
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.816Z | Diff=122274
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.075Z | Diff=51015
+[1A[2KBROWSER_PAGE: error   Candidate: 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.092Z | Diff=50998
+[1A[2KBROWSER_PAGE: error   Candidate: ff9e45c0-b10b-4316-8a2e-7107bac16e20:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498702710' | Dir=out | Date=2025-12-23T00:56:02.072Z | Diff=18
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=11
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=75837
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=75826
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=75863
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=75852
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=26
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=158967
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=158956
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=83130
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=83104
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=158981
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=158970
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=83144
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=83118
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=14
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=241695
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=241684
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=165858
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=165832
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=82728
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=82714
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=241711
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=241700
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=165874
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=165848
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=82744
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=82730
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=16
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.797Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=311695
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=311684
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=235858
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=235832
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=152728
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=152714
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=70000
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z | Diff=69984
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.828Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=311726
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=311715
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=235889
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=235863
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=152759
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=152745
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=70031
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z | Diff=70015
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.797Z | Diff=31
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.078Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=382976
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=382965
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=307139
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=307113
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=224009
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=223995
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=141281
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z | Diff=141265
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.797Z | Diff=71281
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.828Z | Diff=71250
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.093Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=382991
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=382980
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=307154
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=307128
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=224024
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=224010
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=141296
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z | Diff=141280
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.797Z | Diff=71296
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.828Z | Diff=71265
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.078Z | Diff=15
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg ff9e45c0-b10b-4316-8a2e-7107bac16e20:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498702710' | Dir=in | Date=2025-12-23T00:56:02.076Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=433974
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=433963
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=358137
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=358111
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=275007
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=274993
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=192279
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z | Diff=192263
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.797Z | Diff=122279
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.828Z | Diff=122248
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.078Z | Diff=50998
+[1A[2KBROWSER_PAGE: error   Candidate: 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.093Z | Diff=50983
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 229d5d7b-5120-4a6a-8c6c-67b3ae3db09b:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498702710' | Dir=in | Date=2025-12-23T00:56:02.091Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=433989
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=433978
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=358152
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=358126
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=275022
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=275008
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=192294
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z | Diff=192278
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.797Z | Diff=122294
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.828Z | Diff=122263
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.078Z | Diff=51013
+[1A[2KBROWSER_PAGE: error   Candidate: 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.093Z | Diff=50998
+[1A[2KBROWSER_PAGE: error   Candidate: ff9e45c0-b10b-4316-8a2e-7107bac16e20:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498702710' | Dir=in | Date=2025-12-23T00:56:02.076Z | Diff=15
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 2766f5cd-54ef-4d9a-8280-95baceb0139d:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498796590' | Dir=out | Date=2025-12-23T14:06:36.583Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=47868483
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=47868471
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=47792648
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=47792620
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=47709520
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=47709501
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=47626788
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z | Diff=47626771
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.794Z | Diff=47556789
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.816Z | Diff=47556767
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.075Z | Diff=47485508
+[1A[2KBROWSER_PAGE: error   Candidate: 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.092Z | Diff=47485491
+[1A[2KBROWSER_PAGE: error   Candidate: ff9e45c0-b10b-4316-8a2e-7107bac16e20:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498702710' | Dir=out | Date=2025-12-23T00:56:02.072Z | Diff=47434511
+[1A[2KBROWSER_PAGE: error   Candidate: 229d5d7b-5120-4a6a-8c6c-67b3ae3db09b:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498702710' | Dir=out | Date=2025-12-23T00:56:02.090Z | Diff=47434493
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 2766f5cd-54ef-4d9a-8280-95baceb0139d:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498796590' | Dir=in | Date=2025-12-23T14:06:36.600Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=47868498
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=47868487
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=47792661
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=47792635
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=47709531
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=47709517
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=47626803
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z | Diff=47626787
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.797Z | Diff=47556803
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.828Z | Diff=47556772
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.078Z | Diff=47485522
+[1A[2KBROWSER_PAGE: error   Candidate: 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.093Z | Diff=47485507
+[1A[2KBROWSER_PAGE: error   Candidate: ff9e45c0-b10b-4316-8a2e-7107bac16e20:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498702710' | Dir=in | Date=2025-12-23T00:56:02.076Z | Diff=47434524
+[1A[2KBROWSER_PAGE: error   Candidate: 229d5d7b-5120-4a6a-8c6c-67b3ae3db09b:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498702710' | Dir=in | Date=2025-12-23T00:56:02.091Z | Diff=47434509
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 8bdc7b97-d3b8-4551-8ea1-86616c908ac7:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498796590' | Dir=out | Date=2025-12-23T14:06:36.603Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.100Z | Diff=47868503
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=out | Date=2025-12-23T00:48:48.112Z | Diff=47868491
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.935Z | Diff=47792668
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=out | Date=2025-12-23T00:50:03.963Z | Diff=47792640
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.063Z | Diff=47709540
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=out | Date=2025-12-23T00:51:27.082Z | Diff=47709521
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.795Z | Diff=47626808
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=out | Date=2025-12-23T00:52:49.812Z | Diff=47626791
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.794Z | Diff=47556809
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=out | Date=2025-12-23T00:53:59.816Z | Diff=47556787
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.075Z | Diff=47485528
+[1A[2KBROWSER_PAGE: error   Candidate: 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=out | Date=2025-12-23T00:55:11.092Z | Diff=47485511
+[1A[2KBROWSER_PAGE: error   Candidate: ff9e45c0-b10b-4316-8a2e-7107bac16e20:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498702710' | Dir=out | Date=2025-12-23T00:56:02.072Z | Diff=47434531
+[1A[2KBROWSER_PAGE: error   Candidate: 229d5d7b-5120-4a6a-8c6c-67b3ae3db09b:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498702710' | Dir=out | Date=2025-12-23T00:56:02.090Z | Diff=47434513
+[1A[2KBROWSER_PAGE: error   Candidate: 2766f5cd-54ef-4d9a-8280-95baceb0139d:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498796590' | Dir=out | Date=2025-12-23T14:06:36.583Z | Diff=20
+[1A[2KBROWSER_PAGE: error DEBUG_DEDUPE_FAIL: No duplicate found for msg 8bdc7b97-d3b8-4551-8ea1-86616c908ac7:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498796590' | Dir=in | Date=2025-12-23T14:06:36.620Z
+[1A[2KBROWSER_PAGE: error   Candidate: 5c9f60fb-b7a2-4fd7-ad1d-1cc22a745e1f:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.102Z | Diff=47868518
+[1A[2KBROWSER_PAGE: error   Candidate: e6eb2e05-5152-4d5b-b851-175d3d6bbbdd:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498272927' | Dir=in | Date=2025-12-23T00:48:48.113Z | Diff=47868507
+[1A[2KBROWSER_PAGE: error   Candidate: 74fd6c44-8be4-4d6e-9084-8b3792c6e10a:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.939Z | Diff=47792681
+[1A[2KBROWSER_PAGE: error   Candidate: 99241079-d95c-4869-82ff-b227b7a2e532:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498348034' | Dir=in | Date=2025-12-23T00:50:03.965Z | Diff=47792655
+[1A[2KBROWSER_PAGE: error   Candidate: 1d8fbc49-d65e-46c3-a3f9-d85aeaf74b67:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.069Z | Diff=47709551
+[1A[2KBROWSER_PAGE: error   Candidate: eede6eda-4e94-452d-8d9d-b270a75a6b04:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498430358' | Dir=in | Date=2025-12-23T00:51:27.083Z | Diff=47709537
+[1A[2KBROWSER_PAGE: error   Candidate: 17787b9b-74b0-45ad-aa3f-96ad56219954:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.797Z | Diff=47626823
+[1A[2KBROWSER_PAGE: error   Candidate: bb9e28e7-016c-4e0f-a552-b3a979d99206:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498512290' | Dir=in | Date=2025-12-23T00:52:49.813Z | Diff=47626807
+[1A[2KBROWSER_PAGE: error   Candidate: 0b2a27df-5f9d-43a6-9e7d-66bb18faf7f0:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.797Z | Diff=47556823
+[1A[2KBROWSER_PAGE: error   Candidate: edcd8789-63f0-42f7-bc0c-660fdfea36e2:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498581611' | Dir=in | Date=2025-12-23T00:53:59.828Z | Diff=47556792
+[1A[2KBROWSER_PAGE: error   Candidate: 9e3a4159-f202-4cf2-bc88-27f162ab8d36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.078Z | Diff=47485542
+[1A[2KBROWSER_PAGE: error   Candidate: 9a626f16-156d-4088-bc1e-f6bdcb89ff36:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498652203' | Dir=in | Date=2025-12-23T00:55:11.093Z | Diff=47485527
+[1A[2KBROWSER_PAGE: error   Candidate: ff9e45c0-b10b-4316-8a2e-7107bac16e20:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498702710' | Dir=in | Date=2025-12-23T00:56:02.076Z | Diff=47434544
+[1A[2KBROWSER_PAGE: error   Candidate: 229d5d7b-5120-4a6a-8c6c-67b3ae3db09b:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 2 1766498702710' | Dir=in | Date=2025-12-23T00:56:02.091Z | Diff=47434529
+[1A[2KBROWSER_PAGE: error   Candidate: 2766f5cd-54ef-4d9a-8280-95baceb0139d:msg-sleepy@local-jabber.entenhausen.pazz.de- | Body='SnowWhite Message 1 1766498796590' | Dir=in | Date=2025-12-23T14:06:36.600Z | Diff=20
+[1A[2K[31m  1) [chromium] › dual-connect.spec.ts:10:5 › should facilitate chat between two users via dual.html with extended message flow [39m
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoHaveCount[2m([22m[32mexpected[39m[2m)[22m
+    Locator: locator('ngx-chat-message-out').filter({ hasText: 'SnowWhite Message 1 1766498796590' })
+    Expected: [32m1[39m
+    Received: [31m2[39m
+    Call log:
+      [2m- expect.toHaveCount with timeout 10000ms[22m
+    [2m  - waiting for locator('ngx-chat-message-out').filter({ hasText: 'SnowWhite Message 1 1766498796590' })[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [2m  -   locator resolved to 2 elements[22m
+    [2m  -   unexpected value "2"[22m
+    [0m [90m 76 |[39m[0m
+    [0m [90m 77 |[39m     [90m// Verify SnowWhite sees them sent (out)[39m[0m
+    [0m[31m[1m>[22m[39m[90m 78 |[39m     [36mawait[39m expect(snowWhiteFrame[33m.[39mlocator([32m'ngx-chat-message-out'[39m[33m,[39m { hasText[33m:[39m msgA1 }))[33m.[39mtoHaveCount([35m1[39m)[33m;[39m[0m
+    [0m [90m    |[39m                                                                                      [31m[1m^[22m[39m[0m
+    [0m [90m 79 |[39m     [36mawait[39m expect(snowWhiteFrame[33m.[39mlocator([32m'ngx-chat-message-out'[39m[33m,[39m { hasText[33m:[39m msgA2 }))[33m.[39mtoHaveCount([35m1[39m)[33m;[39m[0m
+    [0m [90m 80 |[39m[0m
+    [0m [90m 81 |[39m     [90m// Sleepy: Open chat and verify receipt[39m[0m
+    [2m    at /Users/oliverschiessl/WebstormProjects/ngx-chat-new/ngx-chat/apps/ngx-chat-e2e-new/src/dual-connect.spec.ts:78:86[22m
+[1A[2K[31m  1 failed[39m
+[31m    [chromium] › dual-connect.spec.ts:10:5 › should facilitate chat between two users via dual.html with extended message flow [39m
+[36m  Serving HTML report at http://localhost:63719. Press Ctrl+C to quit.[39m
+[32m✔[39m Browser application bundle generation complete.
+[37m[0m[0m[39m
+[37m[0m[1mInitial chunk files[22m[2m | [22m[1mNames[22m  [2m | [22m [1mRaw size[22m[0m[39m
+[37m[0m[32mmain.js[39m[37m            [2m | [22m[2mmain[22m   [2m | [22m[36m969.31 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[32mruntime.js[39m[37m         [2m | [22m[2mruntime[22m[2m | [22m  [36m6.51 kB[39m[37m[2m | [22m[0m[39m
+[37m[0m[0m[39m
+[37m[0m3 unchanged chunks[0m[39m
+[37m[0m[0m[39m
+[37m[0mBuild at: [1m[37m2025-12-23T14:09:09.444Z[39m[37m[22m - Hash: [1m[37m45beef67e8a764e0[39m[37m[22m - Time: [1m[37m1181[39m[37m[22mms[0m[39m
+[37m[39m
+[37m[92m✔[39m[37m Compiled successfully.[39m
+
+
+
+ NX   Running target e2e for project ngx-chat-e2e-new failed
+
+Failed tasks:
+
+- ngx-chat-e2e-new:e2e
+
+Hint: run the command with --verbose for more details.
+

@@ -12,5 +12,23 @@ module.exports = function (config) {
       ...baseConfig.coverageReporter,
       dir: join(__dirname, '../../coverage/libs/ngx-xmpp'),
     },
+    browsers: ['ChromeHeadlessInsecure'],
+    customLaunchers: {
+      ChromeInsecure: {
+        base: 'Chrome',
+        flags: ['--ignore-certificate-errors', '--allow-insecure-localhost'],
+      },
+      ChromeHeadlessInsecure: {
+        base: 'ChromeHeadless',
+        flags: ['--headless=new', '--disable-gpu', '--no-sandbox', '--ignore-certificate-errors', '--allow-insecure-localhost'],
+      },
+    },
+    client: {
+      jasmine: {
+        timeoutInterval: 300000,
+      },
+      clearContext: false, // leave Jasmine Spec Runner output visible in browser
+    },
+    browserNoActivityTimeout: 600000,
   });
 };

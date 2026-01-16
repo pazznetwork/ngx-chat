@@ -1,0 +1,254 @@
+###
+###              ejabberd configuration file
+###
+### The parameters used in this configuration file are explained at
+###
+###       https://docs.ejabberd.im/admin/configuration
+###
+### The configuration file is written in YAML.
+### *******************************************************
+### *******           !!! WARNING !!!               *******
+### *******     YAML IS INDENTATION SENSITIVE       *******
+### ******* MAKE SURE YOU INDENT SECTIONS CORRECTLY *******
+### *******************************************************
+### Refer to http://en.wikipedia.org/wiki/YAML for the brief description.
+###
+
+###   =======
+###   LOGGING
+
+#   4=info (default), 5=debug
+#   see https://docs.ejabberd.im/admin/configuration/basic/#logging
+loglevel: 5
+log_rotate_size: 10485760
+log_rotate_count: 0
+
+language: "en"
+sm_db_type: mnesia
+max_fsm_queue: 1000
+registration_timeout: infinity
+acme:
+    auto: false
+
+###   ================
+###   SERVED HOSTNAMES
+
+hosts:
+- "local-jabber.entenhausen.pazz.de"
+
+###   ===============
+###   LISTENING PORTS
+
+listen:
+#  -
+#    port: 5222
+#    module: ejabberd_c2s
+#    starttls_required: true
+#    shaper: c2s_shaper
+#    protocol_options:
+#      - "no_sslv2"
+#      - "no_sslv3"
+#      - "no_tlsv1"
+#    max_stanza_size: 65536
+#    tls_compression: false
+#    ciphers: "HIGH:!aNULL:!3DES"
+-   port: 5269
+    module: ejabberd_s2s_in
+-   port: 5280
+    module: ejabberd_http
+    request_handlers:
+        "/websocket": ejabberd_http_ws
+        "/admin": ejabberd_web_admin
+        "/bosh": mod_bosh
+    tls: false
+    tls_compression: false
+    ciphers: "HIGH:!aNULL:!3DES"
+-   port: 5443
+    module: ejabberd_http
+    request_handlers:
+        "": mod_http_upload
+    tls: false
+    tls_compression: false
+    ciphers: "HIGH:!aNULL:!3DES"
+-   port: 5281
+    module: ejabberd_http
+    request_handlers:
+        "/api": mod_http_api
+    tls: false
+
+###   ================
+###   CERTIFICATES
+certfiles:
+- "/home/ejabberd/ssl/cert.pem"
+- "/home/ejabberd/ssl/key.pem"
+
+###   ================
+###   SERVER TO SERVER
+s2s_use_starttls: required
+s2s_protocol_options:
+- "no_sslv3"
+- "no_tlsv1"
+s2s_ciphers: "HIGH:!aNULL:!3DES"
+
+###   ==============
+###   AUTHENTICATION
+
+auth_method:
+    - sql
+
+auth_password_format: scram
+
+###   ===============
+###   TRAFFIC SHAPERS
+
+shaper:
+    normal: 5000000
+    fast: 50000
+
+shaper_rules:
+    soft_upload_quota:
+        400: all # MiB
+    hard_upload_quota:
+        500: all # MiB
+    max_user_offline_messages:
+    - 100000
+    c2s_shaper:
+        none: admin
+        normal: all
+    s2s_shaper: fast
+
+
+###   ============
+###   ACCESS RULES
+access_rules:
+    admin:
+        allow: admin
+    local:
+        allow: local
+    register:
+        allow: all
+    configure:
+        allow: admin
+    pubsub_createnode:
+        allow: local
+
+acl:
+    admin:
+    -   user: "local-admin@local-jabber.entenhausen.pazz.de"
+    local:
+        user_regexp: ""
+
+
+###   ==============
+###   DATABASE SETUP
+
+default_db: sql
+#default_ram_db: sql
+
+new_sql_schema: true
+
+##
+## PostgreSQL server:
+##
+sql_type: pgsql
+sql_server: "postgres"
+sql_database: "ejabberd"
+sql_username: "postgres"
+sql_password: "postgres"
+sql_port: 5432
+
+###   =======
+###   MODULES
+
+modules:
+    mod_adhoc: { }
+    mod_admin_extra: { }
+    mod_blocking: { } # requires mod_privacy
+    mod_bosh: { }
+    mod_caps: { }
+    mod_carboncopy: { }
+    mod_client_state:
+        queue_chat_states: true
+        queue_presence: false
+    mod_configure: { } # requires mod_adhoc
+    mod_disco: { }
+    mod_http_upload:
+        docroot: "/home/ejabberd/upload"
+        put_url: "https://@HOST@:5443"
+        custom_headers:
+            "Cache-Control": "public, max-age=31536000"
+            "Access-Control-Allow-Origin": "*"
+            "Access-Control-Allow-Methods": "OPTIONS, HEAD, GET, PUT"
+            "Access-Control-Allow-Headers": "Authorization, Content-Type"
+            "Access-Control-Allow-Credentials": "true"
+            "Access-Control-Expose-Headers": "Content-Length"
+            "Content-Security-Policy": "default-src 'none'; img-src *; media-src *; frame-ancestors 'none';"
+    mod_http_upload_quota: { }
+    mod_last: { }
+    mod_mam:
+        default: always
+        use_cache: true
+    mod_muc:
+        host: "conference.@HOST@"
+        access_create: local
+        history_size: 500
+        max_user_conferences: 500
+        default_room_options:
+            public: false
+            members_only: true
+            moderated: true
+            persistent: true
+            mam: true
+            allow_subscription: true
+    mod_muc_admin: { }
+
+    # mod_muc_log: {}
+    ## mod_multicast: {}
+    mod_offline:
+        access_max_user_messages: max_user_offline_messages
+    mod_ping: { }
+    ## mod_pres_counter:
+    ##   count: 5
+    ##   interval: 60
+    mod_privacy: { }
+    mod_private: { }
+    ## mod_proxy65:
+    ##   host: "proxy.@HOST@"
+    ##   name: "File Transfer Proxy"
+    ##   port: 5277
+    mod_pubsub:
+        access_createnode: pubsub_createnode
+        force_node_config:
+            "eu.siacs.conversations.axolotl.*":
+                access_model: open
+        ## XEP compliant, but increases resource consumption
+        ignore_pep_from_offline: false
+        last_item_cache: true
+        plugins:
+        - "flat"
+        - "pep" # pep requires mod_caps
+    mod_register:
+        access: register
+        access_remove: register
+    mod_roster:
+        versioning: true
+    mod_s2s_dialback: { }
+    mod_shared_roster: { }
+    mod_stats: { }
+    mod_stream_mgmt:
+        resend_on_timeout: if_offline
+    mod_time: { }
+    mod_vcard: { }
+    mod_version: { }
+    ## mod_pazz_offline_push:
+    ##     push_url: "http://host.docker.internal:3001/api/xmpp/messages"
+    ##     auth_token: "push"
+
+api_permissions:
+    "API used from test runners for branches and integration manual deploy allows all calls":
+        who:
+        -   user: "local-admin@local-jabber.entenhausen.pazz.de"
+        what:
+        - "*"
+        - "!stop"
+        - "!start"

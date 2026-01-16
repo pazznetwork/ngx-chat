@@ -11,18 +11,17 @@ import { ChatBubbleFooterComponent } from '../chat-bubble-footer';
 import { CHAT_SERVICE_TOKEN, CONTACT_CLICK_HANDLER_TOKEN } from '@pazznetwork/ngx-xmpp';
 
 @Component({
-  standalone: true,
-  imports: [
-    CommonModule,
-    ChatBubbleComponent,
-    ChatBubbleAvatarComponent,
-    ChatMessageTextAreaComponent,
-    ChatMessageImageComponent,
-    ChatBubbleFooterComponent,
-  ],
-  selector: 'ngx-chat-message-in',
-  templateUrl: './chat-message-in.component.html',
-  styleUrls: ['./chat-message-in.component.less'],
+    imports: [
+        CommonModule,
+        ChatBubbleComponent,
+        ChatBubbleAvatarComponent,
+        ChatMessageTextAreaComponent,
+        ChatMessageImageComponent,
+        ChatBubbleFooterComponent,
+    ],
+    selector: 'ngx-chat-message-in',
+    templateUrl: './chat-message-in.component.html',
+    styleUrls: ['./chat-message-in.component.less']
 })
 export class ChatMessageInComponent {
   @Input()

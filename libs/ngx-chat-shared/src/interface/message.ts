@@ -46,6 +46,7 @@ export interface NewMessage {
 
 export interface Message extends NewMessage {
   id: string;
+  stanzaId?: string;
 }
 
 export enum Direction {

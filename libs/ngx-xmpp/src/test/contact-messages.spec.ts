@@ -20,7 +20,7 @@ describe('contact', () => {
     expect(contact1.equalsJid(contact2)).toBeFalsy();
   });
 
-  xit('should append messages with same id only once', () => {
+  it('should append messages with same id only once', () => {
     const contact = new Contact('test@example1.com/resource', 'john doe');
     const message = {
       id: getId(),
@@ -31,7 +31,7 @@ describe('contact', () => {
       fromArchive: false,
     };
     contact.messageStore.addMessage(message);
-    expect(() => contact.messageStore.addMessage(message)).toThrow();
+    expect(() => contact.messageStore.addMessage(message)).not.toThrow();
     expect(contact.messageStore.messages.length).toEqual(1);
   });
 
